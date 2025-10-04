@@ -46,6 +46,11 @@ class PopupController extends Controller
             $query->where('popup_type', $request->popup_type);
         }
         
+        // 팝업표시타입 필터
+        if ($request->filled('popup_display_type')) {
+            $query->where('popup_display_type', $request->popup_display_type);
+        }
+        
         // 목록 개수 설정
         $perPage = $request->get('per_page', 10);
         $perPage = in_array($perPage, [10, 20, 50, 100]) ? $perPage : 10;
@@ -80,6 +85,7 @@ class PopupController extends Controller
             'url' => 'nullable|url',
             'url_target' => 'nullable|in:_self,_blank',
             'popup_type' => 'nullable|in:image,html',
+            'popup_display_type' => 'nullable|in:normal,layer',
             'popup_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
             'popup_content' => 'nullable|string',
             'is_active' => 'boolean',
@@ -144,6 +150,7 @@ class PopupController extends Controller
             'url' => 'nullable|url',
             'url_target' => 'nullable|in:_self,_blank',
             'popup_type' => 'nullable|in:image,html',
+            'popup_display_type' => 'nullable|in:normal,layer',
             'popup_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
             'popup_content' => 'nullable|string',
             'is_active' => 'boolean',
@@ -221,5 +228,13 @@ class PopupController extends Controller
         }
 
         return response()->json(['success' => true]);
+    }
+
+    /**
+     * 팝업 표시 (일반 팝업용)
+     */
+    public function showPopup(Popup $popup)
+    {
+        return view('popup.show', compact('popup'));
     }
 }

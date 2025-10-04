@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\Backoffice\PopupController;
 
 // =============================================================================
 // 기본 라우트 파일
@@ -13,6 +14,9 @@ use App\Http\Controllers\HomeController;
 
 // 메인 페이지
 Route::get('/', [HomeController::class, 'index'])->name('home');
+
+// 팝업 표시 (일반 팝업용)
+Route::get('/popup/{popup}', [PopupController::class, 'showPopup'])->name('popup.show');
 
 // 인증 관련 라우트
 Route::prefix('auth')->name('auth.')->group(function () {

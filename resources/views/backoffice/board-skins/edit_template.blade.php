@@ -3,7 +3,7 @@
 @section('title', $pageTitle ?? '')
 
 @section('styles')
-<link rel="stylesheet" href="{{ asset('css/frontend/board-skins.css') }}">
+<link rel="stylesheet" href="{{ asset('css/backoffice/board-skins.css') }}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css">
 @endsection
@@ -152,5 +152,5 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/closetag.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/closebrackets.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/matchbrackets.min.js"></script>
-<script src="{{ asset('js/frontend/board-skins.js') }}"></script>
+<script src="{{ asset('js/backoffice/board-skins.js') }}"></script>
 @endsection

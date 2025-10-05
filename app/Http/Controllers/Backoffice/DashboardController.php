@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Backoffice;
 use App\Models\User;
 use App\Models\Board;
 use App\Models\AdminMenu;
+use App\Models\DailyVisitorStat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -35,13 +36,11 @@ class DashboardController extends BaseController
         $today = now()->format('Y-m-d');
         
         // 오늘 방문객 수
-        $todayVisitors = DB::table('daily_visitor_stats')
-            ->where('visit_date', $today)
+        $todayVisitors = DailyVisitorStat::where('visit_date', $today)
             ->value('visitor_count') ?? 0;
             
         // 총 방문객 수
-        $totalVisitors = DB::table('daily_visitor_stats')
-            ->sum('visitor_count');
+        $totalVisitors = DailyVisitorStat::sum('visitor_count');
             
         // 일별 통계 (이번 달)
         $dailyStats = $this->getDailyChartData();
@@ -66,11 +65,9 @@ class DashboardController extends BaseController
         $thisMonth = now()->format('Y-m');
         
         return [
-            'today_visitors' => DB::table('daily_visitor_stats')
-                ->where('visit_date', $today)
+            'today_visitors' => DailyVisitorStat::where('visit_date', $today)
                 ->value('visitor_count') ?? 0,
-            'total_visitors' => DB::table('daily_visitor_stats')
-                ->sum('visitor_count'),
+            'total_visitors' => DailyVisitorStat::sum('visitor_count'),
             'daily_stats' => $this->getDailyChartData(),
             'monthly_stats' => $this->getMonthlyChartData(),
         ];
@@ -87,10 +84,12 @@ class DashboardController extends BaseController
         $startOfMonth = now()->startOfMonth();
         $endOfMonth = now()->endOfMonth();
         
-        $stats = DB::table('daily_visitor_stats')
-            ->whereBetween('visit_date', [$startOfMonth->format('Y-m-d'), $endOfMonth->format('Y-m-d')])
+        $stats = DailyVisitorStat::whereBetween('visit_date', [$startOfMonth->format('Y-m-d'), $endOfMonth->format('Y-m-d')])
             ->orderBy('visit_date')
-            ->get();
+            ->get()
+            ->keyBy(function($item) {
+                return $item->visit_date->format('Y-m-d');
+            });
             
         $labels = [];
         $data = [];
@@ -101,7 +100,7 @@ class DashboardController extends BaseController
             $dateStr = $current->format('Y-m-d');
             $labels[] = $current->format('m/d');
             
-            $stat = $stats->firstWhere('visit_date', $dateStr);
+            $stat = $stats->get($dateStr);
             $data[] = $stat ? $stat->visitor_count : 0;
             
             $current->addDay();
@@ -121,8 +120,7 @@ class DashboardController extends BaseController
         $startOfYear = now()->startOfYear();
         $endOfYear = now()->endOfYear();
         
-        $stats = DB::table('daily_visitor_stats')
-            ->whereBetween('visit_date', [$startOfYear->format('Y-m-d'), $endOfYear->format('Y-m-d')])
+        $stats = DailyVisitorStat::whereBetween('visit_date', [$startOfYear->format('Y-m-d'), $endOfYear->format('Y-m-d')])
             ->get()
             ->groupBy(function($item) {
                 return substr($item->visit_date, 0, 7); // YYYY-MM

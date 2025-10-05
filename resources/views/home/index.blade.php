@@ -6,12 +6,6 @@
 	<div class="mvisual_wrap">
 		<div class="mvisual">
 			<img src="{{ asset('images/mvisual01.jpg') }}" alt="image">
-			<div class="video">
-				<video width="100%" height="100%" autoplay muted poster="{{ asset('images/mvisual02.jpg') }}">
-					<source src="{{ asset('video/mvisual02.mp4') }}" type="video/mp4">
-					해당 브라우저에서는 영상이 나오지 않습니다.
-				</video>
-			</div>
 		</div>
 		<div class="abso_box">
 			<div class="mvisual_txt">

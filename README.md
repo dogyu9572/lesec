@@ -1,13 +1,13 @@
-# PLS Corp 웹사이트 개발 가이드
+# Laravel 웹사이트 개발 가이드
 
 ## 📋 프로젝트 개요
-PLS Corp 공식 웹사이트로, 수입자동차 PDI 사업, 항만물류사업, 특장차 제조업을 소개하는 기업 홈페이지입니다.
+Laravel 프레임워크를 사용한 기업 웹사이트 프로젝트입니다. 퍼블리셔와 기획자가 Laravel 프로젝트에서 작업할 때 필요한 실용적인 가이드를 제공합니다.
 
 ## 🏗️ 프로젝트 구조
 
 ### 주요 디렉토리 구조
 ```
-pls/
+project/
 ├── public/                 # 웹 접근 가능한 정적 파일들
 │   ├── css/               # 스타일시트 파일들
 │   ├── js/                # JavaScript 파일들
@@ -38,7 +38,7 @@ public/css/
 ### 2. JavaScript 파일 구조
 ```
 public/js/
-├── com.js                # 공통 JavaScript
+├── app.js                # 메인 JavaScript
 ├── popup.js              # 팝업 관련 스크립트
 ├── slick.js              # 슬라이더 라이브러리
 ├── jquery.js             # jQuery 라이브러리
@@ -57,28 +57,6 @@ public/images/
 └── bg_*.jpg              # 배경 이미지들
 ```
 
-## 📄 페이지별 템플릿 구조
-
-### 1. 메인 페이지
-- **파일 위치**: `resources/views/home/index.blade.php`
-- **설명**: 메인 배너, 비즈니스 소개, 뉴스, 공지사항 등
-
-### 2. 기업정보 페이지들
-- **디렉토리**: `resources/views/information/`
-- **포함 페이지**: CEO 인사말, 회사소개, 회사연혁, 품질/환경경영
-
-### 3. 사업영역 페이지들
-- **디렉토리**: `resources/views/business/`
-- **포함 페이지**: 수입자동차 PDI, 항만물류, 특장차 제조
-
-### 4. PR 센터 페이지들
-- **디렉토리**: `resources/views/pr-center/`
-- **포함 페이지**: 뉴스, 갤러리, 공지사항
-
-### 5. 관리자 페이지들
-- **디렉토리**: `resources/views/backoffice/`
-- **포함 페이지**: 대시보드, 배너 관리, 메뉴 관리, 게시판 관리
-
 ## 🛠️ Laravel 파일 경로 찾기 가이드
 
 #### 1. URL 패턴 분석
@@ -95,7 +73,7 @@ URL 구조: /{카테고리}/{페이지명}
 |-----|------------------|
 | `http://localhost/` | `resources/views/home/index.blade.php` |
 | `http://localhost/information/about-company` | `resources/views/information/about-company.blade.php` |
-| `http://localhost/business/pdi` | `resources/views/business/pdi.blade.php` |
+| `http://localhost/business/main` | `resources/views/business/main.blade.php` |
 | `http://localhost/pr-center/news` | `resources/views/pr-center/news.blade.php` |
 | `http://localhost/contact` | `resources/views/contact/index.blade.php` |
 
@@ -216,12 +194,12 @@ Route::prefix('information')->name('information.')->group(function () {
 {{-- 레이아웃 파일: resources/views/layouts/app.blade.php --}}
 
 <head>
-    <title>PLS Corp</title>
+    <title>회사명</title>
     <link rel="stylesheet" href="{{ asset('css/font.css') }}" media="all">
     <link rel="stylesheet" href="{{ asset('css/styles.css') }}" media="all">
     <link rel="stylesheet" href="{{ asset('css/reactive.css') }}" media="all">
     <link rel="stylesheet" href="{{ asset('css/popup.css') }}" media="all">
-    <script src="{{ asset('js/com.js') }}"></script>
+    <script src="{{ asset('js/app.js') }}"></script>
     <script src="{{ asset('js/popup.js') }}"></script>
 </head>
 <body>
@@ -229,7 +207,7 @@ Route::prefix('information')->name('information.')->group(function () {
     <div class="header">
         <a href="/" class="logo">
             <img src="{{ asset('images/logo.svg') }}" alt="logo">
-            <h1>PLS Corp</h1>
+            <h1>회사명</h1>
         </a>        
     </div>
     

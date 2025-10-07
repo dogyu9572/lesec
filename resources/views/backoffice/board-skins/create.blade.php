@@ -74,7 +74,7 @@
 
                 <div class="board-form-group">
                     <div class="board-checkbox-item">
-                        <input type="checkbox" class="board-checkbox-input" id="is_active" name="is_active" value="1" {{ old('is_active', true) ? 'checked' : '' }}>
+                        <input type="checkbox" class="board-checkbox-input" id="is_active" name="is_active" value="1" @checked(old('is_active', true))>
                         <label for="is_active" class="board-form-label">활성화</label>
                     </div>
                 </div>

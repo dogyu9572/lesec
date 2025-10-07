@@ -83,7 +83,7 @@
                     <div class="board-form-col board-form-col-6">
                         <div class="board-form-group">
                             <div class="board-checkbox-item">
-                                <input type="checkbox" class="board-checkbox-input" id="is_active" name="is_active" value="1" {{ old('is_active', $boardSkin->is_active) ? 'checked' : '' }}>
+                                <input type="checkbox" class="board-checkbox-input" id="is_active" name="is_active" value="1" @checked(old('is_active', $boardSkin->is_active))>
                                 <label for="is_active" class="board-form-label">활성화</label>
                             </div>
                         </div>
@@ -92,7 +92,7 @@
                     <div class="board-form-col board-form-col-6">
                         <div class="board-form-group">
                             <div class="board-checkbox-item">
-                                <input type="checkbox" class="board-checkbox-input" id="is_default" name="is_default" value="1" {{ old('is_default', $boardSkin->is_default) ? 'checked' : '' }}>
+                                <input type="checkbox" class="board-checkbox-input" id="is_default" name="is_default" value="1" @checked(old('is_default', $boardSkin->is_default))>
                                 <label for="is_default" class="board-form-label">기본 스킨</label>
                             </div>
                             <small class="board-form-text">기본 스킨으로 설정하면 다른 모든 스킨의 기본 설정이 해제됩니다.</small>

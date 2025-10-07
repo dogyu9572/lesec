@@ -41,16 +41,16 @@
                                 <label for="category" class="filter-label">등록페이지</label>
                                 <select id="category" name="category" class="filter-select">
                                     <option value="">전체</option>
-                                    <option value="국문" {{ request('category') == '국문' ? 'selected' : '' }}>국문</option>
-                                    <option value="영문" {{ request('category') == '영문' ? 'selected' : '' }}>영문</option>
+                                    <option value="국문" @selected(request('category') == '국문')>국문</option>
+                                    <option value="영문" @selected(request('category') == '영문')>영문</option>
                                 </select>
                             </div>
                             <div class="filter-group">
                                 <label for="search_type" class="filter-label">검색 구분</label>
                                 <select id="search_type" name="search_type" class="filter-select">
                                     <option value="">전체</option>
-                                    <option value="title" {{ request('search_type') == 'title' ? 'selected' : '' }}>제목</option>
-                                    <option value="content" {{ request('search_type') == 'content' ? 'selected' : '' }}>내용</option>
+                                    <option value="title" @selected(request('search_type') == 'title')>제목</option>
+                                    <option value="content" @selected(request('search_type') == 'content')>내용</option>
                                 </select>
                             </div>
                             <div class="filter-group">
@@ -96,11 +96,11 @@
                                 @endforeach
                                 <label for="per_page" class="per-page-label">목록 개수:</label>
                                 <select id="per_page" name="per_page" class="per-page-select" onchange="this.form.submit()">
-                                    <option value="10" {{ request('per_page', 15) == 10 ? 'selected' : '' }}>10</option>
-                                    <option value="15" {{ request('per_page', 15) == 15 ? 'selected' : '' }}>15</option>
-                                    <option value="20" {{ request('per_page') == 20 ? 'selected' : '' }}>20</option>
-                                    <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
-                                    <option value="100" {{ request('per_page') == 100 ? 'selected' : '' }}>100</option>
+                                    <option value="10" @selected(request('per_page', 15) == 10)>10</option>
+                                    <option value="15" @selected(request('per_page', 15) == 15)>15</option>
+                                    <option value="20" @selected(request('per_page') == 20)>20</option>
+                                    <option value="50" @selected(request('per_page') == 50)>50</option>
+                                    <option value="100" @selected(request('per_page') == 100)>100</option>
                                 </select>
                             </form>
                         </div>

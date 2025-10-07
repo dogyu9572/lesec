@@ -37,24 +37,24 @@
                                 <label for="is_active" class="filter-label">사용여부</label>
                                 <select id="is_active" name="is_active" class="filter-select">
                                     <option value="">전체</option>
-                                    <option value="1" {{ request('is_active') == '1' ? 'selected' : '' }}>사용</option>
-                                    <option value="0" {{ request('is_active') == '0' ? 'selected' : '' }}>숨김</option>
+                                    <option value="1" @selected(request('is_active') == '1')>사용</option>
+                                    <option value="0" @selected(request('is_active') == '0')>숨김</option>
                                 </select>
                             </div>
                             <div class="filter-group">
                                 <label for="popup_type" class="filter-label">팝업타입</label>
                                 <select id="popup_type" name="popup_type" class="filter-select">
                                     <option value="">전체</option>
-                                    <option value="image" {{ request('popup_type') == 'image' ? 'selected' : '' }}>이미지</option>
-                                    <option value="html" {{ request('popup_type') == 'html' ? 'selected' : '' }}>HTML</option>
+                                    <option value="image" @selected(request('popup_type') == 'image')>이미지</option>
+                                    <option value="html" @selected(request('popup_type') == 'html')>HTML</option>
                                 </select>
                             </div>
                             <div class="filter-group">
                                 <label for="popup_display_type" class="filter-label">표시타입</label>
                                 <select id="popup_display_type" name="popup_display_type" class="filter-select">
                                     <option value="">전체</option>
-                                    <option value="normal" {{ request('popup_display_type') == 'normal' ? 'selected' : '' }}>일반팝업</option>
-                                    <option value="layer" {{ request('popup_display_type') == 'layer' ? 'selected' : '' }}>레이어팝업</option>
+                                    <option value="normal" @selected(request('popup_display_type') == 'normal')>일반팝업</option>
+                                    <option value="layer" @selected(request('popup_display_type') == 'layer')>레이어팝업</option>
                                 </select>
                             </div>
                             <div class="filter-group">
@@ -109,10 +109,10 @@
                                 @endforeach
                                 <label for="per_page" class="per-page-label">목록개수:</label>
                                 <select id="per_page" name="per_page" class="per-page-select" onchange="this.form.submit()">
-                                    <option value="10" {{ request('per_page', 10) == 10 ? 'selected' : '' }}>10</option>
-                                    <option value="20" {{ request('per_page') == 20 ? 'selected' : '' }}>20</option>
-                                    <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
-                                    <option value="100" {{ request('per_page') == 100 ? 'selected' : '' }}>100</option>
+                                    <option value="10" @selected(request('per_page', 10) == 10)>10</option>
+                                    <option value="20" @selected(request('per_page') == 20)>20</option>
+                                    <option value="50" @selected(request('per_page') == 50)>50</option>
+                                    <option value="100" @selected(request('per_page') == 100)>100</option>
                                 </select>
                             </form>
                         </div>

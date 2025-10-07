@@ -39,7 +39,7 @@
                             <select class="board-form-control" id="parent_id" name="parent_id">
                                 <option value="">없음 (최상위 메뉴)</option>
                                 @foreach($menus as $menu)
-                                    <option value="{{ $menu->id }}" {{ old('parent_id') == $menu->id ? 'selected' : '' }}>
+                                    <option value="{{ $menu->id }}" @selected(old('parent_id') == $menu->id)>
                                         {{ $menu->name }}
                                     </option>
                                 @endforeach
@@ -104,7 +104,7 @@
 
                 <div class="board-form-group">
                     <div class="board-checkbox-item">
-                        <input type="checkbox" class="board-checkbox-input" id="is_active" name="is_active" value="1" {{ old('is_active', true) ? 'checked' : '' }}>
+                        <input type="checkbox" class="board-checkbox-input" id="is_active" name="is_active" value="1" @checked(old('is_active', true))>
                         <label for="is_active" class="board-form-label">활성화</label>
                     </div>
                 </div>

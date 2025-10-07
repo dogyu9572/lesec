@@ -90,11 +90,11 @@
             <h3>사용 여부</h3>
             <div class="radio-group">
                 <label class="radio-label">
-                    <input type="radio" name="is_active" value="1" {{ old('is_active', $admin->is_active ? '1' : '0') == '1' ? 'checked' : '' }}>
+                    <input type="radio" name="is_active" value="1" @checked(old('is_active', $admin->is_active ? '1' : '0') == '1')>
                     <span>사용</span>
                 </label>
                 <label class="radio-label">
-                    <input type="radio" name="is_active" value="0" {{ old('is_active', $admin->is_active ? '1' : '0') == '0' ? 'checked' : '' }}>
+                    <input type="radio" name="is_active" value="0" @checked(old('is_active', $admin->is_active ? '1' : '0') == '0')>
                     <span>미사용</span>
                 </label>
             </div>
@@ -123,7 +123,7 @@
                                 <h4>{{ $menu->name }}</h4>
                                 <label class="permission-item parent-menu">
                                     <input type="checkbox" name="permissions[{{ $menu->id }}]" value="1" 
-                                        {{ ($userPermissions[$menu->id] ?? false) || old('permissions.'.$menu->id) ? 'checked' : '' }}>
+                                        @checked($userPermissions[$menu->id] ?? false || old('permissions.'.$menu->id))>
                                     <span>{{ $menu->name }} 메뉴</span>
                                 </label>
                             </div>
@@ -132,7 +132,7 @@
                                     @foreach($menu->children as $child)
                                         <label class="permission-item child-menu">
                                             <input type="checkbox" name="permissions[{{ $child->id }}]" value="1" 
-                                                {{ ($userPermissions[$child->id] ?? false) || old('permissions.'.$child->id) ? 'checked' : '' }}>
+                                                @checked($userPermissions[$child->id] ?? false || old('permissions.'.$child->id))>
                                             <span>{{ $child->name }}</span>
                                         </label>
                                     @endforeach

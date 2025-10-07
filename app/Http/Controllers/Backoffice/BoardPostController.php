@@ -7,6 +7,7 @@ use App\Http\Requests\BoardPostRequest;
 use App\Services\Backoffice\BoardPostService;
 use App\Models\Board;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class BoardPostController extends Controller
 {
@@ -237,7 +238,7 @@ class BoardPostController extends Controller
                 $tableName = 'board_' . $slug;
                 
                 foreach ($posts as $post) {
-                    \DB::table($tableName)
+                    DB::table($tableName)
                         ->where('id', $post['post_id'])
                         ->update(['sort_order' => $post['sort_order']]);
                 }
@@ -262,7 +263,7 @@ class BoardPostController extends Controller
     private function findBoardSlugByPostId($postId)
     {
         // 모든 board_ 테이블에서 게시글 ID 찾기
-        $tables = \DB::select("SHOW TABLES LIKE 'board_%'");
+        $tables = DB::select("SHOW TABLES LIKE 'board_%'");
         
         foreach ($tables as $table) {
             $tableName = array_values((array)$table)[0];
@@ -270,7 +271,7 @@ class BoardPostController extends Controller
                 continue;
             }
             
-            $exists = \DB::table($tableName)->where('id', $postId)->exists();
+            $exists = DB::table($tableName)->where('id', $postId)->exists();
             if ($exists) {
                 return str_replace('board_', '', $tableName);
             }

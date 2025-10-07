@@ -42,7 +42,7 @@
                         <div class="mb-3 row">
                             <div class="col-md-6 offset-md-4">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
+                                    <input class="form-check-input" type="checkbox" name="remember" id="remember" @checked(old('remember'))>
 
                                     <label class="form-check-label" for="remember">
                                         로그인 상태 유지

@@ -88,11 +88,11 @@
             <h3>사용 여부</h3>
             <div class="radio-group">
                 <label class="radio-label">
-                    <input type="radio" name="is_active" value="1" {{ old('is_active', '1') == '1' ? 'checked' : '' }}>
+                    <input type="radio" name="is_active" value="1" @checked(old('is_active', '1') == '1')>
                     <span>사용</span>
                 </label>
                 <label class="radio-label">
-                    <input type="radio" name="is_active" value="0" {{ old('is_active') == '0' ? 'checked' : '' }}>
+                    <input type="radio" name="is_active" value="0" @checked(old('is_active') == '0')>
                     <span>미사용</span>
                 </label>
             </div>
@@ -110,7 +110,7 @@
                         <div class="permission-category-header">
                             <h4>{{ $menu->name }}</h4>
                             <label class="permission-item parent-menu">
-                                <input type="checkbox" name="permissions[{{ $menu->id }}]" value="1" {{ old('permissions.'.$menu->id) ? 'checked' : '' }}>
+                                <input type="checkbox" name="permissions[{{ $menu->id }}]" value="1" @checked(old('permissions.'.$menu->id))>
                                 <span>{{ $menu->name }} 메뉴</span>
                             </label>
                         </div>
@@ -118,7 +118,7 @@
                             <div class="permission-items">
                                 @foreach($menu->children as $child)
                                     <label class="permission-item child-menu">
-                                        <input type="checkbox" name="permissions[{{ $child->id }}]" value="1" {{ old('permissions.'.$child->id) ? 'checked' : '' }}>
+                                        <input type="checkbox" name="permissions[{{ $child->id }}]" value="1" @checked(old('permissions.'.$child->id))>
                                         <span>{{ $child->name }}</span>
                                     </label>
                                 @endforeach

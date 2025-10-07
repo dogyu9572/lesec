@@ -41,11 +41,11 @@
                                 <label class="board-form-label">게시기간 사용여부</label>
                                 <div class="radio-group">
                                     <label class="radio-label">
-                                        <input type="radio" name="use_period" value="1" {{ old('use_period', '0') == '1' ? 'checked' : '' }}>
+                                        <input type="radio" name="use_period" value="1" @checked(old('use_period', '0') == '1')>
                                         <span class="radio-text">Y</span>
                                     </label>
                                     <label class="radio-label">
-                                        <input type="radio" name="use_period" value="0" {{ old('use_period', '0') == '0' ? 'checked' : '' }}>
+                                        <input type="radio" name="use_period" value="0" @checked(old('use_period', '0') == '0')>
                                         <span class="radio-text">N</span>
                                     </label>
                                 </div>
@@ -156,11 +156,11 @@
                                 <label class="board-form-label">타겟</label>
                                 <div class="radio-group">
                                     <label class="radio-label">
-                                        <input type="radio" name="url_target" value="_blank" {{ old('url_target', '_blank') == '_blank' ? 'checked' : '' }}>
+                                        <input type="radio" name="url_target" value="_blank" @checked(old('url_target', '_blank') == '_blank')>
                                         <span class="radio-text">새창</span>
                                     </label>
                                     <label class="radio-label">
-                                        <input type="radio" name="url_target" value="_self" {{ old('url_target') == '_self' ? 'checked' : '' }}>
+                                        <input type="radio" name="url_target" value="_self" @checked(old('url_target') == '_self')>
                                         <span class="radio-text">현재창</span>
                                     </label>
                                 </div>
@@ -174,11 +174,11 @@
                                 <label class="board-form-label">팝업표시타입</label>
                                 <div class="radio-group">
                                     <label class="radio-label">
-                                        <input type="radio" name="popup_display_type" value="normal" {{ old('popup_display_type', 'normal') == 'normal' ? 'checked' : '' }}>
+                                        <input type="radio" name="popup_display_type" value="normal" @checked(old('popup_display_type', 'normal') == 'normal')>
                                         <span class="radio-text">일반팝업</span>
                                     </label>
                                     <label class="radio-label">
-                                        <input type="radio" name="popup_display_type" value="layer" {{ old('popup_display_type') == 'layer' ? 'checked' : '' }}>
+                                        <input type="radio" name="popup_display_type" value="layer" @checked(old('popup_display_type') == 'layer')>
                                         <span class="radio-text">레이어팝업</span>
                                     </label>
                                 </div>
@@ -193,11 +193,11 @@
                                 <label class="board-form-label">팝업타입</label>
                                 <div class="radio-group">
                                     <label class="radio-label">
-                                        <input type="radio" name="popup_type" value="image" {{ old('popup_type', 'image') == 'image' ? 'checked' : '' }}>
+                                        <input type="radio" name="popup_type" value="image" @checked(old('popup_type', 'image') == 'image')>
                                         <span class="radio-text">이미지</span>
                                     </label>
                                     <label class="radio-label">
-                                        <input type="radio" name="popup_type" value="html" {{ old('popup_type') == 'html' ? 'checked' : '' }}>
+                                        <input type="radio" name="popup_type" value="html" @checked(old('popup_type') == 'html')>
                                         <span class="radio-text">HTML</span>
                                     </label>
                                 </div>
@@ -249,11 +249,11 @@
                                 <label class="board-form-label">사용여부</label>
                                 <div class="radio-group">
                                     <label class="radio-label">
-                                        <input type="radio" name="is_active" value="1" {{ old('is_active', '1') == '1' ? 'checked' : '' }}>
+                                        <input type="radio" name="is_active" value="1" @checked(old('is_active', '1') == '1')>
                                         <span class="radio-text">Y</span>
                                     </label>
                                     <label class="radio-label">
-                                        <input type="radio" name="is_active" value="0" {{ old('is_active') == '0' ? 'checked' : '' }}>
+                                        <input type="radio" name="is_active" value="0" @checked(old('is_active') == '0')>
                                         <span class="radio-text">N</span>
                                     </label>
                                 </div>

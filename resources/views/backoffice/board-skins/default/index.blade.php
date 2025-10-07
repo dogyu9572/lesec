@@ -52,9 +52,9 @@
                                 <label for="search_type" class="filter-label">검색 구분</label>
                                 <select id="search_type" name="search_type" class="filter-select">
                                     <option value="">전체</option>
-                                    <option value="title" {{ request('search_type') == 'title' ? 'selected' : '' }}>제목
+                                    <option value="title" @selected(request('search_type') == 'title')>제목
                                     </option>
-                                    <option value="content" {{ request('search_type') == 'content' ? 'selected' : '' }}>내용
+                                    <option value="content" @selected(request('search_type') == 'content')>내용
                                     </option>
                                 </select>
                             </div>
@@ -91,10 +91,10 @@
                             <input type="hidden" name="search_type" value="{{ request('search_type') }}">
                             <label for="per_page" class="per-page-label">표시 개수:</label>
                             <select name="per_page" id="per_page" class="per-page-select" onchange="this.form.submit()">
-                                <option value="10" {{ request('per_page', 15) == 10 ? 'selected' : '' }}>10개</option>
-                                <option value="20" {{ request('per_page', 15) == 20 ? 'selected' : '' }}>20개</option>
-                                <option value="50" {{ request('per_page', 15) == 50 ? 'selected' : '' }}>50개</option>
-                                <option value="100" {{ request('per_page', 15) == 100 ? 'selected' : '' }}>100개</option>
+                                <option value="10" @selected(request('per_page', 15) == 10)>10개</option>
+                                <option value="20" @selected(request('per_page', 15) == 20)>20개</option>
+                                <option value="50" @selected(request('per_page', 15) == 50)>50개</option>
+                                <option value="100" @selected(request('per_page', 15) == 100)>100개</option>
                             </select>
                         </form>
                     </div>

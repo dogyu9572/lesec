@@ -99,7 +99,7 @@
                             <label class="board-form-label">게시기간 설정</label>
                             <div class="board-checkbox-group">
                                 <div class="board-checkbox-item">
-                                    <input type="checkbox" name="use_period" value="1" {{ old('use_period') ? 'checked' : '' }} id="use_period" class="board-checkbox-input">
+                                    <input type="checkbox" name="use_period" value="1" @checked(old('use_period')) id="use_period" class="board-checkbox-input">
                                     <label for="use_period">게시기간 사용</label>
                                 </div>
                             </div>
@@ -183,11 +183,11 @@
                                     <label class="board-form-label">사용여부</label>
                                     <div class="board-radio-group">
                                         <div class="board-radio-item">
-                                            <input type="radio" id="is_active_1" name="is_active" value="1" class="board-radio-input" {{ old('is_active', '1') == '1' ? 'checked' : '' }}>
+                                            <input type="radio" id="is_active_1" name="is_active" value="1" class="board-radio-input" @checked(old('is_active', '1') == '1')>
                                             <label for="is_active_1">사용</label>
                                         </div>
                                         <div class="board-radio-item">
-                                            <input type="radio" id="is_active_0" name="is_active" value="0" class="board-radio-input" {{ old('is_active') == '0' ? 'checked' : '' }}>
+                                            <input type="radio" id="is_active_0" name="is_active" value="0" class="board-radio-input" @checked(old('is_active') == '0')>
                                             <label for="is_active_0">숨김</label>
                                         </div>
                                     </div>

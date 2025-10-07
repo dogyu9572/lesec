@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\File;
 
 class Board extends Model
 {
@@ -144,7 +145,7 @@ class Board extends Model
     public function hasCustomSkin()
     {
         $customSkinPath = resource_path("views/boards/instances/{$this->slug}");
-        return \Illuminate\Support\Facades\File::exists($customSkinPath);
+        return File::exists($customSkinPath);
     }
     
     /**

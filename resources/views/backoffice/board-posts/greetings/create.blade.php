@@ -78,7 +78,7 @@
                                         @foreach(explode("\n", $fieldConfig['options']) as $option)
                                             @php $option = trim($option); @endphp
                                             @if(!empty($option))
-                                                <option value="{{ $option }}" {{ old('custom_field_' . $fieldConfig['name']) == $option ? 'selected' : '' }}>
+                                                <option value="{{ $option }}" @selected(old('custom_field_' . $fieldConfig['name']) == $option)>
                                                     {{ $option }}
                                                 </option>
                                             @endif
@@ -128,7 +128,7 @@
                                                            id="option_{{ $fieldConfig['name'] }}_{{ $loop->index }}" 
                                                            name="custom_field_{{ $fieldConfig['name'] }}" 
                                                            value="{{ $option }}"
-                                                           {{ old('custom_field_' . $fieldConfig['name']) == $option ? 'checked' : '' }}
+                                                           @checked(old('custom_field_' . $fieldConfig['name']) == $option)
                                                            @if($fieldConfig['required']) required @endif>
                                                     <label for="option_{{ $fieldConfig['name'] }}_{{ $loop->index }}">{{ $option }}</label>
                                                 </div>

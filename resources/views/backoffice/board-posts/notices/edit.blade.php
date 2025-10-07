@@ -38,7 +38,7 @@
                 @if($board->isNoticeEnabled())
                 <div class="board-form-group">
                     <div class="board-checkbox-item">
-                        <input type="checkbox" class="board-checkbox-input" id="is_notice" name="is_notice" value="1" {{ $post->is_notice ? 'checked' : '' }}>
+                        <input type="checkbox" class="board-checkbox-input" id="is_notice" name="is_notice" value="1" @checked($post->is_notice)>
                         <label for="is_notice" class="board-form-label">공지 등록</label>
                     </div>                    
                 </div>
@@ -57,8 +57,8 @@
                     <label for="category" class="board-form-label">카테고리 분류</label>
                     <select class="board-form-control" id="category" name="category">
                         <option value="">카테고리를 선택하세요</option>
-                        <option value="국문" {{ $post->category == '국문' ? 'selected' : '' }}>국문</option>
-                        <option value="영문" {{ $post->category == '영문' ? 'selected' : '' }}>영문</option>                       
+                        <option value="국문" @selected($post->category == '국문')>국문</option>
+                        <option value="영문" @selected($post->category == '영문')>영문</option>                       
                     </select>
                 </div>
 
@@ -110,7 +110,7 @@
                                         @foreach(explode("\n", $fieldConfig['options']) as $option)
                                             @php $option = trim($option); @endphp
                                             @if(!empty($option))
-                                                <option value="{{ $option }}" {{ old('custom_field_' . $fieldConfig['name'], $fieldValue) == $option ? 'selected' : '' }}>
+                                                <option value="{{ $option }}" @selected(old('custom_field_' . $fieldConfig['name'], $fieldValue) == $option)>
                                                     {{ $option }}
                                                 </option>
                                             @endif
@@ -132,7 +132,7 @@
                                                            id="option_{{ $fieldConfig['name'] }}_{{ $loop->index }}" 
                                                            name="custom_field_{{ $fieldConfig['name'] }}[]" 
                                                            value="{{ $option }}"
-                                                           {{ ($isChecked || $isOldChecked) ? 'checked' : '' }}>
+                                                           @checked($isChecked || $isOldChecked)>
                                                     <label for="option_{{ $fieldConfig['name'] }}_{{ $loop->index }}">{{ $option }}</label>
                                                 </div>
                                             @endif
@@ -149,7 +149,7 @@
                                                id="custom_field_{{ $fieldConfig['name'] }}" 
                                                name="custom_field_{{ $fieldConfig['name'] }}" 
                                                value="1"
-                                               {{ ($isChecked || $isOldChecked) ? 'checked' : '' }}
+                                               @checked($isChecked || $isOldChecked)
                                                @if($fieldConfig['required']) required @endif>
                                         <label for="custom_field_{{ $fieldConfig['name'] }}" class="board-form-label">
                                             {{ $fieldConfig['label'] }}
@@ -171,7 +171,7 @@
                                                            id="option_{{ $fieldConfig['name'] }}_{{ $loop->index }}" 
                                                            name="custom_field_{{ $fieldConfig['name'] }}" 
                                                            value="{{ $option }}"
-                                                           {{ ($isChecked || $isOldChecked) ? 'checked' : '' }}
+                                                           @checked($isChecked || $isOldChecked)
                                                            @if($fieldConfig['required']) required @endif>
                                                     <label for="option_{{ $fieldConfig['name'] }}_{{ $loop->index }}">{{ $option }}</label>
                                                 </div>

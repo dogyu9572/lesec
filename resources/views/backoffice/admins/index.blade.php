@@ -53,16 +53,16 @@
                             <label for="role" class="filter-label">권한</label>
                             <select id="role" name="role" class="filter-select">
                                 <option value="">전체</option>
-                                <option value="super_admin" {{ request('role') == 'super_admin' ? 'selected' : '' }}>슈퍼관리자</option>
-                                <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>관리자</option>
+                                <option value="super_admin" @selected(request('role') == 'super_admin')>슈퍼관리자</option>
+                                <option value="admin" @selected(request('role') == 'admin')>관리자</option>
                             </select>
                         </div>
                         <div class="filter-group">
                             <label for="is_active" class="filter-label">상태</label>
                             <select id="is_active" name="is_active" class="filter-select">
                                 <option value="">전체</option>
-                                <option value="1" {{ request('is_active') == '1' ? 'selected' : '' }}>활성화</option>
-                                <option value="0" {{ request('is_active') == '0' ? 'selected' : '' }}>비활성화</option>
+                                <option value="1" @selected(request('is_active') == '1')>활성화</option>
+                                <option value="0" @selected(request('is_active') == '0')>비활성화</option>
                             </select>
                         </div>
                     </div>
@@ -106,10 +106,10 @@
                             @endforeach
                             <label for="per_page" class="per-page-label">목록 개수:</label>
                             <select id="per_page" name="per_page" class="per-page-select" onchange="this.form.submit()">
-                                <option value="10" {{ request('per_page', 10) == 10 ? 'selected' : '' }}>10</option>
-                                <option value="20" {{ request('per_page') == 20 ? 'selected' : '' }}>20</option>
-                                <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
-                                <option value="100" {{ request('per_page') == 100 ? 'selected' : '' }}>100</option>
+                                <option value="10" @selected(request('per_page', 10) == 10)>10</option>
+                                <option value="20" @selected(request('per_page') == 20)>20</option>
+                                <option value="50" @selected(request('per_page') == 50)>50</option>
+                                <option value="100" @selected(request('per_page') == 100)>100</option>
                             </select>
                         </form>
                     </div>

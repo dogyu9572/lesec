@@ -64,7 +64,7 @@
                                     <select class="board-form-control" id="skin_id" name="skin_id" required>
                                         <option value="">스킨을 선택하세요</option>
                                         @foreach ($skins as $skin)
-                                            <option value="{{ $skin->id }}" {{ old('skin_id', $board->skin_id) == $skin->id ? 'selected' : '' }}>
+                                            <option value="{{ $skin->id }}" @selected(old('skin_id', $board->skin_id) == $skin->id)>
                                                 {{ $skin->name }}
                                             </option>
                                         @endforeach
@@ -86,15 +86,15 @@
                                     <label class="board-form-label">읽기 권한 <span class="required">*</span></label>
                                     <div class="board-radio-group">
                                         <div class="board-radio-item">
-                                            <input type="radio" id="permission_read_all" name="permission_read" value="all" class="board-radio-input" {{ old('permission_read', $board->permission_read) == 'all' ? 'checked' : '' }}>
+                                            <input type="radio" id="permission_read_all" name="permission_read" value="all" class="board-radio-input" @checked(old('permission_read', $board->permission_read) == 'all')>
                                             <label for="permission_read_all">모두</label>
                                         </div>
                                         <div class="board-radio-item">
-                                            <input type="radio" id="permission_read_member" name="permission_read" value="member" class="board-radio-input" {{ old('permission_read', $board->permission_read) == 'member' ? 'checked' : '' }}>
+                                            <input type="radio" id="permission_read_member" name="permission_read" value="member" class="board-radio-input" @checked(old('permission_read', $board->permission_read) == 'member')>
                                             <label for="permission_read_member">회원만</label>
                                         </div>
                                         <div class="board-radio-item">
-                                            <input type="radio" id="permission_read_admin" name="permission_read" value="admin" class="board-radio-input" {{ old('permission_read', $board->permission_read) == 'admin' ? 'checked' : '' }}>
+                                            <input type="radio" id="permission_read_admin" name="permission_read" value="admin" class="board-radio-input" @checked(old('permission_read', $board->permission_read) == 'admin')>
                                             <label for="permission_read_admin">관리자만</label>
                                         </div>
                                     </div>
@@ -106,15 +106,15 @@
                                     <label class="board-form-label">쓰기 권한 <span class="required">*</span></label>
                                     <div class="board-radio-group">
                                         <div class="board-radio-item">
-                                            <input type="radio" id="permission_write_all" name="permission_write" value="all" class="board-radio-input" {{ old('permission_write', $board->permission_write) == 'all' ? 'checked' : '' }}>
+                                            <input type="radio" id="permission_write_all" name="permission_write" value="all" class="board-radio-input" @checked(old('permission_write', $board->permission_write) == 'all')>
                                             <label for="permission_write_all">모두</label>
                                         </div>
                                         <div class="board-radio-item">
-                                            <input type="radio" id="permission_write_member" name="permission_write" value="member" class="board-radio-input" {{ old('permission_write', $board->permission_write) == 'member' ? 'checked' : '' }}>
+                                            <input type="radio" id="permission_write_member" name="permission_write" value="member" class="board-radio-input" @checked(old('permission_write', $board->permission_write) == 'member')>
                                             <label for="permission_write_member">회원만</label>
                                         </div>
                                         <div class="board-radio-item">
-                                            <input type="radio" id="permission_write_admin" name="permission_write" value="admin" class="board-radio-input" {{ old('permission_write', $board->permission_write) == 'admin' ? 'checked' : '' }}>
+                                            <input type="radio" id="permission_write_admin" name="permission_write" value="admin" class="board-radio-input" @checked(old('permission_write', $board->permission_write) == 'admin')>
                                             <label for="permission_write_admin">관리자만</label>
                                         </div>
                                     </div>
@@ -126,15 +126,15 @@
                                     <label class="board-form-label">댓글 작성 권한 <span class="required">*</span></label>
                                     <div class="board-radio-group">
                                         <div class="board-radio-item">
-                                            <input type="radio" id="permission_comment_all" name="permission_comment" value="all" class="board-radio-input" {{ old('permission_comment', $board->permission_comment) == 'all' ? 'checked' : '' }}>
+                                            <input type="radio" id="permission_comment_all" name="permission_comment" value="all" class="board-radio-input" @checked(old('permission_comment', $board->permission_comment) == 'all')>
                                             <label for="permission_comment_all">모두</label>
                                         </div>
                                         <div class="board-radio-item">
-                                            <input type="radio" id="permission_comment_member" name="permission_comment" value="member" class="board-radio-input" {{ old('permission_comment', $board->permission_comment) == 'member' ? 'checked' : '' }}>
+                                            <input type="radio" id="permission_comment_member" name="permission_comment" value="member" class="board-radio-input" @checked(old('permission_comment', $board->permission_comment) == 'member')>
                                             <label for="permission_comment_member">회원만</label>
                                         </div>
                                         <div class="board-radio-item">
-                                            <input type="radio" id="permission_comment_admin" name="permission_comment" value="admin" class="board-radio-input" {{ old('permission_comment', $board->permission_comment) == 'admin' ? 'checked' : '' }}>
+                                            <input type="radio" id="permission_comment_admin" name="permission_comment" value="admin" class="board-radio-input" @checked(old('permission_comment', $board->permission_comment) == 'admin')>
                                             <label for="permission_comment_admin">관리자만</label>
                                         </div>
                                     </div>
@@ -144,14 +144,14 @@
 
                         <div class="board-form-group">
                             <div class="board-checkbox-item">
-                                <input type="checkbox" class="board-checkbox-input" id="is_active" name="is_active" value="1" {{ old('is_active', $board->is_active) ? 'checked' : '' }}>
+                                <input type="checkbox" class="board-checkbox-input" id="is_active" name="is_active" value="1" @checked(old('is_active', $board->is_active))>
                                 <label for="is_active" class="board-form-label">사용 여부</label>
                             </div>
                         </div>
 
                         <div class="board-form-group">
                             <div class="board-checkbox-item">
-                                <input type="checkbox" class="board-checkbox-input" id="enable_notice" name="enable_notice" value="1" {{ old('enable_notice', $board->enable_notice ?? '0') == '1' ? 'checked' : '' }}>
+                                <input type="checkbox" class="board-checkbox-input" id="enable_notice" name="enable_notice" value="1" @checked(old('enable_notice', $board->enable_notice ?? '0') == '1')>
                                 <label for="enable_notice" class="board-form-label">공지 기능 활성화</label>
                             </div>
                             <small class="board-form-text">체크하면 게시글 작성 시 공지여부를 설정할 수 있습니다. 공지글은 최상단에 표시됩니다.</small>
@@ -159,7 +159,7 @@
 
                         <div class="board-form-group">
                             <div class="board-checkbox-item">
-                                <input type="checkbox" class="board-checkbox-input" id="is_single_page" name="is_single_page" value="1" {{ old('is_single_page', $board->is_single_page ?? '0') == '1' ? 'checked' : '' }}>
+                                <input type="checkbox" class="board-checkbox-input" id="is_single_page" name="is_single_page" value="1" @checked(old('is_single_page', $board->is_single_page ?? '0') == '1')>
                                 <label for="is_single_page" class="board-form-label">단일페이지 모드</label>
                             </div>
                             <small class="board-form-text">체크하면 게시판이 단일페이지로 동작합니다. 목록 대신 하나의 페이지에서만 내용을 관리할 수 있습니다.</small>
@@ -167,7 +167,7 @@
 
                         <div class="board-form-group">
                             <div class="board-checkbox-item">
-                                <input type="checkbox" class="board-checkbox-input" id="enable_sorting" name="enable_sorting" value="1" {{ old('enable_sorting', $board->enable_sorting ?? '0') == '1' ? 'checked' : '' }}>
+                                <input type="checkbox" class="board-checkbox-input" id="enable_sorting" name="enable_sorting" value="1" @checked(old('enable_sorting', $board->enable_sorting ?? '0') == '1')>
                                 <label for="enable_sorting" class="board-form-label">정렬 기능 활성화</label>
                             </div>
                             <small class="board-form-text">체크하면 게시글의 순서를 숫자 입력이나 드래그 앤 드롭으로 변경할 수 있습니다.</small>
@@ -217,19 +217,19 @@
                                                             <label class="board-form-label">필드 타입</label>
                                                             <select class="board-form-control" name="custom_fields[{{ $index }}][type]" onchange="toggleFieldOptions(this, {{ $index }})">
                                                                 <option value="">타입 선택</option>
-                                                                <option value="text" {{ $fieldConfig['type'] == 'text' ? 'selected' : '' }}>텍스트</option>
-                                                                <option value="select" {{ $fieldConfig['type'] == 'select' ? 'selected' : '' }}>셀렉박스</option>
-                                                                <option value="checkbox" {{ $fieldConfig['type'] == 'checkbox' ? 'selected' : '' }}>체크박스</option>
-                                                                <option value="radio" {{ $fieldConfig['type'] == 'radio' ? 'selected' : '' }}>라디오 버튼</option>
-                                                                <option value="date" {{ $fieldConfig['type'] == 'date' ? 'selected' : '' }}>날짜</option>
-                                                                <option value="editor" {{ $fieldConfig['type'] == 'editor' ? 'selected' : '' }}>에디터</option>
+                                                                <option value="text" @selected($fieldConfig['type'] == 'text')>텍스트</option>
+                                                                <option value="select" @selected($fieldConfig['type'] == 'select')>셀렉박스</option>
+                                                                <option value="checkbox" @selected($fieldConfig['type'] == 'checkbox')>체크박스</option>
+                                                                <option value="radio" @selected($fieldConfig['type'] == 'radio')>라디오 버튼</option>
+                                                                <option value="date" @selected($fieldConfig['type'] == 'date')>날짜</option>
+                                                                <option value="editor" @selected($fieldConfig['type'] == 'editor')>에디터</option>
                                                             </select>
                                                         </div>
                                                     </div>
                                                     <div class="board-form-col board-form-col-4">
                                                         <div class="board-form-group">
                                                             <div class="board-checkbox-item">
-                                                                <input type="checkbox" class="board-checkbox-input" name="custom_fields[{{ $index }}][required]" value="1" {{ ($fieldConfig['required'] ?? false) ? 'checked' : '' }}>
+                                                                <input type="checkbox" class="board-checkbox-input" name="custom_fields[{{ $index }}][required]" value="1" @checked($fieldConfig['required'] ?? false)>
                                                                 <label class="board-form-label">필수 입력</label>
                                                             </div>
                                                         </div>

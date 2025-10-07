@@ -79,7 +79,7 @@
                             <div class="form-group">
                                 <label for="is_active">계정 상태</label>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="is_active" name="is_active" value="1" {{ old('is_active', true) ? 'checked' : '' }}>
+                                    <input class="form-check-input" type="checkbox" id="is_active" name="is_active" value="1" @checked(old('is_active', true))>
                                     <label class="form-check-label" for="is_active">
                                         활성화
                                     </label>

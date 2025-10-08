@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Backoffice;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AdminMenuRequest;
 use App\Models\AdminMenu;
 use Illuminate\Http\Request;
 
@@ -29,21 +30,9 @@ class AdminMenuController extends BaseController
     /**
      * 새 메뉴 저장
      */
-    public function store(Request $request)
+    public function store(AdminMenuRequest $request)
     {
-        $validated = $request->validate([
-            'parent_id' => 'nullable|exists:admin_menus,id',
-            'name' => 'required|string|max:255',
-            'url' => 'nullable|string|max:255',
-            'icon' => 'nullable|string|max:100',
-            'order' => 'required|integer|min:0',
-            'is_active' => 'boolean',
-        ]);
-
-        // is_active가 제출되지 않았으면 false로 설정
-        $validated['is_active'] = $request->has('is_active');
-
-        AdminMenu::create($validated);
+        AdminMenu::create($request->validated());
 
         return redirect()->route('backoffice.admin-menus.index')
             ->with('success', '메뉴가 성공적으로 생성되었습니다.');
@@ -65,21 +54,9 @@ class AdminMenuController extends BaseController
     /**
      * 메뉴 업데이트
      */
-    public function update(Request $request, AdminMenu $admin_menu)
+    public function update(AdminMenuRequest $request, AdminMenu $admin_menu)
     {
-        $validated = $request->validate([
-            'parent_id' => 'nullable|exists:admin_menus,id',
-            'name' => 'required|string|max:255',
-            'url' => 'nullable|string|max:255',
-            'icon' => 'nullable|string|max:100',
-            'order' => 'required|integer|min:0',
-            'is_active' => 'boolean',
-        ]);
-
-        // is_active가 제출되지 않았으면 false로 설정
-        $validated['is_active'] = $request->has('is_active');
-
-        $admin_menu->update($validated);
+        $admin_menu->update($request->validated());
 
         return redirect()->route('backoffice.admin-menus.index')
             ->with('success', '메뉴가 성공적으로 수정되었습니다.');

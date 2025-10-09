@@ -1,0 +1,240 @@
+/**
+ * 카테고리 관리 페이지 전용 스타일
+ */
+
+
+/* 카테고리 페이지에서 menu-list 왼쪽 여백 제거 */
+.menu-list {
+    padding-left: 0 !important;
+    margin-left: 0 !important;
+}
+
+/* 테이블 반응형 컨테이너 왼쪽 여백 제거 */
+.table-responsive {
+    padding-left: 0 !important;
+    margin-left: 0 !important;
+}
+
+/* 카테고리 그룹 탭 */
+.category-group-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.group-tab {
+    padding: 6px 14px;
+    border: 1px solid #e0e0e0;
+    border-radius: 20px;
+    background-color: #fff;
+    color: #666;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: -0.2px;
+}
+
+.group-tab:hover {
+    background-color: #f8f9fa;
+    border-color: #4a90e2;
+    color: #4a90e2;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(74, 144, 226, 0.1);
+    text-decoration: none;
+}
+
+.group-tab.active {
+    background-color: #4a90e2;
+    color: #fff;
+    border-color: #4a90e2;
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(74, 144, 226, 0.3);
+    text-decoration: none;
+}
+
+/* 카테고리 메뉴 아이템 */
+.category-menu-item {
+    background-color: #fff;
+    border: 1px solid #e9ecef;
+    margin-bottom: 5px;
+    border-radius: 4px;
+    padding: 15px 15px 15px 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: grab;
+    transition: all 0.2s ease;
+    position: relative;
+    z-index: 1;
+}
+
+.category-menu-item:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border-color: #aaa;
+}
+
+.category-menu-item:active {
+    cursor: grabbing;
+    background-color: #f8f9fa;
+}
+
+/* Depth별 배경색과 padding */
+.category-menu-item-depth-1 {
+    background-color: #fff;
+    border-left: 3px solid #4a90e2;
+    padding-left: 30px;
+    margin-left: 0px;
+}
+
+.category-menu-item-depth-2 {
+    background-color: #f8f9fa;
+    border-left: 3px solid #6c757d;
+    padding-left: 50px;
+    margin-left: 20px;
+}
+
+.category-menu-item-depth-3 {
+    background-color: #e9ecef;
+    border-left: 3px solid #adb5bd;
+    padding-left: 70px;
+    margin-left: 40px;
+}
+
+/* 카테고리 메뉴 정보 */
+.category-menu-info {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    min-height: 40px;
+    gap: 15px;
+}
+
+.category-menu-info .drag-handle {
+    color: #6c757d;
+    cursor: grab;
+    padding: 5px;
+    border-radius: 4px;
+    background-color: #f1f3f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+}
+
+.category-menu-info .drag-handle:hover {
+    background-color: #e9ecef;
+    color: #343a40;
+}
+
+.category-menu-info .menu-name {
+    flex-grow: 1;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.category-menu-info .menu-status {
+    flex-shrink: 0;
+    width: 80px;
+    margin-left: auto;
+    margin-right: 15px;
+    position: relative;
+    right: 180px;
+}
+
+/* 뎁스별 활성화 텍스트 위치 고정 */
+.category-menu-item-depth-2 .menu-status {
+    right: 180px;
+}
+
+.category-menu-item-depth-3 .menu-status {
+    right: 265px;
+}
+
+/* 카테고리 액션 버튼 */
+.category-menu-item .board-btn-group {
+    width: auto;
+    display: flex;
+    gap: 5px;
+    flex-wrap: nowrap;
+    flex-shrink: 0;
+    min-width: 120px;
+}
+
+.category-menu-item .board-btn-group .btn {
+    font-size: 0.8rem;
+    padding: 0.35rem 0.6rem;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-block;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.category-menu-item .board-btn-group .btn-primary {
+    background-color: #4a90e2;
+    color: white;
+}
+
+.category-menu-item .board-btn-group .btn-primary:hover {
+    background-color: #357abd;
+    transform: translateY(-1px);
+}
+
+.category-menu-item .board-btn-group .btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.category-menu-item .board-btn-group .btn-secondary:hover {
+    background-color: #545b62;
+    transform: translateY(-1px);
+}
+
+.category-menu-item .board-btn-group .btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.category-menu-item .board-btn-group .btn-danger:hover {
+    background-color: #c82333;
+    transform: translateY(-1px);
+}
+
+/* 데이터 없음 */
+.no-category-item {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6c757d;
+    font-style: italic;
+}
+
+/* 순서 저장 메시지 */
+.order-saved-msg {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 10px 15px;
+    background-color: #d1e7dd;
+    color: #0f5132;
+    border-radius: 4px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    display: none;
+    z-index: 1000;
+    animation: fadeInOut 3s ease;
+}
+
+@keyframes fadeInOut {
+    0% { opacity: 0; }
+    20% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { opacity: 0; }
+}

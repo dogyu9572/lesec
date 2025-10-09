@@ -108,5 +108,6 @@
                 <div class="w-[448px] h-14.5 lg:w-[438px] lg:h-14 bg-[#1b1b18] dark:bg-[#0a0a0a] rounded-t-lg lg:rounded-t-none lg:rounded-tl-lg lg:rounded-r-lg lg:rounded-br-none lg:rounded-bl-lg border border-[#dbdbd7] dark:border-[#3E3E3A] lg:border-l-0 lg:border-t-0 lg:border-r lg:border-b-0 lg:border-l lg:border-t lg:border-r-0 lg:border-b-0 overflow-hidden filter drop-shadow-[0px_0px_1px_0px_rgba(0,0,0,0.03),0px_1px_2px_0px_rgba(0,0,0,0.06)] lg:drop-shadow-none"></div>
             </main>
         </div>
+        
     </body>
 </html>

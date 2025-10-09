@@ -15,7 +15,7 @@ class AdminMenuSeeder extends Seeder
         // 기존 데이터 삭제
         AdminMenu::query()->delete();
 
-        // 현재 활성화된 게시판에 맞춰 메뉴 구성
+        // 현재 DB 데이터로 최신화된 메뉴 구성
         $menus = [
             [
                 'id' => 1,
@@ -50,7 +50,7 @@ class AdminMenuSeeder extends Seeder
                 'order' => 1,
                 'is_active' => 1,
                 'created_at' => '2025-05-05 09:33:08',
-                'updated_at' => '2025-08-24 09:34:00',
+                'updated_at' => '2025-10-07 13:38:54',
                 'permission_key' => null,
             ],
             [
@@ -58,11 +58,11 @@ class AdminMenuSeeder extends Seeder
                 'parent_id' => 2,
                 'name' => '메뉴 관리',
                 'url' => '/backoffice/admin-menus',
-                'icon' => 'fa-list',
+                'icon' => null,
                 'order' => 1,
                 'is_active' => 1,
                 'created_at' => '2025-05-05 09:33:08',
-                'updated_at' => '2025-09-23 13:14:34',
+                'updated_at' => '2025-10-09 14:41:00',
                 'permission_key' => null,
             ],
             [
@@ -82,11 +82,11 @@ class AdminMenuSeeder extends Seeder
                 'parent_id' => 2,
                 'name' => '게시판 관리',
                 'url' => '/backoffice/boards',
-                'icon' => 'fa-clipboard',
+                'icon' => null,
                 'order' => 2,
                 'is_active' => 1,
                 'created_at' => '2025-05-05 09:33:08',
-                'updated_at' => '2025-09-23 13:17:39',
+                'updated_at' => '2025-10-09 14:41:06',
                 'permission_key' => null,
             ],
             [
@@ -95,10 +95,10 @@ class AdminMenuSeeder extends Seeder
                 'name' => '팝업 관리',
                 'url' => '/backoffice/popups',
                 'icon' => null,
-                'order' => 2,
+                'order' => 1,
                 'is_active' => 1,
                 'created_at' => '2025-05-05 09:33:08',
-                'updated_at' => '2025-09-29 06:11:39',
+                'updated_at' => '2025-10-07 05:59:49',
                 'permission_key' => null,
             ],
             [
@@ -106,11 +106,11 @@ class AdminMenuSeeder extends Seeder
                 'parent_id' => 2,
                 'name' => '게시판 스킨 관리',
                 'url' => '/backoffice/board-skins',
-                'icon' => 'fa-id-card',
+                'icon' => null,
                 'order' => 3,
                 'is_active' => 0,
                 'created_at' => '2025-05-06 09:58:14',
-                'updated_at' => '2025-09-23 13:03:10',
+                'updated_at' => '2025-10-09 14:41:09',
                 'permission_key' => null,
             ],
             [
@@ -143,10 +143,10 @@ class AdminMenuSeeder extends Seeder
                 'name' => '배너 관리',
                 'url' => '/backoffice/banners',
                 'icon' => null,
-                'order' => 1,
+                'order' => 2,
                 'is_active' => 1,
                 'created_at' => '2025-08-24 09:35:23',
-                'updated_at' => '2025-09-29 06:11:37',
+                'updated_at' => '2025-10-07 05:59:49',
                 'permission_key' => null,
             ],
             [
@@ -166,11 +166,11 @@ class AdminMenuSeeder extends Seeder
                 'parent_id' => 6,
                 'name' => '관리자 관리',
                 'url' => '/backoffice/admins',
-                'icon' => 'fa-paper-plane',
+                'icon' => null,
                 'order' => 2,
                 'is_active' => 1,
                 'created_at' => '2025-09-19 00:19:49',
-                'updated_at' => '2025-09-22 07:46:49',
+                'updated_at' => '2025-10-09 04:28:31',
                 'permission_key' => null,
             ],
             [
@@ -202,11 +202,23 @@ class AdminMenuSeeder extends Seeder
                 'parent_id' => 22,
                 'name' => '인사말',
                 'url' => '/backoffice/board-posts/greetings',
-                'icon' => 'fa-folder',
+                'icon' => null,
                 'order' => 1,
                 'is_active' => 1,
                 'created_at' => '2025-09-23 07:29:41',
-                'updated_at' => '2025-09-23 13:14:56',
+                'updated_at' => '2025-10-09 04:28:35',
+                'permission_key' => null,
+            ],
+            [
+                'id' => 39,
+                'parent_id' => 6,
+                'name' => '카테고리 관리',
+                'url' => '/backoffice/categories',
+                'icon' => null,
+                'order' => 3,
+                'is_active' => 1,
+                'created_at' => '2025-10-09 01:02:41',
+                'updated_at' => '2025-10-09 01:03:04',
                 'permission_key' => null,
             ],
         ];

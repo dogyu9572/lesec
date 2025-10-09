@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Board;
+use App\Models\Popup;
+use App\Models\Banner;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class HomeController extends Controller
 {
@@ -20,7 +23,25 @@ class HomeController extends Controller
         // notices 게시판 최신글 4개  
         $noticePosts = $this->getLatestPosts('notices', 4);
         
-        return view('home.index', compact('gNum', 'gName', 'sName', 'galleryPosts', 'noticePosts'));
+        // 활성화된 팝업 조회 (쿠키 확인하여 숨겨진 팝업 제외)
+        $popups = Popup::select('id', 'title', 'popup_type', 'popup_display_type', 'popup_image', 'popup_content', 'url', 'url_target', 'width', 'height', 'position_top', 'position_left')
+            ->active()
+            ->inPeriod()
+            ->ordered()
+            ->get()
+            ->filter(function($popup) {
+                // 서버사이드에서 쿠키 확인하여 숨겨진 팝업 제외
+                $cookieName = 'popup_hide_' . $popup->id;
+                return !isset($_COOKIE[$cookieName]) || $_COOKIE[$cookieName] !== '1';
+            });
+
+        // 활성화된 배너 조회
+        $banners = Banner::active()
+            ->inPeriod()
+            ->ordered()
+            ->get();
+        
+        return view('home.index', compact('gNum', 'gName', 'sName', 'galleryPosts', 'noticePosts', 'popups', 'banners'));
     }
     
     /**
@@ -59,7 +80,7 @@ class HomeController extends Controller
                 });
                 
         } catch (\Exception $e) {
-            \Log::error("게시판 데이터 조회 오류: " . $e->getMessage());
+            Log::error("게시판 데이터 조회 오류: " . $e->getMessage());
             return collect();
         }
     }

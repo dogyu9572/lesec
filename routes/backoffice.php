@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Backoffice\AuthController;
 use App\Http\Controllers\Backoffice\AdminMenuController;
+use App\Http\Controllers\Backoffice\CategoryController;
 use App\Http\Controllers\Backoffice\SettingController;
 use App\Http\Controllers\Backoffice\BoardController;
 use App\Http\Controllers\Backoffice\BoardSkinController;
@@ -55,6 +56,19 @@ Route::prefix('backoffice')->middleware(['backoffice'])->group(function () {
     // 메뉴 부모 업데이트 (드래그로 메뉴 이동)
     Route::post('admin-menus/update-parent', [AdminMenuController::class, 'updateParent'])
         ->name('backoffice.admin-menus.update-parent');
+
+    // 카테고리 관리
+    // 카테고리 순서 업데이트 (resource 라우트보다 앞에 위치)
+    Route::post('categories/update-order', [CategoryController::class, 'updateOrder'])
+        ->name('backoffice.categories.update-order');
+
+    // 활성 카테고리 조회 (AJAX - resource 라우트보다 앞에 위치)
+    Route::get('categories/active/{group}', [CategoryController::class, 'getActiveCategories'])
+        ->name('backoffice.categories.active');
+
+    Route::resource('categories', CategoryController::class, [
+        'names' => 'backoffice.categories'
+    ])->except(['show']);
 
     // 기본설정 관리
     Route::get('setting', [SettingController::class, 'index'])

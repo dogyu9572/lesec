@@ -126,7 +126,7 @@ class DashboardService
     }
 
     /**
-     * 전체 게시글 수 계산 (실시간 집계)
+     * 전체 게시글 수 계산 (실시간 집계, 삭제된 글 제외)
      */
     public function getTotalPostsCount(): int
     {
@@ -139,7 +139,9 @@ class DashboardService
         foreach ($boards as $board) {
             $tableName = 'board_' . $board->slug;
             try {
-                $count = DB::table($tableName)->count();
+                $count = DB::table($tableName)
+                    ->whereNull('deleted_at')
+                    ->count();
                 $totalPosts += $count;
             } catch (\Exception $e) {
                 continue;
@@ -157,6 +159,7 @@ class DashboardService
         try {
             return DB::table('banners')
                 ->where('is_active', true)
+                ->whereNull('deleted_at')
                 ->where(function($query) {
                     $query->whereNull('start_date')
                           ->orWhere('start_date', '<=', now());
@@ -179,6 +182,7 @@ class DashboardService
         try {
             return DB::table('popups')
                 ->where('is_active', true)
+                ->whereNull('deleted_at')
                 ->where(function($query) {
                     $query->whereNull('start_date')
                           ->orWhere('start_date', '<=', now());

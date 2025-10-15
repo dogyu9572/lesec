@@ -8,6 +8,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -39,7 +40,45 @@ class AppServiceProvider extends ServiceProvider
                 
                 // 사이드바 데이터 추가 (모든 페이지에서 공통 사용)
                 $view->with('siteTitle', \App\Models\Setting::getValue('site_title', '관리자'));
-                $view->with('mainMenus', \App\Models\AdminMenu::getMainMenus());
+                
+                // 사용자 권한에 따른 메뉴 필터링
+                $user = Auth::user();
+                if ($user && $user->isSuperAdmin()) {
+                    // 슈퍼 관리자는 모든 메뉴 표시
+                    $mainMenus = \App\Models\AdminMenu::getMainMenus();
+                } elseif ($user) {
+                    // 일반 관리자는 권한 있는 메뉴만 표시
+                    $accessibleMenuIds = $user->accessibleMenus()->pluck('admin_menus.id')->toArray();
+                    
+                    // 부모 메뉴 가져오기 (자식 메뉴는 eager loading하지 않음)
+                    $mainMenus = \App\Models\AdminMenu::whereNull('parent_id')
+                        ->where('is_active', true)
+                        ->orderBy('order')
+                        ->get()
+                        ->filter(function ($menu) use ($accessibleMenuIds) {
+                            // 부모 메뉴 자체에 권한이 있는지 확인
+                            $hasParentPermission = in_array($menu->id, $accessibleMenuIds);
+                            
+                            // 권한이 있는 자식 메뉴만 필터링하여 로드
+                            $filteredChildren = \App\Models\AdminMenu::where('parent_id', $menu->id)
+                                ->where('is_active', true)
+                                ->orderBy('order')
+                                ->get()
+                                ->filter(function ($child) use ($accessibleMenuIds) {
+                                    return in_array($child->id, $accessibleMenuIds);
+                                });
+                            
+                            // 자식 메뉴를 필터링된 것으로 교체
+                            $menu->setRelation('children', $filteredChildren);
+                            
+                            // 부모 메뉴 권한이 있거나, 권한 있는 자식 메뉴가 하나라도 있으면 표시
+                            return $hasParentPermission || $filteredChildren->count() > 0;
+                        });
+                } else {
+                    $mainMenus = collect();
+                }
+                
+                $view->with('mainMenus', $mainMenus);
             });
         }
 

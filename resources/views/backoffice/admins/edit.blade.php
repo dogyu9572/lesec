@@ -45,7 +45,7 @@
             <div class="form-grid">
                 <div class="form-group">
                     <label for="login_id">아이디</label>
-                    <input type="text" id="login_id" name="login_id" value="{{ old('login_id', $admin->login_id) }}" placeholder="로그인 아이디를 입력하세요">
+                    <input type="text" id="login_id" name="login_id" value="{{ old('login_id', $admin->login_id) }}" placeholder="로그인 아이디를 입력하세요" readonly>
                 </div>
                 
                 <div class="form-group">

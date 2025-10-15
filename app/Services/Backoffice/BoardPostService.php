@@ -32,14 +32,14 @@ class BoardPostService
         // 정렬 기능이 활성화된 게시판인지 확인
         $board = \App\Models\Board::where('slug', $slug)->first();
         if ($board && $board->enable_sorting) {
-            // 정렬 기능이 활성화된 경우: sort_order 우선 (큰 숫자가 위에), 그 다음 공지글, 그 다음 생성일
+            // 정렬 기능 활성화: sort_order 내림차순 (큰 값이 위), 공지글, 최신순
             $posts = $query->orderBy('sort_order', 'desc')
                 ->orderBy('is_notice', 'desc')
                 ->orderBy('created_at', 'desc')
                 ->paginate($perPage)
                 ->withQueryString();
         } else {
-            // 정렬 기능이 비활성화된 경우: 기존 정렬 방식
+            // 정렬 기능 비활성화: 공지글, 최신순
             $posts = $query->orderBy('is_notice', 'desc')
                 ->orderBy('created_at', 'desc')
                 ->paginate($perPage)
@@ -119,6 +119,12 @@ class BoardPostService
      */
     private function preparePostData(array $validated, Request $request, string $slug, $board): array
     {
+        // 정렬 기능 활성화된 게시판인 경우 자동으로 sort_order 설정
+        $sortOrder = 0;
+        if ($board && $board->enable_sorting) {
+            $sortOrder = $this->getNextSortOrder($slug);
+        }
+        
         return [
             'user_id' => null,
             'author_name' => '관리자',
@@ -130,10 +136,29 @@ class BoardPostService
             'attachments' => json_encode($this->handleAttachments($request, $slug)),
             'custom_fields' => $this->getCustomFieldsJson($request, $board),
             'view_count' => 0,
-            'sort_order' => $request->input('sort_order', 0),
+            'sort_order' => $sortOrder,
             'created_at' => now(),
             'updated_at' => now()
         ];
+    }
+
+    /**
+     * 다음 정렬 순서 값을 계산합니다 (외부에서 호출 가능)
+     */
+    public function calculateNextSortOrder(string $slug): int
+    {
+        $maxSortOrder = DB::table($this->getTableName($slug))
+            ->max('sort_order');
+        
+        return ($maxSortOrder ?? 0) + 1;
+    }
+
+    /**
+     * 다음 정렬 순서 값을 가져옵니다 (정렬 기능 활성화된 게시판에만 사용)
+     */
+    private function getNextSortOrder(string $slug): int
+    {
+        return $this->calculateNextSortOrder($slug);
     }
 
     /**

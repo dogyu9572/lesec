@@ -106,13 +106,20 @@ class BoardSorting {
 
     async saveSortOrder(updates) {
         try {
+            // URL에서 slug 추출 (/backoffice/board-posts/{slug} 형식)
+            const pathParts = window.location.pathname.split('/');
+            const slug = pathParts[3] || null; // /backoffice/board-posts/{slug}
+            
             const response = await fetch('/backoffice/board-posts/update-sort-order', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 },
-                body: JSON.stringify({ updates })
+                body: JSON.stringify({ 
+                    updates,
+                    slug 
+                })
             });
 
             if (!response.ok) {

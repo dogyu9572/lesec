@@ -61,8 +61,13 @@ class BoardPostController extends Controller
             }
         }
         
+        // 정렬 기능이 활성화된 경우 다음 정렬순서 값 계산
+        $nextSortOrder = $board->enable_sorting 
+            ? $this->boardPostService->calculateNextSortOrder($slug) 
+            : 0;
+        
         // 자동 생성된 뷰 사용
-        return view("backoffice.board-posts.{$slug}.create", compact('board'));
+        return view("backoffice.board-posts.{$slug}.create", compact('board', 'nextSortOrder'));
     }
 
     /**
@@ -208,40 +213,33 @@ class BoardPostController extends Controller
     public function updateSortOrder(Request $request)
     {
         $request->validate([
+            'slug' => 'required|string',
             'updates' => 'required|array',
             'updates.*.post_id' => 'required|integer',
             'updates.*.sort_order' => 'required|integer|min:0'
         ]);
 
         try {
+            $slug = $request->input('slug');
             $updates = $request->input('updates');
+            $tableName = 'board_' . $slug;
             
-            // 게시판별로 그룹화
-            $boardGroups = [];
-            foreach ($updates as $update) {
-                $postId = $update['post_id'];
-                $sortOrder = $update['sort_order'];
-                
-                // 게시글 ID로 게시판 찾기 (동적 테이블에서 직접 찾기)
-                $boardSlug = $this->findBoardSlugByPostId($postId);
-                
-                if ($boardSlug) {
-                    $boardGroups[$boardSlug][] = [
-                        'post_id' => $postId,
-                        'sort_order' => $sortOrder
-                    ];
-                }
+            // 테이블이 존재하는지 확인
+            if (!DB::getSchemaBuilder()->hasTable($tableName)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => '게시판을 찾을 수 없습니다.'
+                ], 404);
             }
 
-            // 각 게시판별로 정렬 순서 업데이트
-            foreach ($boardGroups as $slug => $posts) {
-                $tableName = 'board_' . $slug;
-                
-                foreach ($posts as $post) {
-                    DB::table($tableName)
-                        ->where('id', $post['post_id'])
-                        ->update(['sort_order' => $post['sort_order']]);
-                }
+            // 정렬 순서 업데이트
+            foreach ($updates as $update) {
+                DB::table($tableName)
+                    ->where('id', $update['post_id'])
+                    ->update([
+                        'sort_order' => $update['sort_order'],
+                        'updated_at' => now()
+                    ]);
             }
 
             return response()->json([

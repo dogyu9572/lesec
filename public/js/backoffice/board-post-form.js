@@ -268,6 +268,31 @@ class FileManager {
     }
 }
 
+// 폼 유효성 검사 함수
+function validateForm(form) {
+    // Summernote 에디터 내용 검사
+    const contentEditor = $('#content');
+    if (contentEditor.length && contentEditor.summernote('isEmpty')) {
+        alert('내용은 필수 입력 항목입니다.');
+        contentEditor.summernote('focus');
+        return false;
+    }
+    
+    // 커스텀 필드 에디터 검사
+    const invalidEditor = $('.summernote-editor').filter(function() {
+        return $(this).prop('required') && $(this).summernote('isEmpty');
+    }).first();
+    
+    if (invalidEditor.length) {
+        const label = $('label[for="' + invalidEditor.attr('id') + '"]').text().replace('*', '').trim();
+        alert(label + '은(는) 필수 입력 항목입니다.');
+        invalidEditor.summernote('focus');
+        return false;
+    }
+    
+    return true;
+}
+
 // 페이지 로드 시 초기화
 document.addEventListener('DOMContentLoaded', function() {
     // jQuery 로드 확인 후 Summernote 초기화
@@ -292,4 +317,23 @@ document.addEventListener('DOMContentLoaded', function() {
     window.removeExistingFile = function(index) {
         window.fileManager.removeExistingFile(index);
     };
+    
+    // 폼 제출 유효성 검사 (capture phase에서 먼저 실행)
+    document.addEventListener('submit', function(e) {
+        const form = e.target;
+        if (!form.matches('form')) return;
+        
+        if (!validateForm(form)) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            
+            // ButtonManager가 버튼 상태를 변경했다면 복원
+            setTimeout(() => {
+                const submitBtn = form.querySelector('button[type="submit"]');
+                if (submitBtn && window.ButtonManager) {
+                    window.ButtonManager.restoreButton(submitBtn);
+                }
+            }, 0);
+        }
+    }, true); // capture phase
 });

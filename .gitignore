@@ -21,5 +21,14 @@ yarn-error.log
 .DS_Store
 Thumbs.db
 
+# Windows system files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+*:Zone.Identifier
+*.tmp
+
 public/temp/
 public/images/

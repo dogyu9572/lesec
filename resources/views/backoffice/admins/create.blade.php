@@ -7,9 +7,6 @@
 <link rel="stylesheet" href="{{ asset('css/backoffice/admins.css') }}">
 @endsection
 
-@section('scripts')
-<script src="{{ asset('js/backoffice/admin-permissions.js') }}"></script>
-@endsection
 
 @section('content')
 <div class="admin-form-container">
@@ -100,40 +97,26 @@
 
         <div class="form-section">
             <h3>권한 설정</h3>
-            <div class="permissions-container">
-                @php
-                    $menus = \App\Models\AdminMenu::getPermissionMenuTree();
-                @endphp
-                
-                @foreach($menus as $menu)
-                    <div class="permission-category">
-                        <div class="permission-category-header">
-                            <h4>{{ $menu->name }}</h4>
-                            <label class="permission-item parent-menu">
-                                <input type="checkbox" name="permissions[{{ $menu->id }}]" value="1" @checked(old('permissions.'.$menu->id))>
-                                <span>{{ $menu->name }} 메뉴</span>
-                            </label>
-                        </div>
-                        @if($menu->children->count() > 0)
-                            <div class="permission-items">
-                                @foreach($menu->children as $child)
-                                    <label class="permission-item child-menu">
-                                        <input type="checkbox" name="permissions[{{ $child->id }}]" value="1" @checked(old('permissions.'.$child->id))>
-                                        <span>{{ $child->name }}</span>
-                                    </label>
-                                @endforeach
-                            </div>
-                        @endif
-                    </div>
-                @endforeach
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="admin_group_id">권한 그룹</label>
+                    <select id="admin_group_id" name="admin_group_id" required>
+                        <option value="">그룹을 선택하세요</option>
+                        @foreach($groups as $group)
+                            <option value="{{ $group->id }}" @selected(old('admin_group_id') == $group->id)>
+                                {{ $group->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
             </div>
             <div class="permission-notice">
                 <small class="text-muted">
                     <i class="fas fa-info-circle"></i>
-                    슈퍼 관리자는 모든 메뉴에 자동으로 접근 권한이 부여됩니다.
+                    일반 관리자는 권한 그룹을 선택해야 합니다. 슈퍼 관리자는 자동으로 모든 권한이 부여됩니다.
                 </small>
             </div>
-                        </div>
+        </div>
                         
                         <div class="form-actions">
                             <button type="submit" class="btn btn-primary">

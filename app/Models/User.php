@@ -23,6 +23,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'admin_group_id',
         'is_active',
         'last_login_at',
         'department',
@@ -104,7 +105,15 @@ class User extends Authenticatable
     }
 
     /**
-     * 사용자의 메뉴 권한들과의 관계
+     * 관리자 권한 그룹과의 관계
+     */
+    public function adminGroup()
+    {
+        return $this->belongsTo(AdminGroup::class, 'admin_group_id');
+    }
+
+    /**
+     * 사용자의 메뉴 권한들과의 관계 (레거시 - 더 이상 사용 안 함)
      */
     public function menuPermissions()
     {
@@ -116,6 +125,12 @@ class User extends Authenticatable
      */
     public function accessibleMenus()
     {
+        // 그룹 기반 권한으로 변경
+        if ($this->admin_group_id && $this->adminGroup) {
+            return $this->adminGroup->menus();
+        }
+        
+        // 레거시 지원
         return $this->belongsToMany(AdminMenu::class, 'user_menu_permissions', 'user_id', 'menu_id')
             ->wherePivot('granted', true)
             ->withPivot('granted')
@@ -131,10 +146,13 @@ class User extends Authenticatable
             return true; // 슈퍼 관리자는 모든 메뉴 접근 가능
         }
 
-        return $this->menuPermissions()
-            ->where('menu_id', $menuId)
-            ->where('granted', true)
-            ->exists();
+        // 그룹 기반 권한 체크
+        if ($this->admin_group_id && $this->adminGroup) {
+            return $this->adminGroup->hasMenuPermission($menuId);
+        }
+
+        // 그룹이 없으면 권한 없음
+        return false;
     }
 
     /**
@@ -152,19 +170,31 @@ class User extends Authenticatable
             return $result;
         }
 
-        $permissions = $this->menuPermissions()
-            ->get()
-            ->pluck('granted', 'menu_id')
-            ->toArray();
+        // 그룹 기반 권한 반환
+        if ($this->admin_group_id && $this->adminGroup) {
+            $groupPermissions = $this->adminGroup->groupMenuPermissions()
+                ->get()
+                ->pluck('granted', 'menu_id')
+                ->toArray();
 
-        // 모든 메뉴에 대해 권한 정보 생성 (권한이 없는 메뉴는 false)
-        $allMenus = \App\Models\AdminMenu::where('is_active', true)->get();
-        $result = [];
+            // 모든 메뉴에 대해 권한 정보 생성
+            $allMenus = \App\Models\AdminMenu::where('is_active', true)->get();
+            $result = [];
 
-        foreach ($allMenus as $menu) {
-            $result[$menu->id] = $permissions[$menu->id] ?? false;
+            foreach ($allMenus as $menu) {
+                $result[$menu->id] = $groupPermissions[$menu->id] ?? false;
+            }
+
+            return $result;
         }
 
+        // 그룹이 없으면 모든 메뉴에 권한 없음
+        $allMenus = \App\Models\AdminMenu::where('is_active', true)->get();
+        $result = [];
+        foreach ($allMenus as $menu) {
+            $result[$menu->id] = false;
+        }
+        
         return $result;
     }
 }

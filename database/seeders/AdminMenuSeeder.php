@@ -174,6 +174,18 @@ class AdminMenuSeeder extends Seeder
                 'permission_key' => null,
             ],
             [
+                'id' => 23,
+                'parent_id' => 6,
+                'name' => '관리자 권한 그룹',
+                'url' => '/backoffice/admin-groups',
+                'icon' => null,
+                'order' => 4,
+                'is_active' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+                'permission_key' => null,
+            ],
+            [
                 'id' => 21,
                 'parent_id' => null,
                 'name' => '홈페이지관리',

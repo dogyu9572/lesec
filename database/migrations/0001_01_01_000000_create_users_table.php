@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('login_id')->unique()->nullable();  // 로그인 ID
             $table->enum('role', ['super_admin', 'admin', 'manager', 'user'])->default('user');  // 사용자 역할
+            $table->foreignId('admin_group_id')->nullable()->comment('관리자 권한 그룹 ID');
             $table->boolean('is_active')->default(true);  // 활성화 여부
             $table->timestamp('last_login_at')->nullable();  // 마지막 로그인 시간
             $table->string('name');

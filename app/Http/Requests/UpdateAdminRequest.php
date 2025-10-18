@@ -40,8 +40,7 @@ class UpdateAdminRequest extends FormRequest
             'position' => 'nullable|string|max:255',
             'contact' => 'nullable|string|max:50',
             'is_active' => 'boolean',
-            'permissions' => 'array',
-            'permissions.*' => 'boolean',
+            'admin_group_id' => 'nullable|exists:admin_groups,id',
         ];
     }
 

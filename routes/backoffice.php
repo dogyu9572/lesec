@@ -12,6 +12,7 @@ use App\Http\Controllers\Backoffice\BoardPostController;
 use App\Http\Controllers\Backoffice\UserController;
 use App\Http\Controllers\Backoffice\LogController;
 use App\Http\Controllers\Backoffice\AdminController;
+use App\Http\Controllers\Backoffice\AdminGroupController;
 use App\Http\Controllers\Backoffice\BannerController;
 use App\Http\Controllers\Backoffice\PopupController;
 
@@ -84,6 +85,17 @@ Route::prefix('backoffice')->middleware(['backoffice'])->group(function () {
     Route::resource('admins', AdminController::class, [
         'names' => 'backoffice.admins'
     ]);
+
+    // 관리자 권한 그룹 관리
+    Route::resource('admin-groups', AdminGroupController::class, [
+        'names' => 'backoffice.admin-groups'
+    ])->except(['show']);
+
+    // 권한 그룹 권한 설정
+    Route::get('admin-groups/{admin_group}/permissions', [AdminGroupController::class, 'editPermissions'])
+        ->name('backoffice.admin-groups.permissions.edit');
+    Route::post('admin-groups/{admin_group}/permissions', [AdminGroupController::class, 'updatePermissions'])
+        ->name('backoffice.admin-groups.permissions.update');
 
     // -------------------------------------------------------------------------
     // 콘텐츠 관리

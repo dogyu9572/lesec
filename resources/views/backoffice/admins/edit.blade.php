@@ -7,9 +7,6 @@
 <link rel="stylesheet" href="{{ asset('css/backoffice/admins.css') }}">
 @endsection
 
-@section('scripts')
-<script src="{{ asset('js/backoffice/admin-permissions.js') }}"></script>
-@endsection
 
 @section('content')
 <div class="admin-form-container">
@@ -103,46 +100,27 @@
         <div class="form-section">
             <h3>권한 설정</h3>
             @if($admin->isSuperAdmin())
-                <div class="super-admin-notice">
-                    <div class="alert alert-info">
-                        <i class="fas fa-crown"></i>
-                        <strong>슈퍼 관리자</strong><br>
-                        슈퍼 관리자는 모든 메뉴에 자동으로 접근 권한이 부여됩니다. 권한 설정이 필요하지 않습니다.
-                    </div>
+                <div class="alert alert-info">
+                    <i class="fas fa-crown"></i>
+                    <strong>슈퍼 관리자</strong><br>
+                    슈퍼 관리자는 모든 메뉴에 자동으로 접근 권한이 부여됩니다. 권한 그룹 설정이 필요하지 않습니다.
                 </div>
             @else
-                <div class="permissions-container">
-                    @php
-                        $menus = \App\Models\AdminMenu::getPermissionMenuTree();
-                        $userPermissions = $admin->getAllMenuPermissions();
-                    @endphp
-                    
-                    @foreach($menus as $menu)
-                        <div class="permission-category">
-                            <div class="permission-category-header">
-                                <h4>{{ $menu->name }}</h4>
-                                <label class="permission-item parent-menu">
-                                    <input type="checkbox" name="permissions[{{ $menu->id }}]" value="1" 
-                                        @checked($userPermissions[$menu->id] ?? false || old('permissions.'.$menu->id))>
-                                    <span>{{ $menu->name }} 메뉴</span>
-                                </label>
-                            </div>
-                            @if($menu->children->count() > 0)
-                                <div class="permission-items">
-                                    @foreach($menu->children as $child)
-                                        <label class="permission-item child-menu">
-                                            <input type="checkbox" name="permissions[{{ $child->id }}]" value="1" 
-                                                @checked($userPermissions[$child->id] ?? false || old('permissions.'.$child->id))>
-                                            <span>{{ $child->name }}</span>
-                                        </label>
-                                    @endforeach
-                                </div>
-                            @endif
-                        </div>
-                    @endforeach
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="admin_group_id">권한 그룹</label>
+                        <select id="admin_group_id" name="admin_group_id" required>
+                            <option value="">그룹을 선택하세요</option>
+                            @foreach($groups as $group)
+                                <option value="{{ $group->id }}" @selected(old('admin_group_id', $admin->admin_group_id) == $group->id)>
+                                    {{ $group->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
             @endif
-                        </div>
+        </div>
                         
                         <div class="form-actions">
                             <button type="submit" class="btn btn-primary">

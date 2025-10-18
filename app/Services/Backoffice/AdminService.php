@@ -70,6 +70,7 @@ class AdminService
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
             'role' => 'admin',
+            'admin_group_id' => $data['admin_group_id'] ?? null,
             'is_active' => true,
             'department' => $data['department'] ?? null,
             'position' => $data['position'] ?? null,
@@ -94,6 +95,7 @@ class AdminService
     {
         $admin->name = $data['name'];
         $admin->email = $data['email'];
+        $admin->admin_group_id = $data['admin_group_id'] ?? null;
         $admin->department = $data['department'] ?? null;
         $admin->position = $data['position'] ?? null;
         $admin->contact = $data['contact'] ?? null;
@@ -114,42 +116,11 @@ class AdminService
     }
 
     /**
-     * 관리자의 메뉴 권한을 저장합니다.
+     * 관리자의 메뉴 권한을 저장합니다. (레거시 - 더 이상 사용 안 함)
      */
     public function saveMenuPermissions(int $userId, array $permissions): void
     {
-        $user = User::findOrFail($userId);
-        
-        // 슈퍼 관리자는 권한 설정을 저장하지 않음 (항상 모든 권한)
-        if ($user->isSuperAdmin()) {
-            return;
-        }
-
-        // 모든 메뉴 ID 가져오기
-        $allMenuIds = AdminMenu::where('is_active', true)->pluck('id')->toArray();
-        
-        // 전송된 권한 처리
-        foreach ($permissions as $menuId => $granted) {
-            UserMenuPermission::updateOrCreate(
-                [
-                    'user_id' => $userId,
-                    'menu_id' => $menuId
-                ],
-                [
-                    'granted' => (bool) $granted
-                ]
-            );
-        }
-        
-        // 전송되지 않은 메뉴는 권한 제거 (체크 해제된 경우)
-        $submittedMenuIds = array_keys($permissions);
-        $removedMenuIds = array_diff($allMenuIds, $submittedMenuIds);
-        
-        if (!empty($removedMenuIds)) {
-            UserMenuPermission::where('user_id', $userId)
-                ->whereIn('menu_id', $removedMenuIds)
-                ->update(['granted' => false]);
-        }
+        // 그룹 기반 권한으로 변경됨 - 더 이상 사용하지 않음
     }
 
     /**

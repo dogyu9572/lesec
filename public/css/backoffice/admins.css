@@ -310,8 +310,8 @@
 
 .form-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px 25px;
+    grid-template-columns: 1fr;
+    gap: 20px;
 }
 
 .form-group {
@@ -365,7 +365,7 @@
 /* 권한 설정 스타일 */
 .permissions-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: 20px;
 }
 

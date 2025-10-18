@@ -33,8 +33,8 @@ class AdminController extends Controller
      */
     public function create()
     {
-        $menus = $this->adminService->getAllMenus();
-        return view('backoffice.admins.create', compact('menus'));
+        $groups = \App\Models\AdminGroup::where('is_active', true)->get();
+        return view('backoffice.admins.create', compact('groups'));
     }
 
     /**
@@ -43,15 +43,7 @@ class AdminController extends Controller
     public function store(StoreAdminRequest $request)
     {
         $data = $request->validated();
-        $permissions = $data['permissions'] ?? [];
-        unset($data['permissions']);
-
         $admin = $this->adminService->createAdmin($data);
-        
-        // 권한 저장
-        if (!empty($permissions)) {
-            $this->adminService->saveMenuPermissions($admin->id, $permissions);
-        }
 
         return redirect()->route('backoffice.admins.index')
             ->with('success', '관리자가 추가되었습니다.');
@@ -72,8 +64,8 @@ class AdminController extends Controller
     public function edit($id)
     {
         $admin = $this->adminService->getAdmin($id);
-        $menus = $this->adminService->getAllMenus();
-        return view('backoffice.admins.edit', compact('admin', 'menus'));
+        $groups = \App\Models\AdminGroup::where('is_active', true)->get();
+        return view('backoffice.admins.edit', compact('admin', 'groups'));
     }
 
     /**
@@ -83,13 +75,7 @@ class AdminController extends Controller
     {
         $admin = $this->adminService->getAdmin($id);
         $data = $request->validated();
-        $permissions = $data['permissions'] ?? [];
-        unset($data['permissions']);
-
         $this->adminService->updateAdmin($admin, $data);
-        
-        // 권한 업데이트
-        $this->adminService->saveMenuPermissions($admin->id, $permissions);
 
         return redirect()->route('backoffice.admins.index')
             ->with('success', '관리자 정보가 수정되었습니다.');

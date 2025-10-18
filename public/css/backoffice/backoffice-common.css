@@ -32,7 +32,7 @@
 .board-card {
     background: white;
     border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    box-shadow: 0 2px 20px rgba(0,0,0,0.08);
     border: 1px solid #e9ecef;
     overflow: hidden;
 }
@@ -66,7 +66,7 @@
     padding: 0.75rem 0.5rem;
     font-weight: 600;
     color: #495057;
-    border-bottom: 2px solid #e9ecef;
+    border-bottom: 2px solid #3490dc;
     background: #f8f9fa;
 }
 
@@ -75,6 +75,16 @@
     border-bottom: 1px solid #f1f3f4;
     color: #333;
     vertical-align: middle;
+}
+
+/* 테이블 행 번갈아 가며 배경색 */
+.board-table tbody tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+.board-table tbody tr:hover {
+    background-color: #e3f2fd;
+    transition: background-color 0.2s ease;
 }
 
 /* 컬럼 너비 유틸리티 클래스 */

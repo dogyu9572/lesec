@@ -43,63 +43,87 @@
 
 /* 버튼 색상 변형 */
 .btn-primary {
-    background-color: #4a90e2;
+    background: linear-gradient(135deg, #3490dc 0%, #2980b9 100%);
     color: white;
+    border: none;
+    box-shadow: 0 2px 8px rgba(52, 144, 220, 0.3);
 }
 
 .btn-primary:hover {
-    background-color: #357abd;
+    background: linear-gradient(135deg, #2980b9 0%, #1f618d 100%);
     color: white;
+    box-shadow: 0 4px 12px rgba(52, 144, 220, 0.4);
+    transform: translateY(-1px);
 }
 
 .btn-success {
-    background-color: #28a745;
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
     color: white;
+    border: none;
+    box-shadow: 0 2px 6px rgba(40, 167, 69, 0.3);
 }
 
 .btn-success:hover {
-    background-color: #218838;
+    background: linear-gradient(135deg, #218838 0%, #1ea085 100%);
     color: white;
+    box-shadow: 0 4px 10px rgba(40, 167, 69, 0.4);
+    transform: translateY(-1px);
 }
 
 .btn-danger {
-    background-color: #dc3545;
+    background: linear-gradient(135deg, #dc3545 0%, #e74c3c 100%);
     color: white;
+    border: none;
+    box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3);
 }
 
 .btn-danger:hover {
-    background-color: #c82333;
+    background: linear-gradient(135deg, #c82333 0%, #d63031 100%);
     color: white;
+    box-shadow: 0 4px 10px rgba(220, 53, 69, 0.4);
+    transform: translateY(-1px);
 }
 
 .btn-warning {
-    background-color: #ffc107;
-    color: #212529;
+    background: linear-gradient(135deg, #3490dc 0%, #2980b9 100%);
+    color: white;
+    border: none;
+    box-shadow: 0 2px 6px rgba(52, 144, 220, 0.3);
 }
 
 .btn-warning:hover {
-    background-color: #e0a800;
-    color: #212529;
+    background: linear-gradient(135deg, #2980b9 0%, #1f618d 100%);
+    color: white;
+    box-shadow: 0 4px 10px rgba(52, 144, 220, 0.4);
+    transform: translateY(-1px);
 }
 
 .btn-info {
-    background-color: #17a2b8;
+    background: linear-gradient(135deg, #17a2b8 0%, #20c997 100%);
     color: white;
+    border: none;
+    box-shadow: 0 2px 6px rgba(23, 162, 184, 0.3);
 }
 
 .btn-info:hover {
-    background-color: #138496;
+    background: linear-gradient(135deg, #138496 0%, #1ea085 100%);
     color: white;
+    box-shadow: 0 4px 10px rgba(23, 162, 184, 0.4);
+    transform: translateY(-1px);
 }
 
 .btn-secondary {
-    background-color: #6c757d;
+    background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
     color: white;
+    border: none;
+    box-shadow: 0 2px 6px rgba(108, 117, 125, 0.2);
 }
 
 .btn-secondary:hover {
-    background-color: #5a6268;
+    background: linear-gradient(135deg, #5a6268 0%, #3d4043 100%);
     color: white;
+    box-shadow: 0 4px 10px rgba(108, 117, 125, 0.3);
+    transform: translateY(-1px);
 }
 
 .btn-light {

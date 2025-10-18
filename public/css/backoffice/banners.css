@@ -305,7 +305,8 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     padding: 20px;
     background-color: #f8f9fa;
     border-radius: 8px;
-    border: 1px solid #e9ecef;
+    border: 1px solid #dee2e6;
+    box-shadow: 0 1px 4px rgba(52, 144, 220, 0.2);
 }
 
 .filter-form {

@@ -12,7 +12,7 @@
     align-items: center;
     margin-bottom: 2rem;
     padding: 1.5rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #3490dc 0%, #2980b9 100%);
     border-radius: 12px;
     color: white;
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
@@ -94,7 +94,7 @@
 }
 
 .stat-card.stat-users::before {
-    background: #667eea;
+    background: #3490dc;
 }
 
 .stat-card.stat-boards::before {
@@ -107,6 +107,14 @@
 
 .stat-card.stat-comments::before {
     background: #ffc107;
+}
+
+.stat-card.stat-banners::before {
+    background: #e83e8c;
+}
+
+.stat-card.stat-popups::before {
+    background: #fd7e14;
 }
 
 .stat-card:hover {
@@ -127,7 +135,7 @@
 }
 
 .stat-users .stat-icon {
-    background: #667eea;
+    background: #3490dc;
 }
 
 .stat-boards .stat-icon {
@@ -164,7 +172,7 @@
 }
 
 .stat-users .stat-info h3 {
-    color: #667eea;
+    color: #3490dc;
 }
 
 .stat-boards .stat-info h3 {
@@ -177,6 +185,14 @@
 
 .stat-comments .stat-info h3 {
     color: #ffc107;
+}
+
+.stat-banners .stat-info h3 {
+    color: #e83e8c;
+}
+
+.stat-popups .stat-info h3 {
+    color: #fd7e14;
 }
 
 .stat-number {

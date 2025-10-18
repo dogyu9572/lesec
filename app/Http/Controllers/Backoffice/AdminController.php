@@ -7,6 +7,7 @@ use App\Http\Requests\StoreAdminRequest;
 use App\Http\Requests\UpdateAdminRequest;
 use App\Services\Backoffice\AdminService;
 use App\Models\User;
+use App\Models\AdminGroup;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
@@ -33,7 +34,7 @@ class AdminController extends Controller
      */
     public function create()
     {
-        $groups = \App\Models\AdminGroup::where('is_active', true)->get();
+        $groups = AdminGroup::where('is_active', true)->get();
         return view('backoffice.admins.create', compact('groups'));
     }
 
@@ -64,7 +65,7 @@ class AdminController extends Controller
     public function edit($id)
     {
         $admin = $this->adminService->getAdmin($id);
-        $groups = \App\Models\AdminGroup::where('is_active', true)->get();
+        $groups = AdminGroup::where('is_active', true)->get();
         return view('backoffice.admins.edit', compact('admin', 'groups'));
     }
 

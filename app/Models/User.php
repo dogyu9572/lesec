@@ -113,28 +113,17 @@ class User extends Authenticatable
     }
 
     /**
-     * 사용자의 메뉴 권한들과의 관계 (레거시 - 더 이상 사용 안 함)
-     */
-    public function menuPermissions()
-    {
-        return $this->hasMany(UserMenuPermission::class);
-    }
-
-    /**
      * 사용자가 접근 가능한 메뉴들
      */
     public function accessibleMenus()
     {
-        // 그룹 기반 권한으로 변경
+        // 그룹 기반 권한
         if ($this->admin_group_id && $this->adminGroup) {
             return $this->adminGroup->menus();
         }
         
-        // 레거시 지원
-        return $this->belongsToMany(AdminMenu::class, 'user_menu_permissions', 'user_id', 'menu_id')
-            ->wherePivot('granted', true)
-            ->withPivot('granted')
-            ->withTimestamps();
+        // 그룹이 없으면 빈 관계 반환
+        return AdminMenu::whereRaw('1 = 0');
     }
 
     /**
@@ -162,7 +151,7 @@ class User extends Authenticatable
     {
         // 슈퍼 관리자는 모든 메뉴에 권한이 있다고 반환
         if ($this->isSuperAdmin()) {
-            $allMenus = \App\Models\AdminMenu::where('is_active', true)->get();
+            $allMenus = AdminMenu::where('is_active', true)->get();
             $result = [];
             foreach ($allMenus as $menu) {
                 $result[$menu->id] = true;
@@ -178,7 +167,7 @@ class User extends Authenticatable
                 ->toArray();
 
             // 모든 메뉴에 대해 권한 정보 생성
-            $allMenus = \App\Models\AdminMenu::where('is_active', true)->get();
+            $allMenus = AdminMenu::where('is_active', true)->get();
             $result = [];
 
             foreach ($allMenus as $menu) {
@@ -189,7 +178,7 @@ class User extends Authenticatable
         }
 
         // 그룹이 없으면 모든 메뉴에 권한 없음
-        $allMenus = \App\Models\AdminMenu::where('is_active', true)->get();
+        $allMenus = AdminMenu::where('is_active', true)->get();
         $result = [];
         foreach ($allMenus as $menu) {
             $result[$menu->id] = false;

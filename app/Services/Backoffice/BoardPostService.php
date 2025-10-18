@@ -2,6 +2,7 @@
 
 namespace App\Services\Backoffice;
 
+use App\Models\Board;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -30,7 +31,7 @@ class BoardPostService
         $perPage = in_array($perPage, [10, 20, 50, 100]) ? $perPage : 15;
         
         // 정렬 기능이 활성화된 게시판인지 확인
-        $board = \App\Models\Board::where('slug', $slug)->first();
+        $board = Board::where('slug', $slug)->first();
         if ($board && $board->enable_sorting) {
             // 정렬 기능 활성화: sort_order 내림차순 (큰 값이 위), 공지글, 최신순
             $posts = $query->orderBy('sort_order', 'desc')

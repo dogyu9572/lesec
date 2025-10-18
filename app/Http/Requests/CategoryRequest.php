@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Category;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CategoryRequest extends FormRequest
@@ -30,7 +31,7 @@ class CategoryRequest extends FormRequest
         // 부모 카테고리 선택 시 depth 제한 체크
         if ($this->parent_id) {
             $rules['parent_id'][] = function ($attribute, $value, $fail) {
-                $parent = \App\Models\Category::find($value);
+                $parent = Category::find($value);
                 if ($parent && $parent->depth >= 3) {
                     $fail('카테고리는 최대 3단계까지만 생성할 수 있습니다.');
                 }

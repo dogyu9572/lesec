@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Board;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -48,7 +49,7 @@ class BoardPostRequest extends FormRequest
         
         // 게시판 정보 가져오기
         $slug = $this->route('slug');
-        $board = \App\Models\Board::where('slug', $slug)->first();
+        $board = Board::where('slug', $slug)->first();
         
         if (!$board || !$board->custom_fields_config) {
             return $rules;
@@ -153,7 +154,7 @@ class BoardPostRequest extends FormRequest
         
         // 게시판 정보 가져오기
         $slug = $this->route('slug');
-        $board = \App\Models\Board::where('slug', $slug)->first();
+        $board = Board::where('slug', $slug)->first();
         
         if (!$board || !$board->custom_fields_config) {
             return $messages;

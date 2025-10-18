@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Backoffice;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -27,7 +28,7 @@ class AuthController extends Controller
         ]);
 
         // login_id로 사용자 찾기
-        $user = \App\Models\User::where('login_id', $credentials['login_id'])
+        $user = User::where('login_id', $credentials['login_id'])
                                 ->where('is_active', true)
                                 ->first();
 

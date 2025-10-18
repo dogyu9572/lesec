@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\AdminMenu;
+use App\Models\Setting;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Request;
@@ -39,19 +40,19 @@ class AppServiceProvider extends ServiceProvider
                 $view->with('title', $title);
                 
                 // 사이드바 데이터 추가 (모든 페이지에서 공통 사용)
-                $view->with('siteTitle', \App\Models\Setting::getValue('site_title', '관리자'));
+                $view->with('siteTitle', Setting::getValue('site_title', '관리자'));
                 
                 // 사용자 권한에 따른 메뉴 필터링
                 $user = Auth::user();
                 if ($user && $user->isSuperAdmin()) {
                     // 슈퍼 관리자는 모든 메뉴 표시
-                    $mainMenus = \App\Models\AdminMenu::getMainMenus();
+                    $mainMenus = AdminMenu::getMainMenus();
                 } elseif ($user) {
                     // 일반 관리자는 권한 있는 메뉴만 표시
                     $accessibleMenuIds = $user->accessibleMenus()->pluck('admin_menus.id')->toArray();
                     
                     // 부모 메뉴 가져오기 (자식 메뉴는 eager loading하지 않음)
-                    $mainMenus = \App\Models\AdminMenu::whereNull('parent_id')
+                    $mainMenus = AdminMenu::whereNull('parent_id')
                         ->where('is_active', true)
                         ->orderBy('order')
                         ->get()
@@ -60,7 +61,7 @@ class AppServiceProvider extends ServiceProvider
                             $hasParentPermission = in_array($menu->id, $accessibleMenuIds);
                             
                             // 권한이 있는 자식 메뉴만 필터링하여 로드
-                            $filteredChildren = \App\Models\AdminMenu::where('parent_id', $menu->id)
+                            $filteredChildren = AdminMenu::where('parent_id', $menu->id)
                                 ->where('is_active', true)
                                 ->orderBy('order')
                                 ->get()

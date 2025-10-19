@@ -4,6 +4,7 @@ namespace App\Services\Backoffice;
 
 use App\Models\Board;
 use App\Models\BoardSkin;
+use App\Models\BoardTemplate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
@@ -80,6 +81,13 @@ class BoardService
             $data['enable_notice'] = false;
         }
 
+        // 필드 설정 처리
+        if (isset($data['field_config'])) {
+            if (is_string($data['field_config'])) {
+                $data['field_config'] = json_decode($data['field_config'], true) ?: null;
+            }
+        }
+
         // 커스텀 필드 설정 처리
         $customFieldsConfig = null;
         if (isset($data['custom_fields']) && !empty($data['custom_fields'])) {
@@ -102,6 +110,30 @@ class BoardService
 
 
         return $board;
+    }
+
+    /**
+     * 템플릿 기반으로 게시판을 생성합니다.
+     */
+    public function createBoardFromTemplate(int $templateId, array $boardData): Board
+    {
+        $template = BoardTemplate::findOrFail($templateId);
+        
+        // 템플릿 설정을 게시판 데이터에 병합
+        $data = array_merge([
+            'skin_id' => $template->skin_id,
+            'template_id' => $template->id,
+            'field_config' => $template->field_config,
+            'custom_fields_config' => $template->custom_fields_config,
+            'enable_notice' => $template->enable_notice,
+            'enable_sorting' => $template->enable_sorting,
+            'list_count' => $template->list_count,
+            'permission_read' => $template->permission_read,
+            'permission_write' => $template->permission_write,
+            'permission_comment' => $template->permission_comment,
+        ], $boardData);
+        
+        return $this->createBoard($data);
     }
 
     /**
@@ -148,6 +180,13 @@ class BoardService
         // enable_sorting 기본값 설정 (체크되지 않은 경우 false)
         if (!isset($data['enable_sorting'])) {
             $data['enable_sorting'] = false;
+        }
+
+        // 필드 설정 처리
+        if (isset($data['field_config'])) {
+            if (is_string($data['field_config'])) {
+                $data['field_config'] = json_decode($data['field_config'], true) ?: null;
+            }
         }
 
         // 커스텀 필드 설정 처리

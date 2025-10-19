@@ -7,6 +7,7 @@ use App\Http\Controllers\Backoffice\AdminMenuController;
 use App\Http\Controllers\Backoffice\CategoryController;
 use App\Http\Controllers\Backoffice\SettingController;
 use App\Http\Controllers\Backoffice\BoardController;
+use App\Http\Controllers\Backoffice\BoardTemplateController;
 use App\Http\Controllers\Backoffice\BoardSkinController;
 use App\Http\Controllers\Backoffice\BoardPostController;
 use App\Http\Controllers\Backoffice\UserController;
@@ -138,6 +139,18 @@ Route::prefix('backoffice')->middleware(['backoffice'])->group(function () {
     Route::resource('boards', BoardController::class, [
         'names' => 'backoffice.boards'
     ])->except(['show']); // show는 제외 (게시글 목록과 충돌)
+
+    // 게시판 템플릿 관리
+    Route::resource('board-templates', BoardTemplateController::class, [
+        'names' => 'backoffice.board-templates',
+        'parameters' => ['board-templates' => 'boardTemplate']
+    ]);
+
+    // 게시판 템플릿 추가 기능
+    Route::post('board-templates/{boardTemplate}/duplicate', [BoardTemplateController::class, 'duplicate'])
+        ->name('backoffice.board-templates.duplicate');
+    Route::get('board-templates/{boardTemplate}/data', [BoardTemplateController::class, 'getTemplateData'])
+        ->name('backoffice.board-templates.data');
 
     // 게시판 스킨 관리
     Route::resource('board-skins', BoardSkinController::class, [

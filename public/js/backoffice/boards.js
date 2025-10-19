@@ -199,6 +199,196 @@ function validateBoardForm() {
     return isValid;
 }
 
+/**
+ * 템플릿 선택 시 정보 표시
+ */
+function initializeTemplateSelection() {
+    const templateSelect = document.getElementById('template_id');
+    const templateInfo = document.getElementById('templateInfo');
+    
+    if (!templateSelect) return;
+    
+    templateSelect.addEventListener('change', function() {
+        const templateId = this.value;
+        
+        if (!templateId) {
+            // 템플릿 선택 안 함
+            if (templateInfo) {
+                templateInfo.style.display = 'none';
+            }
+            return;
+        }
+        
+        // AJAX로 템플릿 데이터 로드
+        fetch(`/backoffice/board-templates/${templateId}/data`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const template = data.data;
+                    
+                    // 템플릿 정보 표시
+                    displayTemplateInfo(template);
+                }
+            })
+            .catch(error => {
+                console.error('템플릿 로드 실패:', error);
+                alert('템플릿 정보를 불러오는데 실패했습니다.');
+            });
+    });
+}
+
+/**
+ * 템플릿 정보 표시
+ */
+function displayTemplateInfo(template) {
+    const templateInfo = document.getElementById('templateInfo');
+    if (!templateInfo) return;
+    
+    // 권한 텍스트 변환
+    const permissionText = {
+        'all': '모두',
+        'member': '회원만',
+        'admin': '관리자만'
+    };
+    
+    // 스킨 이름
+    document.getElementById('infoSkin').textContent = template.skin?.name || '-';
+    
+    // 카테고리 그룹
+    document.getElementById('infoCategoryGroup').textContent = template.category_group || '사용 안함';
+    
+    // 공지 기능
+    document.getElementById('infoNotice').textContent = template.enable_notice ? '사용' : '사용 안함';
+    
+    // 정렬 기능
+    document.getElementById('infoSorting').textContent = template.enable_sorting ? '사용' : '사용 안함';
+    
+    // 페이지당 글수
+    document.getElementById('infoListCount').textContent = template.list_count + '개';
+    
+    // 권한 설정
+    document.getElementById('infoPermissionRead').textContent = permissionText[template.permission_read] || '-';
+    document.getElementById('infoPermissionWrite').textContent = permissionText[template.permission_write] || '-';
+    document.getElementById('infoPermissionComment').textContent = permissionText[template.permission_comment] || '-';
+    
+    // 기본 필드
+    if (template.field_config) {
+        const enabledFields = [];
+        for (const [key, config] of Object.entries(template.field_config)) {
+            if (config.enabled) {
+                enabledFields.push(config.label || key);
+            }
+        }
+        document.getElementById('infoFieldConfig').textContent = enabledFields.length > 0 
+            ? enabledFields.join(', ') 
+            : '없음';
+    } else {
+        document.getElementById('infoFieldConfig').textContent = '기본 설정';
+    }
+    
+    // 커스텀 필드
+    if (template.custom_fields_config && template.custom_fields_config.length > 0) {
+        const fieldLabels = template.custom_fields_config.map(f => f.label).join(', ');
+        document.getElementById('infoCustomFields').textContent = 
+            `${template.custom_fields_config.length}개 (${fieldLabels})`;
+    } else {
+        document.getElementById('infoCustomFields').textContent = '없음';
+    }
+    
+    // 정보 박스 표시
+    templateInfo.style.display = 'block';
+}
+
+/**
+ * 라디오 버튼 값 설정
+ */
+function setRadioValue(name, value) {
+    const radio = document.querySelector(`input[name="${name}"][value="${value}"]`);
+    if (radio) {
+        radio.checked = true;
+    }
+}
+
+/**
+ * 기존 데이터로 커스텀 필드 추가
+ */
+function addCustomFieldWithData(fieldData) {
+    const container = document.getElementById('customFieldsList');
+    if (!container) return;
+    
+    const existingFields = container.children.length;
+    const fieldId = 'custom_field_' + customFieldCounter++;
+    
+    const fieldHtml = `
+        <div class="custom-field-item" id="${fieldId}">
+            <div class="custom-field-header">
+                <h6>커스텀 필드 #${existingFields + 1}</h6>
+                <div class="custom-field-actions">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="moveCustomField('${fieldId}', 'up')" title="위로 이동">
+                        <i class="fas fa-arrow-up"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="moveCustomField('${fieldId}', 'down')" title="아래로 이동">
+                        <i class="fas fa-arrow-down"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeCustomField('${fieldId}')">
+                        <i class="fas fa-trash"></i> 삭제
+                    </button>
+                </div>
+            </div>
+            <div class="board-form-row">
+                <div class="board-form-col board-form-col-6">
+                    <div class="board-form-group">
+                        <label class="board-form-label">필드명</label>
+                        <input type="text" class="board-form-control" name="custom_fields[${existingFields}][name]" value="${fieldData.name || ''}" placeholder="예: location">
+                        <small class="board-form-text">영문, 소문자, 언더스코어(_) 사용</small>
+                    </div>
+                </div>
+                <div class="board-form-col board-form-col-6">
+                    <div class="board-form-group">
+                        <label class="board-form-label">라벨</label>
+                        <input type="text" class="board-form-control" name="custom_fields[${existingFields}][label]" value="${fieldData.label || ''}" placeholder="예: 위치">
+                        <small class="board-form-text">사용자에게 보여질 이름</small>
+                    </div>
+                </div>
+            </div>
+            <div class="board-form-row">
+                <div class="board-form-col board-form-col-4">
+                    <div class="board-form-group">
+                        <label class="board-form-label">필드 타입</label>
+                        <select class="board-form-control" name="custom_fields[${existingFields}][type]" onchange="toggleFieldOptions(this, ${existingFields})">
+                            <option value="">타입 선택</option>
+                            <option value="text" ${fieldData.type === 'text' ? 'selected' : ''}>텍스트</option>
+                            <option value="select" ${fieldData.type === 'select' ? 'selected' : ''}>셀렉박스</option>
+                            <option value="checkbox" ${fieldData.type === 'checkbox' ? 'selected' : ''}>체크박스</option>
+                            <option value="radio" ${fieldData.type === 'radio' ? 'selected' : ''}>라디오 버튼</option>
+                            <option value="editor" ${fieldData.type === 'editor' ? 'selected' : ''}>에디터</option>
+                            <option value="date" ${fieldData.type === 'date' ? 'selected' : ''}>날짜</option>                                
+                        </select>
+                    </div>
+                </div>
+                <div class="board-form-col board-form-col-4">
+                    <div class="board-form-group">
+                        <div class="board-checkbox-item">
+                            <input type="checkbox" class="board-checkbox-input" name="custom_fields[${existingFields}][required]" value="1" ${fieldData.required ? 'checked' : ''}>
+                            <label class="board-form-label">필수 입력</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="board-form-group field-options" id="field_options_${existingFields}" style="${['select', 'checkbox', 'radio'].includes(fieldData.type) ? '' : 'display: none;'}">
+                <label class="board-form-label">선택 옵션</label>
+                <textarea class="board-form-control" name="custom_fields[${existingFields}][options]" placeholder="한 줄에 하나씩 입력하세요&#10;예:&#10;일반&#10;프리미엄&#10;VIP" rows="3">${fieldData.options || ''}</textarea>
+            </div>
+            <div class="board-form-group">
+                <label class="board-form-label">플레이스홀더</label>
+                <input type="text" class="board-form-control" name="custom_fields[${existingFields}][placeholder]" value="${fieldData.placeholder || ''}" placeholder="예: 위치를 입력하세요">
+            </div>
+        </div>
+    `;
+    
+    container.insertAdjacentHTML('beforeend', fieldHtml);
+}
+
 // 페이지 로드 시 초기화
 document.addEventListener('DOMContentLoaded', function() {
     // 슬러그 자동 생성 초기화
@@ -206,6 +396,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 커스텀 필드 카운터 초기화
     initializeCustomFieldCounter();
+    
+    // 템플릿 선택 초기화
+    initializeTemplateSelection();
     
     // 커스텀 필드 추가 버튼 이벤트 리스너
     const addCustomFieldBtn = document.getElementById('addCustomFieldBtn');

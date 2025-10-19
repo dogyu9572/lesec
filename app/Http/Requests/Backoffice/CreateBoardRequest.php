@@ -23,38 +23,10 @@ class CreateBoardRequest extends FormRequest
         $rules = [
             'name' => 'required|max:100',
             'slug' => 'nullable|alpha_dash|max:50',
-            'description' => 'nullable|max:255',
-            'skin_id' => 'required|exists:board_skins,id',
+            'description' => 'nullable|max:500',
+            'template_id' => 'required|exists:board_templates,id',
             'is_active' => 'boolean',
-            'is_single_page' => 'boolean',
-            'enable_sorting' => 'boolean',
-            'list_count' => 'integer|min:5|max:100',
-            'enable_notice' => 'boolean',
-            'permission_read' => 'required|in:all,member,admin',
-            'permission_write' => 'required|in:all,member,admin',
-            'permission_comment' => 'required|in:all,member,admin',
-            'custom_fields' => 'nullable|array',
         ];
-
-        // custom_fields가 배열이고 비어있지 않은 경우에만 개별 필드 검증 규칙 추가
-        $customFields = $this->input('custom_fields');
-        
-        // custom_fields가 없거나 null인 경우 빈 배열로 처리
-        if (empty($customFields)) {
-            $customFields = [];
-        } elseif (is_string($customFields)) {
-            $customFields = json_decode($customFields, true) ?: [];
-        }
-        
-        if (!empty($customFields) && is_array($customFields)) {
-            $rules['custom_fields.*.name'] = 'required|string|max:30|regex:/^[a-zA-Z0-9_]+$/';
-            $rules['custom_fields.*.label'] = 'required|string|max:50';
-            $rules['custom_fields.*.type'] = 'required|in:text,select,checkbox,radio,date,editor';
-            $rules['custom_fields.*.max_length'] = 'nullable|integer|min:1|max:255';
-            $rules['custom_fields.*.required'] = 'boolean';
-            $rules['custom_fields.*.options'] = 'nullable|string|max:500';
-            $rules['custom_fields.*.placeholder'] = 'nullable|string|max:100';
-        }
 
         return $rules;
     }
@@ -67,20 +39,11 @@ class CreateBoardRequest extends FormRequest
         return [
             'name.required' => '게시판 이름은 필수입니다.',
             'name.max' => '게시판 이름은 100자를 초과할 수 없습니다.',
-            'slug.alpha_dash' => '게시판 식별자는 영문, 숫자, 하이픈, 언더스코어만 사용 가능합니다.',
-            'slug.max' => '게시판 식별자는 50자를 초과할 수 없습니다.',
-            'description.max' => '게시판 설명은 255자를 초과할 수 없습니다.',
-            'skin_id.required' => '게시판 스킨을 선택해주세요.',
-            'skin_id.exists' => '선택한 스킨이 존재하지 않습니다.',
-            'list_count.integer' => '목록 개수는 숫자여야 합니다.',
-            'list_count.min' => '목록 개수는 최소 5개 이상이어야 합니다.',
-            'list_count.max' => '목록 개수는 최대 100개까지 가능합니다.',
-            'permission_read.required' => '읽기 권한을 선택해주세요.',
-            'permission_read.in' => '읽기 권한이 올바르지 않습니다.',
-            'permission_write.required' => '쓰기 권한을 선택해주세요.',
-            'permission_write.in' => '쓰기 권한이 올바르지 않습니다.',
-            'permission_comment.required' => '댓글 권한을 선택해주세요.',
-            'permission_comment.in' => '댓글 권한이 올바르지 않습니다.',
+            'slug.alpha_dash' => '게시판 슬러그는 영문, 숫자, 하이픈, 언더스코어만 사용 가능합니다.',
+            'slug.max' => '게시판 슬러그는 50자를 초과할 수 없습니다.',
+            'description.max' => '게시판 설명은 500자를 초과할 수 없습니다.',
+            'template_id.required' => '템플릿을 선택해주세요.',
+            'template_id.exists' => '선택한 템플릿이 존재하지 않습니다.',
         ];
     }
 

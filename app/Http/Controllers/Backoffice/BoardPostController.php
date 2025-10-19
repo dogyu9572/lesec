@@ -66,8 +66,11 @@ class BoardPostController extends Controller
             ? $this->boardPostService->calculateNextSortOrder($slug) 
             : 0;
         
+        // 카테고리 옵션 가져오기
+        $categoryOptions = $board->getCategoryOptions();
+        
         // 자동 생성된 뷰 사용
-        return view("backoffice.board-posts.{$slug}.create", compact('board', 'nextSortOrder'));
+        return view("backoffice.board-posts.{$slug}.create", compact('board', 'nextSortOrder', 'categoryOptions'));
     }
 
     /**
@@ -130,8 +133,11 @@ class BoardPostController extends Controller
             abort(404, '게시글을 찾을 수 없습니다.');
         }
 
+        // 카테고리 옵션 가져오기
+        $categoryOptions = $board->getCategoryOptions();
+
         // 자동 생성된 뷰 사용
-        return view("backoffice.board-posts.{$slug}.edit", compact('board', 'post'));
+        return view("backoffice.board-posts.{$slug}.edit", compact('board', 'post', 'categoryOptions'));
     }
 
     /**

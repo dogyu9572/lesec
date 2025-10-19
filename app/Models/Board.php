@@ -21,6 +21,7 @@ class Board extends Model
         'slug',
         'description',
         'skin_id',
+        'template_id',
         'is_active',
         'list_count',
         'enable_notice',
@@ -29,6 +30,7 @@ class Board extends Model
         'permission_read',
         'permission_write',
         'permission_comment',
+        'field_config',
         'custom_fields_config',
     ];
 
@@ -43,6 +45,7 @@ class Board extends Model
         'enable_notice' => 'boolean',
         'is_single_page' => 'boolean',
         'enable_sorting' => 'boolean',
+        'field_config' => 'array',
         'custom_fields_config' => 'array',
     ];
 
@@ -88,6 +91,14 @@ class Board extends Model
     public function skin()
     {
         return $this->belongsTo(BoardSkin::class, 'skin_id');
+    }
+
+    /**
+     * 이 게시판이 사용하는 템플릿 관계
+     */
+    public function template()
+    {
+        return $this->belongsTo(BoardTemplate::class, 'template_id');
     }
 
     /**
@@ -149,6 +160,19 @@ class Board extends Model
     }
     
     /**
+     * 필드 설정을 안전하게 가져옵니다.
+     */
+    public function getFieldConfigAttribute($value)
+    {
+        if (is_string($value) && !empty($value)) {
+            $decoded = json_decode($value, true);
+            return is_array($decoded) ? $decoded : null;
+        }
+        
+        return is_array($value) ? $value : null;
+    }
+
+    /**
      * 커스텀 필드 설정을 안전하게 가져옵니다.
      */
     public function getCustomFieldsConfigAttribute($value)
@@ -163,6 +187,32 @@ class Board extends Model
         }
         
         return is_array($value) ? $value : [];
+    }
+
+    /**
+     * 특정 필드가 활성화되어 있는지 확인
+     */
+    public function isFieldEnabled(string $fieldName): bool
+    {
+        // field_config가 없으면 모든 필드 활성화 (하위 호환성)
+        if (!$this->field_config) {
+            return true;
+        }
+
+        return $this->field_config[$fieldName]['enabled'] ?? false;
+    }
+
+    /**
+     * 특정 필드가 필수인지 확인
+     */
+    public function isFieldRequired(string $fieldName): bool
+    {
+        if (!$this->field_config) {
+            // 기본 필수 필드 (제목/내용도 선택 가능)
+            return in_array($fieldName, ['author_name']);
+        }
+
+        return $this->field_config[$fieldName]['required'] ?? false;
     }
 
     /**
@@ -232,5 +282,23 @@ class Board extends Model
             ->where('is_notice', false)
             ->orderBy('created_at', 'desc')
             ->paginate($perPage);
+    }
+
+    /**
+     * 이 게시판의 카테고리 옵션을 가져옵니다
+     */
+    public function getCategoryOptions()
+    {
+        // 템플릿에서 카테고리 그룹 가져오기
+        $categoryGroup = $this->template?->category_group;
+        
+        if (!$categoryGroup) {
+            return collect(); // 카테고리 그룹이 없으면 빈 컬렉션 반환
+        }
+        
+        return \App\Models\Category::byGroup($categoryGroup)
+            ->active()
+            ->orderBy('display_order')
+            ->get();
     }
 }

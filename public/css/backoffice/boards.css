@@ -3,6 +3,58 @@
  * 라우팅: /backoffice/boards
  */
 
+/* 템플릿 정보 표시 박스 */
+.board-template-info {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 8px;
+    padding: 0;
+    margin: 20px 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.board-template-info-header {
+    background: rgba(255, 255, 255, 0.15);
+    padding: 12px 20px;
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.board-template-info-header i {
+    margin-right: 8px;
+}
+
+.board-template-info-body {
+    background: #fff;
+    padding: 15px 20px;
+}
+
+.board-template-info-row {
+    display: flex;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f0;
+    align-items: center;
+}
+
+.board-template-info-row:last-child {
+    border-bottom: none;
+}
+
+.board-template-info-row .label {
+    min-width: 140px;
+    font-weight: 600;
+    color: #495057;
+    font-size: 14px;
+}
+
+.board-template-info-row span:not(.label) {
+    color: #212529;
+    font-size: 14px;
+    flex: 1;
+}
+
 /* 사이드바 토글 버튼 강제 표시 (모바일에서만) */
 @media (max-width: 768px) {
     .sidebar-toggle {
@@ -52,6 +104,41 @@
     padding: 1.5rem;
     margin-bottom: 1.5rem;
     box-shadow: 0 1px 4px rgba(52, 144, 220, 0.2);
+}
+
+.board-filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-end;
+}
+
+.board-filter-col {
+    flex: 1;
+    min-width: 200px;
+}
+
+.board-filter-col:last-child {
+    flex: 0 0 auto;
+    min-width: auto;
+}
+
+/* 반응형 필터 */
+@media (max-width: 768px) {
+    .board-filter-row {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .board-filter-col {
+        min-width: 100%;
+    }
+    
+    .board-filter-col:last-child {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+    }
 }
 
 .filter-form {
@@ -187,4 +274,115 @@
     outline: none;
     border-color: #4a90e2;
     box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+}
+
+/* ============================================
+   필드 설정 UI 스타일
+   ============================================ */
+.field-config-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.field-config-item {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    gap: 15px;
+}
+
+.field-config-checkbox {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.field-config-required {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.field-config-checkbox input[type="checkbox"],
+.field-config-required input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.field-config-checkbox label,
+.field-config-required label {
+    margin: 0;
+    cursor: pointer;
+    font-weight: normal;
+    user-select: none;
+}
+
+.field-config-checkbox input[type="checkbox"]:disabled,
+.field-config-required input[type="checkbox"]:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* 제목/내용 특별 스타일 제거 */
+
+/* Badge 스타일 */
+.badge {
+    display: inline-block;
+    padding: 0.25em 0.6em;
+    font-size: 75%;
+    font-weight: 600;
+    line-height: 1;
+    color: #fff;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 0.25rem;
+}
+
+.badge-info {
+    background-color: #17a2b8;
+}
+
+.badge-secondary {
+    background-color: #6c757d;
+}
+
+.badge-success {
+    background-color: #28a745;
+}
+
+.btn-group {
+    display: inline-flex;
+    gap: 5px;
+    align-items: center;
+}
+
+.btn-group .btn {
+    white-space: nowrap;
+}
+
+/* 템플릿 액션 버튼들 */
+.template-actions {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.template-actions .btn {
+    border-radius: 4px !important;
+    white-space: nowrap;
+    margin: 0;
+}
+
+.template-actions form {
+    margin: 0;
+    display: inline;
 }

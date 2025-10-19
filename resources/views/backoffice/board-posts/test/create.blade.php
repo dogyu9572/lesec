@@ -51,17 +51,19 @@
                 </div>
                 @endif
 
+                @if($board->isFieldEnabled('category') && $categoryOptions->count() > 0)
                 <div class="board-form-group">
                     <label for="category" class="board-form-label">카테고리 분류</label>
                     <select class="board-form-control" id="category" name="category">
                         <option value="">카테고리를 선택하세요</option>
-                        <option value="일반" @selected(old('category') == '일반')>일반</option>
-                        <option value="공지" @selected(old('category') == '공지')>공지</option>
-                        <option value="안내" @selected(old('category') == '안내')>안내</option>
-                        <option value="이벤트" @selected(old('category') == '이벤트')>이벤트</option>
-                        <option value="기타" @selected(old('category') == '기타')>기타</option>
+                        @foreach($categoryOptions as $category)
+                            <option value="{{ $category->name }}" @selected(old('category') == $category->name)>
+                                {{ $category->name }}
+                            </option>
+                        @endforeach
                     </select>
                 </div>
+                @endif
 
                 <div class="board-form-group">
                     <label for="title" class="board-form-label">제목 <span class="required">*</span></label>

@@ -8,6 +8,7 @@ use App\Http\Requests\Backoffice\UpdateBoardRequest;
 use App\Models\Board;
 use App\Services\Backoffice\BoardService;
 use App\Services\Backoffice\BoardFileGeneratorService;
+use App\Services\Backoffice\BoardTemplateService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -15,13 +16,16 @@ class BoardController extends BaseController
 {
     protected $boardService;
     protected $boardFileGeneratorService;
+    protected $templateService;
 
     public function __construct(
         BoardService $boardService,
-        BoardFileGeneratorService $boardFileGeneratorService
+        BoardFileGeneratorService $boardFileGeneratorService,
+        BoardTemplateService $templateService
     ) {
         $this->boardService = $boardService;
         $this->boardFileGeneratorService = $boardFileGeneratorService;
+        $this->templateService = $templateService;
     }
 
     /**
@@ -39,7 +43,8 @@ class BoardController extends BaseController
     public function create()
     {
         $skins = $this->boardService->getActiveSkins();
-        return $this->view('backoffice.boards.create', compact('skins'));
+        $templates = $this->templateService->getActiveTemplates();
+        return $this->view('backoffice.boards.create', compact('skins', 'templates'));
     }
 
     /**
@@ -48,8 +53,16 @@ class BoardController extends BaseController
     public function store(CreateBoardRequest $request)
     {
         try {
-            // 게시판 생성
-            $board = $this->boardService->createBoard($request->validated());
+            // 템플릿 기반 생성인지 확인
+            if ($request->filled('template_id')) {
+                $board = $this->boardService->createBoardFromTemplate(
+                    $request->input('template_id'),
+                    $request->validated()
+                );
+            } else {
+                // 일반 게시판 생성
+                $board = $this->boardService->createBoard($request->validated());
+            }
 
             // 스킨 파일들을 게시판별 디렉토리로 복사
             try {

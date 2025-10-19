@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('slug')->unique();  // URL에 사용할 슬러그
             $table->text('description')->nullable();  // 게시판 설명
             $table->unsignedBigInteger('skin_id');  // 사용할 스킨 ID
+            $table->unsignedBigInteger('template_id')->nullable();  // 템플릿 ID
             $table->boolean('is_active')->default(true);  // 활성화 여부
             $table->boolean('table_created')->default(false);  // 동적 테이블 생성 여부
             $table->integer('list_count')->default(15);  // 페이지당 게시물 수
@@ -29,10 +30,12 @@ return new class extends Migration
             $table->string('permission_comment')->default('member');  // 댓글 권한
             $table->timestamps();
             $table->softDeletes();  // 소프트 삭제 지원
+            $table->json('field_config')->nullable();  // 필드 활성화 설정
             $table->json('custom_fields_config')->nullable();  // 커스텀 필드 설정
 
             // 외래 키 제약 조건
             $table->foreign('skin_id')->references('id')->on('board_skins');
+            $table->foreign('template_id')->references('id')->on('board_templates')->onDelete('set null');
         });
     }
 

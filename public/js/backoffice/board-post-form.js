@@ -10,7 +10,22 @@ function initSummernote() {
     if (typeof $.fn.summernote !== 'undefined') {
         $('#content').summernote({
             height: 400,
-            lang: 'ko-KR',                
+            lang: 'ko-KR',
+            // HTML 태그 필터링 비활성화
+            disableHtml: false,
+            // 드래그 앤 드롭 비활성화 (썸네일/첨부파일과 충돌 방지)
+            disableDragAndDrop: true,
+            // 허용할 HTML 태그 설정
+            allowedTags: ['p', 'br', 'strong', 'b', 'em', 'i', 'u', 'strike', 'div', 'span', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote', 'pre', 'code', 'a', 'img', 'table', 'thead', 'tbody', 'tr', 'td', 'th', 'iframe', 'video', 'source'],
+            // 허용할 속성 설정
+            allowedAttributes: {
+                '*': ['style', 'class', 'id'],
+                'iframe': ['src', 'width', 'height', 'frameborder', 'allowfullscreen', 'title', 'allow'],
+                'img': ['src', 'alt', 'width', 'height'],
+                'a': ['href', 'target'],
+                'table': ['border', 'cellpadding', 'cellspacing'],
+                'td': ['colspan', 'rowspan']
+            },
             toolbar: [
                 ['style', ['style']],
                 ['font', ['bold', 'underline', 'italic', 'strikethrough', 'clear']],
@@ -30,18 +45,139 @@ function initSummernote() {
                     for (let i = 0; i < files.length; i++) {
                         uploadImage(files[i], this);
                     }
+                },
+                onInit: function() {
+                    // Summernote 초기화 완료
+                },
+                onChange: function(contents, $editable) {
+                    // 콘텐츠 변경 시 실제 textarea에 동기화
+                    $('#content').val(contents);
+                },
+                onBlur: function() {
+                    // 포커스 잃을 때 최종 동기화
+                    const content = $('#content').summernote('code');
+                    $('#content').val(content);
                 }
             }
         });
         
-        // 드롭다운 이벤트 강제 활성화
+        // 드롭다운 이벤트 강제 활성화 및 재클릭 문제 해결
         setTimeout(function() {
-            $('.note-btn-group .dropdown-toggle').off('click').on('click', function(e) {
+            // 모든 드롭다운 버튼에 대해 이벤트 재설정
+            $('.note-btn-group .dropdown-toggle').off('click.dropdownFix').on('click.dropdownFix', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                $(this).dropdown('toggle');
+                
+                // 현재 드롭다운 상태 확인
+                const $this = $(this);
+                const $dropdown = $this.next('.note-dropdown-menu');
+                
+                // 다른 드롭다운 닫기
+                $('.note-dropdown-menu').not($dropdown).hide();
+                
+                // 현재 드롭다운 토글
+                if ($dropdown.is(':visible')) {
+                    $dropdown.hide();
+                } else {
+                    $dropdown.show();
+                }
             });
-        }, 500);
+            
+            // 드롭다운 외부 클릭 시 닫기
+            $(document).on('click.dropdownFix', function(e) {
+                if (!$(e.target).closest('.note-btn-group').length) {
+                    $('.note-dropdown-menu').hide();
+                }
+            });
+            
+            // 드롭다운 메뉴 항목 클릭 시 메뉴 닫기
+            $('.note-dropdown-menu .note-btn').on('click', function() {
+                $(this).closest('.note-dropdown-menu').hide();
+            });
+            
+        }, 1000);
+        
+        // Summernote tooltip 완전 비활성화
+        setTimeout(function() {
+            // 모든 버튼의 title과 data-original-title 속성 제거
+            $('.note-toolbar .note-btn').each(function() {
+                $(this).removeAttr('title').removeAttr('data-original-title');
+            });
+            
+            // tooltip 관련 이벤트 제거
+            $('.note-toolbar .note-btn').off('mouseenter mouseleave');
+            
+            // Bootstrap tooltip 비활성화
+            $('.note-toolbar .note-btn').tooltip('dispose');
+        }, 1500);
+        
+        // Summernote 드래그 앤 드롭 완전 비활성화
+        setTimeout(function() {
+            // Summernote 에디터 영역의 모든 드래그 앤 드롭 이벤트 제거
+            $('.note-editable').off('dragover dragenter dragleave drop');
+            $('.note-editable').on('dragover dragenter dragleave drop', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            });
+            
+            // Summernote 에디터 영역의 드래그 앤 드롭 관련 CSS 클래스 제거
+            $('.note-editable').removeClass('note-drag-over');
+        }, 2000);
+        
+        // Summernote 모달 문제 해결 - modal-backdrop 즉시 제거
+        setTimeout(function() {
+            // modal-backdrop 즉시 제거 및 모달 스타일 적용
+            setInterval(function() {
+                // modal-backdrop 즉시 제거
+                $('.modal-backdrop').remove();
+                
+                $('.note-modal').each(function() {
+                    const $modal = $(this);
+                    if ($modal.is(':visible')) {
+                        $modal.css({
+                            'z-index': '999999',
+                            'position': 'fixed',
+                            'top': '0',
+                            'left': '0',
+                            'width': '100%',
+                            'height': '100%',
+                            'background-color': 'rgba(0, 0, 0, 0.5)',
+                            'pointer-events': 'auto'
+                        });
+                        
+                        $modal.find('.modal-dialog').css({
+                            'z-index': '1000000',
+                            'position': 'relative',
+                            'margin': '50px auto',
+                            'pointer-events': 'auto'
+                        });
+                        
+                        $modal.find('.modal-content').css({
+                            'z-index': '1000001',
+                            'pointer-events': 'auto',
+                            'position': 'relative'
+                        });
+                        
+                        // 모달 내부 모든 요소에 클릭 이벤트 강제 활성화
+                        $modal.find('*').css('pointer-events', 'auto');
+                    }
+                });
+            }, 10);
+        }, 100);
+        
+        // Bootstrap 모달 이벤트에서 modal-backdrop만 제거
+        $(document).on('show.bs.modal', '.note-modal', function(e) {
+            // modal-backdrop만 제거, 모달은 정상 동작
+            setTimeout(function() {
+                $('.modal-backdrop').remove();
+            }, 10);
+        });
+        
+        $(document).on('shown.bs.modal', '.note-modal', function(e) {
+            // modal-backdrop만 제거, 모달은 정상 동작
+            $('.modal-backdrop').remove();
+        });
         
     } else {
         console.error('Summernote가 로드되지 않았습니다!');
@@ -57,6 +193,21 @@ function initCustomFieldEditors() {
             $(this).summernote({
                 height: 300,
                 lang: 'ko-KR',
+                // HTML 태그 필터링 비활성화
+                disableHtml: false,
+                // 드래그 앤 드롭 비활성화 (썸네일/첨부파일과 충돌 방지)
+                disableDragAndDrop: true,
+                // 허용할 HTML 태그 설정
+                allowedTags: ['p', 'br', 'strong', 'b', 'em', 'i', 'u', 'strike', 'div', 'span', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote', 'pre', 'code', 'a', 'img', 'table', 'thead', 'tbody', 'tr', 'td', 'th', 'iframe', 'video', 'source'],
+                // 허용할 속성 설정
+                allowedAttributes: {
+                    '*': ['style', 'class', 'id'],
+                    'iframe': ['src', 'width', 'height', 'frameborder', 'allowfullscreen', 'title', 'allow'],
+                    'img': ['src', 'alt', 'width', 'height'],
+                    'a': ['href', 'target'],
+                    'table': ['border', 'cellpadding', 'cellspacing'],
+                    'td': ['colspan', 'rowspan']
+                },
                 toolbar: [
                     ['style', ['style']],
                     ['font', ['bold', 'underline', 'italic', 'strikethrough', 'clear']],
@@ -74,6 +225,21 @@ function initCustomFieldEditors() {
                     onImageUpload: function(files) {
                         for (let i = 0; i < files.length; i++) {
                             uploadImage(files[i], this);
+                        }
+                    },
+                    onChange: function(contents, $editable) {
+                        // 커스텀 필드 에디터 콘텐츠 변경 시 실제 textarea에 동기화
+                        const editorId = $editable.attr('id');
+                        if (editorId) {
+                            $('#' + editorId).val(contents);
+                        }
+                    },
+                    onBlur: function() {
+                        // 포커스 잃을 때 최종 동기화
+                        const content = $(this).summernote('code');
+                        const editorId = $(this).attr('id');
+                        if (editorId) {
+                            $('#' + editorId).val(content);
                         }
                     }
                 }
@@ -107,16 +273,180 @@ function uploadImage(file, editor) {
     });
 }
 
+
+// URL을 embed 코드로 변환
+function convertToEmbedCode(url) {
+    let videoId = '';
+    let embedUrl = '';
+    
+    // YouTube URL 처리 - 다양한 형식 지원
+    if (url.includes('youtube.com/watch')) {
+        const match = url.match(/[?&]v=([^&]+)/);
+        if (match) {
+            videoId = match[1];
+            embedUrl = `https://www.youtube.com/embed/${videoId}`;
+        }
+    } else if (url.includes('youtu.be/')) {
+        const match = url.match(/youtu\.be\/([^?&]+)/);
+        if (match) {
+            videoId = match[1];
+            embedUrl = `https://www.youtube.com/embed/${videoId}`;
+        }
+    } else if (url.includes('youtube.com/embed/')) {
+        // 이미 embed URL인 경우
+        const match = url.match(/youtube\.com\/embed\/([^?&]+)/);
+        if (match) {
+            videoId = match[1];
+            embedUrl = url; // 그대로 사용
+        }
+    }
+    // Vimeo URL 처리
+    else if (url.includes('vimeo.com/')) {
+        const match = url.match(/vimeo\.com\/(\d+)/);
+        if (match) {
+            videoId = match[1];
+            embedUrl = `https://player.vimeo.com/video/${videoId}`;
+        }
+    }
+    
+    if (embedUrl) {
+        return `<div class="video-container" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; margin: 20px 0;">
+            <iframe src="${embedUrl}" 
+                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" 
+                    frameborder="0" 
+                    allowfullscreen>
+            </iframe>
+        </div>`;
+    }
+    
+    return null;
+}
+
+// 썸네일 이미지 관리 클래스
+class ThumbnailManager {
+    constructor() {
+        this.thumbnailInput = document.getElementById('thumbnail');
+        this.thumbnailPreview = document.getElementById('thumbnailPreview');
+        this.thumbnailUpload = this.thumbnailInput?.closest('.board-file-upload');
+        this.maxFileSize = 5 * 1024 * 1024; // 5MB
+        this.allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        
+        if (this.thumbnailInput && this.thumbnailUpload) {
+            this.init();
+        }
+    }
+    
+    init() {
+        // 파일 선택 이벤트
+        this.thumbnailInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                this.handleThumbnail(file);
+            }
+        });
+        
+        // 드래그 앤 드롭 이벤트 (썸네일 전용)
+        this.thumbnailUpload.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.stopPropagation(); // 이벤트 전파 차단
+            this.thumbnailUpload.classList.add('board-file-drag-over');
+        });
+        
+        this.thumbnailUpload.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            e.stopPropagation(); // 이벤트 전파 차단
+            this.thumbnailUpload.classList.remove('board-file-drag-over');
+        });
+        
+        this.thumbnailUpload.addEventListener('drop', (e) => {
+            e.preventDefault();
+            e.stopPropagation(); // 이벤트 전파 차단 - 첨부파일 영역과 완전 분리
+            this.thumbnailUpload.classList.remove('board-file-drag-over');
+            
+            const file = e.dataTransfer.files[0]; // 첫 번째 파일만
+            if (file) {
+                this.handleThumbnail(file);
+            }
+        });
+    }
+    
+    // 썸네일 파일 처리
+    handleThumbnail(file) {
+        // 파일 타입 체크
+        if (!this.allowedTypes.includes(file.type)) {
+            alert('이미지 파일만 업로드 가능합니다. (JPG, PNG, GIF)');
+            this.thumbnailInput.value = '';
+            return;
+        }
+        
+        // 파일 크기 체크
+        if (file.size > this.maxFileSize) {
+            alert('썸네일 이미지는 5MB 이하만 가능합니다.');
+            this.thumbnailInput.value = '';
+            return;
+        }
+        
+        // FileList를 DataTransfer로 변환
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        this.thumbnailInput.files = dt.files;
+        
+        // 미리보기 생성
+        this.updateThumbnailPreview(file);
+    }
+    
+    // 썸네일 미리보기 업데이트
+    updateThumbnailPreview(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            this.thumbnailPreview.innerHTML = `
+                <div class="board-file-item">
+                    <div class="board-file-info">
+                        <img src="${e.target.result}" alt="썸네일 미리보기" style="max-width: 200px; max-height: 200px; object-fit: cover; border-radius: 8px;">
+                        <span class="board-file-name">${file.name}</span>
+                        <span class="board-file-size">(${(file.size / 1024 / 1024).toFixed(2)}MB)</span>
+                    </div>
+                    <button type="button" class="board-file-remove" onclick="thumbnailManager.removeThumbnail()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+        };
+        reader.readAsDataURL(file);
+    }
+    
+    // 썸네일 제거
+    removeThumbnail() {
+        // 파일 입력 필드 초기화
+        if (this.thumbnailInput) {
+            this.thumbnailInput.value = '';
+        }
+        
+        // 기존 썸네일 숨겨진 입력 필드 제거
+        const existingThumbnailInput = document.querySelector('input[name="existing_thumbnail"]');
+        if (existingThumbnailInput) {
+            existingThumbnailInput.remove();
+        }
+        
+        // 미리보기 영역 초기화
+        if (this.thumbnailPreview) {
+            this.thumbnailPreview.innerHTML = '';
+        }
+    }
+}
+
 // 첨부파일 관리 클래스
 class FileManager {
     constructor() {
         this.fileInput = document.getElementById('attachments');
         this.filePreview = document.getElementById('filePreview');
-        this.fileUpload = document.querySelector('.board-file-upload');
+        this.fileUpload = this.fileInput?.closest('.board-file-upload');
         this.maxFiles = 5;
         this.maxFileSize = 10 * 1024 * 1024; // 10MB
         
-        this.init();
+        if (this.fileInput && this.fileUpload) {
+            this.init();
+        }
     }
     
     init() {
@@ -128,20 +458,24 @@ class FileManager {
             }
         });
         
-        // 드래그 앤 드롭 이벤트
+        // 드래그 앤 드롭 이벤트 (첨부파일 전용)
         this.fileUpload.addEventListener('dragover', (e) => {
             e.preventDefault();
+            e.stopPropagation(); // 이벤트 전파 차단
             this.fileUpload.classList.add('board-file-drag-over');
         });
         
         this.fileUpload.addEventListener('dragleave', (e) => {
             e.preventDefault();
+            e.stopPropagation(); // 이벤트 전파 차단
             this.fileUpload.classList.remove('board-file-drag-over');
         });
         
         this.fileUpload.addEventListener('drop', (e) => {
             e.preventDefault();
+            e.stopPropagation(); // 이벤트 전파 차단 - 썸네일 영역과 완전 분리
             this.fileUpload.classList.remove('board-file-drag-over');
+            
             const files = Array.from(e.dataTransfer.files);
             this.handleFiles(files);
         });
@@ -268,29 +602,62 @@ class FileManager {
     }
 }
 
-// 폼 유효성 검사 함수
-function validateForm(form) {
-    // Summernote 에디터 내용 검사
-    const contentEditor = $('#content');
-    if (contentEditor.length && contentEditor.summernote('isEmpty')) {
-        alert('내용은 필수 입력 항목입니다.');
-        contentEditor.summernote('focus');
-        return false;
+// 모달창 내 Insert Video 버튼 기능 교체
+$(document).ready(function() {
+    // 모달이 나타날 때마다 체크하여 Insert Video 버튼 기능 교체
+    setInterval(function() {
+        const insertBtn = $('.note-video-btn[value="Insert Video"]');
+        if (insertBtn.length > 0 && !insertBtn.data('custom-attached')) {
+            insertBtn.data('custom-attached', true);
+            insertBtn.off('click').on('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // 모달창의 URL 입력값 가져오기
+                const videoUrl = $('.note-video-url').val();
+                
+                if (videoUrl && videoUrl.trim() !== '') {
+                    const embedCode = convertToEmbedCode(videoUrl.trim());
+                    
+                    if (embedCode) {
+                        // HTML 문자열을 DOM 요소로 변환
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = embedCode;
+                        const videoElement = tempDiv.firstElementChild;
+                        
+                        $('#content').summernote('insertNode', videoElement);
+                        
+                        // 모달창 닫기
+                        $('.modal').modal('hide');
+                    } else {
+                        alert('지원하지 않는 비디오 URL입니다. YouTube 또는 Vimeo URL을 입력해주세요.');
+                    }
+                } else {
+                    alert('비디오 URL을 입력해주세요.');
+                }
+                
+                return false;
+            });
+        }
+    }, 500);
+});
+
+// 폼 제출 전 콘텐츠 동기화 함수
+function syncEditorContent() {
+    // 메인 에디터 콘텐츠 동기화
+    if ($('#content').length && typeof $('#content').summernote === 'function') {
+        const content = $('#content').summernote('code');
+        $('#content').val(content);
     }
     
-    // 커스텀 필드 에디터 검사
-    const invalidEditor = $('.summernote-editor').filter(function() {
-        return $(this).prop('required') && $(this).summernote('isEmpty');
-    }).first();
-    
-    if (invalidEditor.length) {
-        const label = $('label[for="' + invalidEditor.attr('id') + '"]').text().replace('*', '').trim();
-        alert(label + '은(는) 필수 입력 항목입니다.');
-        invalidEditor.summernote('focus');
-        return false;
-    }
-    
-    return true;
+    // 커스텀 필드 에디터들 콘텐츠 동기화
+    $('.summernote-editor').each(function() {
+        const editorId = $(this).attr('id');
+        if (editorId && typeof $(this).summernote === 'function') {
+            const content = $(this).summernote('code');
+            $('#' + editorId).val(content);
+        }
+    });
 }
 
 // 페이지 로드 시 초기화
@@ -310,7 +677,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 100);
     }
     
-    // 파일 관리자 초기화
+    // 썸네일 관리자 초기화 (첨부파일과 완전 분리)
+    window.thumbnailManager = new ThumbnailManager();
+    
+    // 첨부파일 관리자 초기화 (썸네일과 완전 분리)
     window.fileManager = new FileManager();
     
     // 기존 첨부파일 제거 함수를 전역으로 사용할 수 있도록 설정
@@ -318,22 +688,17 @@ document.addEventListener('DOMContentLoaded', function() {
         window.fileManager.removeExistingFile(index);
     };
     
-    // 폼 제출 유효성 검사 (capture phase에서 먼저 실행)
-    document.addEventListener('submit', function(e) {
-        const form = e.target;
-        if (!form.matches('form')) return;
-        
-        if (!validateForm(form)) {
-            e.preventDefault();
-            e.stopImmediatePropagation();
-            
-            // ButtonManager가 버튼 상태를 변경했다면 복원
-            setTimeout(() => {
-                const submitBtn = form.querySelector('button[type="submit"]');
-                if (submitBtn && window.ButtonManager) {
-                    window.ButtonManager.restoreButton(submitBtn);
-                }
-            }, 0);
+    // 썸네일 제거 함수를 전역으로 사용할 수 있도록 설정
+    window.removeThumbnail = function() {
+        if (window.thumbnailManager) {
+            // 썸네일 매니저의 제거 함수 호출 (기존 썸네일 처리 포함)
+            window.thumbnailManager.removeThumbnail();
         }
-    }, true); // capture phase
+    };
+    
+    // 폼 제출 전 콘텐츠 동기화
+    $('form').on('submit', function() {
+        syncEditorContent();
+    });
 });
+

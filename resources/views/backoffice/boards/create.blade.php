@@ -32,6 +32,25 @@
             <form action="{{ route('backoffice.boards.store') }}" method="POST">
                 @csrf
 
+                <!-- 기본 정보 입력 -->
+                <div class="board-form-row">
+                    <div class="board-form-col board-form-col-6">
+                        <div class="board-form-group">
+                            <label for="name" class="board-form-label">게시판 이름 <span class="required">*</span></label>
+                            <input type="text" class="board-form-control" id="name" name="name" value="{{ old('name') }}" required>
+                            <small class="board-form-text">사용자에게 표시될 게시판 이름입니다.</small>
+                        </div>
+                    </div>
+
+                    <div class="board-form-col board-form-col-6">
+                        <div class="board-form-group">
+                            <label for="slug" class="board-form-label">게시판명 <span class="required">*</span></label>
+                            <input type="text" class="board-form-control" id="slug" name="slug" value="{{ old('slug') }}" required>
+                            <small class="board-form-text">URL에 사용될 고유 식별자입니다. (영문, 숫자, 하이픈, 언더스코어만 사용 가능)</small>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- 템플릿 선택 (필수) -->
                 <div class="board-form-group">
                     <label for="template_id" class="board-form-label">템플릿 선택 <span class="required">*</span></label>
@@ -92,29 +111,14 @@
                             <span class="label">커스텀 필드:</span>
                             <span id="infoCustomFields">-</span>
                         </div>
+                        <div class="board-template-info-row">
+                            <span class="label">단일 페이지:</span>
+                            <span id="infoSinglePage">-</span>
+                        </div>
                     </div>
                 </div>
 
                 <hr style="margin: 20px 0; border: 0; border-top: 1px solid #e9ecef;">
-
-                <!-- 기본 정보 입력 -->
-                <div class="board-form-row">
-                    <div class="board-form-col board-form-col-6">
-                        <div class="board-form-group">
-                            <label for="name" class="board-form-label">게시판 이름 <span class="required">*</span></label>
-                            <input type="text" class="board-form-control" id="name" name="name" value="{{ old('name') }}" required>
-                            <small class="board-form-text">사용자에게 표시될 게시판 이름입니다.</small>
-                        </div>
-                    </div>
-
-                    <div class="board-form-col board-form-col-6">
-                        <div class="board-form-group">
-                            <label for="slug" class="board-form-label">게시판 슬러그 <span class="required">*</span></label>
-                            <input type="text" class="board-form-control" id="slug" name="slug" value="{{ old('slug') }}" required>
-                            <small class="board-form-text">URL에 사용될 식별자입니다. 영문, 숫자, 대시(-), 언더스코어(_)만 사용 가능합니다.</small>
-                        </div>
-                    </div>
-                </div>
 
                 <div class="board-form-group">
                     <label for="description" class="board-form-label">설명</label>

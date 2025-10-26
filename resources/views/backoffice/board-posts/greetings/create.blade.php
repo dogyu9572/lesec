@@ -1,6 +1,6 @@
 @extends('backoffice.layouts.app')
 
-@section('title', '인사말 관리')
+@section('title', ($board->name ?? '게시판'))
 
 @section('styles')
      <link rel="stylesheet" href="{{ asset('css/backoffice/summernote-custom.css') }}">
@@ -18,7 +18,7 @@
 
     <div class="board-card">
         <div class="board-card-header">
-            <h6>인사말 관리</h6>
+            <h6>게시글 작성</h6>
         </div>
         <div class="board-card-body">
             @if ($errors->any())
@@ -34,13 +34,66 @@
             <form action="{{ route('backoffice.board-posts.store', $board->slug ?? 'notice') }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
-                <!-- 기본 필드들 숨김 처리 (greetings 게시판은 커스텀 필드만 사용) -->
-                <input type="hidden" name="is_notice" value="0">
-                <input type="hidden" name="category" value="인사말">
-                <input type="hidden" name="title" value="인사말">
-                <input type="hidden" name="content" value="인사말 내용">
+                @if($board->isNoticeEnabled())
+                <div class="board-form-group">
+                    <div class="board-checkbox-item">
+                        <input type="checkbox" 
+                               class="board-checkbox-input" 
+                               id="is_notice" 
+                               name="is_notice" 
+                               value="1" 
+                               @checked(old('is_notice') == '1')>
+                        <label for="is_notice" class="board-form-label">
+                            <i class="fas fa-bullhorn"></i> 공지글
+                        </label>
+                    </div>
+                    <small class="board-form-text">체크하면 공지글로 설정되어 최상단에 표시됩니다.</small>
+                </div>
+                @endif
 
-                <!-- 정렬 순서 입력 (정렬 기능이 활성화된 경우만) -->
+                @if($board->isFieldEnabled('category') && $categoryOptions && $categoryOptions->count() > 0)
+                <div class="board-form-group">
+                    <label for="category" class="board-form-label">
+                        카테고리 분류
+                        @if($board->isFieldRequired('category'))
+                            <span class="required">*</span>
+                        @endif
+                    </label>
+                    <select class="board-form-control" id="category" name="category" @if($board->isFieldRequired('category')) required @endif>
+                        <option value="">카테고리를 선택하세요</option>
+                        @foreach($categoryOptions as $category)
+                            <option value="{{ $category->name }}" @selected(old('category') == $category->name)>
+                                {{ $category->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                @endif
+
+                @if($board->isFieldEnabled('title'))
+                <div class="board-form-group">
+                    <label for="title" class="board-form-label">
+                        제목
+                        @if($board->isFieldRequired('title'))
+                            <span class="required">*</span>
+                        @endif
+                    </label>
+                    <input type="text" class="board-form-control" id="title" name="title" value="{{ old('title') }}" @if($board->isFieldRequired('title')) required @endif>
+                </div>
+                @endif
+
+                @if($board->isFieldEnabled('content'))
+                <div class="board-form-group">
+                    <label for="content" class="board-form-label">
+                        내용
+                        @if($board->isFieldRequired('content'))
+                            <span class="required">*</span>
+                        @endif
+                    </label>
+                    <textarea class="board-form-control board-form-textarea" id="content" name="content" rows="15" @if($board->isFieldRequired('content')) required @endif>{{ old('content') }}</textarea>
+                </div>
+                @endif
+
                 @if($board->enable_sorting)
                 <div class="board-form-group">
                     <label for="sort_order" class="board-form-label">정렬 순서</label>
@@ -75,7 +128,7 @@
                                             name="custom_field_{{ $fieldConfig['name'] }}"
                                             @if($fieldConfig['required']) required @endif>
                                         <option value="">선택하세요</option>
-                                        @foreach(explode("\n", $fieldConfig['options']) as $option)
+                                        @foreach(explode(",", $fieldConfig['options']) as $option)
                                             @php $option = trim($option); @endphp
                                             @if(!empty($option))
                                                 <option value="{{ $option }}" @selected(old('custom_field_' . $fieldConfig['name']) == $option)>
@@ -90,7 +143,7 @@
                             @elseif($fieldConfig['type'] === 'checkbox')
                                 @if($fieldConfig['options'])
                                     <div class="board-options-list board-options-horizontal">
-                                        @foreach(explode("\n", $fieldConfig['options']) as $option)
+                                        @foreach(explode(",", $fieldConfig['options']) as $option)
                                             @php $option = trim($option); @endphp
                                             @if(!empty($option))
                                                 <div class="board-option-item">
@@ -120,7 +173,7 @@
                             @elseif($fieldConfig['type'] === 'radio')
                                 @if($fieldConfig['options'])
                                     <div class="board-options-list board-options-horizontal">
-                                        @foreach(explode("\n", $fieldConfig['options']) as $option)
+                                        @foreach(explode(",", $fieldConfig['options']) as $option)
                                             @php $option = trim($option); @endphp
                                             @if(!empty($option))
                                                 <div class="board-option-item">
@@ -139,7 +192,7 @@
                                     <div class="board-form-text text-muted">라디오 버튼은 선택 옵션이 필요합니다.</div>
                                 @endif
                             @elseif($fieldConfig['type'] === 'date')
-                                <input type="text" 
+                                <input type="date" 
                                        class="board-form-control" 
                                        id="custom_field_{{ $fieldConfig['name'] }}" 
                                        name="custom_field_{{ $fieldConfig['name'] }}" 
@@ -160,12 +213,17 @@
                     @endforeach
                 @endif
 
-                <!-- 첨부파일 섹션 숨김 처리 (greetings 게시판은 커스텀 필드만 사용) -->
-                <div class="board-form-group" style="display: none;">
-                    <label class="board-form-label">첨부파일</label>
+                @if($board->isFieldEnabled('attachments'))
+                <div class="board-form-group">
+                    <label class="board-form-label">
+                        첨부파일
+                        @if($board->isFieldRequired('attachments'))
+                            <span class="required">*</span>
+                        @endif
+                    </label>
                     <div class="board-file-upload">
                         <div class="board-file-input-wrapper">
-                            <input type="file" class="board-file-input" id="attachments" name="attachments[]" multiple accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar">
+                            <input type="file" class="board-file-input" id="attachments" name="attachments[]" multiple accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar" @if($board->isFieldRequired('attachments')) required @endif>
                             <div class="board-file-input-content">
                                 <i class="fas fa-cloud-upload-alt"></i>
                                 <span class="board-file-input-text">파일을 선택하거나 여기로 드래그하세요</span>
@@ -175,6 +233,7 @@
                         <div class="board-file-preview" id="filePreview"></div>
                     </div>
                 </div>
+                @endif
 
                 <div class="board-form-actions">
                     <button type="submit" class="btn btn-primary">

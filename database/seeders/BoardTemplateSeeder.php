@@ -9,7 +9,7 @@ use App\Models\BoardSkin;
 class BoardTemplateSeeder extends Seeder
 {
     /**
-     * 시스템 기본 템플릿 시더
+     * 기본 템플릿 시더
      */
     public function run(): void
     {
@@ -47,7 +47,6 @@ class BoardTemplateSeeder extends Seeder
                 'permission_read' => 'all',
                 'permission_write' => 'admin',
                 'permission_comment' => 'member',
-                'is_system' => true,
                 'is_active' => true,
             ],
 
@@ -76,7 +75,6 @@ class BoardTemplateSeeder extends Seeder
                 'permission_read' => 'all',
                 'permission_write' => 'member',
                 'permission_comment' => 'member',
-                'is_system' => true,
                 'is_active' => true,
             ],
 
@@ -105,7 +103,6 @@ class BoardTemplateSeeder extends Seeder
                 'permission_read' => 'all',
                 'permission_write' => 'admin',
                 'permission_comment' => 'member',
-                'is_system' => true,
                 'is_active' => true,
             ],
 
@@ -134,18 +131,17 @@ class BoardTemplateSeeder extends Seeder
                 'permission_read' => 'all',
                 'permission_write' => 'member',
                 'permission_comment' => 'member',
-                'is_system' => true,
                 'is_active' => true,
             ],
         ];
 
         foreach ($templates as $template) {
             BoardTemplate::updateOrCreate(
-                ['name' => $template['name'], 'is_system' => true],
+                ['name' => $template['name']],
                 $template
             );
         }
 
-        $this->command->info('✓ 시스템 기본 템플릿 4종이 생성되었습니다.');
+        $this->command->info('✓ 기본 템플릿 4종이 생성되었습니다.');
     }
 }

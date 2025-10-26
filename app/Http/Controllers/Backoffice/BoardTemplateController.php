@@ -53,15 +53,15 @@ class BoardTemplateController extends BaseController
     public function store(CreateBoardTemplateRequest $request)
     {
         try {
-            $template = $this->templateService->createTemplate($request->validated());
+            $validated = $request->validated();
+            $template = $this->templateService->createTemplate($validated);
             
             return redirect()->route('backoffice.board-templates.index')
                 ->with('success', '게시판 템플릿이 성공적으로 생성되었습니다.');
                 
         } catch (\Exception $e) {
             Log::error('템플릿 생성 실패', [
-                'error' => $e->getMessage(),
-                'data' => $request->validated()
+                'error' => $e->getMessage()
             ]);
             
             return redirect()->back()
@@ -92,7 +92,12 @@ class BoardTemplateController extends BaseController
             ->pluck('category_group');
         
         $skins = $this->templateService->getActiveSkins();
-        return $this->view('backoffice.board-templates.edit', compact('boardTemplate', 'skins', 'categoryGroups'));
+        
+        // 사용 중인 게시판 정보 조회
+        $usedBoards = $boardTemplate->getUsedBoards();
+        $isInUse = $boardTemplate->isInUse();
+        
+        return $this->view('backoffice.board-templates.edit', compact('boardTemplate', 'skins', 'categoryGroups', 'usedBoards', 'isInUse'));
     }
 
     /**
@@ -124,12 +129,6 @@ class BoardTemplateController extends BaseController
     public function destroy(BoardTemplate $boardTemplate)
     {
         try {
-            // 시스템 템플릿 삭제 방지
-            if ($boardTemplate->is_system) {
-                return redirect()->back()
-                    ->withErrors(['error' => '시스템 템플릿은 삭제할 수 없습니다.']);
-            }
-            
             // 사용 중인 템플릿 삭제 방지
             if ($boardTemplate->boards()->count() > 0) {
                 return redirect()->back()

@@ -19,15 +19,6 @@ class UpdateBoardTemplateRequest extends FormRequest
      */
     public function rules(): array
     {
-        $template = $this->route('board_template');
-        
-        // 시스템 템플릿인 경우 활성화 여부만 수정 가능
-        if ($template && $template->is_system) {
-            return [
-                'is_active' => 'nullable|boolean',
-            ];
-        }
-        
         return [
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -85,6 +76,7 @@ class UpdateBoardTemplateRequest extends FormRequest
             'enable_sorting' => 'nullable|boolean',
             'enable_category' => 'nullable|boolean',
             'category_group' => 'nullable|string|max:50',
+            'is_single_page' => 'nullable|boolean',
             
             // 목록 및 권한 설정
             'list_count' => 'nullable|integer|min:5|max:100',

@@ -117,6 +117,23 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     background: white !important;
     padding: 4px 0 !important;
+    max-height: 300px !important; /* 최대 높이 설정 */
+    overflow-y: auto !important; /* 스크롤 가능 */
+    z-index: 9999 !important; /* 다른 요소 위에 표시 */
+    position: absolute !important;
+}
+
+/* Summernote tooltip 완전 비활성화 */
+.note-tooltip,
+.note-popover,
+.note-toolbar .note-btn[title]:hover::after,
+.note-toolbar .note-btn[title]:hover::before,
+.note-toolbar .note-btn[data-original-title]:hover::after,
+.note-toolbar .note-btn[data-original-title]:hover::before {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
 }
 
 .note-dropdown-menu .note-btn {
@@ -125,11 +142,31 @@
     border: none !important;
     padding: 6px 16px !important;
     border-radius: 0 !important;
+    white-space: nowrap !important; /* 텍스트 줄바꿈 방지 */
 }
 
 .note-dropdown-menu .note-btn:hover {
     background: #f8f9fa !important;
     color: #212529 !important;
+}
+
+/* 드롭다운 메뉴 위치 조정 */
+.note-dropdown-menu {
+    min-width: 120px !important;
+    max-width: 200px !important;
+}
+
+/* 폰트 크기 드롭다운 특별 처리 */
+.note-dropdown-menu[data-event="fontSize"] {
+    max-height: 250px !important;
+    overflow-y: auto !important;
+}
+
+/* 색상 선택 드롭다운 특별 처리 */
+.note-dropdown-menu[data-event="foreColor"],
+.note-dropdown-menu[data-event="backColor"] {
+    max-height: 200px !important;
+    overflow-y: auto !important;
 }
 
 /* 그룹 간 구분선 제거 */
@@ -150,4 +187,88 @@
 /* 드롭다운 버튼 내부 간격 최적화 */
 .note-toolbar .note-btn-group .note-btn.dropdown-toggle {
     padding-right: 8px !important;
+}
+
+/* 비디오 컨테이너 스타일 - 비디오 삽입 기능용 */
+.video-container {
+    position: relative;
+    padding-bottom: 56.25%; /* 16:9 비율 */
+    height: 0;
+    overflow: hidden;
+    margin: 20px 0;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.video-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* 에디터 내부 비디오 스타일 */
+.note-editable .video-container {
+    max-width: 100%;
+    margin: 16px auto;
+}
+
+/* Summernote 에디터 컨테이너 z-index 설정 */
+.note-editor {
+    position: relative !important;
+    z-index: 1000 !important;
+}
+
+.note-toolbar {
+    position: relative !important;
+    z-index: 1001 !important;
+}
+
+/* 드롭다운 메뉴가 다른 요소에 가려지지 않도록 */
+.note-dropdown-menu {
+    z-index: 9998 !important;
+    position: absolute !important;
+}
+
+/* Summernote 모달 완전 분리 */
+.note-modal {
+    z-index: 999999 !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background-color: rgba(0, 0, 0, 0.5) !important;
+}
+
+.note-modal .modal-dialog {
+    z-index: 1000000 !important;
+    position: relative !important;
+    margin: 50px auto !important;
+    pointer-events: auto !important;
+}
+
+.note-modal .modal-content {
+    z-index: 1000001 !important;
+    pointer-events: auto !important;
+    position: relative !important;
+}
+
+/* modal-backdrop 숨김 처리 */
+.modal-backdrop {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    z-index: -1 !important;
+    pointer-events: none !important;
+}
+
+.modal-backdrop.show {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    z-index: -1 !important;
+    pointer-events: none !important;
 }

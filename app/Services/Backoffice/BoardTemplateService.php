@@ -15,7 +15,6 @@ class BoardTemplateService
     public function getTemplates(int $perPage = 10)
     {
         return BoardTemplate::with('skin')
-            ->orderBy('is_system', 'desc')
             ->orderBy('id', 'desc')
             ->paginate($perPage);
     }
@@ -39,15 +38,10 @@ class BoardTemplateService
             $query->where('skin_id', $request->skin_id);
         }
         
-        if ($request->filled('is_system')) {
-            $query->where('is_system', $request->is_system);
-        }
-        
         $perPage = $request->get('per_page', 10);
         $perPage = in_array($perPage, [10, 20, 50, 100]) ? $perPage : 10;
         
-        return $query->orderBy('is_system', 'desc')
-            ->orderBy('id', 'desc')
+        return $query->orderBy('id', 'desc')
             ->paginate($perPage);
     }
 
@@ -66,7 +60,6 @@ class BoardTemplateService
     {
         return BoardTemplate::with('skin')
             ->where('is_active', true)
-            ->orderBy('is_system', 'desc')
             ->orderBy('name')
             ->get();
     }
@@ -86,7 +79,7 @@ class BoardTemplateService
         $data['enable_notice'] = $data['enable_notice'] ?? false;
         $data['enable_sorting'] = $data['enable_sorting'] ?? false;
         $data['enable_category'] = $data['enable_category'] ?? false;
-        $data['is_system'] = $data['is_system'] ?? false;
+        $data['is_single_page'] = $data['is_single_page'] ?? false;
         $data['is_active'] = $data['is_active'] ?? true;
         
         return BoardTemplate::create($data);
@@ -97,14 +90,6 @@ class BoardTemplateService
      */
     public function updateTemplate(BoardTemplate $template, array $data): bool
     {
-        // 시스템 템플릿은 일부 필드만 수정 가능
-        if ($template->is_system) {
-            // 시스템 템플릿은 활성화 여부만 변경 가능
-            return $template->update([
-                'is_active' => $data['is_active'] ?? $template->is_active,
-            ]);
-        }
-        
         // 필드 설정 처리
         $data['field_config'] = $this->processFieldConfig($data);
         
@@ -115,6 +100,7 @@ class BoardTemplateService
         $data['enable_notice'] = $data['enable_notice'] ?? false;
         $data['enable_sorting'] = $data['enable_sorting'] ?? false;
         $data['enable_category'] = $data['enable_category'] ?? false;
+        $data['is_single_page'] = $data['is_single_page'] ?? false;
         $data['is_active'] = $data['is_active'] ?? true;
         
         return $template->update($data);
@@ -125,12 +111,7 @@ class BoardTemplateService
      */
     public function deleteTemplate(BoardTemplate $template): bool
     {
-        // 시스템 템플릿은 삭제 불가
-        if ($template->is_system) {
-            return false;
-        }
-        
-        // 사용 중인 템플릿인지 확인
+        // 사용 중인 템플릿 삭제 불가
         if ($template->boards()->count() > 0) {
             return false;
         }

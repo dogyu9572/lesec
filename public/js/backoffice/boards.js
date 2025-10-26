@@ -295,6 +295,12 @@ function displayTemplateInfo(template) {
         document.getElementById('infoCustomFields').textContent = '없음';
     }
     
+    // 단일 페이지
+    const infoSinglePage = document.getElementById('infoSinglePage');
+    if (infoSinglePage) {
+        infoSinglePage.textContent = template.is_single_page ? '사용' : '사용 안함';
+    }
+    
     // 정보 박스 표시
     templateInfo.style.display = 'block';
 }

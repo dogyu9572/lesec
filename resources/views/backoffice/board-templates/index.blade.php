@@ -59,13 +59,6 @@
                             </select>
                         </div>
                         <div class="board-filter-col">
-                            <select name="is_system" class="board-form-control">
-                                <option value="">전체 유형</option>
-                                <option value="1" @selected(request('is_system') === '1')>시스템</option>
-                                <option value="0" @selected(request('is_system') === '0')>사용자</option>
-                            </select>
-                        </div>
-                        <div class="board-filter-col">
                             <button type="submit" class="btn btn-primary">검색</button>
                             <a href="{{ route('backoffice.board-templates.index') }}" class="btn btn-secondary">초기화</a>
                         </div>
@@ -79,13 +72,12 @@
                     <thead>
                         <tr>
                             <th width="5%">번호</th>
-                            <th width="25%">템플릿명</th>
+                            <th width="23%">템플릿명</th>
                             <th width="15%">스킨</th>
-                            <th width="10%">유형</th>
-                            <th width="8%">사용 게시판</th>
-                            <th width="8%">상태</th>
-                            <th width="15%">등록일</th>
-                            <th width="14%">관리</th>
+                            <th width="10%">사용 게시판</th>
+                            <th width="10%">상태</th>
+                            <th width="13%">등록일</th>
+                            <th width="24%">관리</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -96,13 +88,6 @@
                                     <strong>{{ $template->name }}</strong>
                                 </td>
                                 <td>{{ $template->skin->name ?? '-' }}</td>
-                                <td>
-                                    @if($template->is_system)
-                                        <span class="badge badge-info">시스템</span>
-                                    @else
-                                        <span class="badge badge-secondary">사용자</span>
-                                    @endif
-                                </td>
                                 <td>{{ $template->boards()->count() }}개</td>
                                 <td>
                                     @if($template->is_active)
@@ -123,7 +108,7 @@
                                                 <i class="fas fa-copy"></i> 복제
                                             </button>
                                         </form>
-                                        @unless($template->is_system)
+                                        @if($template->boards()->count() == 0)
                                             <form action="{{ route('backoffice.board-templates.destroy', $template) }}" method="POST" 
                                                   onsubmit="return confirm('정말 삭제하시겠습니까?')" style="display: inline;">
                                                 @csrf
@@ -132,13 +117,13 @@
                                                     <i class="fas fa-trash"></i> 삭제
                                                 </button>
                                             </form>
-                                        @endunless
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="text-center">등록된 템플릿이 없습니다.</td>
+                                <td colspan="7" class="text-center">등록된 템플릿이 없습니다.</td>
                             </tr>
                         @endforelse
                     </tbody>

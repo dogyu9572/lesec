@@ -109,26 +109,13 @@
 
                 <hr style="margin: 30px 0; border: 0; border-top: 1px solid #e9ecef;">
 
-                <!-- 카테고리 그룹 설정 -->
-                <div class="board-form-group">
-                    <label for="category_group" class="board-form-label">카테고리 그룹</label>
-                    <select class="board-form-control" id="category_group" name="category_group">
-                        <option value="">카테고리 사용 안함</option>
-                        @foreach($categoryGroups as $group)
-                            <option value="{{ $group }}" @selected(old('category_group') == $group)>
-                                {{ $group }}
-                            </option>
-                        @endforeach
-                    </select>
-                    <small class="board-form-text">카테고리를 사용하려면 그룹을 선택하세요. 카테고리 관리 메뉴에서 등록된 그룹들이 표시됩니다.</small>
-                </div>
-
-                <hr style="margin: 30px 0; border: 0; border-top: 1px solid #e9ecef;">
-
                 <!-- 커스텀 필드 설정 -->
                 <div class="board-form-group">
                     <label class="board-form-label">커스텀 필드 설정</label>
-                    <small class="board-form-text">게시글 작성 시 추가로 입력받을 필드들을 설정할 수 있습니다.</small>
+                    <small class="board-form-text">
+                        게시글 작성 시 추가로 입력받을 필드들을 설정할 수 있습니다. 
+                        select, radio, checkbox 타입의 경우 옵션을 쉼표(,)로 구분하여 입력하세요.
+                    </small>
                     <div class="custom-fields-container">
                         <div class="custom-fields-list" id="customFieldsList">
                             <!-- 커스텀 필드들이 동적으로 추가됩니다 -->
@@ -143,15 +130,15 @@
 
                 <!-- 기능 설정 -->
                 <div class="board-form-row">
-                    <div class="board-form-col board-form-col-4">
+                    <div class="board-form-col board-form-col-3">
                         <div class="board-form-group">
                             <div class="board-checkbox-group">
-                                <input type="checkbox" id="enable_notice" name="enable_notice" value="1" @checked(old('enable_notice', true))>
+                                <input type="checkbox" id="enable_notice" name="enable_notice" value="1" @checked(old('enable_notice', false))>
                                 <label for="enable_notice">공지사항 기능 사용</label>
                             </div>
                         </div>
                     </div>
-                    <div class="board-form-col board-form-col-4">
+                    <div class="board-form-col board-form-col-3">
                         <div class="board-form-group">
                             <div class="board-checkbox-group">
                                 <input type="checkbox" id="enable_sorting" name="enable_sorting" value="1" @checked(old('enable_sorting'))>
@@ -159,14 +146,36 @@
                             </div>
                         </div>
                     </div>
-                    <div class="board-form-col board-form-col-4">
+                    <div class="board-form-col board-form-col-3">
                         <div class="board-form-group">
                             <div class="board-checkbox-group">
-                                <input type="checkbox" id="enable_category" name="enable_category" value="1" @checked(old('enable_category', true))>
+                                <input type="checkbox" id="enable_category" name="enable_category" value="1" @checked(old('enable_category', false))>
                                 <label for="enable_category">카테고리 기능 사용</label>
                             </div>
                         </div>
                     </div>
+                    <div class="board-form-col board-form-col-3">
+                        <div class="board-form-group">
+                            <div class="board-checkbox-group">
+                                <input type="checkbox" id="is_single_page" name="is_single_page" value="1" @checked(old('is_single_page', false))>
+                                <label for="is_single_page">단일 페이지 모드</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 카테고리 그룹 설정 (카테고리 기능 사용 시에만 표시) -->
+                <div class="board-form-group" id="category_group_wrapper" style="display: none;">
+                    <label for="category_group" class="board-form-label">카테고리 그룹</label>
+                    <select class="board-form-control" id="category_group" name="category_group">
+                        <option value="">카테고리 그룹 선택</option>
+                        @foreach($categoryGroups as $group)
+                            <option value="{{ $group }}" @selected(old('category_group') == $group)>
+                                {{ $group }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <small class="board-form-text">카테고리를 사용하려면 그룹을 선택하세요. 카테고리 관리 메뉴에서 등록된 그룹들이 표시됩니다.</small>
                 </div>
 
                 <!-- 목록 및 권한 설정 -->
@@ -174,7 +183,15 @@
                     <div class="board-form-col board-form-col-6">
                         <div class="board-form-group">
                             <label for="list_count" class="board-form-label">페이지당 글 수</label>
-                            <input type="number" class="board-form-control" id="list_count" name="list_count" value="{{ old('list_count', 15) }}" min="5" max="100">
+                            <select class="board-form-control" id="list_count" name="list_count">
+                                <option value="10" @selected(old('list_count', 15) == 10)>10</option>
+                                <option value="15" @selected(old('list_count', 15) == 15)>15</option>
+                                <option value="20" @selected(old('list_count', 15) == 20)>20</option>
+                                <option value="30" @selected(old('list_count', 15) == 30)>30</option>
+                                <option value="50" @selected(old('list_count', 15) == 50)>50</option>
+                                <option value="100" @selected(old('list_count', 15) == 100)>100</option>
+                                <option value="999999" @selected(old('list_count', 15) == 999999)>전체</option>
+                            </select>
                         </div>
                     </div>
                 </div>

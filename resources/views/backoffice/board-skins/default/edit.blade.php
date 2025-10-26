@@ -44,27 +44,48 @@
                 </div>
                 @endif
 
+                @if($board->isFieldEnabled('category') && $categoryOptions && $categoryOptions->count() > 0)
                 <div class="board-form-group">
-                    <label for="category" class="board-form-label">카테고리 분류</label>
-                    <select class="board-form-control" id="category" name="category">
+                    <label for="category" class="board-form-label">
+                        카테고리 분류
+                        @if($board->isFieldRequired('category'))
+                            <span class="required">*</span>
+                        @endif
+                    </label>
+                    <select class="board-form-control" id="category" name="category" @if($board->isFieldRequired('category')) required @endif>
                         <option value="">카테고리를 선택하세요</option>
-                        <option value="일반" @selected($post->category == '일반')>일반</option>
-                        <option value="공지" @selected($post->category == '공지')>공지</option>
-                        <option value="안내" @selected($post->category == '안내')>안내</option>
-                        <option value="이벤트" @selected($post->category == '이벤트')>이벤트</option>
-                        <option value="기타" @selected($post->category == '기타')>기타</option>
+                        @foreach($categoryOptions as $category)
+                            <option value="{{ $category->name }}" @selected(old('category', $post->category) == $category->name)>
+                                {{ $category->name }}
+                            </option>
+                        @endforeach
                     </select>
                 </div>
+                @endif
 
+                @if($board->isFieldEnabled('title'))
                 <div class="board-form-group">
-                    <label for="title" class="board-form-label">제목 <span class="required">*</span></label>
-                    <input type="text" class="board-form-control" id="title" name="title" value="{{ $post->title }}" required>
+                    <label for="title" class="board-form-label">
+                        제목
+                        @if($board->isFieldRequired('title'))
+                            <span class="required">*</span>
+                        @endif
+                    </label>
+                    <input type="text" class="board-form-control" id="title" name="title" value="{{ $post->title }}" @if($board->isFieldRequired('title')) required @endif>
                 </div>
+                @endif
 
+                @if($board->isFieldEnabled('content'))
                 <div class="board-form-group">
-                    <label for="content" class="board-form-label">내용 <span class="required">*</span></label>
-                    <textarea class="board-form-control board-form-textarea" id="content" name="content" rows="15" required>{{ $post->content }}</textarea>
+                    <label for="content" class="board-form-label">
+                        내용
+                        @if($board->isFieldRequired('content'))
+                            <span class="required">*</span>
+                        @endif
+                    </label>
+                    <textarea class="board-form-control board-form-textarea" id="content" name="content" rows="15" @if($board->isFieldRequired('content')) required @endif>{{ $post->content }}</textarea>
                 </div>
+                @endif
 
                 @if($board->enable_sorting)
                 <div class="board-form-group">
@@ -109,7 +130,7 @@
                                         @if($fieldConfig['required']) required @endif>
                                     <option value="">선택하세요</option>
                                     @if($fieldConfig['options'])
-                                        @foreach(explode("\n", $fieldConfig['options']) as $option)
+                                        @foreach(explode(",", $fieldConfig['options']) as $option)
                                             @php $option = trim($option); @endphp
                                             @if(!empty($option))
                                                 <option value="{{ $option }}" @selected(old('custom_field_' . $fieldConfig['name'], $fieldValue) == $option)>
@@ -122,7 +143,7 @@
                             @elseif($fieldConfig['type'] === 'checkbox')
                                 @if($fieldConfig['options'])
                                     <div class="board-options-list board-options-horizontal">
-                                        @foreach(explode("\n", $fieldConfig['options']) as $option)
+                                        @foreach(explode(",", $fieldConfig['options']) as $option)
                                             @php $option = trim($option); @endphp
                                             @if(!empty($option))
                                                 @php
@@ -161,7 +182,7 @@
                             @elseif($fieldConfig['type'] === 'radio')
                                 @if($fieldConfig['options'])
                                     <div class="board-options-list board-options-horizontal">
-                                        @foreach(explode("\n", $fieldConfig['options']) as $option)
+                                        @foreach(explode(",", $fieldConfig['options']) as $option)
                                             @php $option = trim($option); @endphp
                                             @if(!empty($option))
                                                 @php
@@ -202,11 +223,17 @@
                     @endforeach
                 @endif
 
+                @if($board->isFieldEnabled('attachments'))
                 <div class="board-form-group">
-                    <label class="board-form-label">첨부파일</label>
+                    <label class="board-form-label">
+                        첨부파일
+                        @if($board->isFieldRequired('attachments'))
+                            <span class="required">*</span>
+                        @endif
+                    </label>
                     <div class="board-file-upload">
                         <div class="board-file-input-wrapper">
-                            <input type="file" class="board-file-input" id="attachments" name="attachments[]" multiple accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar">
+                            <input type="file" class="board-file-input" id="attachments" name="attachments[]" multiple accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar" @if($board->isFieldRequired('attachments')) required @endif>
                             <div class="board-file-input-content">
                                 <i class="fas fa-cloud-upload-alt"></i>
                                 <span class="board-file-input-text">파일을 선택하거나 여기로 드래그하세요</span>

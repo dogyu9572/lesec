@@ -5,6 +5,7 @@ namespace App\Services\Backoffice;
 use App\Models\Board;
 use App\Models\BoardSkin;
 use App\Models\BoardTemplate;
+use App\Services\Backoffice\BoardFileGeneratorService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
@@ -90,7 +91,15 @@ class BoardService
 
         // 커스텀 필드 설정 처리
         $customFieldsConfig = null;
-        if (isset($data['custom_fields']) && !empty($data['custom_fields'])) {
+        
+        // 템플릿에서 가져온 custom_fields_config가 있으면 사용
+        if (isset($data['custom_fields_config']) && !empty($data['custom_fields_config'])) {
+            if (is_string($data['custom_fields_config'])) {
+                $customFieldsConfig = json_decode($data['custom_fields_config'], true) ?: null;
+            } else {
+                $customFieldsConfig = $data['custom_fields_config'];
+            }
+        } elseif (isset($data['custom_fields']) && !empty($data['custom_fields'])) {
             // 문자열로 온 경우 JSON 디코딩
             if (is_string($data['custom_fields'])) {
                 $data['custom_fields'] = json_decode($data['custom_fields'], true) ?: [];
@@ -127,6 +136,8 @@ class BoardService
             'custom_fields_config' => $template->custom_fields_config,
             'enable_notice' => $template->enable_notice,
             'enable_sorting' => $template->enable_sorting,
+            'enable_category' => $template->enable_category,
+            'is_single_page' => $template->is_single_page,
             'list_count' => $template->list_count,
             'permission_read' => $template->permission_read,
             'permission_write' => $template->permission_write,
@@ -167,48 +178,31 @@ class BoardService
      */
     public function updateBoard(Board $board, array $data): bool
     {
-        // enable_notice 기본값 설정 (체크되지 않은 경우 false)
-        if (!isset($data['enable_notice'])) {
-            $data['enable_notice'] = false;
-        }
-
-        // is_single_page 기본값 설정 (체크되지 않은 경우 false)
-        if (!isset($data['is_single_page'])) {
-            $data['is_single_page'] = false;
-        }
-
-        // enable_sorting 기본값 설정 (체크되지 않은 경우 false)
-        if (!isset($data['enable_sorting'])) {
-            $data['enable_sorting'] = false;
-        }
-
-        // 필드 설정 처리
-        if (isset($data['field_config'])) {
-            if (is_string($data['field_config'])) {
-                $data['field_config'] = json_decode($data['field_config'], true) ?: null;
+        // 템플릿 변경 시 설정 자동 업데이트
+        if (isset($data['template_id']) && $data['template_id'] != $board->template_id) {
+            $template = \App\Models\BoardTemplate::find($data['template_id']);
+            if ($template) {
+                $data = array_merge($data, [
+                    'skin_id' => $template->skin_id,
+                    'field_config' => $template->field_config,
+                    'custom_fields_config' => $template->custom_fields_config,
+                    'enable_notice' => $template->enable_notice,
+                    'enable_sorting' => $template->enable_sorting,
+                    'enable_category' => $template->enable_category,
+                    'is_single_page' => $template->is_single_page,
+                    'list_count' => $template->list_count,
+                    'permission_read' => $template->permission_read,
+                    'permission_write' => $template->permission_write,
+                    'permission_comment' => $template->permission_comment,
+                ]);
             }
         }
-
-        // 커스텀 필드 설정 처리
-        if (isset($data['custom_fields'])) {
-            // custom_fields가 문자열로 오는 경우 배열로 변환
-            if (is_string($data['custom_fields'])) {
-                $data['custom_fields'] = json_decode($data['custom_fields'], true) ?: [];
-            }
-            
-            if (is_array($data['custom_fields']) && !empty($data['custom_fields'])) {
-                $customFieldsConfig = $this->processCustomFieldsConfig($data['custom_fields']);
-                $data['custom_fields_config'] = $customFieldsConfig;
-            } else {
-                // 커스텀 필드가 비어있거나 삭제된 경우 null로 설정
-                $data['custom_fields_config'] = null;
-            }
-        }
-
-        $result = $board->update($data);
-
-
-        return $result;
+        
+        // 기본 정보만 업데이트 (템플릿에서 가져온 설정은 변경 불가)
+        $allowedFields = ['name', 'slug', 'description', 'template_id', 'is_active', 'skin_id', 'field_config', 'custom_fields_config', 'enable_notice', 'enable_sorting', 'enable_category', 'is_single_page', 'list_count', 'permission_read', 'permission_write', 'permission_comment'];
+        $updateData = array_intersect_key($data, array_flip($allowedFields));
+        
+        return $board->update($updateData);
     }
 
     /**
@@ -222,7 +216,7 @@ class BoardService
             
             if ($result) {
                 // 3. 관련 리소스 삭제 (BoardFileGeneratorService 사용)
-                $fileGeneratorService = new \App\Services\BoardFileGeneratorService();
+                $fileGeneratorService = new BoardFileGeneratorService();
                 $fileGeneratorService->deleteBoardResources($board);
             }
             

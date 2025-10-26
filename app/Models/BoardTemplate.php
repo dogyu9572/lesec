@@ -23,7 +23,7 @@ class BoardTemplate extends Model
         'permission_read',
         'permission_write',
         'permission_comment',
-        'is_system',
+        'is_single_page',
         'is_active',
     ];
 
@@ -33,7 +33,7 @@ class BoardTemplate extends Model
         'enable_notice' => 'boolean',
         'enable_sorting' => 'boolean',
         'enable_category' => 'boolean',
-        'is_system' => 'boolean',
+        'is_single_page' => 'boolean',
         'is_active' => 'boolean',
     ];
 
@@ -45,7 +45,6 @@ class BoardTemplate extends Model
         'permission_read' => 'all',
         'permission_write' => 'member',
         'permission_comment' => 'member',
-        'is_system' => false,
         'is_active' => true,
     ];
 
@@ -112,14 +111,6 @@ class BoardTemplate extends Model
     }
 
     /**
-     * 시스템 템플릿 여부 확인
-     */
-    public function isSystem(): bool
-    {
-        return (bool) $this->is_system;
-    }
-
-    /**
      * 활성화된 템플릿만 조회
      */
     public function scopeActive($query)
@@ -128,11 +119,27 @@ class BoardTemplate extends Model
     }
 
     /**
-     * 시스템 템플릿 조회
+     * 이 템플릿을 사용하는 게시판 수를 반환합니다.
      */
-    public function scopeSystem($query)
+    public function getUsedBoardCount(): int
     {
-        return $query->where('is_system', true);
+        return $this->boards()->count();
+    }
+
+    /**
+     * 이 템플릿이 사용 중인지 확인합니다.
+     */
+    public function isInUse(): bool
+    {
+        return $this->getUsedBoardCount() > 0;
+    }
+
+    /**
+     * 이 템플릿을 사용하는 게시판 목록을 반환합니다.
+     */
+    public function getUsedBoards()
+    {
+        return $this->boards()->get();
     }
 }
 

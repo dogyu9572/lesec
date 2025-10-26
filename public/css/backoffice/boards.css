@@ -5,54 +5,58 @@
 
 /* 템플릿 정보 표시 박스 */
 .board-template-info {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
     border-radius: 8px;
-    padding: 0;
+    padding: 20px;
     margin: 20px 0;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-.board-template-info-header {
-    background: rgba(255, 255, 255, 0.15);
-    padding: 12px 20px;
-    color: #fff;
-    font-weight: 600;
-    font-size: 14px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.board-template-info-header i {
-    margin-right: 8px;
-}
-
-.board-template-info-body {
-    background: #fff;
-    padding: 15px 20px;
-}
-
-.board-template-info-row {
+.template-info-header {
     display: flex;
-    padding: 10px 0;
-    border-bottom: 1px solid #f0f0f0;
     align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #dee2e6;
 }
 
-.board-template-info-row:last-child {
-    border-bottom: none;
-}
-
-.board-template-info-row .label {
-    min-width: 140px;
-    font-weight: 600;
+.template-info-header h6 {
+    margin: 0;
     color: #495057;
-    font-size: 14px;
+    font-size: 16px;
+    font-weight: 600;
 }
 
-.board-template-info-row span:not(.label) {
+.template-info-header i {
+    margin-right: 8px;
+    color: #6c757d;
+}
+
+.template-info-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.template-info-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 8px 0;
+}
+
+.template-info-label {
+    min-width: 120px;
+    font-weight: 600;
+    color: #6c757d;
+    font-size: 13px;
+}
+
+.template-info-value {
     color: #212529;
-    font-size: 14px;
+    font-size: 13px;
     flex: 1;
+    line-height: 1.5;
 }
 
 /* 사이드바 토글 버튼 강제 표시 (모바일에서만) */
@@ -249,6 +253,53 @@
     gap: 0.5rem;
 }
 
+/* 사용 중인 게시판 목록 스타일 */
+.used-boards-list {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 15px;
+    margin-top: 10px;
+}
+
+.used-board-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.used-board-item:last-child {
+    border-bottom: none;
+}
+
+.used-board-item .board-name {
+    font-weight: 500;
+    color: #495057;
+}
+
+.used-board-item .board-slug {
+    color: #6c757d;
+    font-size: 0.9em;
+    margin-left: 8px;
+}
+
+.used-board-item .btn {
+    margin-left: auto;
+}
+
+/* 배지 스타일 개선 */
+.badge-warning {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.badge-info {
+    background-color: #17a2b8;
+    color: #fff;
+}
+
 .per-page-form {
     display: flex;
     align-items: center;
@@ -369,20 +420,31 @@
 
 /* 템플릿 액션 버튼들 */
 .template-actions {
-    display: inline-flex;
-    gap: 8px;
+    display: flex;
+    gap: 4px;
     align-items: center;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     justify-content: center;
+    flex-direction: row;
+    width: 100%;
 }
 
 .template-actions .btn {
     border-radius: 4px !important;
     white-space: nowrap;
     margin: 0;
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+    min-width: auto;
 }
 
 .template-actions form {
     margin: 0;
-    display: inline;
+    display: inline-flex;
+}
+
+.template-actions button {
+    white-space: nowrap;
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
 }

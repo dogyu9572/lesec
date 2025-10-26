@@ -105,8 +105,13 @@ class BoardController extends BaseController
      */
     public function edit(Board $board)
     {
-        $skins = $this->boardService->getActiveSkins();
-        return $this->view('backoffice.boards.edit', compact('board', 'skins'));
+        $board->load('template.skin');
+        $templates = \App\Models\BoardTemplate::where('is_active', true)
+            ->orderBy('is_system', 'desc')
+            ->orderBy('id', 'desc')
+            ->get();
+        
+        return $this->view('backoffice.boards.edit', compact('board', 'templates'));
     }
 
     /**

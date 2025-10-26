@@ -4,6 +4,7 @@ let customFieldCounter = 0;
 // 페이지 로드 시 초기화
 document.addEventListener('DOMContentLoaded', function() {
     initializeCustomFieldCounter();
+    initializeCategoryGroupToggle();
 });
 
 /**
@@ -279,5 +280,40 @@ function updateFieldNumbers() {
  */
 function updateCustomFieldsHiddenInput() {
     // 현재는 필요 없지만 향후 확장성을 위해 유지
+}
+
+/**
+ * 카테고리 그룹 설정 토글 초기화
+ */
+function initializeCategoryGroupToggle() {
+    const enableCategoryCheckbox = document.getElementById('enable_category');
+    const categoryGroupWrapper = document.getElementById('category_group_wrapper');
+    const categoryGroupSelect = document.getElementById('category_group');
+    
+    if (!enableCategoryCheckbox || !categoryGroupWrapper) {
+        return;
+    }
+    
+    // 초기 상태 설정
+    function toggleCategoryGroup() {
+        if (enableCategoryCheckbox.checked) {
+            categoryGroupWrapper.style.display = 'block';
+            if (categoryGroupSelect) {
+                categoryGroupSelect.setAttribute('name', 'category_group');
+            }
+        } else {
+            categoryGroupWrapper.style.display = 'none';
+            if (categoryGroupSelect) {
+                categoryGroupSelect.removeAttribute('name');
+                categoryGroupSelect.value = '';
+            }
+        }
+    }
+    
+    // 초기 상태 확인
+    toggleCategoryGroup();
+    
+    // 체크박스 변경 시 토글
+    enableCategoryCheckbox.addEventListener('change', toggleCategoryGroup);
 }
 

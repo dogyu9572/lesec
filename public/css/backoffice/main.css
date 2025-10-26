@@ -769,6 +769,10 @@ table {
     flex: 1;
 }
 
+.board-form-col-3 {
+    flex: 0 0 calc(25% - 15px);
+}
+
 .board-form-col-4 {
     flex: 0 0 calc(33.333% - 13.333px);
 }
@@ -979,6 +983,7 @@ table {
     }
     
     .board-form-col,
+    .board-form-col-3,
     .board-form-col-4,
     .board-form-col-6 {
         flex: none;

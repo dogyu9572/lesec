@@ -17,8 +17,8 @@
     <div class="board-card">
         <div class="board-card-header">
             <h6>템플릿 정보 수정</h6>
-            @if($boardTemplate->is_system)
-                <span class="badge badge-info">시스템 템플릿 (제한적 수정)</span>
+            @if($isInUse)
+                <span class="badge badge-warning">사용 중인 템플릿</span>
             @endif
         </div>
         <div class="board-card-body">
@@ -36,26 +36,33 @@
                 @csrf
                 @method('PUT')
 
-                @if($boardTemplate->is_system)
-                    <!-- 시스템 템플릿은 활성화 여부만 수정 가능 -->
-                    <div class="board-alert board-alert-info">
-                        시스템 템플릿은 활성화 여부만 변경할 수 있습니다.
-                    </div>
-                    
-                    <div class="board-form-group">
-                        <label class="board-form-label">템플릿 이름</label>
-                        <p class="form-control-plaintext">{{ $boardTemplate->name }}</p>
+                @if($isInUse)
+                    <!-- 사용 중인 템플릿 경고 -->
+                    <div class="board-alert board-alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        이 템플릿은 {{ count($usedBoards) }}개의 게시판에서 사용 중입니다.
+                        템플릿 수정 시 기존 게시판에는 자동으로 반영되지 않습니다.
+                        각 게시판에서 템플릿을 다시 선택하거나 수동으로 설정을 변경해야 합니다.
                     </div>
 
+                    <!-- 사용 중인 게시판 목록 표시 -->
                     <div class="board-form-group">
-                        <div class="board-checkbox-group">
-                            <input type="checkbox" id="is_active" name="is_active" value="1" @checked(old('is_active', $boardTemplate->is_active))>
-                            <label for="is_active">활성화</label>
+                        <label class="board-form-label">사용 중인 게시판</label>
+                        <div class="used-boards-list">
+                            @foreach($usedBoards as $board)
+                                <div class="used-board-item">
+                                    <span class="board-name">{{ $board->name }}</span>
+                                    <span class="board-slug">({{ $board->slug }})</span>
+                                    <a href="{{ route('backoffice.boards.edit', $board) }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-edit"></i> 수정
+                                    </a>
+                                </div>
+                            @endforeach
                         </div>
                     </div>
+                @endif
 
-                @else
-                    <!-- 일반 템플릿은 모든 필드 수정 가능 -->
+                <!-- 모든 필드 수정 가능 -->
                     <div class="board-form-row">
                         <div class="board-form-col board-form-col-6">
                             <div class="board-form-group">
@@ -136,11 +143,11 @@
 
                     <hr style="margin: 30px 0; border: 0; border-top: 1px solid #e9ecef;">
 
-                    <!-- 카테고리 그룹 설정 -->
-                    <div class="board-form-group">
+                    <!-- 카테고리 그룹 설정 (카테고리 기능 사용 시에만 표시) -->
+                    <div class="board-form-group" id="category_group_wrapper" style="display: {{ ($boardTemplate->enable_category ?? true) ? 'block' : 'none' }};">
                         <label for="category_group" class="board-form-label">카테고리 그룹</label>
                         <select class="board-form-control" id="category_group" name="category_group">
-                            <option value="">카테고리 사용 안함</option>
+                            <option value="">카테고리 그룹 선택</option>
                             @foreach($categoryGroups as $group)
                                 <option value="{{ $group }}" @selected(old('category_group', $boardTemplate->category_group) == $group)>
                                     {{ $group }}
@@ -155,7 +162,10 @@
                     <!-- 커스텀 필드 설정 -->
                     <div class="board-form-group">
                         <label class="board-form-label">커스텀 필드 설정</label>
-                        <small class="board-form-text">게시글 작성 시 추가로 입력받을 필드들을 설정할 수 있습니다.</small>
+                        <small class="board-form-text">
+                            게시글 작성 시 추가로 입력받을 필드들을 설정할 수 있습니다. 
+                            select, radio, checkbox 타입의 경우 옵션을 쉼표(,)로 구분하여 입력하세요.
+                        </small>
                         <div class="custom-fields-container">
                             <div class="custom-fields-list" id="customFieldsList">
                                 @if($boardTemplate->custom_fields_config)
@@ -174,7 +184,7 @@
 
                     <!-- 기능 설정 -->
                     <div class="board-form-row">
-                        <div class="board-form-col board-form-col-4">
+                        <div class="board-form-col board-form-col-3">
                             <div class="board-form-group">
                                 <div class="board-checkbox-group">
                                     <input type="checkbox" id="enable_notice" name="enable_notice" value="1" @checked(old('enable_notice', $boardTemplate->enable_notice))>
@@ -182,7 +192,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="board-form-col board-form-col-4">
+                        <div class="board-form-col board-form-col-3">
                             <div class="board-form-group">
                                 <div class="board-checkbox-group">
                                     <input type="checkbox" id="enable_sorting" name="enable_sorting" value="1" @checked(old('enable_sorting', $boardTemplate->enable_sorting))>
@@ -190,11 +200,19 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="board-form-col board-form-col-4">
+                        <div class="board-form-col board-form-col-3">
                             <div class="board-form-group">
                                 <div class="board-checkbox-group">
                                     <input type="checkbox" id="enable_category" name="enable_category" value="1" @checked(old('enable_category', $boardTemplate->enable_category))>
                                     <label for="enable_category">카테고리 기능 사용</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="board-form-col board-form-col-3">
+                            <div class="board-form-group">
+                                <div class="board-checkbox-group">
+                                    <input type="checkbox" id="is_single_page" name="is_single_page" value="1" @checked(old('is_single_page', $boardTemplate->is_single_page))>
+                                    <label for="is_single_page">단일 페이지 모드</label>
                                 </div>
                             </div>
                         </div>
@@ -205,7 +223,15 @@
                         <div class="board-form-col board-form-col-6">
                             <div class="board-form-group">
                                 <label for="list_count" class="board-form-label">페이지당 글 수</label>
-                                <input type="number" class="board-form-control" id="list_count" name="list_count" value="{{ old('list_count', $boardTemplate->list_count) }}" min="5" max="100">
+                                <select class="board-form-control" id="list_count" name="list_count">
+                                    <option value="10" @selected(old('list_count', $boardTemplate->list_count) == 10)>10</option>
+                                    <option value="15" @selected(old('list_count', $boardTemplate->list_count) == 15)>15</option>
+                                    <option value="20" @selected(old('list_count', $boardTemplate->list_count) == 20)>20</option>
+                                    <option value="30" @selected(old('list_count', $boardTemplate->list_count) == 30)>30</option>
+                                    <option value="50" @selected(old('list_count', $boardTemplate->list_count) == 50)>50</option>
+                                    <option value="100" @selected(old('list_count', $boardTemplate->list_count) == 100)>100</option>
+                                    <option value="999999" @selected(old('list_count', $boardTemplate->list_count) == 999999)>전체</option>
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -279,7 +305,6 @@
                             <label for="is_active">활성화</label>
                         </div>
                     </div>
-                @endif
 
                 <div class="board-form-actions">
                     <button type="submit" class="btn btn-primary">수정</button>

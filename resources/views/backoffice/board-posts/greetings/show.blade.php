@@ -29,8 +29,7 @@
                 </div>
             </div>
             <div class="board-card-body">
-                <!-- 기본 필드들 숨김 처리 (greetings 게시판은 커스텀 필드만 표시) -->
-                <div class="board-post-header" style="display: none;">
+                <div class="board-post-header">
                     <div class="board-post-title">
                         <h3>{{ $post->title }}</h3>
                     </div>
@@ -42,18 +41,18 @@
                 </div>
 
                 @if ($post->is_notice)
-                    <div class="board-post-notice" style="display: none;">
+                    <div class="board-post-notice">
                         <span class="badge badge-warning">공지</span>
                     </div>
                 @endif
 
                 @if ($post->category)
-                    <div class="board-post-category" style="display: none;">
+                    <div class="board-post-category">
                         <span class="badge badge-info">{{ $post->category }}</span>
                     </div>
                 @endif
 
-                <div class="board-post-content" style="display: none;">
+                <div class="board-post-content">
                     {!! $post->content !!}
                 </div>
 

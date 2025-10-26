@@ -30,7 +30,7 @@
         <div class="board-card">
             <div class="board-card-header">
                 <div class="board-page-card-title">
-                    <h6>인사말</h6>
+                    <h6>싱글</h6>
                 </div>
             </div>
             <div class="board-card-body">

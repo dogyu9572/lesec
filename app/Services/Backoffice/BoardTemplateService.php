@@ -103,7 +103,15 @@ class BoardTemplateService
         $data['is_single_page'] = $data['is_single_page'] ?? false;
         $data['is_active'] = $data['is_active'] ?? true;
         
-        return $template->update($data);
+        // 템플릿 업데이트
+        $updated = $template->update($data);
+        
+        // 이 템플릿을 사용하는 모든 게시판 업데이트
+        if ($updated) {
+            $this->syncBoardsWithTemplate($template);
+        }
+        
+        return $updated;
     }
 
     /**
@@ -222,6 +230,28 @@ class BoardTemplateService
         }
         
         return true;
+    }
+
+    /**
+     * 템플릿을 사용하는 모든 게시판을 템플릿 설정과 동기화합니다.
+     */
+    private function syncBoardsWithTemplate(BoardTemplate $template): void
+    {
+        $boards = $template->boards;
+        
+        foreach ($boards as $board) {
+            $board->update([
+                'field_config' => $template->field_config,
+                'custom_fields_config' => $template->custom_fields_config,
+                'enable_notice' => $template->enable_notice,
+                'enable_sorting' => $template->enable_sorting,
+                'is_single_page' => $template->is_single_page,
+                'list_count' => $template->list_count,
+                'permission_read' => $template->permission_read,
+                'permission_write' => $template->permission_write,
+                'permission_comment' => $template->permission_comment,
+            ]);
+        }
     }
 }
 

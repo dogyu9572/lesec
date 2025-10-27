@@ -108,7 +108,6 @@
                                     'author_name' => ['label' => '작성자'],
                                     'password' => ['label' => '비밀번호'],
                                     'attachments' => ['label' => '첨부파일'],
-                                    'thumbnail' => ['label' => '썸네일'],
                                     'is_secret' => ['label' => '비밀글'],
                                     'created_at' => ['label' => '등록일'],
                                 ];

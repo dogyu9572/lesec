@@ -248,6 +248,48 @@
                     </div>
                 </div>
 
+                @if($board->isFieldEnabled('author_name'))
+                <div class="board-form-group">
+                    <label for="author_name" class="board-form-label">
+                        작성자
+                        @if($board->isFieldRequired('author_name'))
+                            <span class="required">*</span>
+                        @endif
+                    </label>
+                    <input type="text" class="board-form-control" id="author_name" name="author_name" value="{{ old('author_name', $post->author_name) }}" @if($board->isFieldRequired('author_name')) required @endif>
+                </div>
+                @endif
+
+                @if($board->isFieldEnabled('password'))
+                <div class="board-form-group">
+                    <label for="password" class="board-form-label">
+                        비밀번호
+                        @if($board->isFieldRequired('password'))
+                            <span class="required">*</span>
+                        @endif
+                    </label>
+                    <input type="password" class="board-form-control" id="password" name="password">
+                    <small class="board-form-text">비밀번호를 변경하려면 새 비밀번호를 입력하세요. 변경하지 않으려면 비워두세요.</small>
+                </div>
+                @endif
+
+                @if($board->isFieldEnabled('is_secret'))
+                <div class="board-form-group">
+                    <div class="board-checkbox-item">
+                        <input type="checkbox" 
+                               class="board-checkbox-input" 
+                               id="is_secret" 
+                               name="is_secret" 
+                               value="1" 
+                               @checked(old('is_secret', $post->is_secret))>
+                        <label for="is_secret" class="board-form-label">
+                            <i class="fas fa-lock"></i> 비밀글
+                        </label>
+                    </div>
+                    <small class="board-form-text">체크하면 본인만 조회할 수 있습니다.</small>
+                </div>
+                @endif
+
                 @if($board->isFieldEnabled('attachments'))
                 <div class="board-form-group">
                     <label class="board-form-label">
@@ -313,4 +355,4 @@
     <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.js"></script>
     <script src="{{ asset('js/backoffice/board-post-form.js') }}"></script>
     <script src="{{ asset('js/backoffice/board-posts.js') }}"></script>
-</push>
+@endsection

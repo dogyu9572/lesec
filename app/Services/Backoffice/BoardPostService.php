@@ -128,11 +128,13 @@ class BoardPostService
         
         return [
             'user_id' => null,
-            'author_name' => '관리자',
+            'author_name' => $validated['author_name'] ?? '관리자',
             'title' => $validated['title'],
             'content' => $this->sanitizeContent($validated['content']),
-            'category' => $validated['category'],
+            'category' => $validated['category'] ?? null,
             'is_notice' => $request->has('is_notice'),
+            'is_secret' => $request->has('is_secret'),
+            'password' => $validated['password'] ?? null,
             'thumbnail' => $this->handleThumbnail($request, $slug),
             'attachments' => json_encode($this->handleAttachments($request, $slug)),
             'custom_fields' => $this->getCustomFieldsJson($request, $board),
@@ -308,8 +310,11 @@ class BoardPostService
         return [
             'title' => $validated['title'],
             'content' => $this->sanitizeContent($validated['content']),
-            'category' => $validated['category'],
+            'category' => $validated['category'] ?? null,
             'is_notice' => $request->has('is_notice'),
+            'is_secret' => $request->has('is_secret'),
+            'author_name' => $validated['author_name'] ?? null,
+            'password' => $validated['password'] ?? null,
             'thumbnail' => $this->handleThumbnail($request, $slug),
             'attachments' => json_encode($this->handleAttachments($request, $slug)),
             'custom_fields' => $this->getCustomFieldsJson($request, $board),

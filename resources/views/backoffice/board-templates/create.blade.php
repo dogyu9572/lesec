@@ -74,7 +74,6 @@
                                 'title' => ['label' => '제목', 'enabled' => true, 'required' => true],
                                 'content' => ['label' => '내용', 'enabled' => true, 'required' => true],
                                 'attachments' => ['label' => '첨부파일', 'enabled' => true, 'required' => false],
-                                'thumbnail' => ['label' => '썸네일', 'enabled' => false, 'required' => false],
                                 'category' => ['label' => '카테고리', 'enabled' => false, 'required' => false],
                                 'author_name' => ['label' => '작성자', 'enabled' => false, 'required' => false],
                                 'password' => ['label' => '비밀번호', 'enabled' => false, 'required' => false],                                

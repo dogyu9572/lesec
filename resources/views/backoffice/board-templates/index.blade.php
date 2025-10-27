@@ -66,8 +66,28 @@
                 </form>
             </div>
 
-            <!-- 템플릿 목록 테이블 -->
-            <div class="board-table-wrapper">
+            <!-- 목록 개수 선택 -->
+            <div class="board-list-header">
+                <div class="list-info">
+                    <span class="list-count">Total : {{ $templates->total() }}</span>
+                </div>
+                <div class="list-controls">
+                    <form method="GET" action="{{ route('backoffice.board-templates.index') }}" class="per-page-form">
+                        @foreach(request()->except('per_page') as $key => $value)
+                            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                        @endforeach
+                        <label for="per_page" class="per-page-label">목록 개수:</label>
+                        <select id="per_page" name="per_page" class="per-page-select" onchange="this.form.submit()">
+                            <option value="10" @selected(request('per_page', 10) == 10)>10</option>
+                            <option value="20" @selected(request('per_page') == 20)>20</option>
+                            <option value="50" @selected(request('per_page') == 50)>50</option>
+                            <option value="100" @selected(request('per_page') == 100)>100</option>
+                        </select>
+                    </form>
+                </div>
+            </div>
+
+            <div class="table-responsive">
                 <table class="board-table">
                     <thead>
                         <tr>
@@ -130,12 +150,7 @@
                 </table>
             </div>
 
-            <!-- 페이지네이션 -->
-            @if($templates->hasPages())
-                <div class="board-pagination">
-                    {{ $templates->links() }}
-                </div>
-            @endif
+            <x-pagination :paginator="$templates" />
         </div>
     </div>
 </div>

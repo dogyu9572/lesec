@@ -25,7 +25,7 @@ return new class extends Migration
             $table->boolean('enable_notice')->default(true)->comment('공지사항 활성화 여부');
             $table->boolean('enable_sorting')->default(false)->comment('정렬 기능 활성화 여부');
             $table->boolean('enable_category')->default(true)->comment('카테고리 기능 활성화 여부');
-            $table->string('category_group')->nullable()->comment('카테고리 그룹명');
+            $table->foreignId('category_id')->nullable()->after('enable_category')->constrained('categories')->onDelete('set null')->comment('카테고리 그룹 ID (depth=0)');
             $table->boolean('is_single_page')->default(false)->comment('단일 페이지 모드');
             
             // 목록 및 권한 설정
@@ -35,6 +35,7 @@ return new class extends Migration
             $table->string('permission_comment')->default('member')->comment('댓글 권한');
             
             // 시스템 설정
+            $table->boolean('is_system')->default(false)->comment('시스템 템플릿 여부');
             $table->boolean('is_active')->default(true)->comment('활성화 여부');
             
             $table->timestamps();
@@ -43,6 +44,7 @@ return new class extends Migration
             $table->foreign('skin_id')->references('id')->on('board_skins');
             
             // 인덱스
+            $table->index('is_system');
             $table->index('is_active');
         });
     }

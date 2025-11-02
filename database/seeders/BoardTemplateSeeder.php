@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\BoardTemplate;
 use App\Models\BoardSkin;
+use App\Models\Category;
 
 class BoardTemplateSeeder extends Seeder
 {
@@ -13,13 +14,18 @@ class BoardTemplateSeeder extends Seeder
      */
     public function run(): void
     {
-        // 기본 스킨 가져오기 (ID=1을 기본 스킨으로 가정)
+        // 기본 스킨 가져오기
         $defaultSkin = BoardSkin::first();
         
         if (!$defaultSkin) {
             $this->command->warn('스킨이 없습니다. 먼저 BoardSkinSeeder를 실행하세요.');
             return;
         }
+
+        // 게시판 카테고리 그룹 조회 (depth=0, name='게시판')
+        $boardCategoryGroup = Category::where('depth', 0)
+            ->where('name', '게시판')
+            ->first();
 
         $templates = [
             // 1. 공지사항 템플릿
@@ -42,7 +48,7 @@ class BoardTemplateSeeder extends Seeder
                 'enable_notice' => true,
                 'enable_sorting' => false,
                 'enable_category' => false,
-                'category_group' => 'board',
+                'category_id' => null,
                 'list_count' => 20,
                 'permission_read' => 'all',
                 'permission_write' => 'admin',
@@ -70,7 +76,7 @@ class BoardTemplateSeeder extends Seeder
                 'enable_notice' => true,
                 'enable_sorting' => false,
                 'enable_category' => true,
-                'category_group' => 'board',
+                'category_id' => $boardCategoryGroup?->id,
                 'list_count' => 12,
                 'permission_read' => 'all',
                 'permission_write' => 'member',
@@ -98,7 +104,7 @@ class BoardTemplateSeeder extends Seeder
                 'enable_notice' => false,
                 'enable_sorting' => true,
                 'enable_category' => true,
-                'category_group' => 'board',
+                'category_id' => $boardCategoryGroup?->id,
                 'list_count' => 15,
                 'permission_read' => 'all',
                 'permission_write' => 'admin',
@@ -126,7 +132,7 @@ class BoardTemplateSeeder extends Seeder
                 'enable_notice' => true,
                 'enable_sorting' => false,
                 'enable_category' => true,
-                'category_group' => 'board',
+                'category_id' => $boardCategoryGroup?->id,
                 'list_count' => 15,
                 'permission_read' => 'all',
                 'permission_write' => 'member',

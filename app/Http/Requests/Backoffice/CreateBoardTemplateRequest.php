@@ -75,7 +75,7 @@ class CreateBoardTemplateRequest extends FormRequest
             'enable_notice' => 'nullable|boolean',
             'enable_sorting' => 'nullable|boolean',
             'enable_category' => 'nullable|boolean',
-            'category_group' => 'nullable|string|max:50',
+            'category_id' => 'nullable|exists:categories,id',
             'is_single_page' => 'nullable|boolean',
             
             // 목록 및 권한 설정

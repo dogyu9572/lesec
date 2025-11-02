@@ -68,6 +68,30 @@ Route::prefix('backoffice')->middleware(['backoffice'])->group(function () {
     Route::get('categories/active/{group}', [CategoryController::class, 'getActiveCategories'])
         ->name('backoffice.categories.active');
 
+    // 특정 그룹의 1차 카테고리 조회 (AJAX)
+    Route::get('categories/get-by-group/{groupId}', [CategoryController::class, 'getByGroup'])
+        ->name('backoffice.categories.get-by-group');
+
+    // 카테고리 수정용 데이터 조회 (AJAX)
+    Route::get('categories/{category}/edit-data', [CategoryController::class, 'getEditData'])
+        ->name('backoffice.categories.edit-data');
+
+    // 인라인 수정 (AJAX)
+    Route::post('categories/{category}/update-inline', [CategoryController::class, 'updateInline'])
+        ->name('backoffice.categories.update-inline');
+
+    // 모달 등록 (AJAX)
+    Route::post('categories/store-modal', [CategoryController::class, 'storeModal'])
+        ->name('backoffice.categories.store-modal');
+
+    // 모달 수정 (AJAX)
+    Route::put('categories/update-modal', [CategoryController::class, 'updateModal'])
+        ->name('backoffice.categories.update-modal');
+
+    // 미리 생성될 코드 조회 (AJAX)
+    Route::post('categories/generate-preview-code', [CategoryController::class, 'generatePreviewCode'])
+        ->name('backoffice.categories.generate-preview-code');
+
     Route::resource('categories', CategoryController::class, [
         'names' => 'backoffice.categories'
     ])->except(['show']);

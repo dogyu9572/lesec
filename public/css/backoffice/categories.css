@@ -2,25 +2,41 @@
  * 카테고리 관리 페이지 전용 스타일
  */
 
-
 /* 카테고리 페이지에서 menu-list 왼쪽 여백 제거 */
 .menu-list {
     padding-left: 0 !important;
     margin-left: 0 !important;
-}
-
-/* 테이블 반응형 컨테이너 왼쪽 여백 제거 */
-.table-responsive {
-    padding-left: 0 !important;
-    margin-left: 0 !important;
+    list-style: none;
 }
 
 /* 카테고리 그룹 탭 */
 .category-group-tabs {
     display: flex;
+    justify-content: space-between;
+    align-items: center;
     gap: 8px;
     margin-bottom: 20px;
     flex-wrap: wrap;
+}
+
+.category-group-tabs-inner {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    flex: 1;
+}
+
+.selected-group-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+}
+
+.selected-group-info .group-name {
+    font-weight: 600;
+    color: #333;
+    margin-right: 5px;
 }
 
 .group-tab {
@@ -54,20 +70,49 @@
     text-decoration: none;
 }
 
-/* 카테고리 메뉴 아이템 */
+/* 카테고리 메뉴 아이템 - 트리 구조 (grid로 변경하여 하위 메뉴가 아래로) */
 .category-menu-item {
     background-color: #fff;
     border: 1px solid #e9ecef;
     margin-bottom: 5px;
     border-radius: 4px;
-    padding: 15px 15px 15px 15px;
+    transition: all 0.2s ease;
+    position: relative;
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto 1fr;
+    gap: 0;
+    padding: 0;
+}
+
+/* 카테고리 아이템 내부 컨텐츠 (버튼과 정보) - 한 줄로 배치 */
+.category-menu-item .category-content {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    cursor: grab;
-    transition: all 0.2s ease;
-    position: relative;
-    z-index: 1;
+    padding: 12px 15px;
+    grid-column: 1 / -1;
+    grid-row: 1;
+}
+
+/* category-content가 없을 때 - 직접 자식 요소 배치 */
+.category-menu-item > .category-menu-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 15px;
+    grid-column: 1;
+    grid-row: 1;
+}
+
+.category-menu-item > .board-btn-group {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 12px 15px;
+    grid-column: 2;
+    grid-row: 1;
 }
 
 .category-menu-item:hover {
@@ -75,31 +120,40 @@
     border-color: #aaa;
 }
 
-.category-menu-item:active {
-    cursor: grabbing;
-    background-color: #f8f9fa;
+/* Depth별 들여쓰기 - 명칭만 들여쓰기하고 버튼은 오른쪽 고정 */
+.category-menu-item .category-content {
+    padding-left: 0; /* 기본 패딩 제거 */
 }
 
-/* Depth별 배경색과 padding */
-.category-menu-item-depth-1 {
-    background-color: #fff;
-    border-left: 3px solid #4a90e2;
-    padding-left: 30px;
-    margin-left: 0px;
+.category-menu-item-depth-0 .category-menu-info {
+    padding-left: 0px; /* 그룹(0차)은 들여쓰기 없음 */
+}
+
+.category-menu-item-depth-1 .category-menu-info {
+    padding-left: 15px; /* 1차 메뉴 */
 }
 
 .category-menu-item-depth-2 {
     background-color: #f8f9fa;
-    border-left: 3px solid #6c757d;
-    padding-left: 50px;
-    margin-left: 20px;
+}
+
+.category-menu-item-depth-2 .category-menu-info {
+    padding-left: 50px; /* 1차보다 35px 더 */
 }
 
 .category-menu-item-depth-3 {
-    background-color: #e9ecef;
-    border-left: 3px solid #adb5bd;
-    padding-left: 70px;
-    margin-left: 40px;
+    background-color: #f1f3f5;
+}
+
+.category-menu-item-depth-3 .category-menu-info {
+    padding-left: 90px; /* 2차보다 40px 더 (뎁스가 깊어질수록 더 들여쓰기) */
+}
+
+/* 버튼 그룹은 항상 오른쪽 고정 */
+.category-menu-item .board-btn-group {
+    margin-left: auto; /* 왼쪽 여백 자동으로 버튼을 오른쪽으로 밀기 */
+    flex-shrink: 0; /* 버튼 그룹은 축소되지 않도록 */
+    padding-right: 15px; /* 오른쪽 여백 유지 */
 }
 
 /* 카테고리 메뉴 정보 */
@@ -107,10 +161,57 @@
     flex-grow: 1;
     display: flex;
     align-items: center;
-    min-height: 40px;
-    gap: 15px;
+    gap: 10px;
 }
 
+/* 접기/펼치기 버튼 (사이드바 스타일) */
+.expand-toggle {
+    background: none;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+    color: #6c757d;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.expand-toggle:hover {
+    color: #343a40;
+    background-color: #f1f3f5;
+    border-radius: 4px;
+}
+
+.expand-toggle .submenu-icon {
+    display: inline-block !important;
+    transition: transform 0.3s ease;
+    width: 10px;
+    text-align: center;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* 초기 상태: 오른쪽 향하는 화살표 (접혀있을 때) - 직접 자식만 선택 */
+.category-menu-item.collapsed > .category-content > .category-menu-info > .expand-toggle .submenu-icon,
+.category-menu-item.collapsed > .category-menu-info > .expand-toggle .submenu-icon {
+    transform: rotate(-90deg);
+}
+
+/* 펼쳐진 상태: 아래로 향하는 화살표 - 직접 자식만 선택 */
+.category-menu-item.expanded > .category-content > .category-menu-info > .expand-toggle .submenu-icon,
+.category-menu-item.expanded > .category-menu-info > .expand-toggle .submenu-icon {
+    transform: rotate(0deg);
+}
+
+.expand-toggle-placeholder {
+    width: 24px;
+    flex-shrink: 0;
+}
+
+/* 드래그 핸들 */
 .category-menu-info .drag-handle {
     color: #6c757d;
     cursor: grab;
@@ -130,40 +231,33 @@
     color: #343a40;
 }
 
+/* 코드 컬럼 */
+.menu-code {
+    min-width: 80px;
+    font-weight: 500;
+    color: #495057;
+    font-size: 0.9rem;
+    padding: 2px 5px;
+}
+
+/* 명칭 */
 .category-menu-info .menu-name {
     flex-grow: 1;
     font-weight: 500;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    color: #212529;
 }
 
-.category-menu-info .menu-status {
-    flex-shrink: 0;
-    width: 80px;
-    margin-left: auto;
-    margin-right: 15px;
-    position: relative;
-    right: 180px;
-}
-
-/* 뎁스별 활성화 텍스트 위치 고정 */
-.category-menu-item-depth-2 .menu-status {
-    right: 180px;
-}
-
-.category-menu-item-depth-3 .menu-status {
-    right: 265px;
+/* 3차 카테고리 메뉴 이름 앞 공백 처리 */
+.category-menu-item-depth-3 .category-menu-info .menu-name::before {
+    content: '  '; /* 공백 2개 */
+    white-space: pre;
 }
 
 /* 카테고리 액션 버튼 */
 .category-menu-item .board-btn-group {
-    width: auto;
     display: flex;
     gap: 5px;
-    flex-wrap: nowrap;
     flex-shrink: 0;
-    min-width: 120px;
 }
 
 .category-menu-item .board-btn-group .btn {
@@ -173,7 +267,9 @@
     font-weight: 500;
     transition: all 0.2s ease;
     text-decoration: none;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
     border: none;
     cursor: pointer;
     white-space: nowrap;
@@ -199,6 +295,16 @@
     transform: translateY(-1px);
 }
 
+.category-menu-item .board-btn-group .btn-info {
+    background-color: #17a2b8;
+    color: white;
+}
+
+.category-menu-item .board-btn-group .btn-info:hover {
+    background-color: #138496;
+    transform: translateY(-1px);
+}
+
 .category-menu-item .board-btn-group .btn-danger {
     background-color: #dc3545;
     color: white;
@@ -207,6 +313,87 @@
 .category-menu-item .board-btn-group .btn-danger:hover {
     background-color: #c82333;
     transform: translateY(-1px);
+}
+
+/* 하위 카테고리 컨테이너 (사이드바 스타일) - 부모 아래 블록 레벨 */
+.category-children {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 0 !important;
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out;
+    display: block !important;
+    width: 100% !important;
+    grid-column: 1 / -1; /* grid에서 전체 너비 차지 */
+    grid-row: 2; /* 두 번째 행에 배치 */
+}
+
+/* 펼쳐진 카테고리 아이템의 직접 자식인 category-children만 표시 */
+.category-menu-item.expanded > .category-children {
+    max-height: 2000px !important;
+}
+
+/* collapsed 상태일 때는 항상 숨김 */
+.category-menu-item.collapsed > .category-children {
+    max-height: 0 !important;
+}
+
+/* 인라인 편집 모드 */
+.category-menu-item.inline-edit-mode {
+    background-color: #f8f9fa !important;
+}
+
+.category-menu-item.inline-edit-mode .menu-code,
+.category-menu-item.inline-edit-mode .menu-name {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.category-menu-item.inline-edit-mode .menu-code input,
+.category-menu-item.inline-edit-mode .menu-name input {
+    min-width: 100px;
+    padding: 4px 8px;
+    border: 1px solid #4a90e2;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* 인라인 편집 컨트롤 */
+.inline-edit-controls {
+    display: inline-flex;
+    gap: 5px;
+    margin-left: 5px;
+}
+
+.inline-edit-controls button {
+    padding: 2px 6px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.2s ease;
+}
+
+.inline-edit-controls .btn-save {
+    background-color: #28a745;
+    color: white;
+}
+
+.inline-edit-controls .btn-save:hover {
+    background-color: #218838;
+}
+
+.inline-edit-controls .btn-cancel {
+    background-color: #6c757d;
+    color: white;
+}
+
+.inline-edit-controls .btn-cancel:hover {
+    background-color: #545b62;
 }
 
 /* 데이터 없음 */
@@ -237,4 +424,206 @@
     20% { opacity: 1; }
     80% { opacity: 1; }
     100% { opacity: 0; }
+}
+
+/* 모달 팝업 */
+.category-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.category-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    animation: fadeIn 0.2s ease;
+}
+
+.category-modal-content {
+    position: relative;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s ease;
+    z-index: 10000;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.category-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.category-modal-header h5 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #212529;
+}
+
+.category-modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #6c757d;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.category-modal-close:hover {
+    background-color: #f8f9fa;
+    color: #343a40;
+}
+
+.category-modal-body {
+    padding: 20px;
+}
+
+.category-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 20px;
+    border-top: 1px solid #e9ecef;
+}
+
+/* 모달 폼 */
+.modal-form-group {
+    margin-bottom: 20px;
+}
+
+.modal-form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #495057;
+    font-size: 0.9rem;
+}
+
+.modal-form-label .required {
+    color: #dc3545;
+}
+
+.modal-form-control {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    transition: border-color 0.2s ease;
+}
+
+.modal-form-control:focus {
+    outline: none;
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.1);
+}
+
+.modal-form-control:disabled {
+    background-color: #e9ecef;
+    cursor: not-allowed;
+}
+
+.modal-form-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.modal-form-col {
+    flex: 1;
+}
+
+.modal-form-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.modal-form-checkbox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.modal-form-checkbox label {
+    margin: 0;
+    cursor: pointer;
+}
+
+.modal-error {
+    padding: 10px;
+    background-color: #f8d7da;
+    color: #721c24;
+    border-radius: 4px;
+    margin-top: 15px;
+    font-size: 0.9rem;
+}
+
+/* 토스트 메시지 */
+.toast-message {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    background-color: #28a745;
+    color: white;
+    border-radius: 4px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+    z-index: 10000;
+    animation: slideInRight 0.3s ease;
+}
+
+.toast-message.error {
+    background-color: #dc3545;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }

@@ -142,22 +142,6 @@
 
                     <hr style="margin: 30px 0; border: 0; border-top: 1px solid #e9ecef;">
 
-                    <!-- 카테고리 그룹 설정 (카테고리 기능 사용 시에만 표시) -->
-                    <div class="board-form-group" id="category_group_wrapper" style="display: {{ ($boardTemplate->enable_category ?? true) ? 'block' : 'none' }};">
-                        <label for="category_group" class="board-form-label">카테고리 그룹</label>
-                        <select class="board-form-control" id="category_group" name="category_group">
-                            <option value="">카테고리 그룹 선택</option>
-                            @foreach($categoryGroups as $group)
-                                <option value="{{ $group }}" @selected(old('category_group', $boardTemplate->category_group) == $group)>
-                                    {{ $group }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <small class="board-form-text">카테고리를 사용하려면 그룹을 선택하세요. 카테고리 관리 메뉴에서 등록된 그룹들이 표시됩니다.</small>
-                    </div>
-
-                    <hr style="margin: 30px 0; border: 0; border-top: 1px solid #e9ecef;">
-
                     <!-- 커스텀 필드 설정 -->
                     <div class="board-form-group">
                         <label class="board-form-label">커스텀 필드 설정</label>
@@ -215,6 +199,20 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- 카테고리 그룹 설정 (카테고리 기능 사용 시에만 표시) -->
+                    <div class="board-form-group" id="category_id_wrapper" style="display: {{ ($boardTemplate->enable_category ?? false) ? 'block' : 'none' }};">
+                        <label for="category_id" class="board-form-label">카테고리 그룹</label>
+                        <select class="board-form-control" id="category_id" name="category_id">
+                            <option value="">카테고리 그룹 선택</option>
+                            @foreach($categoryGroups as $group)
+                                <option value="{{ $group->id }}" @selected(old('category_id', $boardTemplate->category_id) == $group->id)>
+                                    {{ $group->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <small class="board-form-text">카테고리를 사용하려면 그룹을 선택하세요. 카테고리 관리 메뉴에서 등록된 그룹(depth=0)들이 표시됩니다.</small>
                     </div>
 
                     <!-- 목록 및 권한 설정 -->

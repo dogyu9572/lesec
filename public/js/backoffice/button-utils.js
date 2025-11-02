@@ -57,7 +57,7 @@ class ButtonManager {
         }
 
         // 특정 클래스의 버튼들
-        const skipClasses = ['btn-link', 'dropdown-toggle', 'close', 'modal-close'];
+        const skipClasses = ['btn-link', 'dropdown-toggle', 'close', 'modal-close', 'expand-toggle', 'add-first-depth-btn', 'add-group-btn', 'add-category-btn', 'edit-category-btn', 'delete-category-btn'];
         if (skipClasses.some(cls => button.classList.contains(cls))) {
             return true;
         }
@@ -221,8 +221,8 @@ class ButtonManager {
                 button.dataset.originalText = button.textContent || button.innerHTML;
             }
             
-            // 로딩 텍스트 설정
-            if (button.tagName === 'BUTTON') {
+            // 로딩 텍스트 설정 (펼치기 버튼, 1차 추가 버튼, 그룹 추가 버튼은 제외)
+            if (button.tagName === 'BUTTON' && !button.classList.contains('expand-toggle') && !button.classList.contains('add-first-depth-btn') && !button.classList.contains('add-group-btn')) {
                 button.innerHTML = '<span class="spinner"></span> 처리 중...';
             }
         } else {

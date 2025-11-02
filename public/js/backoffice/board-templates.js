@@ -287,25 +287,21 @@ function updateCustomFieldsHiddenInput() {
  */
 function initializeCategoryGroupToggle() {
     const enableCategoryCheckbox = document.getElementById('enable_category');
-    const categoryGroupWrapper = document.getElementById('category_group_wrapper');
-    const categoryGroupSelect = document.getElementById('category_group');
+    const categoryIdWrapper = document.getElementById('category_id_wrapper');
+    const categoryIdSelect = document.getElementById('category_id');
     
-    if (!enableCategoryCheckbox || !categoryGroupWrapper) {
+    if (!enableCategoryCheckbox || !categoryIdWrapper) {
         return;
     }
     
     // 초기 상태 설정
     function toggleCategoryGroup() {
         if (enableCategoryCheckbox.checked) {
-            categoryGroupWrapper.style.display = 'block';
-            if (categoryGroupSelect) {
-                categoryGroupSelect.setAttribute('name', 'category_group');
-            }
+            categoryIdWrapper.style.display = 'block';
         } else {
-            categoryGroupWrapper.style.display = 'none';
-            if (categoryGroupSelect) {
-                categoryGroupSelect.removeAttribute('name');
-                categoryGroupSelect.value = '';
+            categoryIdWrapper.style.display = 'none';
+            if (categoryIdSelect) {
+                categoryIdSelect.value = '';
             }
         }
     }

@@ -18,7 +18,7 @@ class BoardTemplate extends Model
         'enable_notice',
         'enable_sorting',
         'enable_category',
-        'category_group',
+        'category_id',
         'list_count',
         'permission_read',
         'permission_write',
@@ -62,6 +62,14 @@ class BoardTemplate extends Model
     public function boards()
     {
         return $this->hasMany(Board::class, 'template_id');
+    }
+
+    /**
+     * 선택된 카테고리 그룹
+     */
+    public function category()
+    {
+        return $this->belongsTo(Category::class, 'category_id');
     }
 
     /**
@@ -140,6 +148,19 @@ class BoardTemplate extends Model
     public function getUsedBoards()
     {
         return $this->boards()->get();
+    }
+
+    /**
+     * 선택된 그룹의 모든 하위 카테고리 옵션을 가져옵니다
+     */
+    public function getCategoryOptions()
+    {
+        if (!$this->category_id || !$this->category) {
+            return collect();
+        }
+
+        // 선택된 그룹의 모든 하위 카테고리 재귀적으로 가져오기
+        return $this->category->allChildren()->active()->get();
     }
 }
 

@@ -10,7 +10,7 @@ class Category extends Model
 {
     protected $fillable = [
         'parent_id',
-        'category_group',
+        'code',
         'name',
         'depth',
         'display_order',
@@ -34,7 +34,7 @@ class Category extends Model
      */
     public function children(): HasMany
     {
-        return $this->hasMany(Category::class, 'parent_id')->orderBy('display_order');
+        return $this->hasMany(Category::class, 'parent_id');
     }
 
     /**
@@ -46,14 +46,6 @@ class Category extends Model
     }
 
     /**
-     * 특정 그룹의 카테고리만 조회
-     */
-    public function scopeByGroup($query, string $group)
-    {
-        return $query->where('category_group', $group);
-    }
-
-    /**
      * 활성화된 카테고리만 조회
      */
     public function scopeActive($query)
@@ -62,11 +54,19 @@ class Category extends Model
     }
 
     /**
-     * 최상위 카테고리만 조회 (depth=1)
+     * 그룹(0차)만 조회 (depth=0, parent_id=NULL)
      */
-    public function scopeRoots($query)
+    public function scopeGroups($query)
     {
-        return $query->whereNull('parent_id')->orderBy('display_order');
+        return $query->where('depth', 0)->whereNull('parent_id')->orderBy('display_order', 'desc');
+    }
+
+    /**
+     * 그룹인지 확인 (depth=0 && parent_id=NULL)
+     */
+    public function isGroup(): bool
+    {
+        return $this->depth === 0 && $this->parent_id === null;
     }
 
     /**

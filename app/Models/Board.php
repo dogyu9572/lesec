@@ -289,16 +289,7 @@ class Board extends Model
      */
     public function getCategoryOptions()
     {
-        // 템플릿에서 카테고리 그룹 가져오기
-        $categoryGroup = $this->template?->category_group;
-        
-        if (!$categoryGroup) {
-            return collect(); // 카테고리 그룹이 없으면 빈 컬렉션 반환
-        }
-        
-        return \App\Models\Category::byGroup($categoryGroup)
-            ->active()
-            ->orderBy('display_order')
-            ->get();
+        // 템플릿에서 선택된 그룹의 모든 하위 카테고리 가져오기
+        return $this->template?->getCategoryOptions() ?? collect();
     }
 }

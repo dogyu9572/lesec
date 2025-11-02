@@ -82,6 +82,11 @@ class BoardTemplateService
         $data['is_single_page'] = $data['is_single_page'] ?? false;
         $data['is_active'] = $data['is_active'] ?? true;
         
+        // 카테고리 기능이 비활성화되면 category_id도 null로 설정
+        if (!$data['enable_category']) {
+            $data['category_id'] = null;
+        }
+        
         return BoardTemplate::create($data);
     }
 
@@ -102,6 +107,11 @@ class BoardTemplateService
         $data['enable_category'] = $data['enable_category'] ?? false;
         $data['is_single_page'] = $data['is_single_page'] ?? false;
         $data['is_active'] = $data['is_active'] ?? true;
+        
+        // 카테고리 기능이 비활성화되면 category_id도 null로 설정
+        if (!$data['enable_category']) {
+            $data['category_id'] = null;
+        }
         
         // 템플릿 업데이트
         $updated = $template->update($data);

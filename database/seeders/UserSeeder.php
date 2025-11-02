@@ -18,7 +18,6 @@ class UserSeeder extends Seeder
 
         // 슈퍼 관리자 (홈페이지 관리자)
         User::create([
-            'id' => 1,
             'login_id' => 'homepage',
             'name' => '홈페이지관리자',
             'email' => 'admin@homepage.com',
@@ -29,7 +28,6 @@ class UserSeeder extends Seeder
 
         // 관리자
         User::create([
-            'id' => 2,
             'login_id' => 'admin',
             'name' => '관리자',
             'email' => 'admin@example.com',

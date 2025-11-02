@@ -8,16 +8,19 @@ use App\Http\Requests\Backoffice\UpdateBoardTemplateRequest;
 use App\Models\BoardTemplate;
 use App\Models\Category;
 use App\Services\Backoffice\BoardTemplateService;
+use App\Services\Backoffice\CategoryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class BoardTemplateController extends BaseController
 {
     protected $templateService;
+    protected $categoryService;
 
-    public function __construct(BoardTemplateService $templateService)
+    public function __construct(BoardTemplateService $templateService, CategoryService $categoryService)
     {
         $this->templateService = $templateService;
+        $this->categoryService = $categoryService;
     }
 
     /**
@@ -36,12 +39,8 @@ class BoardTemplateController extends BaseController
      */
     public function create()
     {
-        // 카테고리 관리에서 등록된 그룹명 조회 (중복 제거)
-        $categoryGroups = Category::select('category_group')
-            ->whereNotNull('category_group')
-            ->distinct()
-            ->orderBy('category_group')
-            ->pluck('category_group');
+        // 그룹 목록(depth=0) 조회
+        $categoryGroups = $this->categoryService->getGroups();
         
         $skins = $this->templateService->getActiveSkins();
         return $this->view('backoffice.board-templates.create', compact('skins', 'categoryGroups'));
@@ -84,12 +83,8 @@ class BoardTemplateController extends BaseController
      */
     public function edit(BoardTemplate $boardTemplate)
     {
-        // 카테고리 관리에서 등록된 그룹명 조회 (중복 제거)
-        $categoryGroups = Category::select('category_group')
-            ->whereNotNull('category_group')
-            ->distinct()
-            ->orderBy('category_group')
-            ->pluck('category_group');
+        // 그룹 목록(depth=0) 조회
+        $categoryGroups = $this->categoryService->getGroups();
         
         $skins = $this->templateService->getActiveSkins();
         

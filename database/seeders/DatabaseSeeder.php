@@ -2,9 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,6 +11,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // 관리자 사용자 시더 실행
+        $this->call(AdminUserSeeder::class);
+
         // 사용자 시더 실행
         $this->call(UserSeeder::class);
 
@@ -21,6 +22,12 @@ class DatabaseSeeder extends Seeder
 
         // 게시판 스킨 시더 실행
         $this->call(BoardSkinSeeder::class);
+
+        // 게시판 템플릿 시더 실행 (카테고리보다 먼저)
+        $this->call(BoardTemplateSeeder::class);
+
+        // 카테고리 시더 실행 (템플릿 이후)
+        $this->call(CategorySeeder::class);
 
         // 게시판 시더 실행
         $this->call(BoardSeeder::class);
@@ -33,5 +40,8 @@ class DatabaseSeeder extends Seeder
 
         // 팝업 시더 실행
         $this->call(PopupSeeder::class);
+
+        // 설정 시더 실행
+        $this->call(SettingSeeder::class);
     }
 }

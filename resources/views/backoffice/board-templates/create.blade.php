@@ -164,17 +164,17 @@
                 </div>
 
                 <!-- 카테고리 그룹 설정 (카테고리 기능 사용 시에만 표시) -->
-                <div class="board-form-group" id="category_group_wrapper" style="display: none;">
-                    <label for="category_group" class="board-form-label">카테고리 그룹</label>
-                    <select class="board-form-control" id="category_group" name="category_group">
+                <div class="board-form-group" id="category_id_wrapper" style="display: none;">
+                    <label for="category_id" class="board-form-label">카테고리 그룹</label>
+                    <select class="board-form-control" id="category_id" name="category_id">
                         <option value="">카테고리 그룹 선택</option>
                         @foreach($categoryGroups as $group)
-                            <option value="{{ $group }}" @selected(old('category_group') == $group)>
-                                {{ $group }}
+                            <option value="{{ $group->id }}" @selected(old('category_id') == $group->id)>
+                                {{ $group->name }}
                             </option>
                         @endforeach
                     </select>
-                    <small class="board-form-text">카테고리를 사용하려면 그룹을 선택하세요. 카테고리 관리 메뉴에서 등록된 그룹들이 표시됩니다.</small>
+                    <small class="board-form-text">카테고리를 사용하려면 그룹을 선택하세요. 카테고리 관리 메뉴에서 등록된 그룹(depth=0)들이 표시됩니다.</small>
                 </div>
 
                 <!-- 목록 및 권한 설정 -->

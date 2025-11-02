@@ -15,221 +15,522 @@ class AdminMenuSeeder extends Seeder
         // 기존 데이터 삭제
         AdminMenu::query()->delete();
 
+        // 현재 DB 데이터로 최신화된 메뉴 구성 (ID 1번부터 연속)
         $menus = [
+            // 1. 대시보드
             [
+                'id' => 1,
                 'parent_id' => null,
                 'name' => '대시보드',
                 'url' => '/backoffice',
                 'icon' => 'fa-tachometer-alt',
                 'order' => 1,
-                'is_active' => true,
+                'is_active' => 1,
+                'created_at' => '2025-05-05 09:33:08',
+                'updated_at' => '2025-09-23 07:22:04',
                 'permission_key' => null,
             ],
+            
+            // 2. 시스템 관리
             [
+                'id' => 2,
                 'parent_id' => null,
                 'name' => '시스템 관리',
                 'url' => null,
                 'icon' => 'fa-cogs',
                 'order' => 2,
-                'is_active' => true,
+                'is_active' => 1,
+                'created_at' => '2025-05-05 09:33:08',
+                'updated_at' => '2025-09-23 07:22:04',
                 'permission_key' => null,
             ],
             [
+                'id' => 3,
+                'parent_id' => 2,
+                'name' => '메뉴 관리',
+                'url' => '/backoffice/admin-menus',
+                'icon' => null,
+                'order' => 1,
+                'is_active' => 1,
+                'created_at' => '2025-05-05 09:33:08',
+                'updated_at' => '2025-10-09 14:41:00',
+                'permission_key' => null,
+            ],
+            [
+                'id' => 4,
+                'parent_id' => 2,
+                'name' => '게시판 관리',
+                'url' => '/backoffice/boards',
+                'icon' => null,
+                'order' => 2,
+                'is_active' => 1,
+                'created_at' => '2025-05-05 09:33:08',
+                'updated_at' => '2025-10-09 14:41:06',
+                'permission_key' => null,
+            ],
+            [
+                'id' => 5,
+                'parent_id' => 2,
+                'name' => '게시판 스킨 관리',
+                'url' => '/backoffice/board-skins',
+                'icon' => null,
+                'order' => 3,
+                'is_active' => 0,
+                'created_at' => '2025-05-06 09:58:14',
+                'updated_at' => '2025-10-09 14:41:09',
+                'permission_key' => null,
+            ],
+            
+            // 3. 기본설정
+            [
+                'id' => 6,
                 'parent_id' => null,
                 'name' => '기본설정',
                 'url' => null,
                 'icon' => 'fa-file-alt',
                 'order' => 3,
-                'is_active' => true,
+                'is_active' => 1,
+                'created_at' => '2025-05-05 09:33:08',
+                'updated_at' => '2025-09-23 07:22:12',
                 'permission_key' => null,
             ],
             [
+                'id' => 7,
+                'parent_id' => 6,
+                'name' => '기본설정',
+                'url' => '/backoffice/setting',
+                'icon' => null,
+                'order' => 1,
+                'is_active' => 1,
+                'created_at' => '2025-05-05 09:33:08',
+                'updated_at' => '2025-10-07 13:38:54',
+                'permission_key' => null,
+            ],
+            [
+                'id' => 8,
+                'parent_id' => 6,
+                'name' => '관리자 관리',
+                'url' => '/backoffice/admins',
+                'icon' => null,
+                'order' => 2,
+                'is_active' => 1,
+                'created_at' => '2025-09-19 00:19:49',
+                'updated_at' => '2025-10-09 04:28:31',
+                'permission_key' => null,
+            ],
+            [
+                'id' => 9,
+                'parent_id' => 6,
+                'name' => '코드 관리',
+                'url' => '/backoffice/categories',
+                'icon' => null,
+                'order' => 3,
+                'is_active' => 1,
+                'created_at' => '2025-10-09 01:02:41',
+                'updated_at' => '2025-10-16 06:28:22',
+                'permission_key' => null,
+            ],
+            [
+                'id' => 10,
+                'parent_id' => 6,
+                'name' => '일정관리',
+                'url' => '/backoffice/schedules',
+                'icon' => null,
+                'order' => 4,
+                'is_active' => 1,
+                'created_at' => '2025-10-16 06:31:01',
+                'updated_at' => '2025-10-16 06:50:03',
+                'permission_key' => null,
+            ],
+            
+            // 4. 회원관리
+            [
+                'id' => 11,
+                'parent_id' => null,
+                'name' => '회원관리',
+                'url' => null,
+                'icon' => 'fa-users',
+                'order' => 4,
+                'is_active' => 1,
+                'created_at' => '2025-10-16 06:42:49',
+                'updated_at' => '2025-10-16 06:42:57',
+                'permission_key' => null,
+            ],
+            [
+                'id' => 12,
+                'parent_id' => 11,
+                'name' => '회원 정보',
+                'url' => '/backoffice/users',
+                'icon' => null,
+                'order' => 1,
+                'is_active' => 1,
+                'created_at' => '2025-10-16 06:49:19',
+                'updated_at' => '2025-10-16 06:53:23',
+                'permission_key' => null,
+            ],
+            [
+                'id' => 13,
+                'parent_id' => 11,
+                'name' => '회원 그룹 관리',
+                'url' => '/backoffice/user-groups',
+                'icon' => null,
+                'order' => 2,
+                'is_active' => 1,
+                'created_at' => '2025-10-16 06:50:38',
+                'updated_at' => '2025-10-16 06:53:23',
+                'permission_key' => null,
+            ],
+            [
+                'id' => 14,
+                'parent_id' => 11,
+                'name' => '메일/SMS 관리',
+                'url' => '/backoffice/mail-sms',
+                'icon' => null,
+                'order' => 3,
+                'is_active' => 1,
+                'created_at' => '2025-10-16 06:50:58',
+                'updated_at' => '2025-10-16 06:53:23',
+                'permission_key' => null,
+            ],
+            [
+                'id' => 15,
+                'parent_id' => 11,
+                'name' => '메일/SMS 발송 로그',
+                'url' => '/backoffice/mail-sms-logs',
+                'icon' => null,
+                'order' => 4,
+                'is_active' => 1,
+                'created_at' => '2025-10-16 06:53:18',
+                'updated_at' => '2025-10-16 06:53:23',
+                'permission_key' => null,
+            ],
+            
+            // 5. 프로그램
+            [
+                'id' => 16,
+                'parent_id' => null,
+                'name' => '프로그램',
+                'url' => null,
+                'icon' => 'fa-calendar-alt',
+                'order' => 5,
+                'is_active' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+                'permission_key' => null,
+            ],
+            [
+                'id' => 17,
+                'parent_id' => 16,
+                'name' => '전체일정 관리',
+                'url' => '/backoffice/programs/schedules',
+                'icon' => null,
+                'order' => 1,
+                'is_active' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+                'permission_key' => null,
+            ],
+            [
+                'id' => 18,
+                'parent_id' => 16,
+                'name' => '프로그램 관리',
+                'url' => '/backoffice/programs',
+                'icon' => null,
+                'order' => 2,
+                'is_active' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+                'permission_key' => null,
+            ],
+            [
+                'id' => 19,
+                'parent_id' => 16,
+                'name' => '개인 프로그램 목록',
+                'url' => '/backoffice/programs/individual',
+                'icon' => null,
+                'order' => 3,
+                'is_active' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+                'permission_key' => null,
+            ],
+            [
+                'id' => 20,
+                'parent_id' => 16,
+                'name' => '단체 프로그램 목록',
+                'url' => '/backoffice/programs/group',
+                'icon' => null,
+                'order' => 4,
+                'is_active' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+                'permission_key' => null,
+            ],
+            [
+                'id' => 21,
+                'parent_id' => 16,
+                'name' => '학교 관리',
+                'url' => '/backoffice/schools',
+                'icon' => null,
+                'order' => 5,
+                'is_active' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+                'permission_key' => null,
+            ],
+            
+            // 6. 신청 관리
+            [
+                'id' => 22,
+                'parent_id' => null,
+                'name' => '신청 관리',
+                'url' => null,
+                'icon' => 'fa-clipboard-list',
+                'order' => 6,
+                'is_active' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+                'permission_key' => null,
+            ],
+            [
+                'id' => 23,
+                'parent_id' => 22,
+                'name' => '예약 캘린더',
+                'url' => '/backoffice/reservations/calendar',
+                'icon' => null,
+                'order' => 1,
+                'is_active' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+                'permission_key' => null,
+            ],
+            [
+                'id' => 24,
+                'parent_id' => 22,
+                'name' => '개인 신청내역',
+                'url' => '/backoffice/applications/individual',
+                'icon' => null,
+                'order' => 2,
+                'is_active' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+                'permission_key' => null,
+            ],
+            [
+                'id' => 25,
+                'parent_id' => 22,
+                'name' => '단체 신청내역',
+                'url' => '/backoffice/applications/group',
+                'icon' => null,
+                'order' => 3,
+                'is_active' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+                'permission_key' => null,
+            ],
+            [
+                'id' => 26,
+                'parent_id' => 22,
+                'name' => '명단 관리',
+                'url' => '/backoffice/rosters',
+                'icon' => null,
+                'order' => 4,
+                'is_active' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+                'permission_key' => null,
+            ],
+            
+            // 7. 게시판관리
+            [
+                'id' => 27,
                 'parent_id' => null,
                 'name' => '게시판관리',
                 'url' => null,
                 'icon' => 'fa-chart-bar',
-                'order' => 4,
-                'is_active' => true,
+                'order' => 7,
+                'is_active' => 1,
+                'created_at' => '2025-08-24 09:36:13',
+                'updated_at' => '2025-10-16 06:51:22',
                 'permission_key' => null,
             ],
             [
+                'id' => 28,
+                'parent_id' => 27,
+                'name' => '공지사항',
+                'url' => '/backoffice/board-posts/notices',
+                'icon' => null,
+                'order' => 1,
+                'is_active' => 1,
+                'created_at' => '2025-05-06 12:44:51',
+                'updated_at' => '2025-09-29 04:25:00',
+                'permission_key' => null,
+            ],
+            [
+                'id' => 29,
+                'parent_id' => 27,
+                'name' => '자료실',
+                'url' => '/backoffice/board-posts/materials',
+                'icon' => null,
+                'order' => 2,
+                'is_active' => 1,
+                'created_at' => '2025-08-21 07:20:49',
+                'updated_at' => '2025-10-16 06:54:58',
+                'permission_key' => null,
+            ],
+            [
+                'id' => 30,
+                'parent_id' => 27,
+                'name' => 'FAQ',
+                'url' => '/backoffice/board-posts/faq',
+                'icon' => null,
+                'order' => 3,
+                'is_active' => 1,
+                'created_at' => '2025-10-16 06:56:30',
+                'updated_at' => '2025-10-16 06:56:33',
+                'permission_key' => null,
+            ],
+            
+            // 8. 홈페이지관리
+            [
+                'id' => 31,
                 'parent_id' => null,
                 'name' => '홈페이지관리',
                 'url' => null,
                 'icon' => 'fa-home',
-                'order' => 5,
-                'is_active' => true,
+                'order' => 8,
+                'is_active' => 1,
+                'created_at' => '2025-09-23 07:20:08',
+                'updated_at' => '2025-10-16 06:51:22',
                 'permission_key' => null,
             ],
             [
-                'parent_id' => null,
-                'name' => '기업정보관리',
-                'url' => null,
-                'icon' => 'fa-users',
+                'id' => 32,
+                'parent_id' => 31,
+                'name' => '배너 관리',
+                'url' => '/backoffice/banners',
+                'icon' => null,
+                'order' => 1,
+                'is_active' => 1,
+                'created_at' => '2025-08-24 09:35:23',
+                'updated_at' => '2025-10-16 06:54:00',
+                'permission_key' => null,
+            ],
+            [
+                'id' => 33,
+                'parent_id' => 31,
+                'name' => '팝업 관리',
+                'url' => '/backoffice/popups',
+                'icon' => null,
+                'order' => 2,
+                'is_active' => 1,
+                'created_at' => '2025-05-05 09:33:08',
+                'updated_at' => '2025-10-16 06:54:00',
+                'permission_key' => null,
+            ],
+            [
+                'id' => 34,
+                'parent_id' => 31,
+                'name' => '인사말 관리',
+                'url' => '/backoffice/board-posts/greetings',
+                'icon' => null,
+                'order' => 3,
+                'is_active' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+                'permission_key' => null,
+            ],
+            [
+                'id' => 35,
+                'parent_id' => 31,
+                'name' => '설립목적 관리',
+                'url' => '/backoffice/board-posts/purpose',
+                'icon' => null,
+                'order' => 4,
+                'is_active' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+                'permission_key' => null,
+            ],
+            [
+                'id' => 36,
+                'parent_id' => 31,
+                'name' => '연구원 연락처 관리',
+                'url' => '/backoffice/board-posts/contacts',
+                'icon' => null,
+                'order' => 5,
+                'is_active' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+                'permission_key' => null,
+            ],
+            [
+                'id' => 37,
+                'parent_id' => 31,
+                'name' => '개인정보처리방침 관리',
+                'url' => '/backoffice/board-posts/privacy-policy',
+                'icon' => null,
                 'order' => 6,
-                'is_active' => true,
+                'is_active' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+                'permission_key' => null,
+            ],
+            
+            // 9. 통계 관리
+            [
+                'id' => 38,
+                'parent_id' => null,
+                'name' => '통계 관리',
+                'url' => null,
+                'icon' => 'fa-chart-line',
+                'order' => 9,
+                'is_active' => 1,
+                'created_at' => '2025-09-23 07:21:13',
+                'updated_at' => '2025-10-16 06:53:52',
+                'permission_key' => null,
+            ],
+            [
+                'id' => 39,
+                'parent_id' => 38,
+                'name' => '회원 통계',
+                'url' => '/backoffice/statistics/members',
+                'icon' => null,
+                'order' => 1,
+                'is_active' => 1,
+                'created_at' => '2025-09-23 07:29:41',
+                'updated_at' => '2025-10-16 06:54:11',
+                'permission_key' => null,
+            ],
+            [
+                'id' => 40,
+                'parent_id' => 38,
+                'name' => '접속 통계',
+                'url' => '/backoffice/statistics/access',
+                'icon' => null,
+                'order' => 2,
+                'is_active' => 1,
+                'created_at' => '2025-10-16 06:54:34',
+                'updated_at' => '2025-10-16 06:54:38',
                 'permission_key' => null,
             ],
         ];
 
         // parent_id가 null인 메뉴들을 먼저 생성
-        $parentMenus = [];
-        foreach ($menus as $menu) {
-            if ($menu['parent_id'] === null) {
-                $parentMenus[] = AdminMenu::create($menu);
-            }
+        $parentMenus = array_filter($menus, function($menu) {
+            return $menu['parent_id'] === null;
+        });
+        
+        foreach ($parentMenus as $menu) {
+            AdminMenu::create($menu);
         }
-
-        // 시스템 관리 하위 메뉴
-        $systemMenu = $parentMenus[1];
-        $childMenus = [
-            [
-                'parent_id' => $systemMenu->id,
-                'name' => '메뉴 관리',
-                'url' => '/backoffice/admin-menus',
-                'icon' => null,
-                'order' => 1,
-                'is_active' => true,
-                'permission_key' => null,
-            ],
-            [
-                'parent_id' => $systemMenu->id,
-                'name' => '게시판 관리',
-                'url' => '/backoffice/boards',
-                'icon' => null,
-                'order' => 2,
-                'is_active' => true,
-                'permission_key' => null,
-            ],
-            [
-                'parent_id' => $systemMenu->id,
-                'name' => '게시판 스킨 관리',
-                'url' => '/backoffice/board-skins',
-                'icon' => null,
-                'order' => 3,
-                'is_active' => false,
-                'permission_key' => null,
-            ],
-        ];
-
+        
+        // 그 다음에 자식 메뉴들을 생성
+        $childMenus = array_filter($menus, function($menu) {
+            return $menu['parent_id'] !== null;
+        });
+        
         foreach ($childMenus as $menu) {
-            AdminMenu::create($menu);
-        }
-
-        // 기본설정 하위 메뉴
-        $settingMenu = $parentMenus[2];
-        $settingChildMenus = [
-            [
-                'parent_id' => $settingMenu->id,
-                'name' => '기본설정',
-                'url' => '/backoffice/setting',
-                'icon' => null,
-                'order' => 1,
-                'is_active' => true,
-                'permission_key' => null,
-            ],
-            [
-                'parent_id' => $settingMenu->id,
-                'name' => '관리자 관리',
-                'url' => '/backoffice/admins',
-                'icon' => null,
-                'order' => 2,
-                'is_active' => true,
-                'permission_key' => null,
-            ],
-            [
-                'parent_id' => $settingMenu->id,
-                'name' => '카테고리 관리',
-                'url' => '/backoffice/categories',
-                'icon' => null,
-                'order' => 3,
-                'is_active' => true,
-                'permission_key' => null,
-            ],
-            [
-                'parent_id' => $settingMenu->id,
-                'name' => '관리자 권한 그룹',
-                'url' => '/backoffice/admin-groups',
-                'icon' => null,
-                'order' => 4,
-                'is_active' => true,
-                'permission_key' => null,
-            ],
-        ];
-
-        foreach ($settingChildMenus as $menu) {
-            AdminMenu::create($menu);
-        }
-
-        // 게시판관리 하위 메뉴
-        $boardMenu = $parentMenus[3];
-        $boardChildMenus = [
-            [
-                'parent_id' => $boardMenu->id,
-                'name' => '공지사항',
-                'url' => '/backoffice/board-posts/notices',
-                'icon' => null,
-                'order' => 1,
-                'is_active' => true,
-                'permission_key' => null,
-            ],
-            [
-                'parent_id' => $boardMenu->id,
-                'name' => '갤러리',
-                'url' => '/backoffice/board-posts/gallerys',
-                'icon' => null,
-                'order' => 2,
-                'is_active' => true,
-                'permission_key' => null,
-            ],
-        ];
-
-        foreach ($boardChildMenus as $menu) {
-            AdminMenu::create($menu);
-        }
-
-        // 홈페이지관리 하위 메뉴
-        $homepageMenu = $parentMenus[4];
-        $homepageChildMenus = [
-            [
-                'parent_id' => $homepageMenu->id,
-                'name' => '팝업 관리',
-                'url' => '/backoffice/popups',
-                'icon' => null,
-                'order' => 1,
-                'is_active' => true,
-                'permission_key' => null,
-            ],
-            [
-                'parent_id' => $homepageMenu->id,
-                'name' => '배너 관리',
-                'url' => '/backoffice/banners',
-                'icon' => null,
-                'order' => 2,
-                'is_active' => true,
-                'permission_key' => null,
-            ],
-        ];
-
-        foreach ($homepageChildMenus as $menu) {
-            AdminMenu::create($menu);
-        }
-
-        // 기업정보관리 하위 메뉴
-        $companyMenu = $parentMenus[5];
-        $companyChildMenus = [
-            [
-                'parent_id' => $companyMenu->id,
-                'name' => '인사말',
-                'url' => '/backoffice/board-posts/greetings',
-                'icon' => null,
-                'order' => 1,
-                'is_active' => true,
-                'permission_key' => null,
-            ],
-        ];
-
-        foreach ($companyChildMenus as $menu) {
             AdminMenu::create($menu);
         }
     }

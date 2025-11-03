@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Backoffice;
 
 use App\Http\Controllers\Controller;
+use App\Models\UserAccessLog;
 use Illuminate\Http\Request;
 
 class LogController extends Controller
@@ -39,5 +40,33 @@ class LogController extends Controller
         ];
 
         return view('backoffice.logs.access', compact('logs'));
+    }
+
+    /**
+     * 사용자 접속로그 목록
+     */
+    public function userAccessLogs(Request $request)
+    {
+        $logs = UserAccessLog::with('user')
+            ->users()
+            ->search($request)
+            ->orderBy('login_at', 'desc')
+            ->paginate($request->get('per_page', 20));
+
+        return view('backoffice.logs.user-access', compact('logs'));
+    }
+
+    /**
+     * 관리자 접속로그 목록
+     */
+    public function adminAccessLogs(Request $request)
+    {
+        $logs = UserAccessLog::with('user')
+            ->admins()
+            ->search($request)
+            ->orderBy('login_at', 'desc')
+            ->paginate($request->get('per_page', 20));
+
+        return view('backoffice.logs.admin-access', compact('logs'));
     }
 }

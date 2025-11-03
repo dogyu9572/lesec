@@ -19,13 +19,17 @@ class BoardSeeder extends Seeder
         // 템플릿 조회 (선택적으로 사용)
         $noticeTemplate = BoardTemplate::where('name', '공지사항')->first();
         $galleryTemplate = BoardTemplate::where('name', '갤러리')->first();
+        
+        // 스킨 조회
+        $defaultSkin = \App\Models\BoardSkin::where('name', '기본 스킨')->first();
+        $gallerySkin = \App\Models\BoardSkin::where('name', '갤러리 스킨')->first();
 
         $boards = [
             [
                 'name' => '공지사항',
                 'slug' => 'notices',
                 'description' => '관리자가 작성하는 공지사항 게시판',
-                'skin_id' => 1,
+                'skin_id' => $defaultSkin?->id,
                 'template_id' => $noticeTemplate?->id,
                 'is_active' => true,
                 'table_created' => false,
@@ -54,7 +58,7 @@ class BoardSeeder extends Seeder
                 'name' => '갤러리',
                 'slug' => 'gallerys',
                 'description' => '썸네일 이미지를 보여주는 갤러리형 게시판',
-                'skin_id' => 2,
+                'skin_id' => $gallerySkin?->id,
                 'template_id' => $galleryTemplate?->id,
                 'is_active' => true,
                 'table_created' => false,
@@ -83,7 +87,7 @@ class BoardSeeder extends Seeder
                 'name' => '인사말',
                 'slug' => 'greetings',
                 'description' => '인사말 게시판',
-                'skin_id' => 1,
+                'skin_id' => $defaultSkin?->id,
                 'template_id' => null,
                 'is_active' => true,
                 'table_created' => false,

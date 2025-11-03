@@ -12,8 +12,10 @@ class CategorySeeder extends Seeder
      */
     public function run(): void
     {
-        // 기존 카테고리 삭제
+        // 기존 카테고리 삭제 (외래키 고려)
+        \DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         Category::truncate();
+        \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         // ========================================
         // 게시판 카테고리 그룹

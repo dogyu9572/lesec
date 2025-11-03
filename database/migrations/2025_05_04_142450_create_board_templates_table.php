@@ -25,7 +25,7 @@ return new class extends Migration
             $table->boolean('enable_notice')->default(true)->comment('공지사항 활성화 여부');
             $table->boolean('enable_sorting')->default(false)->comment('정렬 기능 활성화 여부');
             $table->boolean('enable_category')->default(true)->comment('카테고리 기능 활성화 여부');
-            $table->foreignId('category_id')->nullable()->after('enable_category')->constrained('categories')->onDelete('set null')->comment('카테고리 그룹 ID (depth=0)');
+            $table->foreignId('category_id')->nullable()->constrained('categories')->onDelete('set null')->comment('카테고리 그룹 ID (depth=0)');
             $table->boolean('is_single_page')->default(false)->comment('단일 페이지 모드');
             
             // 목록 및 권한 설정

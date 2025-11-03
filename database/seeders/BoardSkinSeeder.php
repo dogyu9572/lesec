@@ -12,8 +12,10 @@ class BoardSkinSeeder extends Seeder
      */
     public function run(): void
     {
-        // 기존 데이터 삭제
+        // 기존 데이터 삭제 (외래키 고려)
+        \DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         BoardSkin::query()->delete();
+        \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         $skins = [
             [

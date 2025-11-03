@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Laravel Sail 프로젝트 설정 스크립트 (1단계: 프로젝트 설정)
-PROJECT_NAME="pls"
+PROJECT_NAME="lesec"
 
 echo "🚀 Laravel Sail 프로젝트 설정 중: $PROJECT_NAME"
 

@@ -105,6 +105,10 @@ Route::prefix('backoffice')->middleware(['backoffice'])->group(function () {
     // 접속 로그 관리
     Route::get('logs/access', [LogController::class, 'access'])
         ->name('backoffice.logs.access');
+    Route::get('logs/user-access', [LogController::class, 'userAccessLogs'])
+        ->name('backoffice.logs.user-access');
+    Route::get('logs/admin-access', [LogController::class, 'adminAccessLogs'])
+        ->name('backoffice.logs.admin-access');
 
     // 관리자 계정 관리
     Route::resource('admins', AdminController::class, [

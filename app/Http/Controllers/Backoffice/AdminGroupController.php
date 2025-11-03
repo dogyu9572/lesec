@@ -32,7 +32,8 @@ class AdminGroupController extends Controller
      */
     public function create()
     {
-        return view('backoffice.admin-groups.create');
+        $menus = $this->adminGroupService->getAllMenus();
+        return view('backoffice.admin-groups.create', compact('menus'));
     }
 
     /**
@@ -42,6 +43,12 @@ class AdminGroupController extends Controller
     {
         $data = $request->validated();
         $group = $this->adminGroupService->createGroup($data);
+
+        // 권한 저장
+        $permissions = $request->input('permissions', []);
+        if (!empty($permissions)) {
+            $this->adminGroupService->saveGroupMenuPermissions($group->id, $permissions);
+        }
 
         return redirect()->route('backoffice.admin-groups.index')
             ->with('success', '권한 그룹이 추가되었습니다.');
@@ -53,7 +60,9 @@ class AdminGroupController extends Controller
     public function edit($id)
     {
         $group = $this->adminGroupService->getGroup($id);
-        return view('backoffice.admin-groups.edit', compact('group'));
+        $menus = $this->adminGroupService->getAllMenus();
+        $groupPermissions = $this->adminGroupService->getGroupMenuPermissions($id);
+        return view('backoffice.admin-groups.edit', compact('group', 'menus', 'groupPermissions'));
     }
 
     /**
@@ -64,6 +73,10 @@ class AdminGroupController extends Controller
         $group = $this->adminGroupService->getGroup($id);
         $data = $request->validated();
         $this->adminGroupService->updateGroup($group, $data);
+
+        // 권한 업데이트
+        $permissions = $request->input('permissions', []);
+        $this->adminGroupService->saveGroupMenuPermissions($id, $permissions);
 
         return redirect()->route('backoffice.admin-groups.index')
             ->with('success', '권한 그룹 정보가 수정되었습니다.');

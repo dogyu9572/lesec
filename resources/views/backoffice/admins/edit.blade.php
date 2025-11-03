@@ -62,16 +62,6 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="department">부서</label>
-                    <input type="text" id="department" name="department" value="{{ old('department', $admin->department) }}" placeholder="부서를 입력하세요">
-                </div>
-                
-                <div class="form-group">
-                    <label for="position">직위</label>
-                    <input type="text" id="position" name="position" value="{{ old('position', $admin->position) }}" placeholder="직위를 입력하세요">
-                </div>
-                
-                <div class="form-group">
                     <label for="contact">연락처</label>
                     <input type="text" id="contact" name="contact" value="{{ old('contact', $admin->contact) }}" placeholder="연락처를 입력하세요">
                 </div>

@@ -46,7 +46,7 @@ class AdminGroup extends Model
      */
     public function menus()
     {
-        return $this->belongsToMany(AdminMenu::class, 'group_menu_permissions', 'group_id', 'menu_id')
+        return $this->belongsToMany(AdminMenu::class, 'admin_group_menu_permissions', 'group_id', 'menu_id')
             ->wherePivot('granted', true)
             ->withPivot('granted')
             ->withTimestamps();

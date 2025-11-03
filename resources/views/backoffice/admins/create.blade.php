@@ -41,7 +41,13 @@
             <div class="form-grid">
                 <div class="form-group">
                     <label for="login_id">아이디</label>
-                    <input type="text" id="login_id" name="login_id" value="{{ old('login_id') }}" placeholder="로그인 아이디를 입력하세요">
+                    <div class="login-id-input-wrapper">
+                        <input type="text" id="login_id" name="login_id" value="{{ old('login_id') }}" placeholder="로그인 아이디를 입력하세요" class="login-id-input">
+                        <button type="button" id="check-login-id-btn" class="btn btn-primary btn-check-id">
+                            <i class="fas fa-check"></i> 중복 확인
+                        </button>
+                    </div>
+                    <div id="login-id-message" class="login-id-message"></div>
                 </div>
                 
                 <div class="form-group">
@@ -57,16 +63,6 @@
                 <div class="form-group">
                     <label for="name">성명</label>
                     <input type="text" id="name" name="name" value="{{ old('name') }}" required placeholder="성명을 입력하세요">
-                </div>
-                
-                <div class="form-group">
-                    <label for="department">부서</label>
-                    <input type="text" id="department" name="department" value="{{ old('department') }}" placeholder="부서를 입력하세요">
-                </div>
-                
-                <div class="form-group">
-                    <label for="position">직위</label>
-                    <input type="text" id="position" name="position" value="{{ old('position') }}" placeholder="직위를 입력하세요">
                 </div>
                 
                 <div class="form-group">
@@ -129,4 +125,8 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script src="{{ asset('js/backoffice/admin-form.js') }}"></script>
 @endsection

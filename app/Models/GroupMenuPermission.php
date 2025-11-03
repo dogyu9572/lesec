@@ -7,6 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class GroupMenuPermission extends Model
 {
     /**
+     * 테이블명 지정
+     */
+    protected $table = 'admin_group_menu_permissions';
+
+    /**
      * 대량 할당 가능한 속성들
      */
     protected $fillable = [

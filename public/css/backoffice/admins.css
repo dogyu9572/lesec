@@ -6,6 +6,82 @@
     vertical-align: middle;
 }
 
+/* 헤더 버튼 그룹 - backoffice-common.css의 board-page-header 스타일 사용 */
+
+/* disabled 상태에서도 버튼 색상 유지 */
+.board-page-buttons .btn:disabled,
+.board-page-buttons button.btn:disabled {
+    opacity: 1 !important;
+}
+
+.board-page-buttons .btn-danger:disabled {
+    background-color: #dc3545 !important;
+    border-color: #dc3545 !important;
+    color: white !important;
+    cursor: not-allowed !important;
+}
+
+.board-page-buttons .btn-success:disabled {
+    background-color: #28a745 !important;
+    border-color: #28a745 !important;
+    color: white !important;
+    cursor: not-allowed !important;
+}
+
+/* 체크박스 컬럼 */
+.admins-page .board-checkbox-column {
+    text-align: center;
+}
+
+.admins-page .board-checkbox-column input[type="checkbox"],
+.admins-page .admin-checkbox {
+    cursor: pointer;
+}
+
+/* 아이디 입력란과 중복 체크 버튼 */
+.login-id-input-wrapper {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.login-id-input {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+.login-id-input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+}
+
+.btn-check-id {
+    white-space: nowrap;
+    padding: 10px 16px;
+    font-size: 14px;
+    min-width: 100px;
+}
+
+.login-id-message {
+    margin-top: 5px;
+    font-size: 12px;
+    font-weight: 500;
+    min-height: 18px;
+}
+
+.login-id-message.success {
+    color: #28a745;
+}
+
+.login-id-message.error {
+    color: #dc3545;
+}
+
 /* 관리자 검색 필터 스타일 */
 .admin-filter {
     background-color: #f8f9fa;
@@ -165,25 +241,27 @@
 }
 
 .admins-page .board-table th:nth-child(1),
-.admins-page .board-table td:nth-child(1) { width: 60px; }
+.admins-page .board-table td:nth-child(1) { width: 50px; }
 .admins-page .board-table th:nth-child(2),
-.admins-page .board-table td:nth-child(2) { width: 120px; }
+.admins-page .board-table td:nth-child(2) { width: 60px; }
 .admins-page .board-table th:nth-child(3),
-.admins-page .board-table td:nth-child(3) { width: 100px; }
+.admins-page .board-table td:nth-child(3) { width: 120px; }
 .admins-page .board-table th:nth-child(4),
 .admins-page .board-table td:nth-child(4) { width: 100px; }
 .admins-page .board-table th:nth-child(5),
 .admins-page .board-table td:nth-child(5) { width: 100px; }
 .admins-page .board-table th:nth-child(6),
-.admins-page .board-table td:nth-child(6) { width: 200px; }
+.admins-page .board-table td:nth-child(6) { width: 100px; }
 .admins-page .board-table th:nth-child(7),
-.admins-page .board-table td:nth-child(7) { width: 120px; }
+.admins-page .board-table td:nth-child(7) { width: 200px; }
 .admins-page .board-table th:nth-child(8),
-.admins-page .board-table td:nth-child(8) { width: 100px; }
+.admins-page .board-table td:nth-child(8) { width: 120px; }
 .admins-page .board-table th:nth-child(9),
-.admins-page .board-table td:nth-child(9) { width: 80px; }
+.admins-page .board-table td:nth-child(9) { width: 100px; }
 .admins-page .board-table th:nth-child(10),
-.admins-page .board-table td:nth-child(10) { width: 200px; }
+.admins-page .board-table td:nth-child(10) { width: 100px; }
+.admins-page .board-table th:nth-child(11),
+.admins-page .board-table td:nth-child(11) { width: 250px; }
 
 /* 역할 배지 */
 .role-badge {

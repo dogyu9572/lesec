@@ -111,6 +111,10 @@ Route::prefix('backoffice')->middleware(['backoffice'])->group(function () {
         ->name('backoffice.logs.admin-access');
 
     // 관리자 계정 관리
+    Route::post('admins/bulk-destroy', [AdminController::class, 'bulkDestroy'])
+        ->name('backoffice.admins.bulk-destroy');
+    Route::post('admins/check-login-id', [AdminController::class, 'checkLoginId'])
+        ->name('backoffice.admins.check-login-id');
     Route::resource('admins', AdminController::class, [
         'names' => 'backoffice.admins'
     ]);

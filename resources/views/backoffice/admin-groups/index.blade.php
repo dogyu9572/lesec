@@ -114,9 +114,6 @@
                                     <td>{{ $group->created_at->format('Y-m-d') }}</td>
                                     <td>
                                         <div class="board-btn-group">
-                                            <a href="{{ route('backoffice.admin-groups.permissions.edit', $group) }}" class="btn btn-warning btn-sm">
-                                                <i class="fas fa-lock"></i> 권한설정
-                                            </a>
                                             <a href="{{ route('backoffice.admin-groups.edit', $group) }}" class="btn btn-primary btn-sm">
                                                 <i class="fas fa-edit"></i> 수정
                                             </a>

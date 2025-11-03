@@ -93,4 +93,51 @@ class AdminController extends Controller
         return redirect()->route('backoffice.admins.index')
             ->with('success', '관리자가 삭제되었습니다.');
     }
+
+    /**
+     * 관리자 일괄 삭제
+     */
+    public function bulkDestroy(Request $request)
+    {
+        $request->validate([
+            'admin_ids' => 'required|array',
+            'admin_ids.*' => 'integer|exists:users,id'
+        ]);
+
+        $adminIds = $request->input('admin_ids');
+        
+        try {
+            // 서비스를 통해 일괄 삭제
+            $deletedCount = $this->adminService->bulkDelete($adminIds);
+
+            return response()->json([
+                'success' => true,
+                'message' => $deletedCount . '명의 관리자가 삭제되었습니다.',
+                'deleted_count' => $deletedCount
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => '삭제 중 오류가 발생했습니다: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * 아이디 중복 체크
+     */
+    public function checkLoginId(Request $request)
+    {
+        $request->validate([
+            'login_id' => 'required|string|max:255'
+        ]);
+
+        $loginId = $request->input('login_id');
+        $exists = User::where('login_id', $loginId)->exists();
+
+        return response()->json([
+            'available' => !$exists,
+            'message' => $exists ? '이미 사용 중인 아이디입니다.' : '사용 가능한 아이디입니다.'
+        ]);
+    }
 }

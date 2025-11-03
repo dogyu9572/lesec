@@ -7,6 +7,10 @@
 <link rel="stylesheet" href="{{ asset('css/backoffice/admins.css') }}">
 @endsection
 
+@section('scripts')
+<script src="{{ asset('js/backoffice/admin-permissions.js') }}"></script>
+@endsection
+
 @section('content')
 <div class="board-container admins-page">
     <div class="board-header">
@@ -61,6 +65,39 @@
                                 </label>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>메뉴 접근 권한</h3>
+                    <div class="permissions-container">
+                        @foreach($menus as $menu)
+                            <div class="permission-category">
+                                <div class="permission-category-header">
+                                    <h4>{{ $menu->name }}</h4>
+                                    <label class="permission-item parent-menu">
+                                        <input type="checkbox" name="permissions[{{ $menu->id }}]" value="1">
+                                        <span>{{ $menu->name }} 메뉴</span>
+                                    </label>
+                                </div>
+                                @if($menu->children->count() > 0)
+                                    <div class="permission-items">
+                                        @foreach($menu->children as $child)
+                                            <label class="permission-item child-menu">
+                                                <input type="checkbox" name="permissions[{{ $child->id }}]" value="1">
+                                                <span>{{ $child->name }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                    <div class="permission-notice">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle"></i>
+                            그룹 생성 시 메뉴 접근 권한을 설정할 수 있습니다. 나중에 권한 설정 페이지에서도 수정 가능합니다.
+                        </small>
                     </div>
                 </div>
 

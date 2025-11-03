@@ -9,10 +9,15 @@
 
 @section('content')
 <div class="board-container admins-page">
-    <div class="board-header">
-        <a href="{{ route('backoffice.admins.create') }}" class="btn btn-success">
-            <i class="fas fa-plus"></i> 새 관리자 추가
-        </a>
+    <div class="board-page-header">
+        <div class="board-page-buttons">
+            <button type="button" id="bulk-delete-btn" class="btn btn-danger">
+                <i class="fas fa-trash"></i> 선택 삭제
+            </button>
+            <a href="{{ route('backoffice.admins.create') }}" class="btn btn-success">
+                <i class="fas fa-plus"></i> 새 관리자 추가
+            </a>
+        </div>
     </div>
 
     @if(session('success'))
@@ -118,26 +123,32 @@
                     <table class="board-table">
                         <thead>
                             <tr>
+                                <th class="w5 board-checkbox-column">
+                                    <input type="checkbox" id="select-all" class="form-check-input">
+                                </th>
                                 <th>번호</th>
                                 <th>아이디</th>
                                 <th>성명</th>
-                                <th>부서</th>
-                                <th>직위</th>
                                 <th>이메일</th>
                                 <th>연락처</th>
                                 <th>권한</th>
                                 <th>상태</th>
+                                <th>등록일</th>
+                                <th>최종 접속일</th>
                                 <th>관리</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($admins as $index => $admin)
                                 <tr>
+                                    <td>
+                                        @if($admin->role !== 'super_admin')
+                                            <input type="checkbox" name="selected_admins[]" value="{{ $admin->id }}" class="form-check-input admin-checkbox">
+                                        @endif
+                                    </td>
                                     <td>{{ $admins->total() - ($admins->currentPage() - 1) * $admins->perPage() - $loop->index }}</td>
                                     <td>{{ $admin->login_id ?: '-' }}</td>
                                     <td>{{ $admin->name }}</td>
-                                    <td>{{ $admin->department ?: '-' }}</td>
-                                    <td>{{ $admin->position ?: '-' }}</td>
                                     <td>{{ $admin->email }}</td>
                                     <td>{{ $admin->contact ?: '-' }}</td>
                                     <td>
@@ -159,6 +170,8 @@
                                             {{ $admin->is_active ? '활성화' : '비활성화' }}
                                         </span>
                                     </td>
+                                    <td>{{ $admin->created_at->format('Y-m-d') }}</td>
+                                    <td>{{ $admin->last_login_at ? $admin->last_login_at->format('Y-m-d') : '-' }}</td>
                                     <td>
                                         <div class="board-btn-group">
                                             <a href="{{ route('backoffice.admins.show', $admin) }}" class="btn btn-info btn-sm">
@@ -185,11 +198,38 @@
                 </div>
                 <x-pagination :paginator="$admins" />
             @else
-                <div class="no-data">
-                    <p>등록된 관리자가 없습니다.</p>
+                <div class="table-responsive">
+                    <table class="board-table">
+                        <thead>
+                            <tr>
+                                <th class="w5 board-checkbox-column">
+                                    <input type="checkbox" id="select-all" class="form-check-input" disabled>
+                                </th>
+                                <th>번호</th>
+                                <th>아이디</th>
+                                <th>성명</th>
+                                <th>이메일</th>
+                                <th>연락처</th>
+                                <th>권한</th>
+                                <th>상태</th>
+                                <th>등록일</th>
+                                <th>최종 접속일</th>
+                                <th>관리</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="11" class="text-center">등록된 관리자가 없습니다.</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             @endif
         </div>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script src="{{ asset('js/backoffice/admins.js') }}"></script>
 @endsection

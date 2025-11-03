@@ -66,6 +66,7 @@ class AdminService
     public function createAdmin(array $data): User
     {
         $adminData = [
+            'login_id' => $data['login_id'] ?? null,
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
@@ -93,6 +94,7 @@ class AdminService
      */
     public function updateAdmin(User $admin, array $data): bool
     {
+        $admin->login_id = $data['login_id'] ?? null;
         $admin->name = $data['name'];
         $admin->email = $data['email'];
         $admin->admin_group_id = $data['admin_group_id'] ?? null;
@@ -113,6 +115,27 @@ class AdminService
     public function deleteAdmin(User $admin): bool
     {
         return $admin->delete();
+    }
+
+    /**
+     * 관리자 일괄 삭제
+     */
+    public function bulkDelete(array $adminIds): int
+    {
+        $deletedCount = 0;
+        
+        foreach ($adminIds as $adminId) {
+            $admin = User::find($adminId);
+            
+            // 슈퍼관리자는 삭제 불가
+            if ($admin && $admin->role !== 'super_admin') {
+                if ($admin->delete()) {
+                    $deletedCount++;
+                }
+            }
+        }
+        
+        return $deletedCount;
     }
 
     /**

@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('group_menu_permissions', function (Blueprint $table) {
+        Schema::create('admin_group_menu_permissions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('group_id')->constrained('admin_groups')->onDelete('cascade')->comment('권한 그룹 ID');
             $table->foreignId('menu_id')->constrained('admin_menus')->onDelete('cascade')->comment('메뉴 ID');
@@ -32,7 +32,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('group_menu_permissions');
+        Schema::dropIfExists('admin_group_menu_permissions');
     }
 };
 

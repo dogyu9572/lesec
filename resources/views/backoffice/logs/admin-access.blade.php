@@ -8,10 +8,7 @@
 @endsection
 
 @section('content')
-<div class="board-container users-page">
-    <div class="board-header">
-        <h1>관리자 접속로그</h1>
-    </div>
+<div class="board-container users-page">   
 
     @if(session('success'))
         <div class="alert alert-success">

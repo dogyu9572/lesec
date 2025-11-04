@@ -1,0 +1,182 @@
+/* 회원 그룹 관리 페이지 스타일 */
+
+/* 페이지별 스타일 */
+.member-list-header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 15px;
+}
+
+.member-search-filter {
+    margin-bottom: 20px;
+}
+
+#member-list-body tr:only-child {
+    border: none !important;
+}
+
+#member-list-body tr:only-child td {
+    border: none !important;
+    border-bottom: none !important;
+}
+
+.form-section:has(+ .form-actions) {
+    border-bottom: none !important;
+}
+
+/* 모달 스타일 */
+.category-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.category-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    animation: fadeIn 0.2s ease;
+}
+
+.category-modal-content {
+    position: relative;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s ease;
+    z-index: 10000;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.category-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.category-modal-header h5 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #212529;
+}
+
+.category-modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #6c757d;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.category-modal-close:hover {
+    background-color: #f8f9fa;
+    color: #343a40;
+}
+
+.category-modal-body {
+    padding: 20px;
+}
+
+.category-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 20px;
+    border-top: 1px solid #e9ecef;
+}
+
+/* 모달 폼 스타일 */
+.modal-form-group {
+    margin-bottom: 20px;
+}
+
+.modal-form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #495057;
+    font-size: 0.9rem;
+}
+
+.modal-form-label .required {
+    color: #dc3545;
+}
+
+.modal-form-control {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    transition: border-color 0.2s ease;
+}
+
+.modal-form-control:focus {
+    outline: none;
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.1);
+}
+
+.modal-form-control:disabled {
+    background-color: #e9ecef;
+    cursor: not-allowed;
+}
+
+.modal-form-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.modal-form-col {
+    flex: 1;
+}
+
+.modal-form-col.search-button-col {
+    flex: 0 0 auto;
+    width: auto;
+}
+
+.search-button-label {
+    opacity: 0;
+}
+

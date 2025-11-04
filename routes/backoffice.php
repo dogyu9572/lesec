@@ -14,6 +14,8 @@ use App\Http\Controllers\Backoffice\UserController;
 use App\Http\Controllers\Backoffice\LogController;
 use App\Http\Controllers\Backoffice\AdminController;
 use App\Http\Controllers\Backoffice\AdminGroupController;
+use App\Http\Controllers\Backoffice\MemberController;
+use App\Http\Controllers\Backoffice\MemberGroupController;
 use App\Http\Controllers\Backoffice\BannerController;
 use App\Http\Controllers\Backoffice\PopupController;
 
@@ -207,6 +209,28 @@ Route::prefix('backoffice')->middleware(['backoffice'])->group(function () {
     Route::resource('users', UserController::class, [
         'names' => 'backoffice.users'
     ]);
+
+    // 회원 관리 (교사/학생)
+    Route::resource('members', MemberController::class, [
+        'names' => 'backoffice.members'
+    ]);
+    Route::post('members/bulk-destroy', [MemberController::class, 'bulkDestroy'])
+        ->name('backoffice.members.bulk-destroy');
+    Route::get('members-export', [MemberController::class, 'export'])
+        ->name('backoffice.members.export');
+
+    // 회원 그룹 관리
+    Route::resource('member-groups', MemberGroupController::class, [
+        'names' => 'backoffice.member-groups'
+    ])->except(['show']);
+    Route::post('member-groups/bulk-destroy', [MemberGroupController::class, 'bulkDestroy'])
+        ->name('backoffice.member-groups.bulk-destroy');
+    Route::get('member-groups/search-members', [MemberGroupController::class, 'searchMembers'])
+        ->name('backoffice.member-groups.search-members');
+    Route::post('member-groups/{member_group}/add-members', [MemberGroupController::class, 'addMembers'])
+        ->name('backoffice.member-groups.add-members');
+    Route::post('member-groups/{member_group}/remove-member', [MemberGroupController::class, 'removeMember'])
+        ->name('backoffice.member-groups.remove-member');
 
     // 배너 관리
     Route::resource('banners', BannerController::class, [

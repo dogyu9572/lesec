@@ -18,6 +18,7 @@ use App\Http\Controllers\Backoffice\MemberController;
 use App\Http\Controllers\Backoffice\MemberGroupController;
 use App\Http\Controllers\Backoffice\BannerController;
 use App\Http\Controllers\Backoffice\PopupController;
+use App\Http\Controllers\Backoffice\ProgramController;
 
 // =============================================================================
 // 백오피스 인증 라우트
@@ -243,6 +244,10 @@ Route::prefix('backoffice')->middleware(['backoffice'])->group(function () {
         'names' => 'backoffice.popups'
     ]);
     Route::post('popups/update-order', [PopupController::class, 'updateOrder'])->name('backoffice.popups.update-order');
+
+    // 프로그램 관리
+    Route::get('programs', [ProgramController::class, 'index'])->name('backoffice.programs.index');
+    Route::put('programs/{program}', [ProgramController::class, 'update'])->name('backoffice.programs.update');
 
     // 세션 연장
     Route::post('session/extend', [App\Http\Controllers\Backoffice\SessionController::class, 'extend'])

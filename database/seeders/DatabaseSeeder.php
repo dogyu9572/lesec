@@ -43,5 +43,8 @@ class DatabaseSeeder extends Seeder
 
         // 설정 시더 실행
         $this->call(SettingSeeder::class);
+
+        // 프로그램 시더 실행
+        $this->call(ProgramSeeder::class);
     }
 }

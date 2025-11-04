@@ -7,71 +7,29 @@ use Illuminate\Http\Request;
 class SubController extends Controller
 {
 //프로그램
-	//중등학기
-    public function middle_semester()
-    {
-        $gNum = "01"; $sNum = "01"; $gName = "프로그램"; $sName = "중등학기";
-        return view('program.middle_semester', compact('gNum', 'sNum', 'gName', 'sName'));
-    }
-	//중등학기 - 신청 - 단체
-    public function middle_semester_apply_a()
-    {
-        $gNum = "01"; $sNum = "01"; $gName = "프로그램"; $sName = "중등학기";
-        return view('program.middle_semester_apply_a', compact('gNum', 'sNum', 'gName', 'sName'));
-    }
-	//중등학기 - 신청 - 단체 - 교육 선택
+	//중등학기 - 신청 - 단체 - 교육 선택 (ProgramController로 이동하지 않은 페이지)
     public function middle_semester_apply_a2()
     {
         $gNum = "01"; $sNum = "01"; $gName = "프로그램"; $sName = "중등학기";
         return view('program.middle_semester_apply_a2', compact('gNum', 'sNum', 'gName', 'sName'));
     }
-	//중등학기 - 신청 - 단체 - 완료
+	//중등학기 - 신청 - 단체 - 완료 (ProgramController로 이동하지 않은 페이지)
     public function middle_semester_apply_a_end()
     {
         $gNum = "01"; $sNum = "01"; $gName = "프로그램"; $sName = "중등학기";
         return view('program.middle_semester_apply_a_end', compact('gNum', 'sNum', 'gName', 'sName'));
     }
-	//중등학기 - 신청 - 개인
-    public function middle_semester_apply_b()
-    {
-        $gNum = "01"; $sNum = "01"; $gName = "프로그램"; $sName = "중등학기";
-        return view('program.middle_semester_apply_b', compact('gNum', 'sNum', 'gName', 'sName'));
-    }
-	//중등학기 - 신청 - 개인 - 교육 선택
+	//중등학기 - 신청 - 개인 - 교육 선택 (ProgramController로 이동하지 않은 페이지)
     public function middle_semester_apply_b2()
     {
         $gNum = "01"; $sNum = "01"; $gName = "프로그램"; $sName = "중등학기";
         return view('program.middle_semester_apply_b2', compact('gNum', 'sNum', 'gName', 'sName'));
     }
-	//중등학기 - 신청 - 개인 - 완료
+	//중등학기 - 신청 - 개인 - 완료 (ProgramController로 이동하지 않은 페이지)
     public function middle_semester_apply_b_end()
     {
         $gNum = "01"; $sNum = "01"; $gName = "프로그램"; $sName = "중등학기";
         return view('program.middle_semester_apply_b_end', compact('gNum', 'sNum', 'gName', 'sName'));
-    }
-	//중등방학
-    public function middle_vacation()
-    {
-        $gNum = "01"; $sNum = "02"; $gName = "프로그램"; $sName = "중등방학";
-        return view('program.middle_vacation', compact('gNum', 'sNum', 'gName', 'sName'));
-    }
-	//고등학기
-    public function high_semester()
-    {
-        $gNum = "01"; $sNum = "03"; $gName = "프로그램"; $sName = "고등학기";
-        return view('program.high_semester', compact('gNum', 'sNum', 'gName', 'sName'));
-    }
-	//고등방학
-    public function high_vacation()
-    {
-        $gNum = "01"; $sNum = "04"; $gName = "프로그램"; $sName = "고등방학";
-        return view('program.high_vacation', compact('gNum', 'sNum', 'gName', 'sName'));
-    }
-	//특별프로그램
-    public function special()
-    {
-        $gNum = "01"; $sNum = "05"; $gName = "프로그램"; $sName = "특별프로그램";
-        return view('program.special', compact('gNum', 'sNum', 'gName', 'sName'));
     }
 //게시판
 	//공지사항

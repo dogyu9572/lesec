@@ -234,6 +234,19 @@ Route::prefix('backoffice')->middleware(['backoffice'])->group(function () {
     Route::post('member-groups/{member_group}/remove-member', [MemberGroupController::class, 'removeMember'])
         ->name('backoffice.member-groups.remove-member');
 
+    // 회원 그룹 관리 (user-groups 별칭)
+    Route::resource('user-groups', MemberGroupController::class, [
+        'names' => 'backoffice.user-groups'
+    ])->except(['show']);
+    Route::post('user-groups/bulk-destroy', [MemberGroupController::class, 'bulkDestroy'])
+        ->name('backoffice.user-groups.bulk-destroy');
+    Route::get('user-groups/search-members', [MemberGroupController::class, 'searchMembers'])
+        ->name('backoffice.user-groups.search-members');
+    Route::post('user-groups/{member_group}/add-members', [MemberGroupController::class, 'addMembers'])
+        ->name('backoffice.user-groups.add-members');
+    Route::post('user-groups/{member_group}/remove-member', [MemberGroupController::class, 'removeMember'])
+        ->name('backoffice.user-groups.remove-member');
+
     // 배너 관리
     Route::resource('banners', BannerController::class, [
         'names' => 'backoffice.banners'

@@ -29,6 +29,7 @@ class BoardPostRequest extends FormRequest
             'category' => 'nullable|string|max:50',
             'is_notice' => 'nullable|boolean',
             'is_secret' => 'nullable|boolean',
+            'is_active' => 'nullable|boolean',
             'author_name' => 'nullable|string|max:100',
             'password' => 'nullable|string|max:255',
             'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB

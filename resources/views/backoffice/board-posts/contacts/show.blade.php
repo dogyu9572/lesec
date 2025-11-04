@@ -25,7 +25,7 @@
         <div class="board-card">
             <div class="board-card-header">
                 <div class="board-page-card-title">
-                    <h6>단일페이지</h6>
+                    <h6>연구원 연락처 관리</h6>
                 </div>
             </div>
             <div class="board-card-body">

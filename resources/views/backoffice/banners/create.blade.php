@@ -34,9 +34,9 @@
                     <form action="{{ route('backoffice.banners.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
 
-                        <!-- 1. 배너제목 -->
+                        <!-- 1. 배너명 -->
                         <div class="board-form-group">
-                            <label for="title" class="board-form-label">배너제목 <span class="required">*</span></label>
+                            <label for="title" class="board-form-label">배너명 <span class="required">*</span></label>
                             <input type="text" class="board-form-control @error('title') is-invalid @enderror" 
                                    id="title" name="title" value="{{ old('title') }}" required>
                             @error('title')
@@ -44,52 +44,27 @@
                             @enderror
                         </div>
 
-                        <!-- 2. 메인텍스트, 서브텍스트 -->
-                        <div class="board-form-row">
-                            <div class="board-form-col board-form-col-6">
-                                <div class="board-form-group">
-                                    <label for="main_text" class="board-form-label">메인텍스트</label>
-                                    <input type="text" class="board-form-control @error('main_text') is-invalid @enderror" 
-                                           id="main_text" name="main_text" value="{{ old('main_text') }}">
-                                    @error('main_text')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <div class="board-form-col board-form-col-6">
-                                <div class="board-form-group">
-                                    <label for="sub_text" class="board-form-label">서브텍스트</label>
-                                    <input type="text" class="board-form-control @error('sub_text') is-invalid @enderror" 
-                                           id="sub_text" name="sub_text" value="{{ old('sub_text') }}">
-                                    @error('sub_text')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
+                        <!-- 2. 클릭시 이동 링크 (URL) -->
+                        <div class="board-form-group">
+                            <label for="url" class="board-form-label">클릭시 이동 링크 (URL)</label>
+                            <input type="url" class="board-form-control @error('url') is-invalid @enderror" 
+                                   id="url" name="url" value="{{ old('url') }}" placeholder="https://example.com">
+                            @error('url')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
-                        <!-- 3. URL, 영상 URL -->
-                        <div class="board-form-row">
-                            <div class="board-form-col board-form-col-6">
-                                <div class="board-form-group">
-                                    <label for="url" class="board-form-label">URL</label>
-                                    <input type="url" class="board-form-control @error('url') is-invalid @enderror" 
-                                           id="url" name="url" value="{{ old('url') }}" placeholder="https://example.com">
-                                    @error('url')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                        <!-- 3. 현재창/새창 -->
+                        <div class="board-form-group">
+                            <label class="board-form-label">현재창/새창</label>
+                            <div class="board-radio-group">
+                                <div class="board-radio-item">
+                                    <input type="radio" id="url_target_self" name="url_target" value="_self" class="board-radio-input" @checked(old('url_target', '_self') == '_self')>
+                                    <label for="url_target_self">현재창</label>
                                 </div>
-                            </div>
-
-                            <div class="board-form-col board-form-col-6">
-                                <div class="board-form-group">
-                                    <label for="video_url" class="board-form-label">영상 URL</label>
-                                    <input type="url" class="board-form-control @error('video_url') is-invalid @enderror" 
-                                           id="video_url" name="video_url" value="{{ old('video_url') }}" placeholder="">
-                                    @error('video_url')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                                <div class="board-radio-item">
+                                    <input type="radio" id="url_target_blank" name="url_target" value="_blank" class="board-radio-input" @checked(old('url_target') == '_blank')>
+                                    <label for="url_target_blank">새창</label>
                                 </div>
                             </div>
                         </div>
@@ -131,78 +106,48 @@
                             </div>
                         </div>
 
-                        <!-- 5. 이미지 (데스크톱, 모바일) -->
-                        <div class="board-form-row">
-                            <div class="board-form-col board-form-col-6">
-                                <div class="board-form-group">
-                                    <label for="desktop_image" class="board-form-label">이미지 (데스크톱)</label>
-                                    <div class="board-file-upload">
-                                        <div class="board-file-input-wrapper">
-                                            <input type="file" class="board-file-input" 
-                                                   id="desktop_image" name="desktop_image" accept=".jpg,.jpeg,.png,.gif">
-                                            <div class="board-file-input-content">
-                                                <i class="fas fa-image"></i>
-                                                <span class="board-file-input-text">데스크톱 이미지를 선택하거나 여기로 드래그하세요</span>
-                                                <span class="board-file-input-subtext">JPG, PNG, GIF 파일만 가능 (최대 5MB)</span>
-                                            </div>
-                                        </div>
-                                        <div class="board-file-preview" id="desktopImagePreview"></div>
+                        <!-- 4. 배너 이미지 -->
+                        <div class="board-form-group">
+                            <label for="desktop_image" class="board-form-label">배너 이미지</label>
+                            <div class="board-file-upload">
+                                <div class="board-file-input-wrapper">
+                                    <input type="file" class="board-file-input" 
+                                           id="desktop_image" name="desktop_image" accept=".jpg,.jpeg,.png,.gif">
+                                    <div class="board-file-input-content">
+                                        <i class="fas fa-image"></i>
+                                        <span class="board-file-input-text">배너 이미지를 선택하거나 여기로 드래그하세요</span>
+                                        <span class="board-file-input-subtext">*배너 이미지는 0000*0000 SIZE, JPG/PNG 형식 업로드 가능</span>
                                     </div>
-                                    @error('desktop_image')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
                                 </div>
+                                <div class="board-file-preview" id="desktopImagePreview"></div>
                             </div>
-
-                            <div class="board-form-col board-form-col-6">
-                                <div class="board-form-group">
-                                    <label for="mobile_image" class="board-form-label">이미지 (모바일)</label>
-                                    <div class="board-file-upload">
-                                        <div class="board-file-input-wrapper">
-                                            <input type="file" class="board-file-input" 
-                                                   id="mobile_image" name="mobile_image" accept=".jpg,.jpeg,.png,.gif">
-                                            <div class="board-file-input-content">
-                                                <i class="fas fa-mobile-alt"></i>
-                                                <span class="board-file-input-text">모바일 이미지를 선택하거나 여기로 드래그하세요</span>
-                                                <span class="board-file-input-subtext">JPG, PNG, GIF 파일만 가능 (최대 5MB)</span>
-                                            </div>
-                                        </div>
-                                        <div class="board-file-preview" id="mobileImagePreview"></div>
-                                    </div>
-                                    @error('mobile_image')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
+                            @error('desktop_image')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
-                        <!-- 6. 사용여부, 배너순서 -->
-                        <div class="board-form-row">
-                            <div class="board-form-col board-form-col-6">
-                                <div class="board-form-group">
-                                    <label class="board-form-label">사용여부</label>
-                                    <div class="board-radio-group">
-                                        <div class="board-radio-item">
-                                            <input type="radio" id="is_active_1" name="is_active" value="1" class="board-radio-input" @checked(old('is_active', '1') == '1')>
-                                            <label for="is_active_1">사용</label>
-                                        </div>
-                                        <div class="board-radio-item">
-                                            <input type="radio" id="is_active_0" name="is_active" value="0" class="board-radio-input" @checked(old('is_active') == '0')>
-                                            <label for="is_active_0">숨김</label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                        <!-- 5. 정렬 -->
+                        <div class="board-form-group">
+                            <label for="sort_order" class="board-form-label">정렬</label>
+                            <input type="number" class="board-form-control @error('sort_order') is-invalid @enderror" 
+                                   id="sort_order" name="sort_order" value="{{ old('sort_order', 0) }}" min="0">
+                            <small class="board-form-text">*숫자가 높을수록 앞쪽에 정렬</small>
+                            @error('sort_order')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
 
-                            <div class="board-form-col board-form-col-6">
-                                <div class="board-form-group">
-                                    <label for="sort_order" class="board-form-label">배너순서</label>
-                                    <input type="number" class="board-form-control @error('sort_order') is-invalid @enderror" 
-                                           id="sort_order" name="sort_order" value="{{ old('sort_order', 0) }}" min="0">
-                                    <small class="board-form-text">*숫자가 높을수록 상위에 노출됩니다.</small>
-                                    @error('sort_order')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                        <!-- 6. 노출여부 -->
+                        <div class="board-form-group">
+                            <label class="board-form-label">노출여부</label>
+                            <div class="board-radio-group">
+                                <div class="board-radio-item">
+                                    <input type="radio" id="is_active_1" name="is_active" value="1" class="board-radio-input" @checked(old('is_active', '1') == '1')>
+                                    <label for="is_active_1">Y</label>
+                                </div>
+                                <div class="board-radio-item">
+                                    <input type="radio" id="is_active_0" name="is_active" value="0" class="board-radio-input" @checked(old('is_active') == '0')>
+                                    <label for="is_active_0">N</label>
                                 </div>
                             </div>
                         </div>

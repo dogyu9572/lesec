@@ -7,6 +7,7 @@
     border-radius: 8px;
     padding: 1.5rem;
     margin-bottom: 1.5rem;
+box-shadow: 0 1px 4px rgba(52, 144, 220, 0.2);
 }
 
 .filter-form {
@@ -251,13 +252,19 @@
     gap: 20px 25px;
 }
 
+.form-grid > div {
+    display: flex;
+    flex-direction: column;
+}
+
 .form-group {
     display: flex;
     flex-direction: column;
     margin-bottom: 12px !important;
 }
 
-.form-group label {
+.form-group label,
+.form-grid > div > label {
     font-weight: 600;
     color: #495057;
     margin-bottom: 6px;
@@ -291,6 +298,51 @@
 .form-check-label {
     margin: 0;
     font-weight: normal;
+}
+
+/* 라디오/체크박스 그룹 */
+.radio-group {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.radio-label input[type="radio"] {
+    margin-right: 8px;
+}
+
+.checkbox-group {
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+    margin-right: 8px;
+}
+
+/* form-group 안의 radio-group, checkbox-group은 항상 가로 배치 */
+.form-group .radio-group,
+.form-group .checkbox-group {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 20px;
+}
+
+.form-group .checkbox-group {
+    gap: 15px;
 }
 
 /* 상태 배지 */
@@ -359,4 +411,62 @@
     .user-card-body {
         padding: 15px;
     }
+}
+
+/* 회원 등록/수정 페이지 추가 스타일 */
+.student-only {
+    display: none;
+}
+
+.member_type_student:checked ~ .form-section .student-only {
+    display: block;
+}
+
+.checkbox-group {
+    display: flex;
+    gap: 20px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+    margin-right: 8px;
+}
+
+/* 학년/반 필드 그룹 스타일 */
+.student-only.grid-span-2 {
+    grid-column: span 2;
+}
+
+.grade-class-wrapper {
+    display: flex;
+    gap: 20px;
+}
+
+.grade-class-item {
+    flex: 1;
+}
+
+.grade-class-item .form-group {
+    margin-bottom: 0;
+}
+
+/* 학교명 검색 버튼 그룹 스타일 */
+.school-search-wrapper {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+.school-search-input {
+    flex: 1;
+}
+
+/* 2컬럼 그리드 스타일 */
+.form-grid.grid-2 {
+    grid-template-columns: repeat(2, 1fr);
 }

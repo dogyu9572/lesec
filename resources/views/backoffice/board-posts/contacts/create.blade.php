@@ -94,14 +94,6 @@
                 </div>
                 @endif
 
-                @if($board->enable_sorting)
-                <div class="board-form-group">
-                    <label for="sort_order" class="board-form-label">정렬 순서</label>
-                    <input type="number" class="board-form-control" id="sort_order" name="sort_order" value="{{ old('sort_order', $nextSortOrder ?? 0) }}" min="0">
-                    <small class="board-form-text">숫자가 클수록 위에 표시됩니다.</small>
-                </div>
-                @endif
-
                 <!-- 커스텀 필드 입력 폼 -->
                 @if($board->custom_fields_config && count($board->custom_fields_config) > 0)
                     @foreach($board->custom_fields_config as $fieldConfig)
@@ -254,6 +246,29 @@
                     <small class="board-form-text">체크하면 본인만 조회할 수 있습니다.</small>
                 </div>
                 @endif
+
+                @if($board->enable_sorting)
+                <div class="board-form-group">
+                    <label for="sort_order" class="board-form-label">정렬 순서</label>
+                    <input type="number" class="board-form-control" id="sort_order" name="sort_order" value="{{ old('sort_order', $nextSortOrder ?? 0) }}" min="0">
+                    <small class="board-form-text">숫자가 클수록 위에 표시됩니다.</small>
+                </div>
+                @endif
+
+                <div class="board-form-group">
+                    <div class="board-checkbox-item">
+                        <input type="checkbox" 
+                               class="board-checkbox-input" 
+                               id="is_active" 
+                               name="is_active" 
+                               value="1" 
+                               @checked(old('is_active', true) == '1')>
+                        <label for="is_active" class="board-form-label">
+                            노출여부
+                        </label>
+                    </div>
+                    <small class="board-form-text">체크하면 게시글이 노출됩니다.</small>
+                </div>
 
                 @if($board->isFieldEnabled('attachments'))
                 <div class="board-form-group">

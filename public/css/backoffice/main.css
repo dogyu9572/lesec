@@ -1875,7 +1875,7 @@ img {
         flex: none;
     }
     
-    .radio-group {
+    .board-radio-group {
         flex-direction: column;
         gap: 10px;
     }

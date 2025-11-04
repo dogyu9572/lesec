@@ -40,9 +40,12 @@ class BoardPostController extends Controller
         }
         
         $posts = $this->boardPostService->getPosts($slug, $request);
+        
+        // 카테고리 옵션 가져오기
+        $categoryOptions = $board->getCategoryOptions();
 
         // 자동 생성된 뷰 사용
-        return view("backoffice.board-posts.{$slug}.index", compact('board', 'posts'));
+        return view("backoffice.board-posts.{$slug}.index", compact('board', 'posts', 'categoryOptions'));
     }
 
     /**

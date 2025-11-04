@@ -74,7 +74,19 @@ class BoardService
         if (empty($data['slug'])) {
             $data['slug'] = $this->generateUniqueSlug($data['name']);
         } else {
-            $data['slug'] = $this->resolveSlugConflict($data['slug']);
+            // 소프트 딜리트된 slug가 있으면 영구 삭제하여 재사용 가능하도록
+            $deletedBoard = Board::withTrashed()->where('slug', $data['slug'])->whereNotNull('deleted_at')->first();
+            if ($deletedBoard) {
+                // 소프트 딜리트된 레코드가 있으면 영구 삭제
+                $fileGeneratorService = new BoardFileGeneratorService();
+                $fileGeneratorService->deleteBoardResources($deletedBoard);
+                $deletedBoard->forceDelete();
+            }
+            
+            // 여전히 중복이면 충돌 해결
+            if (!Board::isSlugAvailable($data['slug'])) {
+                $data['slug'] = $this->resolveSlugConflict($data['slug']);
+            }
         }
 
         // enable_notice 기본값 설정 (체크되지 않은 경우 false)

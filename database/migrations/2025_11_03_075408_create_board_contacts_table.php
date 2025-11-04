@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('board_gallerys', function (Blueprint $table) {
+        Schema::create('board_contacts', function (Blueprint $table) {
             // 기본 컬럼들 (모든 게시판 공통)
             $table->id();
             $table->unsignedBigInteger('user_id')->nullable();
@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('password')->nullable();
             $table->boolean('is_notice')->default(false);
             $table->boolean('is_secret')->default(false);
+            $table->boolean('is_active')->default(true)->comment('활성화 여부');
             $table->string('category')->nullable();
             $table->json('attachments')->nullable();
             $table->integer('view_count')->default(0);
@@ -43,6 +44,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('board_gallerys');
+        Schema::dropIfExists('board_contacts');
     }
 };

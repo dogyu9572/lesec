@@ -21,8 +21,8 @@
                 <button type="button" id="bulk-delete-btn" class="btn btn-danger">
                     <i class="fas fa-trash"></i> 선택 삭제
                 </button>
-                <a href="{{ route('backoffice.board-posts.create', $board->slug ?? 'notice') }}" class="btn btn-success">
-                    <i class="fas fa-plus"></i> 새 게시글
+                <a href="{{ route('backoffice.board-posts.create', $board->slug ?? 'library') }}" class="btn btn-success">
+                    <i class="fas fa-plus"></i> 신규등록
                 </a>              
             </div>
         </div>
@@ -30,13 +30,13 @@
         <div class="board-card">
             <div class="board-card-header">
                 <div class="board-page-card-title">
-                    <h6>싱글</h6>
+                    <h6>자료실</h6>
                 </div>
             </div>
             <div class="board-card-body">
                 <!-- 검색 필터 -->
                 <div class="board-filter">
-                    <form method="GET" action="{{ route('backoffice.board-posts.index', $board->slug ?? 'notice') }}" class="filter-form">
+                    <form method="GET" action="{{ route('backoffice.board-posts.index', $board->slug ?? 'library') }}" class="filter-form">
                         <div class="filter-row">
                             <div class="filter-group">
                                 <label for="start_date" class="filter-label">등록일 시작</label>
@@ -68,7 +68,7 @@
                                     <button type="submit" class="btn btn-primary">
                                         <i class="fas fa-search"></i> 검색
                                     </button>
-                                    <a href="{{ route('backoffice.board-posts.index', $board->slug ?? 'notice') }}"
+                                    <a href="{{ route('backoffice.board-posts.index', $board->slug ?? 'library') }}"
                                         class="btn btn-secondary">
                                         <i class="fas fa-undo"></i> 초기화
                                     </a>
@@ -81,20 +81,20 @@
                 <!-- 목록 개수 선택 -->
                 <div class="board-list-header">
                     <div class="list-info">
-                        <span class="list-count">Total : {{ $posts->total() }}</span>
+                        <span class="list-count">총 {{ $posts->total() }}건</span>
                     </div>
                     <div class="list-controls">
-                        <form method="GET" action="{{ route('backoffice.board-posts.index', $board->slug ?? 'notice') }}" class="per-page-form">
+                        <form method="GET" action="{{ route('backoffice.board-posts.index', $board->slug ?? 'library') }}" class="per-page-form">
                             <input type="hidden" name="start_date" value="{{ request('start_date') }}">
                             <input type="hidden" name="end_date" value="{{ request('end_date') }}">
                             <input type="hidden" name="keyword" value="{{ request('keyword') }}">
                             <input type="hidden" name="search_type" value="{{ request('search_type') }}">
-                            <label for="per_page" class="per-page-label">표시 개수:</label>
+                            <label for="per_page" class="per-page-label">목록 개수:</label>
                             <select name="per_page" id="per_page" class="per-page-select" onchange="this.form.submit()">
-                                <option value="10" @selected(request('per_page', 15) == 10)>10개</option>
-                                <option value="20" @selected(request('per_page', 15) == 20)>20개</option>
-                                <option value="50" @selected(request('per_page', 15) == 50)>50개</option>
-                                <option value="100" @selected(request('per_page', 15) == 100)>100개</option>
+                                <option value="20" @selected(request('per_page', 20) == 20)>20개</option>
+                                <option value="10" @selected(request('per_page', 20) == 10)>10개</option>
+                                <option value="50" @selected(request('per_page', 20) == 50)>50개</option>
+                                <option value="100" @selected(request('per_page', 20) == 100)>100개</option>
                             </select>
                         </form>
                     </div>
@@ -111,10 +111,11 @@
                                     <th class="w5">순서</th>
                                 @endif
                                 <th class="w5">번호</th>
-                                <th class="w10">구분</th>
                                 <th>제목</th>
+                                <th class="w10">첨부파일</th>
                                 <th class="w10">작성자</th>
-                                <th class="w10">작성일</th>
+                                <th class="w10">등록일</th>
+                                <th class="w10">조회수</th>
                                 <th class="w15">관리</th>
                             </tr>
                         </thead>
@@ -130,37 +131,39 @@
                                         </td>
                                     @endif
                                     <td>
-                                        @if ($post->is_notice)
-                                            <span class="board-notice-badge">공지</span>
-                                        @else
-                                            @php
-                                                $postNumber = $posts->total() - ($posts->currentPage() - 1) * $posts->perPage() - $loop->index;
-                                            @endphp
-                                            {{ $postNumber }}
-                                        @endif
-                                    </td>
-                                    <td>
-                                        <span class="status-badge status-general">일반</span>
+                                        @php
+                                            $postNumber = $posts->total() - ($posts->currentPage() - 1) * $posts->perPage() - $loop->index;
+                                        @endphp
+                                        {{ $postNumber }}
                                     </td>
                                     <td>
                                         {{ $post->title }}
                                     </td>
+                                    <td class="text-center">
+                                        @php
+                                            $attachments = $post->attachments ? json_decode($post->attachments, true) : null;
+                                        @endphp
+                                        @if($attachments && is_array($attachments) && count($attachments) > 0)
+                                            <i class="fas fa-file" style="color: #666;"></i>
+                                        @endif
+                                    </td>
                                     <td>{{ $post->author_name ?? '알 수 없음' }}</td>
                                     <td>{{ $post->created_at->format('Y-m-d') }}</td>
+                                    <td>{{ $post->view_count ?? 0 }}</td>
                                     <td>
                                         <div class="board-btn-group">
-                                            <a href="{{ route('backoffice.board-posts.edit', [$board->slug ?? 'notice', $post->id]) }}"
+                                            <a href="{{ route('backoffice.board-posts.edit', [$board->slug ?? 'library', $post->id]) }}"
                                                 class="btn btn-primary btn-sm">
-                                                <i class="fas fa-edit"></i> 수정
+                                                수정
                                             </a>
                                             <form
-                                                action="{{ route('backoffice.board-posts.destroy', [$board->slug ?? 'notice', $post->id]) }}"
+                                                action="{{ route('backoffice.board-posts.destroy', [$board->slug ?? 'library', $post->id]) }}"
                                                 method="POST" class="d-inline"
                                                 onsubmit="return confirm('정말 이 게시글을 삭제하시겠습니까?');">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-danger btn-sm">
-                                                    <i class="fas fa-trash"></i> 삭제
+                                                    삭제
                                                 </button>
                                             </form>
                                         </div>
@@ -168,7 +171,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="{{ $board->enable_sorting ? '8' : '7' }}" class="text-center">등록된 게시글이 없습니다.</td>
+                                    <td colspan="{{ $board->enable_sorting ? '9' : '8' }}" class="text-center">등록된 게시글이 없습니다.</td>
                                 </tr>
                             @endforelse
                         </tbody>

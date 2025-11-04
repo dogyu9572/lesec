@@ -22,8 +22,8 @@
                     <i class="fas fa-trash"></i> 선택 삭제
                 </button>
                 <a href="{{ route('backoffice.board-posts.create', $board->slug ?? 'notice') }}" class="btn btn-success">
-                    <i class="fas fa-plus"></i> 새 게시글
-                </a>              
+                    <i class="fas fa-plus"></i> 신규등록
+                </a>
             </div>
         </div>
 
@@ -81,7 +81,7 @@
                 <!-- 목록 개수 선택 -->
                 <div class="board-list-header">
                     <div class="list-info">
-                        <span class="list-count">Total : {{ $posts->total() }}</span>
+                        <span class="list-count">총 {{ $posts->total() }}건</span>
                     </div>
                     <div class="list-controls">
                         <form method="GET" action="{{ route('backoffice.board-posts.index', $board->slug ?? 'notice') }}" class="per-page-form">
@@ -89,12 +89,12 @@
                             <input type="hidden" name="end_date" value="{{ request('end_date') }}">
                             <input type="hidden" name="keyword" value="{{ request('keyword') }}">
                             <input type="hidden" name="search_type" value="{{ request('search_type') }}">
-                            <label for="per_page" class="per-page-label">표시 개수:</label>
+                            <label for="per_page" class="per-page-label">목록 개수:</label>
                             <select name="per_page" id="per_page" class="per-page-select" onchange="this.form.submit()">
-                                <option value="10" @selected(request('per_page', 15) == 10)>10개</option>
-                                <option value="20" @selected(request('per_page', 15) == 20)>20개</option>
-                                <option value="50" @selected(request('per_page', 15) == 50)>50개</option>
-                                <option value="100" @selected(request('per_page', 15) == 100)>100개</option>
+                                <option value="20" @selected(request('per_page', 20) == 20)>20개</option>
+                                <option value="10" @selected(request('per_page', 20) == 10)>10개</option>
+                                <option value="50" @selected(request('per_page', 20) == 50)>50개</option>
+                                <option value="100" @selected(request('per_page', 20) == 100)>100개</option>
                             </select>
                         </form>
                     </div>
@@ -111,10 +111,11 @@
                                     <th class="w5">순서</th>
                                 @endif
                                 <th class="w5">번호</th>
-                                <th class="w10">구분</th>
                                 <th>제목</th>
+                                <th class="w10">첨부파일</th>
                                 <th class="w10">작성자</th>
-                                <th class="w10">작성일</th>
+                                <th class="w10">등록일</th>
+                                <th class="w10">조회수</th>
                                 <th class="w15">관리</th>
                             </tr>
                         </thead>
@@ -140,18 +141,24 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <span class="status-badge status-general">일반</span>
-                                    </td>
-                                    <td>
                                         {{ $post->title }}
+                                    </td>
+                                    <td class="text-center">
+                                        @php
+                                            $attachments = $post->attachments ? json_decode($post->attachments, true) : null;
+                                        @endphp
+                                        @if($attachments && is_array($attachments) && count($attachments) > 0)
+                                            <i class="fas fa-file" style="color: #666;"></i>
+                                        @endif
                                     </td>
                                     <td>{{ $post->author_name ?? '알 수 없음' }}</td>
                                     <td>{{ $post->created_at->format('Y-m-d') }}</td>
+                                    <td>{{ $post->view_count ?? 0 }}</td>
                                     <td>
                                         <div class="board-btn-group">
                                             <a href="{{ route('backoffice.board-posts.edit', [$board->slug ?? 'notice', $post->id]) }}"
                                                 class="btn btn-primary btn-sm">
-                                                <i class="fas fa-edit"></i> 수정
+                                                수정
                                             </a>
                                             <form
                                                 action="{{ route('backoffice.board-posts.destroy', [$board->slug ?? 'notice', $post->id]) }}"
@@ -160,7 +167,7 @@
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-danger btn-sm">
-                                                    <i class="fas fa-trash"></i> 삭제
+                                                    삭제
                                                 </button>
                                             </form>
                                         </div>
@@ -168,7 +175,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="{{ $board->enable_sorting ? '8' : '7' }}" class="text-center">등록된 게시글이 없습니다.</td>
+                                    <td colspan="{{ $board->enable_sorting ? '9' : '8' }}" class="text-center">등록된 게시글이 없습니다.</td>
                                 </tr>
                             @endforelse
                         </tbody>

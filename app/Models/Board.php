@@ -230,16 +230,18 @@ class Board extends Model
     }
     
     /**
-     * slug가 중복되지 않는지 확인합니다 (삭제된 데이터 제외).
+     * slug가 중복되지 않는지 확인합니다 (소프트 딜리트된 slug는 재사용 가능).
      */
     public static function isSlugAvailable($slug, $excludeId = null)
     {
+        // 활성화된(삭제되지 않은) 데이터만 확인하여 소프트 딜리트된 slug는 재사용 가능하도록
         $query = self::where('slug', $slug);
         
         if ($excludeId) {
             $query->where('id', '!=', $excludeId);
         }
         
+        // 활성화된 레코드가 없으면 사용 가능
         return !$query->exists();
     }
 

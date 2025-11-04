@@ -30,7 +30,7 @@
         <div class="board-card">
             <div class="board-card-header">
                 <div class="board-page-card-title">
-                    <h6>싱글2</h6>
+                    <h6>FAQ</h6>
                 </div>
             </div>
             <div class="board-card-body">
@@ -38,6 +38,19 @@
                 <div class="board-filter">
                     <form method="GET" action="{{ route('backoffice.board-posts.index', $board->slug ?? 'notice') }}" class="filter-form">
                         <div class="filter-row">
+                            @if($categoryOptions && $categoryOptions->count() > 0)
+                            <div class="filter-group">
+                                <label for="category" class="filter-label">FAQ분류</label>
+                                <select id="category" name="category" class="filter-select">
+                                    <option value="">전체</option>
+                                    @foreach($categoryOptions as $category)
+                                        <option value="{{ $category->name }}" @selected(request('category') == $category->name)>
+                                            {{ $category->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            @endif
                             <div class="filter-group">
                                 <label for="start_date" class="filter-label">등록일 시작</label>
                                 <input type="date" id="start_date" name="start_date" class="filter-input"
@@ -85,6 +98,7 @@
                     </div>
                     <div class="list-controls">
                         <form method="GET" action="{{ route('backoffice.board-posts.index', $board->slug ?? 'notice') }}" class="per-page-form">
+                            <input type="hidden" name="category" value="{{ request('category') }}">
                             <input type="hidden" name="start_date" value="{{ request('start_date') }}">
                             <input type="hidden" name="end_date" value="{{ request('end_date') }}">
                             <input type="hidden" name="keyword" value="{{ request('keyword') }}">

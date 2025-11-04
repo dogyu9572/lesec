@@ -19,6 +19,7 @@ use App\Http\Controllers\Backoffice\MemberGroupController;
 use App\Http\Controllers\Backoffice\BannerController;
 use App\Http\Controllers\Backoffice\PopupController;
 use App\Http\Controllers\Backoffice\ProgramController;
+use App\Http\Controllers\Backoffice\GroupProgramController;
 
 // =============================================================================
 // 백오피스 인증 라우트
@@ -248,6 +249,17 @@ Route::prefix('backoffice')->middleware(['backoffice'])->group(function () {
     // 프로그램 관리
     Route::get('programs', [ProgramController::class, 'index'])->name('backoffice.programs.index');
     Route::put('programs/{program}', [ProgramController::class, 'update'])->name('backoffice.programs.update');
+
+    // 단체 프로그램 관리
+    Route::prefix('group-programs')->name('backoffice.group-programs.')->group(function () {
+        Route::get('/', [GroupProgramController::class, 'index'])->name('index');
+        Route::get('/create', [GroupProgramController::class, 'create'])->name('create');
+        Route::post('/', [GroupProgramController::class, 'store'])->name('store');
+        Route::get('/search-programs', [GroupProgramController::class, 'searchPrograms'])->name('search-programs');
+        Route::get('/{programReservation}/edit', [GroupProgramController::class, 'edit'])->name('edit');
+        Route::put('/{programReservation}', [GroupProgramController::class, 'update'])->name('update');
+        Route::delete('/{programReservation}', [GroupProgramController::class, 'destroy'])->name('destroy');
+    });
 
     // 세션 연장
     Route::post('session/extend', [App\Http\Controllers\Backoffice\SessionController::class, 'extend'])

@@ -1,3 +1,4 @@
+
 ---
 alwaysApply: true
 ---
@@ -54,16 +55,43 @@ alwaysApply: true
 
 # CSS/UI 규칙 (우선 적용)
 
-## 기존 CSS 우선 사용
+## Backoffice 페이지 디자인 일관성 (최우선 적용)
+- **핵심 원칙**: Backoffice는 레이아웃이 모두 동일. 리스트 항목, 필터, 입력 필드만 바뀜
+- **새 페이지 작성 시**: 기존 페이지 HTML 구조와 CSS 클래스를 그대로 사용
+- **절대 금지**: 새로운 CSS 클래스를 만들지 않음
+
+## 공통 CSS 파일 (필수 사용)
+- `css/backoffice/boards.css` - 모든 backoffice 페이지 공통 스타일 (카드, 테이블, 필터, 페이지네이션 등)
+- `css/common/buttons.css` - 버튼 스타일
+
+## 신규 Backoffice 페이지 작성 절차 (필수)
+1. **기존 페이지 HTML 구조 복사**
+   - 목록 페이지: `resources/views/backoffice/members/index.blade.php` 참고
+   - 등록 페이지: `resources/views/backoffice/members/create.blade.php` 참고
+   - 수정 페이지: `resources/views/backoffice/members/edit.blade.php` 참고
+
+2. **CSS 클래스명 절대 변경 금지**
+   - `.board-container`, `.board-card`, `.board-table`, `.user-filter`, `.filter-row` 등
+   - 모든 CSS 클래스는 기존 것을 그대로 사용
+
+3. **CSS include는 항상 동일하게**
+   ```blade
+   @section('styles')
+   <link rel="stylesheet" href="{{ asset('css/common/buttons.css') }}">
+   <link rel="stylesheet" href="{{ asset('css/backoffice/boards.css') }}">
+   @endsection
+   ```
+
+4. **예외적인 스타일이 필요한 경우**
+   - 반드시 사용자에게 먼저 확인 요청
+   - 승인 후에만 별도 CSS 파일 생성
+
+## 기존 CSS 우선 사용 (일반 페이지)
 - **금지**: 새로운 CSS 임의 작성
-- **우선**: `publishing/` 디렉토리 기존 CSS 참고
+- **우선**: 기존 CSS 참고 후 재사용
 - **충돌 시**: 새로운 CSS 추가보다 기존 CSS 수정 우선
 - **유지**: CSS 클래스명과 구조 그대로 유지
-
-## UI 컴포넌트
-- **모달, 팝업 등**: 기존 디자인 시스템 준수
-- **금지**: 기존 CSS 클래스명 변경
-- **우선**: 새로운 UI 요소에 기존 CSS 클래스 재사용
+- **UI 컴포넌트**: 기존 디자인 시스템 준수, 기존 CSS 클래스 재사용
 
 # 데이터 관리 규칙
 
@@ -72,10 +100,7 @@ alwaysApply: true
 - **수정 대상**: 컬럼 추가/수정/삭제, 인덱스 변경 등 모든 스키마 변경사항
 - **정리**: CREATE 파일만 유지, MODIFY/ADD 파일은 모두 삭제
 - **동기화**: 마이그레이션 파일 = 실제 DB 스키마 (일치 필수)
-
-## 마이그레이션
 - **테이블 생성**: 최종 스키마를 한 번에 정의
-- **파일 정리**: CREATE 파일만 유지, MODIFY/ADD 파일 삭제
 
 ## 시더
 - **하나의 테이블**: 하나의 시더만 생성

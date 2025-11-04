@@ -1,69 +1,74 @@
 @extends('layouts.app')
 
 @section('content')
-<main class="flex max-w-[335px] w-full flex-col-reverse lg:max-w-4xl lg:flex-row">
-    <div class="text-[13px] leading-[20px] flex-1 p-6 pb-12 lg:p-20 bg-white dark:bg-[#161615] dark:text-[#EDEDEC] shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d] rounded-bl-lg rounded-br-lg lg:rounded-tl-lg lg:rounded-br-none">
-        <h1 class="mb-1 font-medium">Let's get started</h1>
-        <p class="mb-2 text-[#706f6c] dark:text-[#A1A09A]">Laravel has an incredibly rich ecosystem. <br>We suggest starting with the following.</p>
-        <ul class="flex flex-col mb-4 lg:mb-6">
-            <li class="flex items-center gap-4 py-2 relative before:border-l before:border-[#e3e3e0] dark:before:border-[#3E3E3A] before:top-1/2 before:bottom-0 before:left-[0.4rem] before:absolute">
-                <span class="relative py-1 bg-white dark:bg-[#161615]">
-                    <span class="flex items-center justify-center rounded-full bg-[#FDFDFC] dark:bg-[#161615] shadow-[0px_0px_1px_0px_rgba(0,0,0,0.03),0px_1px_2px_0px_rgba(0,0,0,0.06)] w-3.5 h-3.5 border dark:border-[#3E3E3A] border-[#e3e3e0]">
-                        <span class="rounded-full bg-[#dbdbd7] dark:bg-[#3E3E3A] w-1.5 h-1.5"></span>
-                    </span>
-                </span>
-                <span>
-                    Read the
-                    <a href="https://laravel.com/docs" target="_blank" class="inline-flex items-center space-x-1 font-medium underline underline-offset-4 text-[#f53003] dark:text-[#FF4433] ml-1">
-                        <span>Documentation</span>
-                        <svg
-                            width="10"
-                            height="11"
-                            viewBox="0 0 10 11"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                            class="w-2.5 h-2.5"
-                        >
-                            <path
-                                d="M7.70833 6.95834V2.79167H3.54167M2.5 8L7.5 3.00001"
-                                stroke="currentColor"
-                                stroke-linecap="square"
-                            />
-                        </svg>
-                    </a>
-                </span>
-            </li>
-            <li class="flex items-center gap-4 py-2 relative before:border-l before:border-[#e3e3e0] dark:before:border-[#3E3E3A] before:bottom-1/2 before:top-0 before:left-[0.4rem] before:absolute">
-                <span class="relative py-1 bg-white dark:bg-[#161615]">
-                    <span class="flex items-center justify-center rounded-full bg-[#FDFDFC] dark:bg-[#161615] shadow-[0px_0px_1px_0px_rgba(0,0,0,0.03),0px_1px_2px_0px_rgba(0,0,0,0.06)] w-3.5 h-3.5 border dark:border-[#3E3E3A] border-[#e3e3e0]">
-                        <span class="rounded-full bg-[#dbdbd7] dark:bg-[#3E3E3A] w-1.5 h-1.5"></span>
-                    </span>
-                </span>
-                <span>
-                    Watch video tutorials at
-                    <a href="https://laracasts.com" target="_blank" class="inline-flex items-center space-x-1 font-medium underline underline-offset-4 text-[#f53003] dark:text-[#FF4433] ml-1">
-                        <span>Laracasts</span>
-                        <svg
-                            width="10"
-                            height="11"
-                            viewBox="0 0 10 11"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                            class="w-2.5 h-2.5"
-                        >
-                            <path
-                                d="M7.70833 6.95834V2.79167H3.54167M2.5 8L7.5 3.00001"
-                                stroke="currentColor"
-                                stroke-linecap="square"
-                            />
-                        </svg>
-                    </a>
-                </span>
-            </li>
-        </ul>
-    </div>
-    <div class="w-[448px] h-14.5 lg:w-[438px] lg:h-14 bg-[#1b1b18] dark:bg-[#0a0a0a] rounded-t-lg lg:rounded-t-none lg:rounded-tl-lg lg:rounded-r-lg lg:rounded-br-none lg:rounded-bl-lg border border-[#dbdbd7] dark:border-[#3E3E3A] lg:border-l-0 lg:border-t-0 lg:border-r lg:border-b-0 lg:border-l lg:border-t lg:border-r-0 lg:border-b-0 overflow-hidden filter drop-shadow-[0px_0px_1px_0px_rgba(0,0,0,0.03),0px_1px_2px_0px_rgba(0,0,0,0.06)] lg:drop-shadow-none"></div>
+<main>
+    
+	<div class="main_visual">
+		<div class="inner">
+			<div class="tit"><span><i>청</i><i>소</i><i>년</i>을 위한</span> <strong>생명·환경과학 체험학습</strong></div>
+			<p>생명환경과학교육센터는 농업·환경·생명과학 분야의 전문 지식과 연구 장비 체험을 제공하며 <br/>청소년의 과학 이해와 진로 탐색을 돕고 연구지원 체계 향상을 위해 노력합니다.</p>
+		</div>
+	</div>
+
+	<div class="main_type_link">
+		<div class="inner">
+			<dl class="c1 on">
+				<dt>중등<button type="button" class="mo_vw">열기</button></dt>
+				<dd>
+					<a href="#this" class="i1"><span class="tt">중등학기 신청<i></i></span><p>클릭 후 해당 페이지에서 <br/>신청할 수 있습니다.</p></a>
+					<a href="#this" class="i2"><span class="tt">중등방학 신청<i></i></span><p>클릭 후 해당 페이지에서 <br/>신청할 수 있습니다.</p></a>
+				</dd>
+			</dl>
+			<dl class="c2">
+				<dt>고등<button type="button" class="mo_vw">열기</button></dt>
+				<dd>
+					<a href="#this" class="i1"><span class="tt">고등학기 신청<i></i></span><p>클릭 후 해당 페이지에서 <br/>신청할 수 있습니다.</p></a>
+					<a href="#this" class="i2"><span class="tt">고등방학 신청<i></i></span><p>클릭 후 해당 페이지에서 <br/>신청할 수 있습니다.</p></a>
+				</dd>
+			</dl>
+		</div>
+	</div>
+
+	<div class="main_board">
+		<div class="inner">
+			<div class="box">
+				<div class="tit">공지사항 <a href="" class="more">View more</a></div>
+				<div class="list">
+					<a href="">[중학생 학기 프로그램] 인증서 받는 방법<span>2025.07.19</span></a>
+					<a href="">4월 응급처치교육/워크숍 안내<span>2025.07.19</span></a>
+					<a href="">10월 15일 개교기념일 휴무<span>2025.07.19</span></a>
+					<a href="">생명환경과학교육센터 이전 및 문의처 안내<span>2025.07.19</span></a>
+				</div>
+			</div>
+			<div class="box">
+				<div class="tit">자료실  <a href="" class="more">View more</a></div>
+				<div class="list">
+					<a href="">2025.8.15.-8.16. 참가 / Mid2. CSI 속 과학이야기(스누베어)<span>2025.07.19</span></a>
+					<a href="">2025.8.15.-8.16. 참가 / Mid2. CSI 속 과학이야기<span>2025.07.19</span></a>
+					<a href="">2025.8.15.-8.16. 참가 / M3. Blood 관찰 및 DNA 추출<span>2025.07.19</span></a>
+					<a href="">2025.8.15.-8.16. 참가 / P2. Plasmid DNA와 제한효소(608호)<span>2025.07.19</span></a>
+				</div>
+			</div>
+			<div class="box main_faq">
+				<div class="tit">자주 묻는 질문  <a href="" class="more">View more</a></div>
+				<div class="list">
+					<a href=""><i>신청/입금</i>신청/입금 확인은 어떻게 하나요?<span>2025.07.19</span></a>
+					<a href=""><i>신청/입금</i>입금자명을 "학생이름+학교"(6자)로 하지 않았어...<span>2025.07.19</span></a>
+					<a href=""><i>수료증</i>재발급<span>2025.07.19</span></a>
+					<a href=""><i>신청/입금</i>단체 신청의 기준인원은 몇명인가요?<span>2025.07.19</span></a>
+				</div>
+			</div>
+		</div>
+	</div>
+
 </main>
+
+<script>
+$(".main_type_link dt button").click(function(){
+	$(this).parent().parent().addClass("on").siblings().removeClass("on");
+});
+</script>
+
 @endsection
 
 @section('popups')

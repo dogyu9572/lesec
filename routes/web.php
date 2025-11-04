@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\SubController;
 use App\Http\Controllers\Backoffice\PopupController;
 
 // =============================================================================
@@ -43,6 +44,120 @@ Route::prefix('auth')->name('auth.')->group(function () {
         Route::post('/reset', [ResetPasswordController::class, 'reset'])
             ->name('update');
     });
+});
+
+// =============================================================================
+// 서브페이지 관련 라우트
+// =============================================================================
+
+// 서브페이지 관련 라우트
+Route::prefix('sub')->name('sub.')->group(function () {
+    Route::get('/sample', [SubController::class, 'sample'])->name('sample');
+});
+
+//프로그램
+Route::prefix('program')->name('program.')->group(function () {
+	//중등학기
+	Route::get('/middle_semester', [SubController::class, 'middle_semester'])->name('middle_semester');
+	Route::get('/middle_semester_apply_a', [SubController::class, 'middle_semester_apply_a'])->name('middle_semester_apply_a');
+	Route::get('/middle_semester_apply_a2', [SubController::class, 'middle_semester_apply_a2'])->name('middle_semester_apply_a2');
+	Route::get('/middle_semester_apply_a_end', [SubController::class, 'middle_semester_apply_a_end'])->name('middle_semester_apply_a_end');
+	Route::get('/middle_semester_apply_b', [SubController::class, 'middle_semester_apply_b'])->name('middle_semester_apply_b');
+	Route::get('/middle_semester_apply_b2', [SubController::class, 'middle_semester_apply_b2'])->name('middle_semester_apply_b2');
+	Route::get('/middle_semester_apply_b_end', [SubController::class, 'middle_semester_apply_b_end'])->name('middle_semester_apply_b_end');
+	//중등방학
+	Route::get('/middle_vacation', [SubController::class, 'middle_vacation'])->name('middle_vacation');
+	//고등학기
+	Route::get('/high_semester', [SubController::class, 'high_semester'])->name('high_semester');
+	//고등방학
+	Route::get('/high_vacation', [SubController::class, 'high_vacation'])->name('high_vacation');
+	//특별프로그램
+	Route::get('/special', [SubController::class, 'special'])->name('special');
+});
+
+//게시판
+Route::prefix('board')->name('board.')->group(function () {
+	//공지사항
+	Route::get('/notice', [SubController::class, 'notice'])->name('notice');
+	Route::get('/notice_view', [SubController::class, 'notice_view'])->name('notice_view');
+	//FAQ
+	Route::get('/faq', [SubController::class, 'faq'])->name('faq');
+	//자료실
+	Route::get('/dataroom', [SubController::class, 'dataroom'])->name('dataroom');
+	Route::get('/dataroom_view', [SubController::class, 'dataroom_view'])->name('dataroom_view');
+});
+
+//마이페이지
+Route::prefix('mypage')->name('mypage.')->group(function () {
+	//회원정보
+	Route::get('/member', [SubController::class, 'member'])->name('member');
+	//신청내역 - 단체
+	Route::get('/application_list', [SubController::class, 'application_list'])->name('application_list');
+	Route::get('/application_view', [SubController::class, 'application_view'])->name('application_view');
+	Route::get('/application_write', [SubController::class, 'application_write'])->name('application_write');
+	//신청내역 - 개인
+	Route::get('/application_indi_list', [SubController::class, 'application_indi_list'])->name('application_indi_list');
+	Route::get('/application_indi_view', [SubController::class, 'application_indi_view'])->name('application_indi_view');
+});
+
+//센터소개
+Route::prefix('introduction')->name('introduction.')->group(function () {
+	//인사말
+	Route::get('/greeting', [SubController::class, 'greeting'])->name('greeting');
+	//설립목적
+	Route::get('/establishment', [SubController::class, 'establishment'])->name('establishment');
+	//연락처
+	Route::get('/contact', [SubController::class, 'contact'])->name('contact');
+});
+
+//위치안내
+Route::prefix('location')->name('location.')->group(function () {
+	//오시는 길
+	Route::get('/location', [SubController::class, 'location'])->name('location');
+	//강의실 안내
+	Route::get('/classroom', [SubController::class, 'classroom'])->name('classroom');
+	//주차 안내
+	Route::get('/parking', [SubController::class, 'parking'])->name('parking');
+});
+
+//멤버
+Route::prefix('member')->name('member.')->group(function () {
+	//로그인
+	Route::get('/login', [SubController::class, 'login'])->name('login');
+	//회원가입
+	Route::get('/register', [SubController::class, 'register'])->name('register');
+	Route::get('/register2', [SubController::class, 'register2'])->name('register2');
+	Route::get('/register2_a', [SubController::class, 'register2_a'])->name('register2_a');
+	Route::get('/register2_b', [SubController::class, 'register2_b'])->name('register2_b');
+	Route::get('/register3_a', [SubController::class, 'register3_a'])->name('register3_a');
+	Route::get('/register3_b', [SubController::class, 'register3_b'])->name('register3_b');
+	Route::get('/register4', [SubController::class, 'register4'])->name('register4');
+	//아이디비번찾기
+	Route::get('/find_id', [SubController::class, 'find_id'])->name('find_id');
+	Route::get('/find_id_end', [SubController::class, 'find_id_end'])->name('find_id_end');
+	Route::get('/find_pw', [SubController::class, 'find_pw'])->name('find_pw');
+	Route::get('/find_pw_change', [SubController::class, 'find_pw_change'])->name('find_pw_change');
+	Route::get('/find_pw_end', [SubController::class, 'find_pw_end'])->name('find_pw_end');
+});
+
+//약관들
+Route::prefix('terms')->name('terms.')->group(function () {
+	//개인정보처리방침
+	Route::get('/privacy_policy', [SubController::class, 'privacy_policy'])->name('privacy_policy');
+	//이메일무단수집거부
+	Route::get('/no_email_collection', [SubController::class, 'no_email_collection'])->name('no_email_collection');
+});
+
+//인쇄
+Route::prefix('print')->name('print.')->group(function () {
+	//견적서
+	Route::get('/estimate', [SubController::class, 'estimate'])->name('estimate');
+});
+
+//오류
+Route::prefix('error')->name('error.')->group(function () {
+	//404 페이지 없음
+	Route::get('/error404', [SubController::class, 'error404'])->name('error404');
 });
 
 // =============================================================================

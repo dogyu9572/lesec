@@ -20,6 +20,8 @@ class ProgramReservation extends Model
         'is_unlimited_capacity',
         'education_fee',
         'is_free',
+        'naver_form_url',
+        'waitlist_url',
         'author',
         'is_active',
     ];
@@ -102,6 +104,9 @@ class ProgramReservation extends Model
             'application' => '신청',
             'remaining' => '잔여석 신청',
             'closed' => '마감',
+            'first_come' => '선착순',
+            'lottery' => '추첨',
+            'naver_form' => '네이버폼',
         ];
 
         return $types[$this->reception_type] ?? $this->reception_type;

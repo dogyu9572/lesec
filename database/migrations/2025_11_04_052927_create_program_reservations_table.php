@@ -19,13 +19,15 @@ return new class extends Migration
             $table->date('education_start_date')->nullable()->comment('교육 시작일');
             $table->date('education_end_date')->nullable()->comment('교육 종료일');
             $table->json('payment_methods')->nullable()->comment('결제수단 (JSON 배열)');
-            $table->enum('reception_type', ['application', 'remaining', 'closed'])->nullable()->comment('접수유형 (단체용: 신청/잔여석 신청/마감)');
+            $table->enum('reception_type', ['application', 'remaining', 'closed', 'first_come', 'lottery', 'naver_form'])->nullable()->comment('접수유형 (단체용: 신청/잔여석 신청/마감, 개인용: 선착순/추첨/네이버폼)');
             $table->date('application_start_date')->nullable()->comment('신청 시작일');
             $table->date('application_end_date')->nullable()->comment('신청 종료일');
             $table->integer('capacity')->nullable()->comment('신청정원');
             $table->boolean('is_unlimited_capacity')->default(false)->comment('제한없음 여부');
             $table->decimal('education_fee', 10, 2)->nullable()->comment('교육비');
             $table->boolean('is_free')->default(false)->comment('무료 여부');
+            $table->string('naver_form_url')->nullable()->comment('네이버폼 링크');
+            $table->string('waitlist_url')->nullable()->comment('대기자 신청 링크');
             $table->string('author', 100)->nullable()->comment('작성자');
             $table->boolean('is_active')->default(true)->comment('활성화 여부');
             $table->timestamps();

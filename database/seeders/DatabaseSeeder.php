@@ -47,6 +47,12 @@ class DatabaseSeeder extends Seeder
         // 프로그램 시더 실행
         $this->call(ProgramSeeder::class);
 
+        // 단체 프로그램 시더 실행
+        $this->call(GroupProgramSeeder::class);
+
+        // 개인 프로그램 시더 실행
+        $this->call(IndividualProgramSeeder::class);
+
         // 회원 그룹 시더 실행
         $this->call(MemberGroupSeeder::class);
 

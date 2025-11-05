@@ -162,9 +162,10 @@
                                 
                                 <div class="form-group">
                                     <label for="school_name">학교명</label>
+                                    <input type="hidden" id="school_id" name="school_id" value="{{ old('school_id', $member->school_id) }}">
                                     <div class="school-search-wrapper">
-                                        <input type="text" id="school_name" name="school_name" value="{{ old('school_name', $member->school_name) }}" class="school-search-input">
-                                        <button type="button" class="btn btn-secondary btn-sm">
+                                        <input type="text" id="school_name" name="school_name" value="{{ old('school_name', $member->school_name) }}" class="school-search-input" readonly>
+                                        <button type="button" id="school-search-btn" class="btn btn-secondary btn-sm">
                                             <i class="fas fa-search"></i> 검색
                                         </button>
                                     </div>
@@ -254,6 +255,70 @@
 </div>
 
 @endsection
+
+<!-- 학교 검색 모달 -->
+<div id="school-search-modal" class="modal" style="display: none;">
+    <div class="modal-backdrop" onclick="this.closest('.modal').style.display='none'"></div>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5>학교 검색</h5>
+            <button type="button" class="close-modal" onclick="this.closest('.modal').style.display='none'">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="school-search-form" data-url="{{ route('backoffice.schools.search') }}">
+                <div class="form-group">
+                    <label for="search_school_name">학교명</label>
+                    <input type="text" id="search_school_name" name="search_keyword" class="form-control" placeholder="학교명을 입력하세요">
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-4">
+                        <label for="search_city">시/도</label>
+                        <input type="text" id="search_city" name="city" class="form-control" placeholder="시/도">
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label for="search_district">시/군/구</label>
+                        <input type="text" id="search_district" name="district" class="form-control" placeholder="시/군/구">
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label for="search_school_level">학교급</label>
+                        <select id="search_school_level" name="school_level" class="form-control">
+                            <option value="">전체</option>
+                            <option value="elementary">초등학교</option>
+                            <option value="middle">중학교</option>
+                            <option value="high">고등학교</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> 검색
+                    </button>
+                </div>
+            </form>
+            <div class="table-responsive mt-3">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>학교명</th>
+                            <th>시/도</th>
+                            <th>시/군/구</th>
+                            <th>학교급</th>
+                            <th>관리</th>
+                        </tr>
+                    </thead>
+                    <tbody id="school-search-results">
+                        <tr>
+                            <td colspan="5" class="text-center">검색 조건을 입력하고 검색 버튼을 클릭하세요.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="school-search-pagination" class="mt-3 text-center"></div>
+        </div>
+    </div>
+</div>
+
 @section('scripts')
 <script src="{{ asset('js/backoffice/members.js') }}"></script>
+<script src="{{ asset('js/backoffice/school-search.js') }}"></script>
 @endsection

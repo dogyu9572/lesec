@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'neis' => [
+        'api_key' => env('NEIS_API_KEY'),
+        'endpoint' => 'https://open.neis.go.kr/hub/schoolInfo',
+    ],
+
 ];

@@ -115,4 +115,12 @@ class Member extends Authenticatable
     {
         return $query->where('member_type', 'student');
     }
+
+    /**
+     * 학교와의 관계
+     */
+    public function school()
+    {
+        return $this->belongsTo(School::class, 'school_id');
+    }
 }

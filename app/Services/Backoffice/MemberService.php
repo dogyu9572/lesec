@@ -90,6 +90,7 @@ class MemberService
             'city' => $data['city'] ?? null,
             'district' => $data['district'] ?? null,
             'school_name' => $data['school_name'] ?? null,
+            'school_id' => $data['school_id'] ?? null,
             'grade' => $data['grade'] ?? null,
             'class_number' => $data['class_number'] ?? null,
             'email_consent' => $data['email_consent'] ?? false,
@@ -116,6 +117,7 @@ class MemberService
         $member->city = $data['city'] ?? $member->city;
         $member->district = $data['district'] ?? $member->district;
         $member->school_name = $data['school_name'] ?? $member->school_name;
+        $member->school_id = $data['school_id'] ?? $member->school_id;
         $member->grade = $data['grade'] ?? $member->grade;
         $member->class_number = $data['class_number'] ?? $member->class_number;
         $member->email_consent = isset($data['email_consent']) ? $data['email_consent'] : $member->email_consent;

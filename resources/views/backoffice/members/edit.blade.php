@@ -37,8 +37,8 @@
                         @csrf
                         @method('PUT')
                         
-                        <div class="form-section">
-                            <h3>기본 정보</h3>
+                        <div class="program-section">
+                            <div class="section-title">기본 정보</div>
                             <div class="form-grid grid-2">
                                 <div>
                                     <label>회원구분</label>
@@ -147,8 +147,8 @@
                             </div>
                         </div>
 
-                        <div class="form-section">
-                            <h3>소속 정보</h3>
+                        <div class="program-section">
+                            <div class="section-title">소속 정보</div>
                             <div class="form-grid grid-2">
                                 <div class="form-group">
                                     <label for="city">시</label>
@@ -199,10 +199,10 @@
                             </div>
                         </div>
 
-                        <div class="form-section">
-                            <h3>신청 현황</h3>
+                        <div class="program-section">
+                            <div class="section-title">신청 현황</div>
                             <div class="table-responsive">
-                                <table class="table table-hover">
+                                <table class="board-table">
                                     <thead>
                                         <tr>
                                             <th>No</th>
@@ -222,18 +222,16 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td colspan="14" class="text-center text-muted">
-                                                신청 내역이 없습니다.
-                                            </td>
+                                        <tr style="border: none;">
+                                            <td colspan="14" class="text-center" style="padding: 40px 20px; border: none !important; border-bottom: none !important;">신청 내역이 없습니다.</td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
                         </div>
 
-                        <div class="form-section">
-                            <h3>기타</h3>
+                        <div class="program-section">
+                            <div class="section-title">기타</div>
                             <div class="form-group">
                                 <label>메모</label>
                                 <textarea id="memo" name="memo" rows="3">{{ old('memo', $member->memo) }}</textarea>

@@ -46,5 +46,11 @@ class DatabaseSeeder extends Seeder
 
         // 프로그램 시더 실행
         $this->call(ProgramSeeder::class);
+
+        // 회원 그룹 시더 실행
+        $this->call(MemberGroupSeeder::class);
+
+        // 회원 시더 실행 (그룹 이후)
+        $this->call(MemberSeeder::class);
     }
 }

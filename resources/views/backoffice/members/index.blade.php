@@ -197,10 +197,10 @@
                                     <td>
                                         <div class="board-btn-group">
                                             <a href="{{ route('backoffice.members.edit', $member) }}" class="btn btn-primary btn-sm">
-                                                수정
+                                                <i class="fas fa-edit"></i>수정
                                             </a>
                                             <button type="button" class="btn btn-danger btn-sm" onclick="withdrawMember({{ $member->id }})">
-                                                탈퇴
+                                                <i class="fas fa-trash"></i> 탈퇴
                                             </button>
                                         </div>
                                     </td>

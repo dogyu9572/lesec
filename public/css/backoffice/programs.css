@@ -35,7 +35,10 @@
     font-size: 18px;
     font-weight: 600;
     margin-bottom: 15px;
+    margin-top: 0;
     color: #333;
     padding-bottom: 10px;
+    padding-top: 0;
     border-bottom: 2px solid #007bff;
+    border-top: none;
 }

@@ -259,7 +259,8 @@
     display: none;
 }
 
-.member_type_student:checked ~ .form-section .student-only {
+.member_type_student:checked ~ * .student-only,
+.program-section .member_type_student:checked ~ .student-only {
     display: block;
 }
 
@@ -310,4 +311,27 @@
 /* 2컬럼 그리드 스타일 */
 .form-grid.grid-2 {
     grid-template-columns: repeat(2, 1fr);
+}
+
+/* 프로그램 섹션 스타일 (members 페이지용) */
+.program-section {
+    margin-bottom: 30px;
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    margin-top: 0;
+    color: #333;
+    padding-bottom: 10px;
+    padding-top: 0;
+    border-bottom: 2px solid #007bff;
+    border-top: none;
+}
+
+/* members 페이지 테이블 헤더 파란 줄 제거 */
+.admin-form-container .board-table th,
+.admin-card-body .board-table th {
+    border-bottom: 1px solid #e9ecef;
 }

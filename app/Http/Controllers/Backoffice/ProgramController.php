@@ -20,22 +20,24 @@ class ProgramController extends BaseController
     /**
      * 프로그램 정보 관리 페이지 (타입별)
      */
-    public function index(Request $request)
+    public function index(Request $request, ?string $type = null)
     {
-        $type = $request->get('type', 'middle_semester');
+        $requestedType = $type ?? $request->get('type');
         
         // 유효한 타입인지 확인
         $types = $this->programService->getAllTypes();
-        if (!isset($types[$type])) {
-            $type = 'middle_semester';
+        $defaultType = array_key_first($types) ?? 'middle_semester';
+        $selectedType = $requestedType ?: $defaultType;
+        if (!isset($types[$selectedType])) {
+            $types[$selectedType] = $this->programService->getTypeName($selectedType);
         }
         
         // 타입별 프로그램 조회 (없으면 생성)
-        $program = $this->programService->getOrCreateProgram($type);
+        $program = $this->programService->getOrCreateProgram($selectedType);
         
         return $this->view('backoffice.programs.index', [
             'program' => $program,
-            'currentType' => $type,
+            'currentType' => $selectedType,
             'types' => $types,
         ]);
     }

@@ -71,21 +71,36 @@ Route::prefix('program')->name('program.')->group(function () {
 		->where('type', 'middle_semester|middle_vacation|high_semester|high_vacation|special')
 		->name('apply.individual');
 	
-	// 기존 라우트 호환성 유지 (리다이렉트)
+	// 교육 선택 페이지
+	Route::get('/{type}/select-group', [ProgramController::class, 'selectGroup'])
+		->where('type', 'middle_semester|middle_vacation|high_semester|high_vacation|special')
+		->name('select.group');
+	
+	Route::get('/{type}/select-individual', [ProgramController::class, 'selectIndividual'])
+		->where('type', 'middle_semester|middle_vacation|high_semester|high_vacation|special')
+		->name('select.individual');
+	
+	// 완료 페이지
+	Route::get('/{type}/complete-group', [ProgramController::class, 'completeGroup'])
+		->where('type', 'middle_semester|middle_vacation|high_semester|high_vacation|special')
+		->name('complete.group');
+	
+	Route::get('/{type}/complete-individual', [ProgramController::class, 'completeIndividual'])
+		->where('type', 'middle_semester|middle_vacation|high_semester|high_vacation|special')
+		->name('complete.individual');
+	
+	// 레거시 라우트 호환성 유지 (리다이렉트)
 	Route::get('/middle_semester', fn() => redirect()->route('program.show', 'middle_semester'));
 	Route::get('/middle_semester_apply_a', fn() => redirect()->route('program.apply.group', 'middle_semester'));
+	Route::get('/middle_semester_apply_a2', fn() => redirect()->route('program.select.group', 'middle_semester'));
+	Route::get('/middle_semester_apply_a_end', fn() => redirect()->route('program.complete.group', 'middle_semester'));
 	Route::get('/middle_semester_apply_b', fn() => redirect()->route('program.apply.individual', 'middle_semester'));
+	Route::get('/middle_semester_apply_b2', fn() => redirect()->route('program.select.individual', 'middle_semester'));
+	Route::get('/middle_semester_apply_b_end', fn() => redirect()->route('program.complete.individual', 'middle_semester'));
 	Route::get('/middle_vacation', fn() => redirect()->route('program.show', 'middle_vacation'));
 	Route::get('/high_semester', fn() => redirect()->route('program.show', 'high_semester'));
 	Route::get('/high_vacation', fn() => redirect()->route('program.show', 'high_vacation'));
 	Route::get('/special', fn() => redirect()->route('program.show', 'special'));
-	
-	// 교육 선택 및 완료 페이지는 기존 SubController 유지
-	Route::get('/middle_semester_apply_a2', [SubController::class, 'middle_semester_apply_a2'])->name('middle_semester_apply_a2');
-	Route::get('/get-group-programs-by-month', [SubController::class, 'getGroupProgramsByMonth'])->name('get_group_programs_by_month');
-	Route::get('/middle_semester_apply_a_end', [SubController::class, 'middle_semester_apply_a_end'])->name('middle_semester_apply_a_end');
-	Route::get('/middle_semester_apply_b2', [SubController::class, 'middle_semester_apply_b2'])->name('middle_semester_apply_b2');
-	Route::get('/middle_semester_apply_b_end', [SubController::class, 'middle_semester_apply_b_end'])->name('middle_semester_apply_b_end');
 });
 
 //게시판

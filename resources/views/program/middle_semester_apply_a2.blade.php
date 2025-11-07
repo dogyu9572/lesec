@@ -32,185 +32,33 @@
 								<th>금</th>
 								<th>토</th>
 							</tr>
-						</thead>
-						<tbody>
-							<tr>
-								<td class="disabled"><span>29</span></td>
-								<td class="disabled"><span>30</span></td>
-								<td class="disabled"><span>31</span></td>
-								<td class="disabled"><span>1</span></td>
-								<td class="disabled"><span>2</span></td>
-								<td class="disabled"><span>3</span></td>
-								<td><span>4</span>
-									<ul class="list">
-										<li class="i_possible" data-applied="0" data-total="24">M1. 광학현미경을 이용한 세포 관찰</li>
-										<li class="i_possible" data-applied="0" data-total="24">M2. DNA 추출(단체만 신청 가능)</li>
-										<li class="i_possible" data-applied="0" data-total="24">M3. 분류학으로 보는 생물의 세계</li>
-									</ul>
-								</td>
-							</tr>
-							<tr>
-								<td><span>5</span>
-									<ul class="list">
-										<li class="i_possible" data-applied="0" data-total="24">M1. 광학현미경을 이용한 세포 관찰</li>
-										<li class="i_possible" data-applied="0" data-total="24">M2. DNA 추출(단체만 신청 가능)</li>
-										<li class="i_possible" data-applied="0" data-total="24">M3. 분류학으로 보는 생물의 세계</li>
-									</ul>
-								</td>
-								<td><span>6</span>
-									<ul class="list">
-										<li class="i_possible" data-applied="0" data-total="24">M1. 광학현미경을 이용한 세포 관찰</li>
-										<li class="i_possible" data-applied="0" data-total="24">M2. DNA 추출(단체만 신청 가능)</li>
-										<li class="i_possible" data-applied="0" data-total="24">M3. 분류학으로 보는 생물의 세계</li>
-									</ul>
-								</td>
-								<td><span>7</span>
-									<ul class="list">
-										<li class="i_possible" data-applied="0" data-total="24">M1. 광학현미경을 이용한 세포 관찰</li>
-										<li class="i_possible" data-applied="0" data-total="24">M2. DNA 추출(단체만 신청 가능)</li>
-										<li class="i_possible" data-applied="0" data-total="24">M3. 분류학으로 보는 생물의 세계</li>
-									</ul>
-								</td>
-								<td><span>8</span>
-									<ul class="list">
-										<li class="i_possible" data-applied="0" data-total="24">M1. 광학현미경을 이용한 세포 관찰</li>
-										<li class="i_possible" data-applied="0" data-total="24">M2. DNA 추출(단체만 신청 가능)</li>
-										<li class="i_possible" data-applied="0" data-total="24">M3. 분류학으로 보는 생물의 세계</li>
-									</ul>
-								</td>
-								<td><span>9</span>
-									<ul class="list">
-										<li class="i_possible" data-applied="0" data-total="24">M1. 광학현미경을 이용한 세포 관찰</li>
-										<li class="i_possible" data-applied="0" data-total="24">M2. DNA 추출(단체만 신청 가능)</li>
-										<li class="i_possible" data-applied="0" data-total="24">M3. 분류학으로 보는 생물의 세계</li>
-									</ul>
-								</td>
-								<td><span>10</span>
-									<ul class="list">
-										<li class="i_possible" data-applied="0" data-total="24">M1. 광학현미경을 이용한 세포 관찰</li>
-										<li class="i_possible" data-applied="0" data-total="24">M2. DNA 추출(단체만 신청 가능)</li>
-										<li class="i_impossible">M3. 분류학으로 보는 생물의 세계</li>
-									</ul>
-								</td>
-								<td><span>11</span>
-									<ul class="list">
-										<li class="i_possible" data-applied="0" data-total="24">M1. 광학현미경을 이용한 세포 관찰</li>
-										<li class="i_possible" data-applied="0" data-total="24">M2. DNA 추출(단체만 신청 가능)</li>
-										<li class="i_possible" data-applied="0" data-total="24">M3. 분류학으로 보는 생물의 세계</li>
-									</ul>
-								</td>
-							</tr>
-							<tr>
-								<td><span>12</span>
-									<ul class="list">
-										<li class="i_possible" data-applied="0" data-total="24">M1. 광학현미경을 이용한 세포 관찰</li>
-										<li class="i_impossible">M2. DNA 추출(단체만 신청 가능)</li>
-										<li class="i_possible" data-applied="0" data-total="24">M3. 분류학으로 보는 생물의 세계</li>
-									</ul>
-								</td>
-								<td><span>13</span>
-									<ul class="list">
-										<li class="i_possible" data-applied="0" data-total="24">M1. 광학현미경을 이용한 세포 관찰</li>
-										<li class="i_possible" data-applied="0" data-total="24">M2. DNA 추출(단체만 신청 가능)</li>
-										<li class="i_possible" data-applied="0" data-total="24">M3. 분류학으로 보는 생물의 세계</li>
-									</ul>
-								</td>
-								<td><span>14</span>
-									<ul class="list">
-										<li class="i_possible" data-applied="0" data-total="24">M1. 광학현미경을 이용한 세포 관찰</li>
-										<li class="i_possible" data-applied="0" data-total="24">M2. DNA 추출(단체만 신청 가능)</li>
-										<li class="i_possible" data-applied="0" data-total="24">M3. 분류학으로 보는 생물의 세계</li>
-									</ul>
-								</td>
-								<td><span>15</span>
-									<ul class="list">
-										<li class="i_possible" data-applied="0" data-total="24">M1. 광학현미경을 이용한 세포 관찰</li>
-										<li class="i_possible" data-applied="0" data-total="24">M2. DNA 추출(단체만 신청 가능)</li>
-										<li class="i_possible" data-applied="0" data-total="24">M3. 분류학으로 보는 생물의 세계</li>
-									</ul>
-								</td>
-								<td><span>16</span>
-									<ul class="list">
-										<li class="i_possible" data-applied="0" data-total="24">M1. 광학현미경을 이용한 세포 관찰</li>
-										<li class="i_possible" data-applied="0" data-total="24">M2. DNA 추출(단체만 신청 가능)</li>
-										<li class="i_possible" data-applied="0" data-total="24">M3. 분류학으로 보는 생물의 세계</li>
-									</ul>
-								</td>
-								<td><span>17</span>
-									<ul class="list">
-										<li class="i_impossible">M1. 광학현미경을 이용한 세포 관찰</li>
-										<li class="i_impossible">M2. DNA 추출(단체만 신청 가능)</li>
-										<li class="i_impossible">M3. 분류학으로 보는 생물의 세계</li>
-									</ul>
-								</td>
-								<td class="disabled"><span>18</span></td>
-							</tr>
-							<tr>
-								<td class="disabled"><span>19</span></td>
-								<td><span>20</span>
-									<ul class="list">
-										<li class="i_possible" data-applied="0" data-total="24">M1. 광학현미경을 이용한 세포 관찰</li>
-										<li class="i_possible" data-applied="15" data-total="24">M2. DNA 추출(단체만 신청 가능)</li>
-										<li class="i_possible" data-applied="0" data-total="24">M3. 분류학으로 보는 생물의 세계</li>
-									</ul>
-								</td>
-								<td class="disabled"><span>21</span></td>
-								<td class="disabled"><span>22</span></td>
-								<td><span>23</span>
-									<ul class="list">
-										<li class="i_possible" data-applied="0" data-total="24">M1. 광학현미경을 이용한 세포 관찰</li>
-										<li class="i_possible" data-applied="0" data-total="24">M2. DNA 추출(단체만 신청 가능)</li>
-										<li class="i_possible" data-applied="0" data-total="24">M3. 분류학으로 보는 생물의 세계</li>
-									</ul>
-								</td>
-								<td><span>24</span>
-									<ul class="list">
-										<li class="i_impossible">M1. 광학현미경을 이용한 세포 관찰</li>
-										<li class="i_impossible">M2. DNA 추출(단체만 신청 가능)</li>
-										<li class="i_impossible">M3. 분류학으로 보는 생물의 세계</li>
-									</ul>
-								</td>
-								<td><span>25</span>
-									<ul class="list">
-										<li class="i_possible" data-applied="0" data-total="24">M1. 광학현미경을 이용한 세포 관찰</li>
-										<li class="i_possible" data-applied="0" data-total="24">M2. DNA 추출(단체만 신청 가능)</li>
-										<li class="i_possible" data-applied="0" data-total="24">M3. 분류학으로 보는 생물의 세계</li>
-									</ul>
-								</td>
-							</tr>
-							<tr>
-								<td><span>26</span>
-									<ul class="list">
-										<li class="i_possible" data-applied="0" data-total="24">M1. 광학현미경을 이용한 세포 관찰</li>
-										<li class="i_possible" data-applied="0" data-total="24">M2. DNA 추출(단체만 신청 가능)</li>
-										<li class="i_possible" data-applied="0" data-total="24">M3. 분류학으로 보는 생물의 세계</li>
-									</ul>
-								</td>
-								<td><span>27</span>
-									<ul class="list">
-										<li class="i_possible" data-applied="0" data-total="24">M1. 광학현미경을 이용한 세포 관찰</li>
-										<li class="i_possible" data-applied="0" data-total="24">M2. DNA 추출(단체만 신청 가능)</li>
-										<li class="i_impossible">M3. 분류학으로 보는 생물의 세계</li>
-									</ul>
-								</td>
-								<td><span>28</span>
-									<ul class="list">
-										<li class="i_possible" data-applied="0" data-total="24">M1. 광학현미경을 이용한 세포 관찰</li>
-										<li class="i_possible" data-applied="0" data-total="24">M2. DNA 추출(단체만 신청 가능)</li>
-									</ul>
-								</td>
-								<td class="disabled"><span>29</span></td>
-								<td><span>30</span>
-									<ul class="list">
-										<li class="i_possible" data-applied="0" data-total="24">M1. 광학현미경을 이용한 세포 관찰</li>
-										<li class="i_impossible">M2. DNA 추출(단체만 신청 가능)</li>
-										<li class="i_impossible">M3. 분류학으로 보는 생물의 세계</li>
-									</ul>
-								</td>
-								<td class="disabled"><span>31</span></td>
-								<td class="disabled"><span>1</span></td>
-							</tr>
-						</tbody>
+					</thead>
+					<tbody>
+						@foreach($calendar as $week)
+						<tr>
+							@foreach($week as $dayData)
+							<td @if($dayData['disabled']) class="disabled" @endif>
+								<span>{{ $dayData['day'] }}</span>
+								@if(!$dayData['disabled'] && count($dayData['programs']) > 0)
+								<ul class="list">
+									@foreach($dayData['programs'] as $program)
+									@php
+										$appliedCount = $program->applied_count ?? 0;
+										$capacity = $program->capacity ?? 0;
+										$statusClass = 'i_possible';
+										if (!$program->is_unlimited_capacity && $appliedCount >= $capacity) {
+											$statusClass = 'i_impossible';
+										}
+									@endphp
+									<li class="{{ $statusClass }}" data-applied="{{ $appliedCount }}" data-total="{{ $capacity }}" data-program-id="{{ $program->id }}">{{ $program->program_name }}</li>
+									@endforeach
+								</ul>
+								@endif
+							</td>
+							@endforeach
+						</tr>
+						@endforeach
+					</tbody>
 					</table>
 				</div>
 
@@ -336,9 +184,12 @@
 </div>
 
 <script>
+// 백오피스 프로그램 데이터
+const programsData = @json($programs ?? []);
+
 $(function () {
 	// 날짜 계산용 변수
-	let currentDate = new Date(2025, 09, 20); // 2025.10 (Month는 0-indexed)
+	let currentDate = new Date({{ $year ?? date('Y') }}, {{ ($month ?? date('m')) - 1 }}, 1); // Month는 0-indexed
 	const daysKor = ['일', '월', '화', '수', '목', '금', '토'];
 
 	// 1. 이전달 / 다음달 버튼
@@ -346,19 +197,22 @@ $(function () {
 		const year = currentDate.getFullYear();
 		const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
 		$('.schedule_top .month strong').text(`${year}.${month}`);
-		// 여기에 AJAX나 달력 리렌더링 코드 삽입 가능
 	}
 
 	$('.arrow.prev').on('click', function () {
 		currentDate.setMonth(currentDate.getMonth() - 1);
-		updateMonthDisplay();
+		const year = currentDate.getFullYear();
+		const month = currentDate.getMonth() + 1;
+		window.location.href = `{{ url('/program/middle_semester_apply_a2') }}?year=${year}&month=${month}`;
 	});
 
 	$('.arrow.next').on('click', function () {
 		currentDate.setMonth(currentDate.getMonth() + 1);
-		updateMonthDisplay();
+		const year = currentDate.getFullYear();
+		const month = currentDate.getMonth() + 1;
+		window.location.href = `{{ url('/program/middle_semester_apply_a2') }}?year=${year}&month=${month}`;
 	});
-
+	
 	updateMonthDisplay(); // 초기 실행
 	selectTodayIfVisible();
 
@@ -419,6 +273,7 @@ $(function () {
 
 		$listItems.each(function (index) {
 			const title = $(this).text();
+			const programId = $(this).data('program-id') ?? 0;
 
 			const applied = $(this).data('applied') ?? 0;
 			const total = $(this).data('total') ?? 24;
@@ -432,7 +287,7 @@ $(function () {
 			if (remain <= 0) {
 				status = '마감';
 				stateClass = 'c3';
-			} else if (remain <= 10) {
+			} else if (applied > 0) {
 				status = '잔여석 신청 가능';
 				stateClass = 'c2';
 			} else {
@@ -441,8 +296,8 @@ $(function () {
 			}
 
 			$tbody.append(`
-				<tr>
-					<td class="edu11"><label class="check solo"><input type="radio" name="select_day"><i></i></label></td>
+				<tr data-program-id="${programId}">
+					<td class="edu11"><label class="check solo"><input type="radio" name="select_day" data-program-id="${programId}"><i></i></label></td>
 					<td class="edu12">${year}-${month}-${day} 09:00</td>
 					<td class="edu13 over_dot">${title}</td>
 					<td class="edu14">${remainText}</td>

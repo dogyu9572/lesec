@@ -17,6 +17,7 @@ class ProgramReservation extends Model
         'application_start_date',
         'application_end_date',
         'capacity',
+        'applied_count',
         'is_unlimited_capacity',
         'education_fee',
         'is_free',
@@ -32,6 +33,7 @@ class ProgramReservation extends Model
         'application_start_date' => 'date',
         'application_end_date' => 'date',
         'payment_methods' => 'array',
+        'applied_count' => 'integer',
         'is_unlimited_capacity' => 'boolean',
         'education_fee' => 'decimal:2',
         'is_free' => 'boolean',
@@ -135,5 +137,58 @@ class ProgramReservation extends Model
         }
 
         return $names;
+    }
+
+    /**
+     * 현재 접수유형 자동 판정 (단체 프로그램용)
+     */
+    public function getCurrentReceptionTypeAttribute(): string
+    {
+        // 정원 무제한이면 항상 신청 가능
+        if ($this->is_unlimited_capacity) {
+            return 'application';
+        }
+
+        $capacity = $this->capacity ?? 0;
+        $appliedCount = $this->applied_count ?? 0;
+
+        if ($appliedCount >= $capacity) {
+            return 'closed';
+        } elseif ($appliedCount > 0) {
+            return 'remaining';
+        } else {
+            return 'application';
+        }
+    }
+
+    /**
+     * 현재 접수유형 한글명 반환
+     */
+    public function getCurrentReceptionTypeNameAttribute(): string
+    {
+        $type = $this->current_reception_type;
+
+        $types = [
+            'application' => '신청',
+            'remaining' => '잔여석 신청',
+            'closed' => '마감',
+        ];
+
+        return $types[$type] ?? '신청';
+    }
+
+    /**
+     * 잔여 정원 반환
+     */
+    public function getRemainingCapacityAttribute(): int
+    {
+        if ($this->is_unlimited_capacity) {
+            return 9999;
+        }
+
+        $capacity = $this->capacity ?? 0;
+        $appliedCount = $this->applied_count ?? 0;
+
+        return max(0, $capacity - $appliedCount);
     }
 }

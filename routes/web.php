@@ -82,6 +82,7 @@ Route::prefix('program')->name('program.')->group(function () {
 	
 	// 교육 선택 및 완료 페이지는 기존 SubController 유지
 	Route::get('/middle_semester_apply_a2', [SubController::class, 'middle_semester_apply_a2'])->name('middle_semester_apply_a2');
+	Route::get('/get-group-programs-by-month', [SubController::class, 'getGroupProgramsByMonth'])->name('get_group_programs_by_month');
 	Route::get('/middle_semester_apply_a_end', [SubController::class, 'middle_semester_apply_a_end'])->name('middle_semester_apply_a_end');
 	Route::get('/middle_semester_apply_b2', [SubController::class, 'middle_semester_apply_b2'])->name('middle_semester_apply_b2');
 	Route::get('/middle_semester_apply_b_end', [SubController::class, 'middle_semester_apply_b_end'])->name('middle_semester_apply_b_end');

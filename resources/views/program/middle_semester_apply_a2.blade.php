@@ -307,76 +307,24 @@ $(function () {
 		});
 	}
 
-	// 5. 신청인원수 증감 로직
-	function getMaxCount() {
-		let max = 0;
-		$('.glbox.select_day .tbl tbody tr').each(function () {
-			if ($(this).find('input[type="radio"]').is(':checked')) {
-				const countText = $(this).find('td').eq(3).text(); // "0/24"
-				const [applied, total] = countText.split('/').map(Number);
-				max = total - applied;
-			}
-		});
-		return max;
-	}
-
-	// ✅ 신청 인원 input 값 보정 함수
-	function updateApplyInput() {
-		const max = getMaxCount();
-		let input = $('.count input');
-		let current = parseInt(input.val(), 10);
-
-		if (max <= 0) {
-			current = 0;
-		} else if (max < 10) {
-			current = Math.min(current, max); // 1~max
-			if (current < 1) current = 1;
-		} else {
-			if (current < 10) current = 10; // 최소 10
-			if (current > max) current = max;
-		}
-
-		input.val(current);
-	}
-
-	// ✅ 라디오 버튼 변경 시 input 자동 보정
-	$('.glbox.select_day .tbl').on('change', 'input[type="radio"]', function () {
-		updateApplyInput();
-	});
-
-	// ✅ 인원수 증가
+	// 5. 신청인원수 증감 로직 (0명과 10명만 왔다갔다)
 	$('.btn.plus').on('click', function () {
 		let val = parseInt($('.count input').val(), 10);
-		let max = getMaxCount();
-
-		if (max <= 0) {
-			$('.count input').val(0);
-			return;
-		}
-
-		if (val < max) {
-			val++;
-			$('.count input').val(val);
+		if (val === 0) {
+			$('.count input').val(10);
 		}
 	});
 
-	// ✅ 인원수 감소
 	$('.btn.minus').on('click', function () {
 		let val = parseInt($('.count input').val(), 10);
-		let max = getMaxCount();
-
-		if (max <= 0) {
+		if (val === 10) {
 			$('.count input').val(0);
-			return;
 		}
+	});
 
-		if (max < 10) {
-			if (val > 1) val--;
-		} else {
-			if (val > 10) val--; // 최소 10
-		}
-
-		$('.count input').val(val);
+	// 라디오 버튼 변경 시 기본값 10명으로 설정
+	$('.glbox.select_day .tbl').on('change', 'input[type="radio"]', function () {
+		$('.count input').val(10);
 	});
 
 	//높이 설정

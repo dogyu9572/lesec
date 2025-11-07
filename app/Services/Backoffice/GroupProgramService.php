@@ -122,10 +122,15 @@ class GroupProgramService
         // 무료 체크 시 education_fee는 null
         if (isset($data['is_free']) && $data['is_free']) {
             $data['education_fee'] = null;
+        } elseif (array_key_exists('education_fee', $data) && $data['education_fee'] !== null && $data['education_fee'] !== '') {
+            $data['education_fee'] = (int) $data['education_fee'];
         }
 
         // 작성자 필드는 현재 로그인한 관리자 이름으로 자동 설정
         $data['author'] = Auth::user()?->name ?? null;
+        
+        // 신청 인원은 0으로 초기화
+        $data['applied_count'] = 0;
         
         return ProgramReservation::create($data);
     }
@@ -154,9 +159,10 @@ class GroupProgramService
         // 무료 체크 시 education_fee는 null
         if (isset($data['is_free']) && $data['is_free']) {
             $data['education_fee'] = null;
-        } elseif (isset($data['is_free']) && !$data['is_free'] && !isset($data['education_fee'])) {
-            // 무료 해제 시 education_fee는 필수
-            $data['education_fee'] = null;
+        } elseif (isset($data['is_free']) && !$data['is_free']) {
+            $data['education_fee'] = array_key_exists('education_fee', $data) && $data['education_fee'] !== null && $data['education_fee'] !== ''
+                ? (int) $data['education_fee']
+                : $programReservation->education_fee;
         }
 
         // 작성자 필드는 현재 로그인한 관리자 이름으로 자동 업데이트

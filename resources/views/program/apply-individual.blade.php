@@ -27,7 +27,7 @@
 					<li class="i3"><b>장소</b>{{ $program ? ($program->location ?? '') : '' }}</li>
 					<li class="i4"><b>대상</b>{{ $program ? ($program->target ?? '') : '' }}</li>
 				</ul>
-				<button type="button" class="btn_apply pc_vw" onclick="location.href='{{ $programService->getIndividualApplySelectRoute($type) }}'">신청하기</button>
+				<button type="button" class="btn_apply pc_vw" onclick="location.href='{{ route('program.select.individual', $type) }}'">신청하기</button>
 			</div>
 			<div class="itit mt0">상세 내용</div>
 			<div class="glbox">
@@ -42,7 +42,7 @@
 				@endif
 			</div>
 			<div class="btn_apply_wrap mo_vw">
-				<button type="button" class="btn_apply" onclick="location.href='{{ $programService->getIndividualApplySelectRoute($type) }}'">신청하기</button>
+				<button type="button" class="btn_apply" onclick="location.href='{{ route('program.select.individual', $type) }}'">신청하기</button>
 			</div>
 		</div>
 	</div>

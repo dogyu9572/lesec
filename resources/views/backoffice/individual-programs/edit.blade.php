@@ -192,7 +192,6 @@
                             <input type="number" class="board-form-control @error('capacity') is-invalid @enderror" 
                                    id="capacity" name="capacity" value="{{ old('capacity', $program->capacity) }}" min="1" 
                                    @if(old('is_unlimited_capacity', $program->is_unlimited_capacity) || old('reception_type', $program->reception_type) == 'lottery') disabled @endif>
-                            <span style="display: inline-block; margin-left: 10px; line-height: 38px;">명</span>
                             @error('capacity')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -215,7 +214,7 @@
                     <div class="board-form-row">
                         <div class="board-form-col board-form-col-6">
                             <input type="number" class="board-form-control @error('education_fee') is-invalid @enderror" 
-                                   id="education_fee" name="education_fee" value="{{ old('education_fee', $program->education_fee) }}" min="0" step="0.01"
+                                   id="education_fee" name="education_fee" value="{{ old('education_fee') !== null ? (int) old('education_fee') : ($program->education_fee !== null ? (int) $program->education_fee : '') }}" min="0" step="1"
                                    @if(old('is_free', $program->is_free)) disabled @endif
                                    style="display: inline-block; width: calc(100% - 50px);">
                             <span style="display: inline-block; margin-left: 10px; line-height: 38px;">원</span>

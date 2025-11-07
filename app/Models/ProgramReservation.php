@@ -35,7 +35,7 @@ class ProgramReservation extends Model
         'payment_methods' => 'array',
         'applied_count' => 'integer',
         'is_unlimited_capacity' => 'boolean',
-        'education_fee' => 'decimal:2',
+        'education_fee' => 'integer',
         'is_free' => 'boolean',
         'is_active' => 'boolean',
     ];

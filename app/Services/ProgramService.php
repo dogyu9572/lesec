@@ -6,6 +6,16 @@ use App\Models\Program;
 
 class ProgramService
 {
+    private const AVAILABLE_TYPES = [
+        'middle_semester',
+        'middle_vacation',
+        'high_semester',
+        'high_vacation',
+        'special',
+    ];
+    
+    private const DEFAULT_TYPE = 'middle_semester';
+    
     /**
      * 타입별 프로그램 조회
      */
@@ -51,14 +61,9 @@ class ProgramService
      */
     public function getGroupApplySelectRoute(string $type): string
     {
-        $routeMap = [
-            'middle_semester' => '/program/middle_semester_apply_a2',
-            'middle_vacation' => '/program/middle_vacation_apply_a2',
-            'high_semester' => '/program/high_semester_apply_a2',
-            'high_vacation' => '/program/high_vacation_apply_a2',
-            'special' => '/program/special_apply_a2',
-        ];
-        return $routeMap[$type] ?? '/program/middle_semester_apply_a2';
+        $resolvedType = in_array($type, self::AVAILABLE_TYPES, true) ? $type : self::DEFAULT_TYPE;
+        
+        return route('program.select.group', $resolvedType);
     }
 
     /**
@@ -66,13 +71,8 @@ class ProgramService
      */
     public function getIndividualApplySelectRoute(string $type): string
     {
-        $routeMap = [
-            'middle_semester' => '/program/middle_semester_apply_b2',
-            'middle_vacation' => '/program/middle_vacation_apply_b2',
-            'high_semester' => '/program/high_semester_apply_b2',
-            'high_vacation' => '/program/high_vacation_apply_b2',
-            'special' => '/program/special_apply_b2',
-        ];
-        return $routeMap[$type] ?? '/program/middle_semester_apply_b2';
+        $resolvedType = in_array($type, self::AVAILABLE_TYPES, true) ? $type : self::DEFAULT_TYPE;
+        
+        return route('program.select.individual', $resolvedType);
     }
 }

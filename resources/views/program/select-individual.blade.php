@@ -2,7 +2,13 @@
 @section('content')
 <main class="pb">
     
-	<div class="inner ">
+	<div
+        class="inner "
+        data-program-page="select"
+        data-select-mode="individual"
+        data-type="{{ $type }}"
+        data-year="{{ $year }}"
+        data-base-url="{{ route('program.select.individual', $type) }}">
 		<div class="btit"><strong>교육 선택</strong><p>원하는 교육 프로그램을 선택 후 신청하기 버튼을 눌러주세요.</p></div>
 
 		<div class="board_top">
@@ -89,40 +95,24 @@
 </main>
 
 <div class="popup pop_info" id="pop_restriction">
-	<div class="dm" onclick="layerHide('pop_restriction')"></div>
+	<div class="dm" data-layer-close="pop_restriction"></div>
 	<div class="inbox">
-		<button type="button" class="btn_close" onclick="layerHide('pop_restriction')"></button>
+		<button type="button" class="btn_close" data-layer-close="pop_restriction"></button>
 		<div class="tit mb">신청 제한 안내</div>
 		<p class="">교사 1인당 최대 3개의 프로그램까지 신청할 수 있습니다.</p>
 		<div class="gbox flex_center colm">
 			<p>추가로 신청이 필요하신 경우,전화 문의 바랍니다.</p>
 			<p class="tel">02-888-0932~3, 02-880-4948</p>
 		</div>
-		<button type="button" class="btn_check" onclick="layerHide('pop_restriction')">확인하기</button>
+		<button type="button" class="btn_check" data-layer-close="pop_restriction">확인하기</button>
 	</div>
 </div>
 
-<script>
-$(function () {
-	// 월 필터 변경
-	$('#filter_month').on('change', function() {
-		const selectedMonth = $(this).val();
-		if (selectedMonth) {
-			window.location.href = `{{ route('program.select.individual', $type) }}?year={{ $year }}&month=${selectedMonth}`;
-		} else {
-			window.location.href = `{{ route('program.select.individual', $type) }}?year={{ $year }}`;
-		}
-	});
-});
-
-//팝업
-function layerShow(id) {
-	$("#" + id).fadeIn(300);
-}
-function layerHide(id) {
-	$("#" + id).fadeOut(300);
-}
-</script>
+@once
+	@push('scripts')
+		<script src="{{ asset('js/program/program.js') }}"></script>
+	@endpush
+@endonce
 
 @endsection
 

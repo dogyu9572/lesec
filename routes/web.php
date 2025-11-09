@@ -89,18 +89,6 @@ Route::prefix('program')->name('program.')->group(function () {
 		->where('type', 'middle_semester|middle_vacation|high_semester|high_vacation|special')
 		->name('complete.individual');
 	
-	// 레거시 라우트 호환성 유지 (리다이렉트)
-	Route::get('/middle_semester', fn() => redirect()->route('program.show', 'middle_semester'));
-	Route::get('/middle_semester_apply_a', fn() => redirect()->route('program.apply.group', 'middle_semester'));
-	Route::get('/middle_semester_apply_a2', fn() => redirect()->route('program.select.group', 'middle_semester'));
-	Route::get('/middle_semester_apply_a_end', fn() => redirect()->route('program.complete.group', 'middle_semester'));
-	Route::get('/middle_semester_apply_b', fn() => redirect()->route('program.apply.individual', 'middle_semester'));
-	Route::get('/middle_semester_apply_b2', fn() => redirect()->route('program.select.individual', 'middle_semester'));
-	Route::get('/middle_semester_apply_b_end', fn() => redirect()->route('program.complete.individual', 'middle_semester'));
-	Route::get('/middle_vacation', fn() => redirect()->route('program.show', 'middle_vacation'));
-	Route::get('/high_semester', fn() => redirect()->route('program.show', 'high_semester'));
-	Route::get('/high_vacation', fn() => redirect()->route('program.show', 'high_vacation'));
-	Route::get('/special', fn() => redirect()->route('program.show', 'special'));
 });
 
 //게시판

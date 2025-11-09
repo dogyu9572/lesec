@@ -4,7 +4,16 @@
     
 	<div class="inner ">
 		<div class="btit"><strong>단체 신청</strong></div>
-		<div class="schedule_wrap">
+		<div
+            class="schedule_wrap"
+            data-program-page="select"
+            data-select-mode="group"
+            data-programs='@json($programs ?? [])'
+            data-type="{{ $type }}"
+            data-year="{{ $year }}"
+            data-month="{{ $month }}"
+            data-base-url="{{ route('program.select.group', $type) }}"
+            data-complete-url="{{ route('program.complete.group', $type) }}'>
 
 			<div class="schedule_table">
 				<div class="schedule_top">
@@ -107,7 +116,7 @@
 						</div>
 					</div>
 					<div class="btns">
-						<button type="button" class="btn_apply" onclick="layerShow('pop_approval')">신청하기</button>
+						<button type="button" class="btn_apply" data-layer-open="pop_approval">신청하기</button>
 					</div>
 				</div>
 			</div>
@@ -118,9 +127,9 @@
 </main>
 
 <div class="popup pop_info" id="pop_approval">
-	<div class="dm" onclick="layerHide('pop_approval')"></div>
+	<div class="dm" data-layer-close="pop_approval"></div>
 	<div class="inbox">
-		<button type="button" class="btn_close" onclick="layerHide('pop_approval')"></button>
+		<button type="button" class="btn_close" data-layer-close="pop_approval"></button>
 		<div class="tit mb">승인 안내</div>
 		<p class="">본 신청은 관리자의 승인 절차를 거쳐 최종 확정됩니다.</p>
 		<div class="gbox flex_center colm">
@@ -130,202 +139,19 @@
 		<div class="flex_center check_area">
 			<label class="check"><input type="checkbox"><i></i>위의 내용을 모두 읽었으며, 내용에 동의합니다.</label>
 		</div>
-		<button type="button" class="btn_check" onclick="location.href='{{ route('program.complete.group', $type) }}'">확인하기</button>
+		<button type="button" class="btn_check" data-navigate-complete="{{ route('program.complete.group', $type) }}">확인하기</button>
 	</div>
 </div>
 
-<script>
-// 백오피스 프로그램 데이터
-const programsData = @json($programs ?? []);
-const currentType = '{{ $type }}';
-const currentYear = {{ $year }};
-const currentMonth = {{ $month }};
+</div>
 
-$(function () {
-	// 날짜 계산용 변수
-	let currentDate = new Date(currentYear, currentMonth - 1, 1); // Month는 0-indexed
-	const daysKor = ['일', '월', '화', '수', '목', '금', '토'];
-
-	// 1. 이전달 / 다음달 버튼
-	function updateMonthDisplay() {
-		const year = currentDate.getFullYear();
-		const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
-		$('.schedule_top .month strong').text(`${year}.${month}`);
-	}
-
-	$('.arrow.prev').on('click', function () {
-		currentDate.setMonth(currentDate.getMonth() - 1);
-		const year = currentDate.getFullYear();
-		const month = currentDate.getMonth() + 1;
-		window.location.href = `{{ route('program.select.group', $type) }}?year=${year}&month=${month}`;
-	});
-
-	$('.arrow.next').on('click', function () {
-		currentDate.setMonth(currentDate.getMonth() + 1);
-		const year = currentDate.getFullYear();
-		const month = currentDate.getMonth() + 1;
-		window.location.href = `{{ route('program.select.group', $type) }}?year=${year}&month=${month}`;
-	});
-	
-	updateMonthDisplay(); // 초기 실행
-	selectTodayIfVisible();
-
-	// 2. 당일보기
-	function selectTodayIfVisible() {
-		const today = new Date();
-
-		// currentDate 기준으로 오늘이 현재 달에 포함되어 있는 경우에만 실행
-		if (
-			currentDate.getFullYear() === today.getFullYear() &&
-			currentDate.getMonth() === today.getMonth()
-		) {
-			$('.schedule_table .table tbody td').each(function () {
-				const dayText = $(this).find('span').text();
-				if (!$(this).hasClass('disabled')) {
-					if (parseInt(dayText) === today.getDate()) {
-						$(this).addClass('select');
-						updateSelectionInfo($(this));
-					}
-				}
-			});
-		}
-	}
-
-	// 오늘보기 버튼
-	$('.btn_today').on('click', function () {
-		$('.schedule_table .table tbody td').removeClass('select');
-		selectTodayIfVisible();
-	});
-
-
-	// 3. 날짜 선택 시 select 클래스 토글
-	$('.schedule_table .table tbody td').on('click', function () {
-		if ($(this).hasClass('disabled')) return;
-
-		$('.schedule_table .table tbody td').removeClass('select');
-		$(this).addClass('select');
-
-		updateSelectionInfo($(this));
-	});
-
-	// 4. 날짜 선택 후 상세정보 반영
-	function updateSelectionInfo($td) {
-		const day = $td.find('span').text().padStart(2, '0');
-		const year = currentDate.getFullYear();
-		const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
-		const selectedDate = `${year}.${month}.${day}`;
-		const dateObj = new Date(`${year}-${month}-${day}`);
-		const dayOfWeek = daysKor[dateObj.getDay()];
-
-		// 상단 날짜 변경
-		$('.glbox.select_day .day dd').html(`${selectedDate} <span>(${dayOfWeek})</span>`);
-
-		// 프로그램 리스트 갱신
-		const $listItems = $td.find('.list li');
-		const $tbody = $('.glbox.select_day .tbl tbody');
-		$tbody.empty();
-
-		$listItems.each(function (index) {
-			const title = $(this).text();
-			const programId = $(this).data('program-id') ?? 0;
-
-			const applied = $(this).data('applied') ?? 0;
-			const total = $(this).data('total') ?? 24;
-			const remain = total - applied;
-
-			const remainText = `${applied}/${total}`;
-
-			let status = '';
-			let stateClass = '';
-
-			if (remain <= 0) {
-				status = '마감';
-				stateClass = 'c3';
-			} else if (applied > 0) {
-				status = '잔여석 신청 가능';
-				stateClass = 'c2';
-			} else {
-				status = '신청가능';
-				stateClass = 'c1';
-			}
-
-			$tbody.append(`
-				<tr data-program-id="${programId}">
-					<td class="edu11"><label class="check solo"><input type="radio" name="select_day" data-program-id="${programId}"><i></i></label></td>
-					<td class="edu12">${year}-${month}-${day} 09:00</td>
-					<td class="edu13 over_dot">${title}</td>
-					<td class="edu14">${remainText}</td>
-					<td class="edu15"><i class="state ${stateClass}">${status}</i></td>
-				</tr>
-			`);
-		});
-	}
-
-	// 5. 신청인원수 증감 로직 (0명과 10명만 왔다갔다)
-	$('.btn.plus').on('click', function () {
-		let val = parseInt($('.count input').val(), 10);
-		if (val === 0) {
-			$('.count input').val(10);
-		}
-	});
-
-	$('.btn.minus').on('click', function () {
-		let val = parseInt($('.count input').val(), 10);
-		if (val === 10) {
-			$('.count input').val(0);
-		}
-	});
-
-	// 라디오 버튼 변경 시 기본값 10명으로 설정
-	$('.glbox.select_day .tbl').on('change', 'input[type="radio"]', function () {
-		$('.count input').val(10);
-	});
-
-	//높이 설정
-	function adjustScrollHeight() {
-		const scheduleTable = $('.schedule_table');
-		const nebox = $('.nebox');
-		const scheduleHeight = scheduleTable.outerHeight(true) - (nebox.outerHeight(true) || 0); // .nebox 높이 제외
-		const minusHeight = nebox.outerHeight(true) || 0; // scroll 계산 시에도 동일하게 반영
-
-		if (window.innerWidth >= 1200) {
-			$('.select_day').css({'height': scheduleHeight, 'max-height': ''});
-		} else {
-			//$('.select_day').css({'max-height': scheduleHeight, 'height': ''});
-		}
-
-		const btmHeight = $('.select_day .btm').outerHeight(true) || 0; // margin 포함
-		const dayHeight = $('.select_day .day').outerHeight(true) || 0;
-		const top = $('.select_day .top');
-		const topPadding = parseInt(top.css('padding-top')) + parseInt(top.css('padding-bottom')) || 0;
-
-		// scroll 영역 높이 계산 (nebox 포함하여 제외)
-		const scrollHeight = scheduleHeight - btmHeight - dayHeight - topPadding;
-
-		if (window.innerWidth >= 1200) {
-			$('.select_day .scroll').css({'height': scrollHeight, 'max-height': ''});
-		} else {
-			//$('.select_day .scroll').css({'max-height': scrollHeight, 'height': ''});
-		}
-	}
-
-	// 실행 및 리사이즈 대응
-	$(document).ready(adjustScrollHeight);
-	$(window).on('resize', adjustScrollHeight);
-
-
-	let resizeTimer;
-	adjustScrollHeight();
-});
-
-//팝업
-function layerShow(id) {
-	$("#" + id).fadeIn(300);
-}
-function layerHide(id) {
-	$("#" + id).fadeOut(300);
-}
-</script>
+@once
+	@push('scripts')
+		<script src="{{ asset('js/program/program.js') }}"></script>
+	@endpush
+@endonce
 
 @endsection
+
+
 

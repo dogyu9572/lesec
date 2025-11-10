@@ -7,32 +7,51 @@
         data-program-page="select"
         data-select-mode="individual"
         data-type="{{ $type }}"
-        data-year="{{ $year }}"
         data-base-url="{{ route('program.select.individual', $type) }}">
 		<div class="btit"><strong>교육 선택</strong><p>원하는 교육 프로그램을 선택 후 신청하기 버튼을 눌러주세요.</p></div>
 
+		@php
+			$statusOptions = [
+				'' => '신청 상태 전체',
+				'apply' => '신청하기',
+				'waitlist' => '대기자 신청',
+				'scheduled' => '접수예정',
+			];
+		@endphp
+
 		<div class="board_top">
 			<div class="total">TOTAL <strong>{{ $programs->count() }}</strong></div>
-			<div class="selects">
-				<select name="filter_month" id="filter_month">
+			<form id="individual-filter-form" method="GET" action="{{ route('program.select.individual', $type) }}" class="selects">
+				<select name="month" id="filter_month">
 					<option value="">월 전체</option>
 					@for($m = 1; $m <= 12; $m++)
-						<option value="{{ $m }}" @selected($m == $month)>{{ $m }}월</option>
+						<option value="{{ $m }}" @selected($filterMonth === $m)>{{ $m }}월</option>
 					@endfor
 				</select>
-			</div>
+				<select name="program" id="filter_program">
+					<option value="">프로그램 전체</option>
+					@foreach($availableProgramNames as $programName)
+						<option value="{{ $programName }}" @selected($filterProgram === $programName)>{{ $programName }}</option>
+					@endforeach
+				</select>
+				<select name="status" id="filter_status">
+					@foreach($statusOptions as $value => $label)
+						<option value="{{ $value }}" @selected($filterStatus === $value)>{{ $label }}</option>
+					@endforeach
+				</select>
+			</form>
 		</div>
 
 		<div class="board_list tablet_break_tbl">
 			<table>
 				<colgroup>
+					<col class="w5_6">
 					<col class="w6_9">
-					<col class="w8_3">
-					<col class="w8_3">
+					<col class="w19_4">
 					<col>
 					<col class="w19_4">
-					<col class="w11_1">
-					<col class="w8_3">
+					<col class="w7">
+					<col class="w7">
 				</colgroup>
 				<thead>
 					<tr>
@@ -52,7 +71,15 @@
 						<td class="edu02">
 							<div class="statebox_tb {{ $program->reception_type }}">{{ $program->reception_type_name }}</div>
 						</td>
-						<td class="edu03">{{ $program->education_start_date->format('Y.m.d') }}</td>
+                        <td class="edu03">
+                            @if($program->education_start_date && $program->education_end_date && !$program->education_start_date->equalTo($program->education_end_date))
+                                {{ $program->education_start_date->format('Y.m.d') }} ~ {{ $program->education_end_date->format('Y.m.d') }}
+                            @elseif($program->education_start_date)
+                                {{ $program->education_start_date->format('Y.m.d') }}
+                            @else
+                                -
+                            @endif
+                        </td>
 						<td class="edu04 tal">{{ $program->program_name }}</td>
 						<td class="edu05">
 							@if($program->application_start_date && $program->application_end_date)
@@ -69,15 +96,16 @@
 							@endif
 						</td>
 						<td class="edu07">
-							@php
-								$currentReceptionType = $program->current_reception_type;
-							@endphp
-							@if($currentReceptionType === 'closed')
-								<span class="btn btn_kwk disabled">마감</span>
+							@if($program->individual_action_type === 'waitlist')
+								<a href="{{ $program->waitlist_url }}" target="_blank" class="btn btn_kwk">대기자 신청</a>
+							@elseif($program->individual_action_type === 'scheduled')
+								<span class="btn btn_kwk disabled">접수예정</span>
 							@elseif($program->reception_type === 'naver_form' && $program->naver_form_url)
 								<a href="{{ $program->naver_form_url }}" target="_blank" class="btn btn_wkk">신청하기</a>
-							@else
+							@elseif($program->individual_action_type === 'apply')
 								<a href="{{ route('program.complete.individual', $type) }}" class="btn btn_wkk">신청하기</a>
+							@else
+								<span class="btn btn_kwk disabled">마감</span>
 							@endif
 						</td>
 					</tr>

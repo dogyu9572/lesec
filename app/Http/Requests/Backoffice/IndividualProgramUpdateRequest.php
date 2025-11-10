@@ -23,30 +23,21 @@ class IndividualProgramUpdateRequest extends FormRequest
             'education_type' => 'required|in:middle_semester,middle_vacation,high_semester,high_vacation,special',
             'program_name' => 'required|string|max:255',
             'education_start_date' => 'required|date',
-            'education_end_date' => 'required|date|after_or_equal:education_start_date',
+            'education_end_date' => 'required_without:is_single_day|nullable|date|after_or_equal:education_start_date',
             'payment_methods' => 'required|array|min:1',
             'payment_methods.*' => 'in:bank_transfer,on_site_card,online_card',
             'reception_type' => 'required|in:first_come,lottery,naver_form',
             'application_start_date' => 'required|date',
             'application_end_date' => 'required|date|after_or_equal:application_start_date',
-            'capacity' => 'nullable|integer|min:1|required_without:is_unlimited_capacity',
-            'is_unlimited_capacity' => 'nullable|boolean',
+            'capacity' => 'nullable|integer|min:1|required_without:is_unlimited_capacity|required_if:reception_type,lottery',
+            'is_unlimited_capacity' => 'nullable|boolean|prohibited_if:reception_type,lottery',
             'education_fee' => 'nullable|integer|min:0|required_without:is_free',
             'is_free' => 'nullable|boolean',
-            'naver_form_url' => 'nullable|url|max:500',
+            'naver_form_url' => 'nullable|url|max:500|required_if:reception_type,naver_form',
             'waitlist_url' => 'nullable|url|max:500',
             'author' => 'nullable|string|max:100',
+            'is_single_day' => 'nullable|boolean',
         ];
-
-        // 조건부 유효성 검사
-        if ($this->input('reception_type') === 'naver_form') {
-            $rules['naver_form_url'] = 'required|url|max:500';
-        }
-
-        if ($this->input('reception_type') === 'lottery') {
-            $rules['is_unlimited_capacity'] = 'nullable|boolean|in:0,false';
-            $rules['capacity'] = 'required|integer|min:1';
-        }
 
         return $rules;
     }
@@ -63,7 +54,7 @@ class IndividualProgramUpdateRequest extends FormRequest
             'program_name.max' => '프로그램명은 255자를 초과할 수 없습니다.',
             'education_start_date.required' => '교육 시작일을 선택해주세요.',
             'education_start_date.date' => '올바른 날짜 형식을 입력해주세요.',
-            'education_end_date.required' => '교육 종료일을 선택해주세요.',
+            'education_end_date.required_without' => '참가일정 종료일을 입력하거나 하루만 진행을 선택해주세요.',
             'education_end_date.date' => '올바른 날짜 형식을 입력해주세요.',
             'education_end_date.after_or_equal' => '교육 종료일은 시작일과 같거나 이후여야 합니다.',
             'payment_methods.required' => '결제수단을 최소 1개 이상 선택해주세요.',
@@ -80,16 +71,18 @@ class IndividualProgramUpdateRequest extends FormRequest
             'capacity.min' => '정원은 1명 이상이어야 합니다.',
             'capacity.required' => '정원을 입력해주세요.',
             'capacity.required_without' => '제한없음이 선택되지 않은 경우 정원을 입력해주세요.',
+            'capacity.required_if' => '추첨 신청유형에서는 정원을 입력해주세요.',
             'education_fee.integer' => '교육비는 정수로 입력해주세요.',
             'education_fee.min' => '교육비는 0원 이상이어야 합니다.',
             'education_fee.required_without' => '무료가 선택되지 않은 경우 교육비를 입력해주세요.',
             'naver_form_url.required' => '네이버폼 링크를 입력해주세요.',
             'naver_form_url.url' => '올바른 URL 형식을 입력해주세요.',
             'naver_form_url.max' => '네이버폼 링크는 500자를 초과할 수 없습니다.',
+            'naver_form_url.required_if' => '신청유형이 네이버폼일 경우 링크를 입력해주세요.',
             'waitlist_url.url' => '올바른 URL 형식을 입력해주세요.',
             'waitlist_url.max' => '대기자 신청 링크는 500자를 초과할 수 없습니다.',
             'author.max' => '작성자는 100자를 초과할 수 없습니다.',
-            'is_unlimited_capacity.in' => '추첨 신청유형에서는 제한없음을 사용할 수 없습니다.',
+            'is_unlimited_capacity.prohibited_if' => '추첨 신청유형에서는 제한없음을 사용할 수 없습니다.',
         ];
     }
 }

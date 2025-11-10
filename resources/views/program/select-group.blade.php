@@ -13,7 +13,7 @@
             data-year="{{ $year }}"
             data-month="{{ $month }}"
             data-base-url="{{ route('program.select.group', $type) }}"
-            data-complete-url="{{ route('program.complete.group', $type) }}'>
+            data-complete-url="{{ route('program.complete.group', $type) }}">
 
 			<div class="schedule_table">
 				<div class="schedule_top">

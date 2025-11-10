@@ -106,12 +106,19 @@ class IndividualProgramService
      */
     public function createProgram(array $data): ProgramReservation
     {
+        $isSingleDay = !empty($data['is_single_day']);
+        unset($data['is_single_day']);
+
         // application_type은 항상 'individual'
         $data['application_type'] = 'individual';
         
         // 결제수단 처리
         if (isset($data['payment_methods']) && is_array($data['payment_methods'])) {
             $data['payment_methods'] = array_values($data['payment_methods']);
+        }
+
+        if ($isSingleDay && !empty($data['education_start_date'])) {
+            $data['education_end_date'] = $data['education_start_date'];
         }
 
         // 제한없음 체크 시 capacity는 null (추첨일 경우 제한없음 사용 불가)
@@ -140,6 +147,13 @@ class IndividualProgramService
      */
     public function updateProgram(ProgramReservation $programReservation, array $data): bool
     {
+        $isSingleDay = !empty($data['is_single_day']);
+        unset($data['is_single_day']);
+
+        if ($isSingleDay && !empty($data['education_start_date'])) {
+            $data['education_end_date'] = $data['education_start_date'];
+        }
+
         // application_type은 변경 불가
         unset($data['application_type']);
 

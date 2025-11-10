@@ -238,18 +238,11 @@
             return;
         }
 
-        const baseUrl = getData($container, 'baseUrl', '');
-        const year = getData($container, 'year', '');
-        const $filter = $container.find('#filter_month');
+        const $form = $container.find('#individual-filter-form');
 
-        if ($filter.length) {
-            $filter.on('change', function () {
-                const selectedMonth = $(this).val();
-                if (selectedMonth) {
-                    navigateTo(`${baseUrl}?year=${year}&month=${selectedMonth}`);
-                } else {
-                    navigateTo(`${baseUrl}?year=${year}`);
-                }
+        if ($form.length) {
+            $form.find('select').on('change', function () {
+                $form.trigger('submit');
             });
         }
     }

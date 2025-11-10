@@ -99,25 +99,42 @@ class ProgramController extends Controller
      */
     public function selectIndividual($type, Request $request)
     {
-        $year = $request->input('year', now()->year);
-        $month = $request->input('month', now()->month);
-        
-        // 프로그램 조회
-        $programs = $this->programReservationService->getProgramsByMonth($type, 'individual', $year, $month);
-        
-        // 날짜별 그룹화
-        $programsByDate = $this->programReservationService->groupProgramsByDate($programs);
-        
-        // 캘린더 생성
-        $calendar = $this->programReservationService->generateCalendar($year, $month, $programsByDate);
-        
-        // 페이지 정보
+        $filterMonthInput = $request->input('month');
+        $filterMonth = is_numeric($filterMonthInput) ? (int) $filterMonthInput : null;
+        $filterProgram = $request->input('program');
+        $filterStatusInput = $request->input('status', '');
+        $allowedStatuses = ['', 'apply', 'waitlist', 'scheduled'];
+        $filterStatus = in_array($filterStatusInput, $allowedStatuses, true) ? $filterStatusInput : '';
+
+        $allPrograms = $this->programReservationService->getIndividualPrograms($type);
+        $programs = $this->programReservationService->filterIndividualPrograms(
+            $allPrograms,
+            $filterMonth,
+            ($filterProgram !== null && $filterProgram !== '') ? $filterProgram : null,
+            $filterStatus !== '' ? $filterStatus : null
+        );
+
+        $availableMonths = $this->programReservationService->getIndividualProgramMonths($allPrograms);
+        $availableProgramNames = $this->programReservationService->getIndividualProgramNames($allPrograms);
+
         $gNum = "01";
         $sNum = $this->programService->getSubMenuNumber($type);
         $gName = "프로그램";
         $sName = $this->programService->getTypeName($type);
-        
-        return view('program.select-individual', compact('gNum', 'sNum', 'gName', 'sName', 'programs', 'programsByDate', 'calendar', 'year', 'month', 'type'));
+
+        return view('program.select-individual', [
+            'gNum' => $gNum,
+            'sNum' => $sNum,
+            'gName' => $gName,
+            'sName' => $sName,
+            'type' => $type,
+            'programs' => $programs,
+            'availableMonths' => $availableMonths,
+            'availableProgramNames' => $availableProgramNames,
+            'filterMonth' => $filterMonth,
+            'filterProgram' => $filterProgram,
+            'filterStatus' => $filterStatus,
+        ]);
     }
 
     /**

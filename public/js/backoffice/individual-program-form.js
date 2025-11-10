@@ -11,6 +11,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const naverFormUrlInput = document.getElementById('naver_form_url');
     const waitlistUrlGroup = document.getElementById('waitlist_url_group');
     const waitlistUrlInput = document.getElementById('waitlist_url');
+    const singleDayCheckbox = document.getElementById('is_single_day');
+    const educationStartDateInput = document.getElementById('education_start_date');
+    const educationEndDateInput = document.getElementById('education_end_date');
     
     function toggleConditionalFields() {
         const receptionType = receptionTypeSelect?.value;
@@ -72,9 +75,42 @@ document.addEventListener('DOMContentLoaded', function() {
     // 초기 로드 시 조건부 필드 상태 설정
     toggleConditionalFields();
     
+    function updateSingleDayState() {
+        if (!singleDayCheckbox || !educationEndDateInput) {
+            return;
+        }
+
+        if (singleDayCheckbox.checked) {
+            if (educationStartDateInput && educationStartDateInput.value) {
+                educationEndDateInput.value = educationStartDateInput.value;
+            } else {
+                educationEndDateInput.value = '';
+            }
+            educationEndDateInput.readOnly = true;
+            educationEndDateInput.classList.add('board-input-readonly');
+        } else {
+            educationEndDateInput.readOnly = false;
+            educationEndDateInput.classList.remove('board-input-readonly');
+        }
+    }
+
+    updateSingleDayState();
+    
     // 신청유형 변경 시 조건부 필드 업데이트
     if (receptionTypeSelect) {
         receptionTypeSelect.addEventListener('change', toggleConditionalFields);
+    }
+
+    if (singleDayCheckbox) {
+        singleDayCheckbox.addEventListener('change', updateSingleDayState);
+    }
+
+    if (educationStartDateInput) {
+        educationStartDateInput.addEventListener('change', function() {
+            if (singleDayCheckbox?.checked && educationEndDateInput) {
+                educationEndDateInput.value = this.value;
+            }
+        });
     }
 
     // 제한없음 체크박스 처리

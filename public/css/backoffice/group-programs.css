@@ -25,3 +25,9 @@
     color: #495057;
     font-size: 14px;
 }
+
+.board-input-readonly {
+    background-color: #f1f3f5;
+    color: #6c757d;
+    cursor: not-allowed;
+}

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\ProgramReservation;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection as SupportCollection;
 
 class ProgramReservationService
 {
@@ -24,6 +25,71 @@ class ProgramReservationService
             ->whereDate('education_end_date', '>=', $startOfMonth)
             ->orderBy('education_start_date', 'asc')
             ->get();
+    }
+
+    /**
+     * 개인 신청 프로그램 전체 조회
+     */
+    public function getIndividualPrograms(string $educationType): Collection
+    {
+        return ProgramReservation::query()
+            ->byEducationType($educationType)
+            ->byApplicationType('individual')
+            ->active()
+            ->orderBy('education_start_date', 'desc')
+            ->get();
+    }
+
+    /**
+     * 개인 신청 프로그램 필터링
+     */
+    public function filterIndividualPrograms(
+        SupportCollection $programs,
+        ?int $month,
+        ?string $programName,
+        ?string $status
+    ): SupportCollection {
+        return $programs->filter(function (ProgramReservation $program) use ($month, $programName, $status) {
+            if ($month !== null && (int) $program->education_start_date->month !== $month) {
+                return false;
+            }
+
+            if ($programName !== null && $programName !== '' && $program->program_name !== $programName) {
+                return false;
+            }
+
+            if ($status !== null && $status !== '') {
+                if ($program->individual_action_type !== $status) {
+                    return false;
+                }
+            }
+
+            return true;
+        })->values();
+    }
+
+    /**
+     * 개인 신청 프로그램 월 옵션 반환
+     */
+    public function getIndividualProgramMonths(SupportCollection $programs): SupportCollection
+    {
+        return $programs
+            ->map(fn (ProgramReservation $program) => (int) $program->education_start_date->month)
+            ->unique()
+            ->sort()
+            ->values();
+    }
+
+    /**
+     * 개인 신청 프로그램명 옵션 반환
+     */
+    public function getIndividualProgramNames(SupportCollection $programs): SupportCollection
+    {
+        return $programs
+            ->map(fn (ProgramReservation $program) => $program->program_name)
+            ->unique()
+            ->sort()
+            ->values();
     }
 
     /**

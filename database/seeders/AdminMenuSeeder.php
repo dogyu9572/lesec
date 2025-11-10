@@ -246,7 +246,7 @@ class AdminMenuSeeder extends Seeder
                 'id' => 19,
                 'parent_id' => 16,
                 'name' => '개인 프로그램 목록',
-                'url' => '/backoffice/programs/individual',
+                'url' => '/backoffice/individual-programs',
                 'icon' => null,
                 'order' => 3,
                 'is_active' => 1,

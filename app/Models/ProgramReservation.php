@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class ProgramReservation extends Model
@@ -175,6 +176,25 @@ class ProgramReservation extends Model
         ];
 
         return $types[$type] ?? '신청';
+    }
+
+    public function getIndividualActionTypeAttribute(): string
+    {
+        $now = Carbon::now();
+
+        if ($this->application_start_date && $this->application_start_date->isAfter($now)) {
+            return 'scheduled';
+        }
+
+        if ($this->current_reception_type === 'closed' && !empty($this->waitlist_url)) {
+            return 'waitlist';
+        }
+
+        if ($this->current_reception_type === 'closed') {
+            return 'closed';
+        }
+
+        return 'apply';
     }
 
     /**

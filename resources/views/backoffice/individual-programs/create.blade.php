@@ -90,6 +90,19 @@
                 </div>
 
                 <!-- 교육일정 -->
+                <div class="board-form-group">
+                    <div class="board-checkbox-item">
+                        <input type="checkbox"
+                               id="is_single_day"
+                               name="is_single_day"
+                               value="1"
+                               class="board-checkbox-input"
+                               @checked(old('is_single_day'))>
+                        <label for="is_single_day">하루만 진행</label>
+                    </div>
+                    <small class="board-form-text">체크 시 종료일은 시작일과 동일하게 설정됩니다.</small>
+                </div>
+
                 <div class="board-form-row">
                     <div class="board-form-col board-form-col-6">
                         <div class="board-form-group">

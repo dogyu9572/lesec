@@ -23,8 +23,9 @@ return new class extends Migration
             $table->date('application_start_date')->nullable()->comment('신청 시작일');
             $table->date('application_end_date')->nullable()->comment('신청 종료일');
             $table->integer('capacity')->nullable()->comment('신청정원');
+            $table->integer('applied_count')->default(0)->comment('신청 인원 수');
             $table->boolean('is_unlimited_capacity')->default(false)->comment('제한없음 여부');
-            $table->decimal('education_fee', 10, 2)->nullable()->comment('교육비');
+            $table->unsignedInteger('education_fee')->nullable()->comment('교육비');
             $table->boolean('is_free')->default(false)->comment('무료 여부');
             $table->string('naver_form_url')->nullable()->comment('네이버폼 링크');
             $table->string('waitlist_url')->nullable()->comment('대기자 신청 링크');

@@ -88,7 +88,6 @@ class ProgramReservationService
         return $programs
             ->map(fn (ProgramReservation $program) => $program->program_name)
             ->unique()
-            ->sort()
             ->values();
     }
 

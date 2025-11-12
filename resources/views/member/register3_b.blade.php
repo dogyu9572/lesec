@@ -12,143 +12,240 @@
 				<li class="i4"><i></i><p>회원가입 완료</p></li>
 			</ol>
 		
-			<div class="stit num mb0 nbd_b"><span>1</span>기본 정보 <p class="abso">* 는 필수 입력 사항입니다.</p></div>
-			<div class="inputs">
-				<dl>
-					<dt>아이디<span>*</span></dt>
-					<dd>
-						<div class="flex inbtn">
-							<input type="text" placeholder="아이디를 입력해주세요.">
-							<button type="button" class="btn btn_wkk btn_error">중복 확인</button>
-						</div>
-						<p class="error_alert">* 입력하신 아이디로 이미 계정이 존재합니다.</p>
+			@if ($errors->has('process'))
+			<p class="error_alert">{{ $errors->first('process') }}</p>
+			@endif
+
+			<form method="POST"
+				action="{{ route('member.register3_b.submit') }}"
+				class="js-member-register"
+				data-duplicate-url="{{ route('member.register.check.duplicate') }}"
+				data-school-search-url="{{ route('member.schools.search') }}"
+				data-school-modal="#pop_school"
+				@if ($errors->any())
+					data-errors='@json($errors->messages())'
+				@endif>
+				@csrf
+
+				<div class="stit num mb0 nbd_b"><span>1</span>기본 정보 <p class="abso">* 는 필수 입력 사항입니다.</p></div>
+				<div class="inputs">
+					<dl>
+						<dt>아이디<span>*</span></dt>
+						<dd>
+							<div class="flex inbtn">
+								<input type="text" name="login_id" value="{{ old('login_id') }}" placeholder="아이디를 입력해주세요.">
+								<button type="button"
+									class="btn btn_wkk btn_error js-duplicate-check"
+									data-field="login_id"
+									data-input="[name='login_id']">중복 확인</button>
+							</div>
+							@error('login_id')
+							<p class="error_alert">{{ $message }}</p>
+							@enderror
+						</dd>
+					</dl>
+					<dl>
+						<dt>비밀번호<span>*</span></dt>
+						<dd>
+							<input type="password" name="password" class="text w100p" placeholder="비밀번호를 입력해주세요.">
+							@error('password')
+							<p class="error_alert">{{ $message }}</p>
+							@enderror
+						</dd>
+					</dl>
+					<dl>
+						<dt>비밀번호 확인<span>*</span></dt>
+						<dd>
+							<input type="password" name="password_confirmation" class="text w100p" placeholder="비밀번호를 다시 입력해주세요.">
+						</dd>
+					</dl>
+					<dl>
+						<dt>이름<span>*</span></dt>
+						<dd>
+							<input type="text" name="name" class="text w100p" value="{{ old('name') }}" placeholder="이름을 입력해주세요.">
+							@error('name')
+							<p class="error_alert">{{ $message }}</p>
+							@enderror
+						</dd>
+					</dl>
+					<dl>
+						<dt>생년월일<span>*</span></dt>
+						<dd>
+							<input type="text" name="birth_date" class="text w100p" value="{{ old('birth_date') }}" placeholder="20010101">
+							@error('birth_date')
+							<p class="error_alert">{{ $message }}</p>
+							@enderror
+						</dd>
+					</dl>
+					<dl>
+						<dt>성별<span>*</span></dt>
+						<dd>
+							<div class="flex radios">
+								<label class="radio"><input type="radio" name="gender" value="male" @checked(old('gender', 'male') === 'male')><i></i>남자</label>
+								<label class="radio"><input type="radio" name="gender" value="female" @checked(old('gender') === 'female')><i></i>여자</label>
+							</div>
+							@error('gender')
+							<p class="error_alert">{{ $message }}</p>
+							@enderror
+						</dd>
+					</dl>
+					<dl>
+						<dt>학생 연락처<span>*</span></dt>
+						<dd>
+							<div class="flex inbtn">
+								<input type="text" name="student_contact" value="{{ old('student_contact') }}" placeholder="휴대폰번호를 입력해주세요." data-phone-input inputmode="tel" autocomplete="tel">
+								<button type="button"
+									class="btn btn_wkk btn_error js-duplicate-check"
+									data-field="contact"
+									data-input="[name='student_contact']">중복 확인</button>
+							</div>
+							@error('contact')
+							<p class="error_alert">{{ $message }}</p>
+							@enderror
+						</dd>
+					</dl>
+					<dl>
+						<dt>보호자 연락처<span>*</span></dt>
+						<dd>
+							<input type="text" name="parent_contact" class="w100p" value="{{ old('parent_contact') }}" placeholder="휴대폰번호를 입력해주세요." data-phone-input inputmode="tel" autocomplete="tel">
+							@error('parent_contact')
+							<p class="error_alert">{{ $message }}</p>
+							@enderror
+						</dd>
+					</dl>
+					<dl>
+						<dt>이메일<span>*</span></dt>
+						<dd>
+							<div class="flex email">
+								<input type="text" name="email_id" value="{{ old('email_id') }}" placeholder="이메일을 입력해주세요.">
+								<span>@</span>
+								<select name="email_domain" class="email-domain-select">
+									<option value="">이메일 주소 선택</option>
+									<option value="naver.com" @selected(old('email_domain') === 'naver.com')>naver.com</option>
+									<option value="gmail.com" @selected(old('email_domain') === 'gmail.com')>gmail.com</option>
+									<option value="daum.net" @selected(old('email_domain') === 'daum.net')>daum.net</option>
+									<option value="nate.com" @selected(old('email_domain') === 'nate.com')>nate.com</option>
+									<option value="custom" @selected(old('email_domain') === 'custom')>직접 입력</option>
+								</select>
+							</div>
+						<input type="text" name="email_domain_custom" value="{{ old('email_domain_custom') }}" class="text w100p mt8 email-domain-custom" placeholder="직접 입력 시 도메인을 입력해 주세요." @if(old('email_domain') !== 'custom') style="display:none;" @endif>
+						@error('email')
+						<p class="error_alert">{{ $message }}</p>
+						@enderror
 					</dd>
-				</dl>
-				<dl>
-					<dt>비밀번호<span>*</span></dt>
-					<dd><input type="password" class="text w100p" placeholder="비밀번호를 입력해주세요."></dd>
-				</dl>
-				<dl>
-					<dt>비밀번호 확인<span>*</span></dt>
-					<dd><input type="password" class="text w100p" placeholder="비밀번호를 다시 입력해주세요."></dd>
-				</dl>
-				<dl>
-					<dt>이름<span>*</span></dt>
-					<dd><input type="text" class="text w100p" placeholder="이름을 입력해주세요."></dd>
-				</dl>
-				<dl>
-					<dt>생년월일<span>*</span></dt>
-					<dd><input type="text" class="text w100p" placeholder="20010101"></dd>
-				</dl>
-				<dl>
-					<dt>성별<span>*</span></dt>
-					<dd>
-						<div class="flex radios">
-							<label class="radio"><input type="radio" name="gnd"><i></i>남자</label>
-							<label class="radio"><input type="radio" name="gnd"><i></i>여자</label>
+					</dl>
+				</div>
+			
+				<div class="stit num mb0 nbd_b"><span>2</span>소속 정보 <p class="abso">* 는 필수 입력 사항입니다.</p></div>
+				<div class="inputs">
+					<dl>
+						<dt>시/도<span>*</span></dt>
+						<dd>
+							<div class="flex city">
+								<select name="city">
+									<option value="">선택</option>
+									@if (old('city'))
+									<option value="{{ old('city') }}" selected>{{ old('city') }}</option>
+									@endif
+								</select>
+								<select name="district">
+									<option value="">선택</option>
+									@if (old('district'))
+									<option value="{{ old('district') }}" selected>{{ old('district') }}</option>
+									@endif
+								</select>
+							</div>
+							@php
+								$regionError = $errors->first('city') ?: $errors->first('district');
+							@endphp
+							@if ($regionError)
+							<p class="error_alert">{{ $regionError }}</p>
+							@endif
+						</dd>
+					</dl>
+					<dl>
+						<dt>학교명<span>*</span></dt>
+						<dd>
+							<div class="flex inbtn">
+								<input type="text" name="school_name" class="input_school" value="{{ old('school_name') }}" placeholder="학교명을 검색해주세요.">
+								<button type="button" class="btn btn_wkk" onclick="layerShow('pop_school')">학교 검색</button>
+							</div>
+							<input type="hidden" name="school_id" class="input_school_id" value="{{ old('school_id') }}">
+							@error('school_name')
+							<p class="error_alert">{{ $message }}</p>
+							@enderror
+							@error('school_id')
+							<p class="error_alert">{{ $message }}</p>
+							@enderror
+						</dd>
+					</dl>
+					<dl>
+						<dt>학년/반<span>*</span></dt>
+						<dd>
+							<div class="flex city">
+								<select name="grade">
+									<option value="">학년 선택</option>
+									@for ($i = 1; $i <= 12; $i++)
+									<option value="{{ $i }}" @selected(old('grade') == $i)>{{ $i }}학년</option>
+									@endfor
+								</select>
+								<select name="class_number">
+									<option value="">반 선택</option>
+									@for ($i = 1; $i <= 30; $i++)
+									<option value="{{ $i }}" @selected(old('class_number') == $i)>{{ $i }}반</option>
+									@endfor
+								</select>
+							</div>
+							@php
+								$classError = $errors->first('grade') ?: $errors->first('class_number');
+							@endphp
+							@if ($classError)
+							<p class="error_alert">{{ $classError }}</p>
+							@endif
+						</dd>
+					</dl>
+				</div>
+			
+				<div class="stit num mb0 nbd_b"><span>3</span>약관 동의</div>
+				<div class="term_area">
+					<div class="textarea">
+						<div class="scroll">
+							<strong>개인정보의 수집이용 목적</strong>
+							체험학습 신청, 회원관리, 수료증 발급
+							<strong>수집하려는 개인정보의 항목</strong>
+							아이디, 비밀번호, 이름, 사용자구분, 소속(지역, 학교명, 학년, 반, 생년월일, 성별), 전화/핸드폰, 이메일
+							<strong>개인정보의 보유 및 이용기간</strong>
+							1년 (1년 후 파기)
+							<strong>거부권 및 거부시의 불이익</strong>
+							동의를 거부할 수 있으며, 동의 거부시 체험학습 신청이 제한될 수 있습니다. 
 						</div>
-					</dd>
-				</dl>
-				<dl>
-					<dt>학생 연락처<span>*</span></dt>
-					<dd>
-						<div class="flex inbtn">
-							<input type="text" placeholder="휴대폰번호를 입력해주세요.">
-							<button type="button" class="btn btn_wkk btn_error">중복 확인</button>
-						</div>
-						<p class="error_alert">* 입력하신 연락처로 이미 계정이 존재합니다.</p>
-					</dd>
-				</dl>
-				<dl>
-					<dt>보호자 연락처<span>*</span></dt>
-					<dd><input type="text" class="w100p" placeholder="휴대폰번호를 입력해주세요."></dd>
-				</dl>
-				<dl>
-					<dt>이메일<span>*</span></dt>
-					<dd>
-						<div class="flex email">
-							<input type="text" placeholder="이메일을 입력해주세요.">
-							<span>@</span>
-							<select name="" id="">
-								<option value="">이메일 주소 선택</option>
-							</select>
-						</div>
-					</dd>
-				</dl>
-			</div>
-		
-			<div class="stit num mb0 nbd_b"><span>2</span>소속 정보 <p class="abso">* 는 필수 입력 사항입니다.</p></div>
-			<div class="inputs">
-				<dl>
-					<dt>시/도<span>*</span></dt>
-					<dd>
-						<div class="flex city">
-							<select name="" id="" readonly>
-								<option value="">선택</option>
-							</select>
-							<select name="" id="" readonly>
-								<option value="">선택</option>
-							</select>
-						</div>
-					</dd>
-				</dl>
-				<dl>
-					<dt>학교명<span>*</span></dt>
-					<dd>
-						<div class="flex inbtn">
-							<input type="text" class="input_school" placeholder="학교명을 검색해주세요.">
-							<button type="button" class="btn btn_wkk" onclick="layerShow('pop_school')">학교 검색</button>
-						</div>
-					</dd>
-				</dl>
-				<dl>
-					<dt>학년/반<span>*</span></dt>
-					<dd>
-						<div class="flex city">
-							<select name="" id="">
-								<option value="">학년 선택</option>
-							</select>
-							<select name="" id="">
-								<option value="">반 선택</option>
-							</select>
-						</div>
-					</dd>
-				</dl>
-			</div>
-		
-			<div class="stit num mb0 nbd_b"><span>3</span>약관 동의</div>
-			<div class="term_area">
-				<div class="textarea">
-					<div class="scroll">
-						<strong>개인정보의 수집이용 목적</strong>
-						체험학습 신청, 회원관리, 수료증 발급
-						<strong>수집하려는 개인정보의 항목</strong>
-						아이디, 비밀번호, 이름, 사용자구분, 소속(지역, 학교명, 학년, 반, 생년월일, 성별), 전화/핸드폰, 이메일
-						<strong>개인정보의 보유 및 이용기간</strong>
-						1년 (1년 후 파기)
-						<strong>거부권 및 거부시의 불이익</strong>
-						동의를 거부할 수 있으며, 동의 거부시 체험학습 신청이 제한될 수 있습니다. 
+					</div>
+					<div class="check_area">
+						<label class="check"><input type="checkbox" name="privacy_agree" value="1" @checked(old('privacy_agree'))><i></i><strong>(필수)</strong>개인정보 처리방침에 동의합니다.</label>
+						@error('privacy_agree')
+						<p class="error_alert">{{ $message }}</p>
+						@enderror
 					</div>
 				</div>
-				<div class="check_area">
-					<label class="check"><input type="checkbox"><i></i><strong>(필수)</strong>개인정보 처리방침에 동의합니다.</label>
+			
+				<div class="stit num mb0 nbd_b"><span>4</span>수신 동의</div>
+				<div class="term_area">
+					<div class="check_area">
+						<label class="check"><input type="checkbox" name="notification_agree" value="1" @checked(old('notification_agree'))><i></i><strong>(필수)</strong>이메일 / SMS / 카카오 알림톡</label>
+						@error('notification_agree')
+						<p class="error_alert">{{ $message }}</p>
+						@enderror
+					</div>
 				</div>
-			</div>
-		
-			<div class="stit num mb0 nbd_b"><span>4</span>수신 동의</div>
-			<div class="term_area">
-				<div class="check_area">
-					<label class="check"><input type="checkbox"><i></i><strong>(필수)</strong>이메일 / SMS / 카카오 알림톡</label>
-				</div>
-			</div>
 
-			<button type="submit" class="btn_submit btn_wbb" onclick="location.href='/member/register4'">가입하기</button>
+				<button type="submit" class="btn_submit btn_wbb">가입하기</button>
+			</form>
 			
 		</div>
 	</div>
 </main>
 
-<div class="popup" id="pop_school">
+<div class="popup" id="pop_school" data-search-url="{{ route('member.schools.search') }}">
 	<div class="dm" onclick="layerHide('pop_school')"></div>
 	<div class="inbox">
 		<button type="button" class="btn_close" onclick="layerHide('pop_school')"></button>
@@ -160,11 +257,11 @@
 						<dt>시/도</dt>
 						<dd>
 							<div class="flex city">
-								<select name="" id="">
-									<option value="">선택</option>
+								<select class="search_city">
+									<option value="">전체</option>
 								</select>
-								<select name="" id="">
-									<option value="">선택</option>
+								<select class="search_district">
+									<option value="">전체</option>
 								</select>
 							</div>
 						</dd>
@@ -172,8 +269,8 @@
 					<dl>
 						<dt>학교급</dt>
 						<dd>
-							<select name="" id="" class="w100p">
-								<option value="">고등학교</option>
+							<select class="search_level w100p">
+								<option value="">전체</option>
 							</select>
 						</dd>
 					</dl>
@@ -181,10 +278,10 @@
 						<dt>학교명</dt>
 						<dd>
 							<div class="flex inbtn">
-								<input type="text" placeholder="학교명을 검색해주세요.">
-								<button type="button" class="btn btn_wkk">학교 검색</button>
+								<input type="text" class="search_keyword" placeholder="학교명을 검색해주세요.">
+								<button type="button" class="btn btn_wkk btn_search_school">학교 검색</button>
 							</div>
-							<input type="text" class="w100p mt" placeholder="학교명이 목록에 없을 경우, 직접 입력하여 등록해주세요.">
+							<p class="search_result_message c_green mt8" style="display:none;"></p>
 						</dd>
 					</dl>
 				</div>
@@ -202,73 +299,21 @@
 								<th>선택</th>
 							</tr>
 						</thead>
-						<tbody>
-							<tr>
-								<td>제주시</td>
-								<td>제주중앙고등학교1</td>
-								<td><label class="check solo"><input type="radio" name="school"><i></i></label></td>
-							</tr>
-							<tr>
-								<td>제주시</td>
-								<td>제주중앙고등학교2</td>
-								<td><label class="check solo"><input type="radio" name="school"><i></i></label></td>
-							</tr>
-							<tr>
-								<td>제주시</td>
-								<td>제주중앙고등학교3</td>
-								<td><label class="check solo"><input type="radio" name="school"><i></i></label></td>
+						<tbody class="school_results">
+							<tr class="empty">
+								<td colspan="3">검색 결과가 없습니다.</td>
 							</tr>
 						</tbody>
 					</table>
 				</div>
 			</div>
-			<button type="submit" class="btn_submit btn_wbb mt4">확인</button>
+			<button type="button" class="btn_submit btn_wbb mt4 btn_select_school">확인</button>
 		</div>
 	</div>
 </div>
 
-<script>
-$(function(){
-	$(".btn_error").click(function(){
-		$(this).parent().next(".error_alert").show();
-	});
-
-//학교선택
-	const $popup = $('#pop_school');
-
-	// 라디오 선택 시 학교명 입력
-	$popup.on('change', 'input[name="school"]', function(){
-		const schoolName = $(this).closest('tr').find('td').eq(1).text().trim();
-		$('.input_school').val(schoolName);
-	});
-
-	// 테이블 행 클릭 시 해당 라디오 선택 및 학교명 입력
-	$popup.on('click', 'tbody tr', function(e){
-		if ($(e.target).is('input, label, a, button')) return; // 내부 클릭 예외 처리
-		const $radio = $(this).find('input[name="school"]');
-		if ($radio.length) $radio.prop('checked', true).trigger('change');
-	});
-
-	// 확인 버튼 클릭 시
-	$popup.on('click', '.btn_submit', function(){
-		const $checked = $popup.find('input[name="school"]:checked');
-		if ($checked.length) {
-			const schoolName = $checked.closest('tr').find('td').eq(1).text().trim();
-			$('.input_school').val(schoolName);
-			// 기존 닫힘 방식 사용
-			layerHide('pop_school');
-		} else {
-			alert('학교를 선택해주세요.');
-		}
-	});
-});
-//팝업
-	function layerShow(id) {
-		$("#" + id).fadeIn(300);
-	}
-	function layerHide(id) {
-		$("#" + id).fadeOut(300);
-	}
-</script>
+@push('scripts')
+<script src="{{ asset('js/member/register.js') }}?v={{ time() }}"></script>
+@endpush
 
 @endsection

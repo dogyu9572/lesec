@@ -180,3 +180,82 @@
     opacity: 0;
 }
 
+/* 학교 검색 모달 전용 스타일 */
+.school-search-modal .modal-form-inline {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+}
+
+.school-search-modal .modal-form-inline.city-selects {
+    align-items: center;
+}
+
+.school-search-modal .modal-form-inline.city-selects .modal-form-control {
+    flex: 1;
+}
+
+.school-search-modal .modal-form-inline.keyword-inline .modal-form-control {
+    flex: 1;
+}
+
+.school-search-modal .modal-form-inline.keyword-inline {
+    align-items: center;
+}
+
+.school-search-modal .modal-form-inline .btn-search {
+    min-width: 90px;
+    height: 40px;
+    padding: 0 16px;
+    justify-content: center;
+}
+
+.school-search-modal .modal-description {
+    margin-top: 6px;
+    font-size: 0.82rem;
+    color: #868e96;
+}
+
+.school-search-table thead th {
+    background-color: #f1f3f5;
+    font-weight: 600;
+    text-align: center;
+}
+
+.school-search-table td {
+    vertical-align: middle;
+}
+
+.school-select-cell {
+    text-align: center;
+    width: 70px;
+}
+
+.school-select-input {
+    width: 16px;
+    height: 16px;
+}
+
+.school-row.selected {
+    background-color: #f1f3f5;
+}
+
+.category-modal-footer {
+    justify-content: center;
+    gap: 10px;
+}
+
+.category-modal-footer .btn-dark:disabled {
+    background-color: #adb5bd;
+    border-color: #adb5bd;
+}
+
+.category-modal-footer .btn-dark {
+    min-width: 140px;
+    border: none;
+}
+
+body.modal-open {
+    overflow: hidden;
+}
+

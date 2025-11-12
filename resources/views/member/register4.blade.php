@@ -15,6 +15,9 @@
 			<div class="register_end">
 				<strong>회원가입 완료</strong>
 				<p>회원가입이 완료되었습니다.</p>
+				@if (!empty($completedLoginId))
+				<p class="tac">아이디 <strong>{{ $completedLoginId }}</strong>로 로그인해 주세요.</p>
+				@endif
 				<a href="/member/login" class="btn_submit btn_wbb">로그인</a>
 			</div>
 		</div>

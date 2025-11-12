@@ -355,7 +355,8 @@
 	.join_wrap .inputs .inbtn input {width:calc(100% - 128px);}
 	.join_wrap .inputs .inbtn .btn {width:120px; height:52px;}
 	.join_wrap .inputs .inbtn + .mt {margin-top:8px;}
-	.join_wrap .inputs .error_alert {color:#f00; line-height:1.75; margin-top:8px; display:none;}
+.join_wrap .inputs .error_alert {color:#f00; line-height:1.75; margin-top:8px; display:none;}
+.login_wrap .inputs .error_alert {color:#f00; line-height:1.75; margin-top:8px; display:none;}
 	.join_wrap .inputs .radios {gap:32px; align-items:center; height:52px;}
 	.join_wrap .inputs .email {gap:5px;}
 	.join_wrap .inputs .email span {width:22px; text-align:center; color:#666;}

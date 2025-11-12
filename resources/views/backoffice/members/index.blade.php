@@ -190,8 +190,8 @@
                                     <td>{{ $member->grade ?? '-' }}</td>
                                     <td>{{ $member->class_number ?? '-' }}</td>
                                     <td>{{ $member->birth_date ? $member->birth_date->format('Ymd') : '-' }}</td>
-                                    <td>{{ $member->contact }}</td>
-                                    <td>{{ $member->parent_contact ?? '-' }}</td>
+                                    <td>{{ $member->formatted_contact ?? '-' }}</td>
+                                    <td>{{ $member->formatted_parent_contact ?? '-' }}</td>
                                     <td>{{ $member->email }}</td>
                                     <td>{{ $member->joined_at ? $member->joined_at->format('Y.m.d') : '-' }}</td>
                                     <td>

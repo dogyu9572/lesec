@@ -12,10 +12,16 @@
 				<li class="i4"><i></i><p>회원가입 완료</p></li>
 			</ol>
 		
+			@if ($errors->has('member_type'))
+			<p class="error_alert">{{ $errors->first('member_type') }}</p>
+			@endif
+			@if ($errors->has('process'))
+			<p class="error_alert">{{ $errors->first('process') }}</p>
+			@endif
 			<div class="stit">회원 구분</div>
 			<div class="mem_half join_type">
-				<a href="/member/register2" class="btn01"><p>교사</p><i></i></a>
-				<a href="/member/register2" class="btn02"><p>학생</p><i></i></a>
+				<a href="{{ route('member.register2', ['member_type' => 'teacher']) }}" class="btn01"><p>교사</p><i></i></a>
+				<a href="{{ route('member.register2', ['member_type' => 'student']) }}" class="btn02"><p>학생</p><i></i></a>
 			</div>
 		</div>
 	</div>

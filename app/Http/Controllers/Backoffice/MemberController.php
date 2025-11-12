@@ -199,8 +199,8 @@ class MemberController extends BaseController
             $member->grade ?? '-',
             $member->class_number ?? '-',
             $member->birth_date ? $member->birth_date->format('Ymd') : '-',
-            $member->contact,
-            $member->parent_contact ?? '-',
+            $member->formatted_contact ?? '-',
+            $member->formatted_parent_contact ?? '-',
             $member->email,
             $member->joined_at ? $member->joined_at->format('Y-m-d H:i') : '-',
         ];

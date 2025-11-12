@@ -7,10 +7,10 @@
 			<div class="ctit mb0">아이디 찾기 완료</div>
 			<p class="tac">개인정보 도용 피해방지를 위해 일부 정보는 *로 표기됩니다.<br/>비밀번호가 기억나지 않으실 경우 변경이 가능합니다.</p>
 			<div class="find_box">
-				<strong>아이디 : ID***</strong>
+				<strong>아이디 : {{ $result['masked_login_id'] ?? '' }}</strong>
 				<dl>
 					<dt>가입일</dt>
-					<dd>YYYY-MM-DD</dd>
+					<dd>{{ $result['joined_at'] ?? '-' }}</dd>
 				</dl>
 			</div>
 			<div class="btns flex">

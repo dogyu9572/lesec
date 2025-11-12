@@ -123,4 +123,50 @@ class Member extends Authenticatable
     {
         return $this->belongsTo(School::class, 'school_id');
     }
+
+    /**
+     * 연락처 포맷팅 (표시용)
+     */
+    public function getFormattedContactAttribute(): ?string
+    {
+        return $this->formatPhoneNumber($this->contact);
+    }
+
+    /**
+     * 보호자 연락처 포맷팅 (표시용)
+     */
+    public function getFormattedParentContactAttribute(): ?string
+    {
+        return $this->formatPhoneNumber($this->parent_contact);
+    }
+
+    /**
+     * 비상 연락처 포맷팅 (표시용)
+     */
+    public function getFormattedEmergencyContactAttribute(): ?string
+    {
+        return $this->formatPhoneNumber($this->emergency_contact);
+    }
+
+    /**
+     * 전화번호 포맷팅 헬퍼
+     */
+    private function formatPhoneNumber(?string $phoneNumber): ?string
+    {
+        if (empty($phoneNumber)) {
+            return null;
+        }
+
+        $digits = preg_replace('/[^0-9]/', '', $phoneNumber);
+
+        if (strlen($digits) === 11) {
+            return preg_replace('/(\d{3})(\d{4})(\d{4})/', '$1-$2-$3', $digits);
+        }
+
+        if (strlen($digits) === 10) {
+            return preg_replace('/(\d{3})(\d{3})(\d{4})/', '$1-$2-$3', $digits);
+        }
+
+        return $digits;
+    }
 }

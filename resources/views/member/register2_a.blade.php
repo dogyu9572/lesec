@@ -4,6 +4,9 @@
     
 	<div class="inner">
 		<div class="mem_wrap join_wrap">
+			@if ($errors->has('process'))
+			<p class="error_alert">{{ $errors->first('process') }}</p>
+			@endif
 			<div class="ctit mb32">회원가입</div>
 			<ol class="join_step">
 				<li class="i1 onf"><i></i><p>회원 구분</p></li>
@@ -17,7 +20,7 @@
 			<div class="phone_certification">
 				<strong>휴대폰 인증</strong>
 				<p>휴대전화 인증을 통해 보호자(법정대리인) 확인 후 <br/>안전하게 회원가입을 진행할 수 있습니다.</p>
-				<button type="button" class="btn btn_wkk" onclick="location.href='/member/register3_a'">휴대폰 인증하기</button>
+				<button type="button" class="btn btn_wkk" onclick="location.href='{{ route('member.register3_a') }}'">휴대폰 인증하기</button>
 			</div>
 		</div>
 	</div>

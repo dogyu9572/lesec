@@ -85,8 +85,8 @@ class MemberService
             'email' => $data['email'],
             'birth_date' => $data['birth_date'] ?? null,
             'gender' => $data['gender'] ?? null,
-            'contact' => $data['contact'] ?? null,
-            'parent_contact' => $data['parent_contact'] ?? null,
+            'contact' => $this->normalizePhoneNumber($data['contact'] ?? null),
+            'parent_contact' => $this->normalizePhoneNumber($data['parent_contact'] ?? null),
             'city' => $data['city'] ?? null,
             'district' => $data['district'] ?? null,
             'school_name' => $data['school_name'] ?? null,
@@ -112,8 +112,8 @@ class MemberService
         $member->email = $data['email'] ?? $member->email;
         $member->birth_date = $data['birth_date'] ?? $member->birth_date;
         $member->gender = $data['gender'] ?? $member->gender;
-        $member->contact = $data['contact'] ?? $member->contact;
-        $member->parent_contact = $data['parent_contact'] ?? $member->parent_contact;
+        $member->contact = isset($data['contact']) ? $this->normalizePhoneNumber($data['contact']) : $member->contact;
+        $member->parent_contact = isset($data['parent_contact']) ? $this->normalizePhoneNumber($data['parent_contact']) : $member->parent_contact;
         $member->city = $data['city'] ?? $member->city;
         $member->district = $data['district'] ?? $member->district;
         $member->school_name = $data['school_name'] ?? $member->school_name;
@@ -145,6 +145,20 @@ class MemberService
     public function bulkDelete(array $memberIds): int
     {
         return Member::whereIn('id', $memberIds)->delete();
+    }
+    
+    /**
+     * 전화번호 정규화 (숫자만)
+     */
+    private function normalizePhoneNumber(?string $phoneNumber): ?string
+    {
+        if (empty($phoneNumber)) {
+            return null;
+        }
+        
+        $digits = preg_replace('/[^0-9]/', '', $phoneNumber);
+        
+        return $digits !== '' ? $digits : null;
     }
     
     /**

@@ -9,6 +9,10 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\SubController;
 use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\Backoffice\PopupController;
+use App\Http\Controllers\Member\MemberAuthController;
+use App\Http\Controllers\Member\MemberRegisterController;
+use App\Http\Controllers\Member\MemberRecoveryController;
+use App\Http\Controllers\Member\SchoolSearchController;
 
 // =============================================================================
 // 기본 라우트 파일
@@ -138,22 +142,33 @@ Route::prefix('location')->name('location.')->group(function () {
 
 //멤버
 Route::prefix('member')->name('member.')->group(function () {
-	//로그인
-	Route::get('/login', [SubController::class, 'login'])->name('login');
-	//회원가입
-	Route::get('/register', [SubController::class, 'register'])->name('register');
-	Route::get('/register2', [SubController::class, 'register2'])->name('register2');
-	Route::get('/register2_a', [SubController::class, 'register2_a'])->name('register2_a');
-	Route::get('/register2_b', [SubController::class, 'register2_b'])->name('register2_b');
-	Route::get('/register3_a', [SubController::class, 'register3_a'])->name('register3_a');
-	Route::get('/register3_b', [SubController::class, 'register3_b'])->name('register3_b');
-	Route::get('/register4', [SubController::class, 'register4'])->name('register4');
-	//아이디비번찾기
-	Route::get('/find_id', [SubController::class, 'find_id'])->name('find_id');
-	Route::get('/find_id_end', [SubController::class, 'find_id_end'])->name('find_id_end');
-	Route::get('/find_pw', [SubController::class, 'find_pw'])->name('find_pw');
-	Route::get('/find_pw_change', [SubController::class, 'find_pw_change'])->name('find_pw_change');
-	Route::get('/find_pw_end', [SubController::class, 'find_pw_end'])->name('find_pw_end');
+	// 로그인
+	Route::get('/login', [MemberAuthController::class, 'showLoginForm'])->name('login');
+	Route::post('/login', [MemberAuthController::class, 'login'])->name('login.submit');
+	Route::post('/logout', [MemberAuthController::class, 'logout'])->name('logout');
+
+	// 회원가입
+	Route::get('/register', [MemberRegisterController::class, 'showTypeSelection'])->name('register');
+	Route::get('/register2', [MemberRegisterController::class, 'showAgeSelection'])->name('register2');
+	Route::get('/register2_a', [MemberRegisterController::class, 'showUnderFourteenVerification'])->name('register2_a');
+	Route::get('/register2_b', [MemberRegisterController::class, 'showOverFourteenVerification'])->name('register2_b');
+	Route::get('/register3_a', [MemberRegisterController::class, 'showUnderFourteenForm'])->name('register3_a');
+	Route::post('/register3_a', [MemberRegisterController::class, 'registerUnderFourteen'])->name('register3_a.submit');
+	Route::get('/register3_b', [MemberRegisterController::class, 'showOverFourteenForm'])->name('register3_b');
+	Route::post('/register3_b', [MemberRegisterController::class, 'registerOverFourteen'])->name('register3_b.submit');
+	Route::get('/register4', [MemberRegisterController::class, 'showComplete'])->name('register4');
+	Route::post('/check-duplicate', [MemberRegisterController::class, 'checkDuplicate'])->name('register.check.duplicate');
+	Route::get('/schools/search', [SchoolSearchController::class, 'search'])->name('schools.search');
+
+	// 아이디 / 비밀번호 찾기
+	Route::get('/find_id', [MemberRecoveryController::class, 'showFindIdForm'])->name('find_id');
+	Route::post('/find_id', [MemberRecoveryController::class, 'findId'])->name('find_id.submit');
+	Route::get('/find_id_end', [MemberRecoveryController::class, 'showFindIdResult'])->name('find_id_end');
+	Route::get('/find_pw', [MemberRecoveryController::class, 'showFindPasswordForm'])->name('find_pw');
+	Route::post('/find_pw', [MemberRecoveryController::class, 'verifyForPassword'])->name('find_pw.submit');
+	Route::get('/find_pw_change', [MemberRecoveryController::class, 'showPasswordChangeForm'])->name('find_pw_change');
+	Route::post('/find_pw_change', [MemberRecoveryController::class, 'updatePassword'])->name('find_pw_change.submit');
+	Route::get('/find_pw_end', [MemberRecoveryController::class, 'showPasswordChangeResult'])->name('find_pw_end');
 });
 
 //약관들

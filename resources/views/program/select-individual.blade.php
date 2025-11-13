@@ -3,7 +3,7 @@
 <main class="pb">
     
 	<div
-        class="inner "
+        class="inner"
         data-program-page="select"
         data-select-mode="individual"
         data-type="{{ $type }}"
@@ -41,6 +41,10 @@
 				</select>
 			</form>
 		</div>
+
+		@if ($errors->has('application'))
+		<p class="error_alert mb16">{{ $errors->first('application') }}</p>
+		@endif
 
 		<div class="board_list tablet_break_tbl">
 			<table>
@@ -92,7 +96,7 @@
 							@if($program->is_unlimited_capacity)
 								제한없음
 							@else
-								{{ $program->applied_count ?? 0 }}/{{ $program->capacity }}
+								{{ $program->applied_count_display }}/{{ $program->capacity }}
 							@endif
 						</td>
 						<td class="edu07">
@@ -103,10 +107,37 @@
 							@elseif($program->reception_type === 'naver_form' && $program->naver_form_url)
 								<a href="{{ $program->naver_form_url }}" target="_blank" class="btn btn_wkk">신청하기</a>
 							@elseif($program->individual_action_type === 'apply')
-								<a href="{{ route('program.complete.individual', $type) }}" class="btn btn_wkk">신청하기</a>
-							@else
-								<span class="btn btn_kwk disabled">마감</span>
-							@endif
+                                @php
+                                    $applicationStatus = $program->application_status ?? 'available';
+                                @endphp
+                                @if($applicationStatus === 'applied')
+                                    <button type="button"
+                                        class="btn btn_kwk disabled"
+                                        data-layer-open="pop_restriction"
+                                        style="pointer-events: auto;">
+                                        신청 완료
+                                    </button>
+                                @elseif($applicationStatus === 'blocked')
+                                    <button type="button"
+                                        class="btn btn_kwk disabled"
+                                        data-layer-open="pop_restriction"
+                                        style="pointer-events: auto;">
+                                        신청 불가
+                                    </button>
+                                @else
+                                    <form method="POST"
+                                        action="{{ route('program.apply.individual.submit', $type) }}"
+                                        class="inline-form"
+                                        style="display:inline">
+                                        @csrf
+                                        <input type="hidden" name="program_reservation_id" value="{{ $program->id }}">
+                                        <input type="hidden" name="participation_date" value="{{ optional($program->education_start_date)->format('Y-m-d') }}">
+                                        <button type="submit" class="btn btn_wkk">신청하기</button>
+                                    </form>
+                                @endif
+                            @else
+                                <span class="btn btn_kwk disabled">마감</span>
+                            @endif
 						</td>
 					</tr>
 					@empty
@@ -127,11 +158,11 @@
 	<div class="inbox">
 		<button type="button" class="btn_close" data-layer-close="pop_restriction"></button>
 		<div class="tit mb">신청 제한 안내</div>
-		<p class="">교사 1인당 최대 3개의 프로그램까지 신청할 수 있습니다.</p>
-		<div class="gbox flex_center colm">
-			<p>추가로 신청이 필요하신 경우,전화 문의 바랍니다.</p>
-			<p class="tel">02-888-0932~3, 02-880-4948</p>
-		</div>
+        <p class="">이미 신청하신 내역이 확인되었습니다.<br>프로그램 변경을 원할 경우 마이페이지에서 취소 후 재신청 바랍니다.</p>
+        <div class="gbox flex_center colm">
+            <p>신청은 학기 1회, 방학 1회만 가능하며<br>(1학기/2학기/여름방학/겨울방학 각 1회씩 가능),<br>추가 참여를 원할 경우 전화 문의 바랍니다.</p>
+            <p class="tel">02-888-0932~3, 02-880-4948</p>
+        </div>
 		<button type="button" class="btn_check" data-layer-close="pop_restriction">확인하기</button>
 	</div>
 </div>

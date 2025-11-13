@@ -74,6 +74,9 @@ Route::prefix('program')->name('program.')->group(function () {
 	Route::get('/{type}/apply-individual', [ProgramController::class, 'applyIndividual'])
 		->where('type', 'middle_semester|middle_vacation|high_semester|high_vacation|special')
 		->name('apply.individual');
+	Route::post('/{type}/apply-individual', [ProgramController::class, 'submitIndividualApplication'])
+		->where('type', 'middle_semester|middle_vacation|high_semester|high_vacation|special')
+		->name('apply.individual.submit');
 	
 	// 교육 선택 페이지
 	Route::get('/{type}/select-group', [ProgramController::class, 'selectGroup'])

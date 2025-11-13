@@ -43,10 +43,17 @@
 				<p class="m"></p>
 				<p class="b"></p>
 			</a>
+			@php
+				$isMemberLoggedIn = Auth::guard('member')->check();
+			@endphp
 			<nav class="gnb">
 				<div class="mo_vw member flex_center">
-					<a href="/member/login" class="login">로그인</a>
-					<a href="/member/register" class="register">회원가입</a>
+					@if ($isMemberLoggedIn)
+					<a href="{{ route('member.logout') }}" class="login" onclick="event.preventDefault();document.getElementById('member-logout-form').submit();">로그아웃</a>
+					@else
+					<a href="{{ route('member.login') }}" class="login">로그인</a>
+					<a href="{{ route('member.register') }}" class="register">회원가입</a>
+					@endif
 				</div>
 				<div class="flex">
 					<div class="menu {{ $gNum == '01' ? 'on' : '' }}">
@@ -98,11 +105,18 @@
 				</div>
 			</nav>
 			<nav class="member flex_center pc_vw">
-				<a href="/member/login" class="login">로그인</a>
-				<a href="/member/register" class="register">회원가입</a>
-				<!-- 로그인 후 -->
-				<!-- <a href="javascript:void(0);" class="login">로그아웃</a> -->
+				@if ($isMemberLoggedIn)
+				<a href="{{ route('member.logout') }}" class="login" onclick="event.preventDefault();document.getElementById('member-logout-form').submit();">로그아웃</a>
+				@else
+				<a href="{{ route('member.login') }}" class="login">로그인</a>
+				<a href="{{ route('member.register') }}" class="register">회원가입</a>
+				@endif
 			</nav>
+			@if ($isMemberLoggedIn)
+			<form id="member-logout-form" action="{{ route('member.logout') }}" method="POST" style="display:none;">
+				@csrf
+			</form>
+			@endif
 		</div>
     </header>
 	@endif

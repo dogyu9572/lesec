@@ -2,10 +2,14 @@
 
 namespace App\Services;
 
+use App\Models\ProgramApplication;
 use App\Models\ProgramReservation;
+use App\Models\Member;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection as SupportCollection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class ProgramReservationService
 {
@@ -36,8 +40,17 @@ class ProgramReservationService
             ->byEducationType($educationType)
             ->byApplicationType('individual')
             ->active()
-            ->orderBy('education_start_date', 'desc')
+            ->orderBy('created_at', 'desc')
             ->get();
+    }
+
+    public function getIndividualProgramById(int $id): ?ProgramReservation
+    {
+        return ProgramReservation::query()
+            ->where('id', $id)
+            ->where('application_type', 'individual')
+            ->active()
+            ->first();
     }
 
     /**
@@ -50,8 +63,11 @@ class ProgramReservationService
         ?string $status
     ): SupportCollection {
         return $programs->filter(function (ProgramReservation $program) use ($month, $programName, $status) {
-            if ($month !== null && (int) $program->education_start_date->month !== $month) {
-                return false;
+            if ($month !== null) {
+                $startDate = $program->education_start_date;
+                if (!$startDate instanceof Carbon || (int) $startDate->month !== $month) {
+                    return false;
+                }
             }
 
             if ($programName !== null && $programName !== '' && $program->program_name !== $programName) {
@@ -74,7 +90,12 @@ class ProgramReservationService
     public function getIndividualProgramMonths(SupportCollection $programs): SupportCollection
     {
         return $programs
-            ->map(fn (ProgramReservation $program) => (int) $program->education_start_date->month)
+            ->filter(fn (ProgramReservation $program) => $program->education_start_date instanceof Carbon)
+            ->map(function (ProgramReservation $program) {
+                $startDate = $program->education_start_date;
+                return $startDate instanceof Carbon ? (int) $startDate->month : null;
+            })
+            ->filter()
             ->unique()
             ->sort()
             ->values();
@@ -89,6 +110,107 @@ class ProgramReservationService
             ->map(fn (ProgramReservation $program) => $program->program_name)
             ->unique()
             ->values();
+    }
+
+    public function createIndividualApplication(ProgramReservation $reservation, array $data, ?Member $member = null, bool $allowAdminOverride = false): ProgramApplication
+    {
+        if ($reservation->application_type !== 'individual') {
+            throw new \InvalidArgumentException('개인 신청 프로그램이 아닙니다.');
+        }
+
+        if (!$reservation->is_active) {
+            throw new \InvalidArgumentException('비활성화된 프로그램입니다.');
+        }
+
+        if (!$allowAdminOverride && $reservation->application_start_date instanceof Carbon && $reservation->application_start_date->greaterThan(now())) {
+            throw new \InvalidArgumentException('접수 예정인 프로그램입니다.');
+        }
+
+        $requestedCount = 1;
+        if (!$reservation->is_unlimited_capacity) {
+            $remaining = $reservation->remaining_capacity;
+            if ($remaining < $requestedCount) {
+                throw new \InvalidArgumentException('잔여 정원이 부족합니다.');
+            }
+        }
+
+        $participationDateValue = $data['participation_date'] ?? null;
+        if (empty($participationDateValue)) {
+            $startDate = $reservation->education_start_date;
+            if ($startDate instanceof Carbon) {
+                $participationDateValue = $startDate->toDateString();
+            } else {
+                throw new \InvalidArgumentException('참가일 정보를 확인할 수 없습니다.');
+            }
+        }
+
+        $participationDate = Carbon::parse($participationDateValue);
+
+        $memberModel = $member;
+        if (!$memberModel && !empty($data['member_id'])) {
+             $memberModel = Member::find($data['member_id']);
+         }
+ 
+         if ($memberModel && $memberModel->member_type === 'student') {
+            $programPrefix = Str::upper(Str::substr($reservation->program_name, 0, 2));
+
+            $existingApplication = ProgramApplication::query()
+                ->where('member_id', $memberModel->id)
+                ->get(['program_name'])
+                ->contains(function (ProgramApplication $application) use ($programPrefix) {
+                    $existingPrefix = Str::upper(Str::substr($application->program_name, 0, 2));
+                    return $existingPrefix === $programPrefix;
+                });
+
+            if ($existingApplication) {
+                throw new \InvalidArgumentException('이미 동일한 프로그램을 신청하셨습니다. 다른 프로그램을 선택해주세요.');
+            }
+         }
+
+        $applicantContact = $this->normalizeContactNumber($data['applicant_contact'] ?? '');
+        if ($applicantContact === null) {
+            throw new \InvalidArgumentException('신청자 연락처를 정확히 입력해주세요.');
+        }
+
+        $guardianContact = $this->normalizeContactNumber($data['guardian_contact'] ?? '');
+
+        $participationFeeValue = $data['participation_fee'] ?? $reservation->education_fee;
+        if ($participationFeeValue === '' || $participationFeeValue === null) {
+            $participationFeeValue = null;
+        } else {
+            $participationFeeValue = (int) preg_replace('/[^0-9]/', '', (string) $participationFeeValue);
+        }
+
+        $programNameValue = $data['program_name'] ?? $reservation->program_name;
+
+        return DB::transaction(function () use ($reservation, $data, $requestedCount, $applicantContact, $guardianContact, $participationDate, $memberModel, $participationFeeValue, $programNameValue) {
+            $application = ProgramApplication::create([
+                'program_reservation_id' => $reservation->id,
+                'member_id' => $memberModel?->id ?? $data['member_id'] ?? null,
+                'application_number' => $this->generateIndividualApplicationNumber($reservation, $memberModel),
+                'education_type' => $reservation->education_type,
+                'reception_type' => $reservation->reception_type ?? 'first_come',
+                'program_name' => $programNameValue,
+                'participation_date' => $participationDate,
+                'participation_fee' => $participationFeeValue,
+                'payment_method' => $data['payment_method'] ?? null,
+                'payment_status' => $data['payment_status'] ?? ProgramApplication::PAYMENT_STATUS_UNPAID,
+                'draw_result' => $data['draw_result'] ?? ProgramApplication::DRAW_RESULT_PENDING,
+                'applicant_name' => $data['applicant_name'],
+                'applicant_school_name' => $data['applicant_school_name'] ?? $memberModel?->school_name,
+                'applicant_grade' => $data['applicant_grade'] ?? $memberModel?->grade,
+                'applicant_class' => $data['applicant_class'] ?? $memberModel?->class_number,
+                'applicant_contact' => $applicantContact,
+                'guardian_contact' => $guardianContact,
+                'applied_at' => now(),
+            ]);
+
+            if (!$reservation->is_unlimited_capacity) {
+                $reservation->increment('applied_count', $requestedCount);
+            }
+
+            return $application;
+        });
     }
 
     /**
@@ -235,6 +357,64 @@ class ProgramReservationService
             'message' => '신청 가능합니다.',
             'remaining' => $remainingCapacity,
         ];
+    }
+
+    private function generateIndividualApplicationNumber(ProgramReservation $reservation, ?Member $member = null): string
+    {
+        $year = now()->format('Y');
+
+        if ($member && $member->member_type === 'teacher') {
+            $prefix = 'T';
+        } elseif ($member && $member->member_type === 'student') {
+            $programPrefix = Str::upper(Str::substr($reservation->program_name, 0, 2));
+            $prefix = str_starts_with($reservation->education_type, 'high') ? 'H' : 'M';
+            if (Str::startsWith($programPrefix, ['M', 'H'])) {
+                $prefix = Str::substr($programPrefix, 0, 1);
+            }
+        } else {
+            $prefix = str_starts_with($reservation->education_type, 'high') ? 'H' : (str_starts_with($reservation->education_type, 'middle') ? 'M' : 'S');
+        }
+
+        $latestNumber = ProgramApplication::query()
+            ->where('application_number', 'like', $prefix . $year . '%')
+            ->orderBy('application_number', 'desc')
+            ->lockForUpdate()
+            ->value('application_number');
+ 
+         $nextSequence = 1;
+         if ($latestNumber) {
+            if (preg_match('/^' . preg_quote($prefix . $year, '/') . '(\d{4})$/', $latestNumber, $matches)) {
+                $nextSequence = ((int) $matches[1]) + 1;
+            }
+         }
+ 
+         return sprintf('%s%s%04d', $prefix, $year, $nextSequence);
+    }
+
+    private function extractProgramPrefix(?string $programName): string
+    {
+        if (empty($programName)) {
+            return '';
+        }
+
+        $trimmed = trim($programName);
+
+        if ($trimmed === '') {
+            return '';
+        }
+
+        return mb_strtoupper(mb_substr($trimmed, 0, 2));
+    }
+
+    private function normalizeContactNumber(?string $number): ?string
+    {
+        if (empty($number)) {
+            return null;
+        }
+
+        $digits = preg_replace('/[^0-9]/', '', $number);
+
+        return $digits !== '' ? $digits : null;
     }
 
     /**

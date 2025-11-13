@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ProgramReservation extends Model
 {
@@ -182,7 +183,7 @@ class ProgramReservation extends Model
     {
         $now = Carbon::now();
 
-        if ($this->application_start_date && $this->application_start_date->isAfter($now)) {
+        if ($this->application_start_date instanceof Carbon && $this->application_start_date->greaterThan($now)) {
             return 'scheduled';
         }
 
@@ -210,5 +211,15 @@ class ProgramReservation extends Model
         $appliedCount = $this->applied_count ?? 0;
 
         return max(0, $capacity - $appliedCount);
+    }
+
+    public function getAppliedCountDisplayAttribute(): int
+    {
+        return max(0, $this->applied_count ?? 0);
+    }
+
+    public function applications(): HasMany
+    {
+        return $this->hasMany(ProgramApplication::class, 'program_reservation_id');
     }
 }

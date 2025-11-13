@@ -287,6 +287,18 @@ Route::prefix('backoffice')->middleware(['backoffice'])->group(function () {
         Route::delete('/{programReservation}', [IndividualProgramController::class, 'destroy'])->name('destroy');
     });
 
+    // 개인 신청 내역 관리
+    Route::prefix('individual-applications')->name('backoffice.individual-applications.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Backoffice\IndividualApplicationController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\Backoffice\IndividualApplicationController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\Backoffice\IndividualApplicationController::class, 'store'])->name('store');
+        Route::get('/{application}/edit', [\App\Http\Controllers\Backoffice\IndividualApplicationController::class, 'edit'])->name('edit');
+        Route::put('/{application}', [\App\Http\Controllers\Backoffice\IndividualApplicationController::class, 'update'])->name('update');
+        Route::delete('/{application}', [\App\Http\Controllers\Backoffice\IndividualApplicationController::class, 'destroy'])->name('destroy');
+        Route::get('/search-members', [\App\Http\Controllers\Backoffice\IndividualApplicationController::class, 'searchMembers'])->name('search-members');
+        Route::get('/search-programs', [\App\Http\Controllers\Backoffice\IndividualApplicationController::class, 'searchPrograms'])->name('search-programs');
+    });
+
     // 학교 관리
     Route::resource('schools', SchoolController::class, [
         'names' => 'backoffice.schools'

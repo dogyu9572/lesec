@@ -2,12 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Program\IndividualProgramApplyRequest;
 use App\Models\Program;
+use App\Models\ProgramApplication;
 use App\Models\ProgramReservation;
+use App\Models\Member;
 use App\Services\ProgramService;
 use App\Services\ProgramReservationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class ProgramController extends Controller
 {
@@ -117,10 +123,46 @@ class ProgramController extends Controller
         $availableMonths = $this->programReservationService->getIndividualProgramMonths($allPrograms);
         $availableProgramNames = $this->programReservationService->getIndividualProgramNames($allPrograms);
 
+        /** @var Member|null $member */
+        $member = Auth::guard('member')->user();
+        if ($member && $member instanceof Member && $member->member_type === 'student') {
+            $applications = ProgramApplication::query()
+                ->where('member_id', $member->id)
+                ->get(['program_reservation_id', 'program_name']);
+
+            $appliedPrefixes = $applications
+                ->map(function (ProgramApplication $application) {
+                    return Str::upper(Str::substr($application->program_name, 0, 2));
+                })
+                ->filter()
+                ->unique();
+
+            $appliedReservationIds = $applications
+                ->pluck('program_reservation_id')
+                ->filter()
+                ->unique();
+
+            $programs = $programs->map(function (ProgramReservation $program) use ($appliedPrefixes, $appliedReservationIds) {
+                $prefix = Str::upper(Str::substr($program->program_name, 0, 2));
+
+                if ($appliedReservationIds->contains($program->id)) {
+                    $program->application_status = 'applied';
+                } elseif ($appliedPrefixes->contains($prefix)) {
+                    $program->application_status = 'blocked';
+                } else {
+                    $program->application_status = 'available';
+                }
+
+                return $program;
+            });
+        }
+
         $gNum = "01";
         $sNum = $this->programService->getSubMenuNumber($type);
         $gName = "프로그램";
         $sName = $this->programService->getTypeName($type);
+
+        $totalCount = $programs->count();
 
         return view('program.select-individual', [
             'gNum' => $gNum,
@@ -129,12 +171,88 @@ class ProgramController extends Controller
             'sName' => $sName,
             'type' => $type,
             'programs' => $programs,
+            'totalPrograms' => $totalCount,
             'availableMonths' => $availableMonths,
             'availableProgramNames' => $availableProgramNames,
             'filterMonth' => $filterMonth,
             'filterProgram' => $filterProgram,
             'filterStatus' => $filterStatus,
+            'member' => $member,
         ]);
+    }
+
+    /**
+     * 개인 신청 저장
+     */
+    public function submitIndividualApplication(IndividualProgramApplyRequest $request, $type): RedirectResponse
+    {
+        $reservation = $this->programReservationService->getIndividualProgramById((int) $request->input('program_reservation_id'));
+
+        if (!$reservation || $reservation->education_type !== $type) {
+            return back()
+                ->withErrors(['application' => '유효하지 않은 프로그램입니다.'])
+                ->withInput();
+        }
+
+        $validated = $request->validated();
+        $member = Auth::guard('member')->user();
+
+        if (!$member instanceof Member) {
+            return redirect()
+                ->route('member.login')
+                ->withErrors(['login' => '로그인 후 신청해 주세요.']);
+        }
+        $memberForCreation = $member;
+
+        $memberContact = $member->contact;
+        if (empty($memberContact)) {
+            return back()
+                ->withErrors(['application' => '회원 정보에 연락처가 등록되어 있지 않습니다. 마이페이지에서 연락처를 먼저 등록해주세요.']);
+        }
+
+        $participationDate = $validated['participation_date'] ?? optional($reservation->education_start_date)->toDateString();
+
+        if ($participationDate === null) {
+            return back()
+                ->withErrors(['application' => '참가일 정보를 확인할 수 없습니다. 관리자에게 문의해 주세요.'])
+                ->withInput();
+        }
+
+        $paymentMethod = null;
+        if (is_array($reservation->payment_methods) && count($reservation->payment_methods) > 0) {
+            $paymentMethod = $reservation->payment_methods[0];
+        }
+
+        try {
+            $application = $this->programReservationService->createIndividualApplication(
+                $reservation,
+                [
+                    'member_id' => $member->id,
+                    'participation_date' => $participationDate,
+                    'program_name' => $reservation->program_name,
+                    'participation_fee' => $reservation->education_fee,
+                    'applicant_name' => $member->name,
+                    'applicant_contact' => $memberContact,
+                    'guardian_contact' => $member->parent_contact,
+                    'applicant_school_name' => $member->school_name,
+                    'applicant_grade' => $member->grade,
+                    'applicant_class' => $member->class_number,
+                    'payment_method' => $paymentMethod,
+                    'payment_status' => ProgramApplication::PAYMENT_STATUS_UNPAID,
+                    'draw_result' => ProgramApplication::DRAW_RESULT_PENDING,
+                ]
+            );
+        } catch (\InvalidArgumentException $e) {
+            return back()
+                ->withErrors(['application' => $e->getMessage()])
+                ->withInput();
+        }
+
+        $request->session()->put('individual_application.completed', [
+            'application_id' => $application->id,
+        ]);
+
+        return redirect()->route('program.complete.individual', [$type]);
     }
 
     /**
@@ -162,7 +280,32 @@ class ProgramController extends Controller
         $sNum = $this->programService->getSubMenuNumber($type);
         $gName = "프로그램";
         $sName = $this->programService->getTypeName($type);
-        $completionContext = $this->buildIndividualCompletionContext($request, $program);
+
+        $sessionData = $request->session()->pull('individual_application.completed');
+
+        if (!$sessionData || empty($sessionData['application_id'])) {
+            return redirect()
+                ->route('program.select.individual', [$type])
+                ->withErrors(['application' => '정상적인 신청 완료 단계가 아닙니다. 다시 신청을 진행해주세요.']);
+        }
+
+        $application = ProgramApplication::query()
+            ->with('reservation')
+            ->find($sessionData['application_id']);
+
+        if (!$application) {
+            return redirect()
+                ->route('program.select.individual', [$type])
+                ->withErrors(['application' => '신청 정보를 찾을 수 없습니다. 다시 신청을 진행해주세요.']);
+        }
+
+        if ($application->reservation && $application->reservation->education_type !== $type) {
+            return redirect()
+                ->route('program.select.individual', [$type])
+                ->withErrors(['application' => '선택하신 교육유형과 신청 정보가 일치하지 않습니다.']);
+        }
+
+        $completionContext = $this->buildIndividualCompletionContext($application);
 
         return view('program.complete-individual', compact('gNum', 'sNum', 'gName', 'sName', 'type', 'program', 'completionContext'));
     }
@@ -173,15 +316,22 @@ class ProgramController extends Controller
             return null;
         }
 
+        $startTimestamp = strtotime((string) $program->period_start);
+        $endTimestamp = strtotime((string) $program->period_end);
+
+        if ($startTimestamp === false || $endTimestamp === false) {
+            return null;
+        }
+
         $days = ['일', '월', '화', '수', '목', '금', '토'];
-        $startDay = $days[$program->period_start->dayOfWeek] ?? '';
-        $endDay = $days[$program->period_end->dayOfWeek] ?? '';
+        $startDay = $days[(int) date('w', $startTimestamp)] ?? '';
+        $endDay = $days[(int) date('w', $endTimestamp)] ?? '';
 
         return sprintf(
             '%s(%s) ~ %s(%s)',
-            $program->period_start->format('Y년 n월 j일'),
+            date('Y년 n월 j일', $startTimestamp),
             $startDay,
-            $program->period_end->format('n월 j일'),
+            date('n월 j일', $endTimestamp),
             $endDay
         );
     }
@@ -198,15 +348,40 @@ class ProgramController extends Controller
         ];
     }
 
-    private function buildIndividualCompletionContext(Request $request, ?Program $program): array
+    private function buildIndividualCompletionContext(ProgramApplication $application): array
     {
+        $participationTimestamp = $application->participation_date
+            ? strtotime((string) $application->participation_date)
+            : false;
+
+        $appliedTimestamp = $application->applied_at
+            ? strtotime((string) $application->applied_at)
+            : false;
+ 
         return [
-            'program_name' => $program ? ($program->title ?? $program->name ?? '') : '',
-            'education_date' => $request->input('education_date', 'YYYY.MM.DD'),
-            'application_number' => $request->input('application_number', '신청번호 표시'),
-            'applicant_name' => $request->input('applicant_name', '홍길동'),
-            'applicant_phone' => $request->input('applicant_phone', '010-0000-0000'),
-            'submitted_at' => $request->input('submitted_at', '2025-09-10 09:00'),
+            'program_name' => $application->program_name ?? '',
+            'education_date' => $participationTimestamp ? date('Y.m.d', $participationTimestamp) : '교육일이 지정되지 않았습니다.',
+            'application_number' => $application->application_number,
+            'applicant_name' => $application->applicant_name,
+            'applicant_phone' => $this->formatContactNumber($application->applicant_contact),
+            'submitted_at' => $appliedTimestamp ? date('Y.m.d H:i', $appliedTimestamp) : now()->format('Y.m.d H:i'),
         ];
+    }
+
+    private function formatContactNumber(?string $digits): string
+    {
+        if (empty($digits)) {
+            return '-';
+        }
+
+        if (strlen($digits) === 11) {
+            return preg_replace('/(\d{3})(\d{4})(\d{4})/', '$1-$2-$3', $digits);
+        }
+
+        if (strlen($digits) === 10) {
+            return preg_replace('/(\d{3})(\d{3})(\d{4})/', '$1-$2-$3', $digits);
+        }
+
+        return $digits;
     }
 }

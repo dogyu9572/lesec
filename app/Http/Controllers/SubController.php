@@ -3,39 +3,153 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Services\Board\BoardContentService;
 
 class SubController extends Controller
 {
+    protected BoardContentService $boardContentService;
+
+    public function __construct(BoardContentService $boardContentService)
+    {
+        $this->boardContentService = $boardContentService;
+    }
+
 //게시판
 	//공지사항
-    public function notice()
+    public function notice(Request $request)
     {
         $gNum = "02"; $sNum = "01"; $gName = "게시판"; $sName = "공지사항";
-        return view('board.notice', compact('gNum', 'sNum', 'gName', 'sName'));
+        $board = $this->boardContentService->getBoard('notices');
+        $filters = [
+            'keyword' => $request->input('keyword'),
+            'search_type' => $request->input('search_type'),
+        ];
+        $posts = $this->boardContentService->getPostPaginator($board, $filters);
+
+        return view('board.notice', [
+            'gNum' => $gNum,
+            'sNum' => $sNum,
+            'gName' => $gName,
+            'sName' => $sName,
+            'board' => $board,
+            'posts' => $posts,
+            'filters' => $filters,
+            'totalCount' => $posts->total(),
+        ]);
     }
 	//공지사항 - 상세
-    public function notice_view()
+    public function notice_view(int $postId)
     {
         $gNum = "02"; $sNum = "01"; $gName = "게시판"; $sName = "공지사항";
-        return view('board.notice_view', compact('gNum', 'sNum', 'gName', 'sName'));
+        $board = $this->boardContentService->getBoard('notices');
+        $detail = $this->boardContentService->getPostDetail($board, $postId);
+
+        if (!$detail) {
+            abort(404, '요청하신 게시글을 찾을 수 없습니다.');
+        }
+
+        return view('board.notice_view', [
+            'gNum' => $gNum,
+            'sNum' => $sNum,
+            'gName' => $gName,
+            'sName' => $sName,
+            'board' => $board,
+            'post' => $detail['post'],
+            'previousPost' => $detail['previous'],
+            'nextPost' => $detail['next'],
+        ]);
     }
 	//FAQ
-    public function faq()
+    public function faq(Request $request)
     {
         $gNum = "02"; $sNum = "02"; $gName = "게시판"; $sName = "FAQ";
-        return view('board.faq', compact('gNum', 'sNum', 'gName', 'sName'));
+        $board = $this->boardContentService->getBoard('faq');
+        $filters = [
+            'keyword' => $request->input('keyword'),
+            'search_type' => $request->input('search_type'),
+            'category' => $request->input('category'),
+        ];
+        $posts = $this->boardContentService->getPostPaginator($board, $filters);
+        $categories = collect([
+            '신청/입금/환불',
+            '수료증',
+            '대기자',
+            '회원정보',
+            '일반',
+        ]);
+
+        return view('board.faq', [
+            'gNum' => $gNum,
+            'sNum' => $sNum,
+            'gName' => $gName,
+            'sName' => $sName,
+            'board' => $board,
+            'posts' => $posts,
+            'filters' => $filters,
+            'categories' => $categories,
+            'totalCount' => $posts->total(),
+        ]);
     }
 	//자료실
-    public function dataroom()
+    public function dataroom(Request $request)
     {
         $gNum = "02"; $sNum = "03"; $gName = "게시판"; $sName = "자료실";
-        return view('board.dataroom', compact('gNum', 'sNum', 'gName', 'sName'));
+        $board = $this->boardContentService->getBoard('library');
+        $filters = [
+            'keyword' => $request->input('keyword'),
+            'search_type' => $request->input('search_type'),
+        ];
+        $posts = $this->boardContentService->getPostPaginator($board, $filters);
+
+        return view('board.dataroom', [
+            'gNum' => $gNum,
+            'sNum' => $sNum,
+            'gName' => $gName,
+            'sName' => $sName,
+            'board' => $board,
+            'posts' => $posts,
+            'filters' => $filters,
+            'totalCount' => $posts->total(),
+        ]);
     }
 	//자료실 - 상세
-    public function dataroom_view()
+    public function dataroom_view(int $postId)
     {
         $gNum = "02"; $sNum = "03"; $gName = "게시판"; $sName = "자료실";
-        return view('board.dataroom_view', compact('gNum', 'sNum', 'gName', 'sName'));
+        $board = $this->boardContentService->getBoard('library');
+        $detail = $this->boardContentService->getPostDetail($board, $postId);
+
+        if (!$detail) {
+            abort(404, '요청하신 게시글을 찾을 수 없습니다.');
+        }
+
+        return view('board.dataroom_view', [
+            'gNum' => $gNum,
+            'sNum' => $sNum,
+            'gName' => $gName,
+            'sName' => $sName,
+            'board' => $board,
+            'post' => $detail['post'],
+            'previousPost' => $detail['previous'],
+            'nextPost' => $detail['next'],
+        ]);
+    }
+    public function downloadBoardAttachment(string $boardType, int $postId, int $attachmentIndex)
+    {
+        $slug = $this->resolveBoardSlug($boardType);
+
+        if (!$slug) {
+            abort(404, '요청하신 첨부파일을 찾을 수 없습니다.');
+        }
+
+        $board = $this->boardContentService->getBoard($slug);
+        $response = $this->boardContentService->downloadAttachment($board, $postId, $attachmentIndex);
+
+        if (!$response) {
+            abort(404, '요청하신 첨부파일을 찾을 수 없습니다.');
+        }
+
+        return $response;
     }
 //마이페이지
 	//회원정보
@@ -111,6 +225,16 @@ class SubController extends Controller
     {
         $gNum = "05"; $sNum = "03"; $gName = "위치안내"; $sName = "주차 안내";
         return view('location.parking', compact('gNum', 'sNum', 'gName', 'sName'));
+    }
+    private function resolveBoardSlug(string $boardType): ?string
+    {
+        $mapping = [
+            'notice' => 'notices',
+            'dataroom' => 'library',
+            'faq' => 'faq',
+        ];
+
+        return $mapping[$boardType] ?? null;
     }
 //member
 	//로그인

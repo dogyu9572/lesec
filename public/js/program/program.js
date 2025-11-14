@@ -106,8 +106,11 @@
         const currentYear = parseInt(getData($wrap, 'year', new Date().getFullYear()), 10);
         const currentMonth = parseInt(getData($wrap, 'month', new Date().getMonth() + 1), 10);
         const baseUrl = getData($wrap, 'baseUrl', '');
+        const applyUrl = getData($wrap, 'applyUrl', '');
         const daysKor = ['일', '월', '화', '수', '목', '금', '토'];
         let currentDate = new Date(currentYear, currentMonth - 1, 1);
+        let selectedProgramData = null;
+        const $approvalModal = $('#pop_approval');
 
         function updateSelectionInfo($td) {
             const day = $td.find('span').text().padStart(2, '0');
@@ -121,11 +124,16 @@
 
             const $tbody = $wrap.find('.glbox.select_day .tbl tbody');
             $tbody.empty();
+            selectedProgramData = null;
 
             $td.find('.list li').each(function () {
                 const $item = $(this);
                 const title = $item.text();
                 const programId = $item.data('programId') || 0;
+                const programName = $item.data('programName') || title;
+                const educationDate = $item.data('educationDate') || '';
+                const educationType = $item.data('educationType') || '';
+                const educationFee = $item.data('educationFee') || 0;
                 const applied = $item.data('applied') || 0;
                 const total = $item.data('total') || 24;
                 const remain = total - applied;
@@ -146,7 +154,11 @@
                 }
 
                 $tbody.append(
-                    `<tr data-program-id="${programId}">
+                    `<tr data-program-id="${programId}" 
+                         data-program-name="${programName}"
+                         data-education-date="${educationDate}"
+                         data-education-type="${educationType}"
+                         data-education-fee="${educationFee}">
                         <td class="edu11"><label class="check solo"><input type="radio" name="select_day" data-program-id="${programId}"><i></i></label></td>
                         <td class="edu12">${year}-${month}-${day} 09:00</td>
                         <td class="edu13 over_dot">${title}</td>
@@ -230,6 +242,99 @@
 
         $wrap.find('.glbox.select_day .tbl').on('change', 'input[type="radio"]', function () {
             $wrap.find('.count input').val(10);
+            const $row = $(this).closest('tr');
+            selectedProgramData = {
+                programId: $row.data('programId'),
+                programName: $row.data('programName'),
+                educationDate: $row.data('educationDate'),
+                educationType: $row.data('educationType'),
+                educationFee: $row.data('educationFee')
+            };
+        });
+
+        $wrap.find('[data-layer-open="pop_approval"]').on('click', function (event) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+
+            if (!selectedProgramData || !selectedProgramData.programId) {
+                alert('프로그램을 선택해주세요.');
+                return;
+            }
+
+            $approvalModal.fadeIn(300);
+        });
+
+        $('#group-submit-btn').on('click', function (event) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+
+            const $agreementCheckbox = $('#agreement_checkbox');
+            
+            if (!$agreementCheckbox.is(':checked')) {
+                alert('승인 안내 내용에 동의해주세요.');
+                return;
+            }
+
+            if (!selectedProgramData || !selectedProgramData.programId) {
+                alert('프로그램을 선택해주세요.');
+                return;
+            }
+
+            const applicantCount = parseInt($wrap.find('.count input').val(), 10) || 10;
+
+            if (applicantCount < 4) {
+                alert('단체 신청은 최소 4명 이상이어야 합니다.');
+                return;
+            }
+
+            const csrfToken = $('meta[name="csrf-token"]').attr('content');
+            
+            if (!csrfToken) {
+                alert('CSRF 토큰을 찾을 수 없습니다. 페이지를 새로고침해주세요.');
+                return;
+            }
+
+            if (!applyUrl) {
+                alert('신청 URL이 설정되지 않았습니다.');
+                return;
+            }
+
+            $.ajax({
+                url: applyUrl,
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
+                },
+                data: {
+                    program_reservation_id: selectedProgramData.programId,
+                    applicant_count: applicantCount,
+                    agreement: 1
+                },
+                success: function (response) {
+                    if (response.success && response.redirect_url) {
+                        window.location.href = response.redirect_url;
+                    } else {
+                        alert(response.message || '신청이 완료되었습니다.');
+                        if (response.redirect_url) {
+                            window.location.href = response.redirect_url;
+                        }
+                    }
+                },
+                error: function (xhr) {
+                    let errorMessage = '신청 중 오류가 발생했습니다.';
+                    
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMessage = xhr.responseJSON.message;
+                    } else if (xhr.status === 401) {
+                        errorMessage = '로그인이 필요합니다.';
+                    } else if (xhr.status === 400) {
+                        errorMessage = '잘못된 요청입니다.';
+                    }
+                    
+                    alert(errorMessage);
+                }
+            });
         });
     }
 

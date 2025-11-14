@@ -13,7 +13,8 @@
             data-year="{{ $year }}"
             data-month="{{ $month }}"
             data-base-url="{{ route('program.select.group', $type) }}"
-            data-complete-url="{{ route('program.complete.group', $type) }}">
+            data-complete-url="{{ route('program.complete.group', $type) }}"
+            data-apply-url="{{ route('program.apply.group.submit', $type) }}">
 
 			<div class="schedule_table">
 				<div class="schedule_top">
@@ -58,8 +59,18 @@
 										if (!$program->is_unlimited_capacity && $appliedCount >= $capacity) {
 											$statusClass = 'i_impossible';
 										}
+										$educationDate = optional($program->education_start_date)->format('Y-m-d') ?? '';
+										$educationType = $program->education_type ?? '';
+										$educationFee = $program->education_fee ?? 0;
 									@endphp
-									<li class="{{ $statusClass }}" data-applied="{{ $appliedCount }}" data-total="{{ $capacity }}" data-program-id="{{ $program->id }}">{{ $program->program_name }}</li>
+									<li class="{{ $statusClass }}" 
+										data-applied="{{ $appliedCount }}" 
+										data-total="{{ $capacity }}" 
+										data-program-id="{{ $program->id }}"
+										data-program-name="{{ $program->program_name }}"
+										data-education-date="{{ $educationDate }}"
+										data-education-type="{{ $educationType }}"
+										data-education-fee="{{ $educationFee }}">{{ $program->program_name }}</li>
 									@endforeach
 								</ul>
 								@endif
@@ -137,9 +148,9 @@
 			<p class="tel">02-888-0932~3, 02-880-4948</p>
 		</div>
 		<div class="flex_center check_area">
-			<label class="check"><input type="checkbox"><i></i>위의 내용을 모두 읽었으며, 내용에 동의합니다.</label>
+			<label class="check"><input type="checkbox" id="agreement_checkbox"><i></i>위의 내용을 모두 읽었으며, 내용에 동의합니다.</label>
 		</div>
-		<button type="button" class="btn_check" data-navigate-complete="{{ route('program.complete.group', $type) }}">확인하기</button>
+		<button type="button" class="btn_check" id="group-submit-btn" data-navigate-complete="{{ route('program.complete.group', $type) }}">확인하기</button>
 	</div>
 </div>
 

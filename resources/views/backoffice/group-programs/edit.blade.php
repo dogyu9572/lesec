@@ -220,73 +220,13 @@
     </div>
 </div>
 
-<!-- 프로그램명 검색 모달 -->
-<div id="program-search-modal" class="category-modal" style="display: none;">
-    <div class="category-modal-overlay" onclick="closeProgramSearchModal()"></div>
-    <div class="category-modal-content" style="max-width: 800px;">
-        <div class="category-modal-header">
-            <h5>프로그램명 검색</h5>
-            <button type="button" class="category-modal-close" onclick="closeProgramSearchModal()">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="category-modal-body">
-            <div class="member-search-filter">
-                <form id="program-search-form" method="GET" action="{{ route('backoffice.group-programs.search-programs') }}">
-                    <div class="modal-form-row">
-                        <div class="modal-form-col">
-                            <div class="modal-form-group">
-                                <label for="popup_education_type" class="modal-form-label">교육유형</label>
-                                <select id="popup_education_type" name="education_type" class="modal-form-control">
-                                    <option value="">전체</option>
-                                    @foreach($educationTypes as $key => $name)
-                                        <option value="{{ $key }}">{{ $name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-                        <div class="modal-form-col">
-                            <div class="modal-form-group">
-                                <label for="popup_search_keyword" class="modal-form-label">검색어</label>
-                                <input type="text" id="popup_search_keyword" name="search_keyword" class="modal-form-control" placeholder="검색어 입력">
-                            </div>
-                        </div>
-                        <div class="modal-form-col search-button-col">
-                            <div class="modal-form-group">
-                                <label class="modal-form-label search-button-label">버튼</label>
-                                <button type="button" id="popup-search-btn" class="btn btn-primary">검색</button>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-                <div style="margin-top: 15px; padding: 10px; background-color: #f8f9fa; border-radius: 4px;">
-                    <span style="font-size: 14px; color: #666;">프로그램명이 없을 경우 입력해주세요.</span>
-                    <button type="button" id="popup-confirm-btn" class="btn btn-secondary btn-sm" style="margin-left: 10px;">확인</button>
-                </div>
-            </div>
-            <div class="table-responsive">
-                <table class="board-table">
-                    <thead>
-                        <tr>
-                            <th>No</th>
-                            <th>프로그램명</th>
-                            <th>선택</th>
-                        </tr>
-                    </thead>
-                    <tbody id="popup-program-list-body">
-                        <tr>
-                            <td colspan="3" class="text-center">검색어를 입력하거나 필터를 선택해주세요.</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div id="popup-pagination" class="pagination-container"></div>
-        </div>
-        <div class="category-modal-footer">
-            <button type="button" class="btn btn-secondary" onclick="closeProgramSearchModal()">취소</button>
-        </div>
-    </div>
-</div>
+@include('backoffice.modals.program-search', [
+    'mode' => 'name',
+    'searchAction' => route('backoffice.group-programs.search-programs'),
+    'educationTypes' => $educationTypes,
+    'showDirectInputNotice' => true,
+    'programInputId' => 'program_name',
+])
 @endsection
 
 @section('scripts')

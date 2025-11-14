@@ -5,9 +5,9 @@
     $confirmButtonText = $selectionMode === 'single' ? '확인' : '선택 완료';
 @endphp
 
-<div id="member-search-modal" class="category-modal" style="display: none;">
+<div id="member-search-modal" class="category-modal" style="display: none;" data-selection-mode="{{ $selectionMode }}">
     <div class="category-modal-overlay" onclick="closeMemberSearchModal()"></div>
-    <div class="category-modal-content" style="max-width: 800px;">
+    <div class="category-modal-content" style="max-width: 900px;">
         <div class="category-modal-header">
             <h5>회원 검색</h5>
             <button type="button" class="category-modal-close" onclick="closeMemberSearchModal()">
@@ -46,31 +46,41 @@
             <div class="table-responsive">
                 <table class="board-table">
                     <thead>
-                        <tr>
-                            <th style="width: 40px;">
-                                @if($selectionMode === 'multiple')
+                        @if($selectionMode === 'multiple')
+                            <tr>
+                                <th style="width: 40px;">
                                     <input type="checkbox" id="popup-select-all">
-                                @endif
-                            </th>
-                            <th>No</th>
-                            <th>ID</th>
-                            <th>이름</th>
-                            <th>학교</th>
-                            <th>이메일</th>
-                        </tr>
+                                </th>
+                                <th>No</th>
+                                <th>ID</th>
+                                <th>이름</th>
+                                <th>학교</th>
+                                <th>이메일</th>
+                            </tr>
+                        @else
+                            <tr>
+                                <th>No</th>
+                                <th>ID</th>
+                                <th>이름</th>
+                                <th>학교</th>
+                                <th style="width: 80px;">선택</th>
+                            </tr>
+                        @endif
                     </thead>
                     <tbody id="popup-member-list-body" data-selection-mode="{{ $selectionMode }}">
                         <tr>
-                            <td colspan="6" class="text-center">검색어를 입력하거나 필터를 선택해주세요.</td>
+                            <td colspan="{{ $selectionMode === 'multiple' ? 6 : 5 }}" class="text-center">검색어를 입력하거나 필터를 선택해주세요.</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
             <div id="popup-pagination" class="pagination-container"></div>
         </div>
-        <div class="category-modal-footer">
-            <button type="button" id="{{ $confirmButtonId }}" class="btn btn-primary" disabled>{{ $confirmButtonText }}</button>
-            <button type="button" class="btn btn-secondary member-search-cancel" onclick="closeMemberSearchModal()">취소</button>
-        </div>
+        @if($selectionMode === 'multiple')
+            <div class="category-modal-footer">
+                <button type="button" id="{{ $confirmButtonId }}" class="btn btn-primary" disabled>{{ $confirmButtonText }}</button>
+                <button type="button" class="btn btn-secondary member-search-cancel" onclick="closeMemberSearchModal()">취소</button>
+            </div>
+        @endif
     </div>
 </div>

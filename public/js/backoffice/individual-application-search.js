@@ -1,13 +1,31 @@
 /**
- * 개인 신청 내역 검색 모달 제어 스크립트
+ * 신청 내역(개인/단체) 검색 모달 제어 스크립트
  */
 
 let currentMemberPage = 1;
 let currentProgramPage = 1;
 let selectedMember = null;
 let selectedProgram = null;
+let memberSearchUrl = '/backoffice/individual-applications/search-members';
+let programSearchUrl = '/backoffice/individual-applications/search-programs';
 
 document.addEventListener('DOMContentLoaded', function () {
+    const searchConfigElement = document.getElementById('application-search-config');
+    if (searchConfigElement) {
+        memberSearchUrl = searchConfigElement.dataset.memberSearchUrl || memberSearchUrl;
+        programSearchUrl = searchConfigElement.dataset.programSearchUrl || programSearchUrl;
+    }
+
+    const programSearchModal = document.getElementById('program-search-modal');
+    if (programSearchModal && programSearchModal.dataset.programSearchUrl) {
+        programSearchUrl = programSearchModal.dataset.programSearchUrl;
+    }
+    const programDirectInput = document.getElementById('popup_direct_program_name');
+    const programDirectConfirmButton = document.getElementById('popup-confirm-btn');
+    if (programDirectConfirmButton) {
+        programDirectConfirmButton.disabled = true;
+    }
+
     // 회원 검색 모달
     const memberSearchBtn = document.getElementById('member-search-btn');
     const memberSearchModal = document.getElementById('member-search-modal');
@@ -19,7 +37,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // 프로그램 검색 모달
     const programSearchBtn = document.getElementById('program-search-btn');
-    const programSearchModal = document.getElementById('program-search-modal');
     const programSearchForm = document.getElementById('program-search-form');
     const popupProgramSearchBtn = document.getElementById('popup-program-search-btn');
     const popupProgramConfirm = document.getElementById('popup-program-confirm');
@@ -123,6 +140,14 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // 직접 입력
+    programDirectInput?.addEventListener('input', () => {
+        selectedProgram = null;
+        updateProgramConfirmButton();
+        updateProgramDirectInputState();
+    });
+    programDirectConfirmButton?.addEventListener('click', applyProgramDirectInput);
+
     // 프로그램 선택 확인
     if (popupProgramConfirm) {
         popupProgramConfirm.addEventListener('click', function () {
@@ -137,6 +162,8 @@ document.addEventListener('DOMContentLoaded', function () {
     if (programModalClose) {
         programModalClose.addEventListener('click', closeProgramSearchModal);
     }
+
+    updateProgramDirectInputState();
 });
 
 // 회원 검색 모달 열기
@@ -168,7 +195,7 @@ function searchMembers(page) {
     const params = new URLSearchParams(formData);
     params.append('page', page);
 
-    fetch(`/backoffice/individual-applications/search-members?${params.toString()}`)
+    fetch(`${memberSearchUrl}?${params.toString()}`)
         .then(response => response.json())
         .then(data => {
             renderMemberList(data.members, data.pagination);
@@ -185,36 +212,73 @@ function renderMemberList(members, pagination) {
     const tbody = document.getElementById('popup-member-list-body');
     if (!tbody) return;
 
+    const selectionMode = tbody.dataset.selectionMode || 'single';
+    const total = pagination ? pagination.total : members.length;
+    const perPage = pagination ? pagination.per_page : members.length;
+    const current = pagination ? pagination.current_page : 1;
+    const baseNumber = total - ((current - 1) * perPage);
+
     if (!members || members.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="text-center">검색 결과가 없습니다.</td></tr>';
+        const emptyCols = selectionMode === 'multiple' ? 6 : 5;
+        tbody.innerHTML = `<tr><td colspan="${emptyCols}" class="text-center">검색 결과가 없습니다.</td></tr>`;
         return;
     }
 
-    const selectionMode = tbody.dataset.selectionMode || 'single';
-    const startingNo = pagination ? pagination.total - ((pagination.current_page - 1) * pagination.per_page) : members.length;
-    const inputName = selectionMode === 'single' ? 'member_radio' : 'member_checkbox';
-    const inputType = selectionMode === 'single' ? 'radio' : 'checkbox';
+    if (selectionMode === 'single') {
+        tbody.innerHTML = members.map((member, index) => {
+            const memberData = encodeURIComponent(JSON.stringify(member));
+            const rowNumber = Math.max(1, baseNumber - index);
 
+            return `
+                <tr>
+                    <td>${rowNumber}</td>
+                    <td>${member.login_id || '-'}</td>
+                    <td>${member.name}</td>
+                    <td>${member.school_name || '-'}</td>
+                    <td>
+                        <button type="button" class="btn btn-primary btn-sm member-select-btn" data-member="${memberData}">
+                            선택
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+
+        tbody.querySelectorAll('.member-select-btn').forEach((button) => {
+            button.addEventListener('click', function () {
+                selectedMember = JSON.parse(decodeURIComponent(this.dataset.member));
+                applySelectedMember();
+            });
+        });
+
+        updateMemberConfirmButton();
+        return;
+    }
+
+    const inputName = 'member_checkbox';
     tbody.innerHTML = members.map((member, index) => {
         const memberData = encodeURIComponent(JSON.stringify(member));
+        const rowNumber = Math.max(1, baseNumber - index);
+
         return `
-        <tr>
-            <td>
-                <input type="${inputType}" name="${inputName}" value="${member.id}" data-member="${memberData}">
-            </td>
-            <td>${startingNo - index}</td>
-            <td>${member.login_id || '-'}</td>
-            <td>${member.name}</td>
-            <td>${member.school_name || '-'}</td>
-            <td>${member.email || '-'}</td>
-        </tr>
-    `;
+            <tr>
+                <td>
+                    <input type="checkbox" name="${inputName}" value="${member.id}" data-member="${memberData}" class="popup-member-checkbox">
+                </td>
+                <td>${rowNumber}</td>
+                <td>${member.login_id || '-'}</td>
+                <td>${member.name}</td>
+                <td>${member.school_name || '-'}</td>
+                <td>${member.email || '-'}</td>
+            </tr>
+        `;
     }).join('');
 
-    const selector = inputType === 'radio' ? `input[name="${inputName}"]` : `input[name="${inputName}"]`;
-    tbody.querySelectorAll(selector).forEach(input => {
+    tbody.querySelectorAll(`input[name="${inputName}"]`).forEach((input) => {
         input.addEventListener('change', function () {
-            selectedMember = JSON.parse(decodeURIComponent(this.dataset.member));
+            const checkedMembers = Array.from(tbody.querySelectorAll(`input[name="${inputName}"]:checked`))
+                .map((checkbox) => JSON.parse(decodeURIComponent(checkbox.dataset.member)));
+            selectedMember = checkedMembers.length > 0 ? checkedMembers : null;
             updateMemberConfirmButton();
         });
     });
@@ -225,35 +289,49 @@ function renderMemberPagination(pagination) {
     const container = document.getElementById('popup-pagination');
     if (!container) return;
 
-    if (pagination.last_page <= 1) {
-        container.innerHTML = '';
-        return;
-    }
+    const lastPage = Math.max(1, pagination?.last_page ?? 1);
+    const current = Math.min(lastPage, pagination?.current_page ?? currentMemberPage);
+    const startPage = Math.max(1, current - 2);
+    const endPage = Math.min(lastPage, current + 2);
 
-    let html = '<div class="pagination">';
+    let html = '<nav aria-label="페이지 네비게이션"><ul class="pagination">';
 
-    if (pagination.current_page > 1) {
-        html += `<a href="#" onclick="searchMembers(${pagination.current_page - 1}); return false;">&lt;</a>`;
-    } else {
-        html += '<span class="disabled">&lt;</span>';
-    }
+    const pageItem = (page, label, disabled = false) => {
+        if (disabled) {
+            return `<li class="page-item disabled"><span class="page-link">${label}</span></li>`;
+        }
+        return `<li class="page-item"><a href="#" class="page-link" data-member-page="${page}">${label}</a></li>`;
+    };
 
-    for (let i = 1; i <= pagination.last_page; i++) {
-        if (i === pagination.current_page) {
-            html += `<span class="active">${i}</span>`;
+    html += pageItem(1, '<i class="fas fa-angle-double-left"></i>', current === 1);
+    html += pageItem(current - 1, '<i class="fas fa-chevron-left"></i>', current === 1);
+
+    for (let i = startPage; i <= endPage; i++) {
+        if (i === current) {
+            html += `<li class="page-item active"><span class="page-link">${i}</span></li>`;
         } else {
-            html += `<a href="#" onclick="searchMembers(${i}); return false;">${i}</a>`;
+            html += pageItem(i, i);
         }
     }
 
-    if (pagination.current_page < pagination.last_page) {
-        html += `<a href="#" onclick="searchMembers(${pagination.current_page + 1}); return false;">&gt;</a>`;
-    } else {
-        html += '<span class="disabled">&gt;</span>';
-    }
+    html += pageItem(current + 1, '<i class="fas fa-chevron-right"></i>', current === lastPage);
+    html += pageItem(lastPage, '<i class="fas fa-angle-double-right"></i>', current === lastPage);
 
-    html += '</div>';
+    html += '</ul></nav>';
     container.innerHTML = html;
+
+    container.querySelectorAll('a[data-member-page]').forEach((link) => {
+        link.addEventListener('click', function (event) {
+            event.preventDefault();
+            const targetPage = Number(this.dataset.memberPage);
+            if (!targetPage || targetPage === currentMemberPage) {
+                return;
+            }
+            selectedMember = null;
+            updateMemberConfirmButton();
+            searchMembers(targetPage);
+        });
+    });
 }
 
 // 회원 확인 버튼 상태 업데이트
@@ -281,6 +359,11 @@ function applySelectedMember() {
     const schoolNameInput = document.getElementById('school_name');
     if (schoolNameInput) {
         schoolNameInput.value = selectedMember.school_name || '';
+    }
+
+    const schoolLevelInput = document.getElementById('school_level');
+    if (schoolLevelInput) {
+        schoolLevelInput.value = selectedMember.school_level_label || selectedMember.school_level || '';
     }
 
     const schoolIdInput = document.getElementById('school_id');
@@ -323,10 +406,28 @@ function applySelectedMember() {
 function openProgramSearchModal() {
     const modal = document.getElementById('program-search-modal');
     if (modal) {
+        const modalContent = modal.querySelector('.category-modal-content');
+        if (modalContent) {
+            modalContent.scrollTop = 0;
+        }
+
+        const closeButton = modal.querySelector('.category-modal-close');
+        if (closeButton && !closeButton.querySelector('i')) {
+            const icon = document.createElement('i');
+            icon.className = 'fas fa-times';
+            closeButton.appendChild(icon);
+        }
+
+        const directInput = document.getElementById('popup_direct_program_name');
+        if (directInput) {
+            directInput.value = '';
+        }
+
         modal.style.display = 'flex';
         selectedProgram = null;
         currentProgramPage = 1;
         updateProgramConfirmButton();
+        updateProgramDirectInputState();
         searchPrograms(1);
     }
 }
@@ -348,15 +449,17 @@ function searchPrograms(page) {
     const params = new URLSearchParams(formData);
     params.append('page', page);
 
-    fetch(`/backoffice/individual-applications/search-programs?${params.toString()}`)
+    fetch(`${programSearchUrl}?${params.toString()}`)
         .then(response => response.json())
         .then(data => {
             renderProgramList(data.programs, data.pagination);
             renderProgramPagination(data.pagination);
+            updateProgramDirectInputState();
         })
         .catch(error => {
             console.error('프로그램 검색 오류:', error);
             alert('프로그램 검색 중 오류가 발생했습니다.');
+            updateProgramDirectInputState();
         });
 }
 
@@ -365,8 +468,11 @@ function renderProgramList(programs, pagination) {
     const tbody = document.getElementById('popup-program-list-body');
     if (!tbody) return;
 
-    if (programs.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="text-center">검색 결과가 없습니다.</td></tr>';
+    const searchMode = document.getElementById('program-search-modal')?.dataset.programSearchMode || 'reservation';
+
+    if (!programs || programs.length === 0) {
+        const emptyCols = searchMode === 'reservation' ? 6 : 3;
+        tbody.innerHTML = `<tr><td colspan="${emptyCols}" class="text-center">검색 결과가 없습니다.</td></tr>`;
         return;
     }
 
@@ -378,32 +484,67 @@ function renderProgramList(programs, pagination) {
         'special': '특별프로그램'
     };
 
-    const startingNo = pagination ? pagination.total - ((pagination.current_page - 1) * pagination.per_page) : programs.length;
+    const total = pagination ? pagination.total : programs.length;
+    const perPage = pagination ? pagination.per_page : programs.length;
+    const current = pagination ? pagination.current_page : 1;
+    const baseNumber = total - ((current - 1) * perPage);
 
+    if (searchMode === 'reservation') {
+        tbody.innerHTML = programs.map((program, index) => {
+            const displayDate = program.education_start_date ? program.education_start_date.replace(/-/g, '.') : '-';
+            const displayFee = program.education_fee ? Number(program.education_fee).toLocaleString() + '원' : '무료';
+            const programData = encodeURIComponent(JSON.stringify(program));
+            const rowNumber = Math.max(1, baseNumber - index);
+
+            return `
+                <tr>
+                    <td>${rowNumber}</td>
+                    <td>${program.program_name}</td>
+                    <td>${educationTypeLabels[program.education_type] || program.education_type || '-'}</td>
+                    <td>${displayDate}</td>
+                    <td>${displayFee}</td>
+                    <td>
+                        <button type="button" class="btn btn-primary btn-sm program-select-btn" data-program="${programData}">
+                            선택
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+
+        tbody.querySelectorAll('.program-select-btn').forEach((button) => {
+            button.addEventListener('click', function () {
+                selectedProgram = JSON.parse(decodeURIComponent(this.dataset.program));
+                applySelectedProgram();
+            });
+        });
+
+        updateProgramConfirmButton();
+        return;
+    }
+
+    // name 모드
     tbody.innerHTML = programs.map((program, index) => {
-        const displayDate = program.education_start_date ? program.education_start_date.replace(/-/g, '.') : '-';
-        const displayFee = program.education_fee ? Number(program.education_fee).toLocaleString() + '원' : '무료';
         const programData = encodeURIComponent(JSON.stringify(program));
+        const rowNumber = Math.max(1, baseNumber - index);
 
         return `
-        <tr>
-            <td>
-                <input type="radio" name="program_radio" value="${program.id}" data-program="${programData}">
-            </td>
-            <td>${startingNo - index}</td>
-            <td>${educationTypeLabels[program.education_type] || program.education_type}</td>
-            <td>${program.program_name}</td>
-            <td>${displayDate}</td>
-            <td>${displayFee}</td>
-        </tr>
-    `;
+            <tr>
+                <td>${rowNumber}</td>
+                <td>${program.program_name}</td>
+                <td>
+                    <button type="button" class="btn btn-primary btn-sm program-select-btn" data-program="${programData}">
+                        선택
+                    </button>
+                </td>
+            </tr>
+        `;
     }).join('');
 
-    // 라디오 버튼 이벤트
-    tbody.querySelectorAll('input[name="program_radio"]').forEach(radio => {
-        radio.addEventListener('change', function () {
+    tbody.querySelectorAll('.program-select-btn').forEach((button) => {
+        button.addEventListener('click', function () {
             selectedProgram = JSON.parse(decodeURIComponent(this.dataset.program));
-            updateProgramConfirmButton();
+            applySelectedProgram();
         });
     });
 }
@@ -413,35 +554,49 @@ function renderProgramPagination(pagination) {
     const container = document.getElementById('popup-program-pagination');
     if (!container) return;
 
-    if (pagination.last_page <= 1) {
-        container.innerHTML = '';
-        return;
-    }
+    const lastPage = Math.max(1, pagination?.last_page ?? 1);
+    const current = Math.min(lastPage, pagination?.current_page ?? currentProgramPage);
+    const startPage = Math.max(1, current - 2);
+    const endPage = Math.min(lastPage, current + 2);
 
-    let html = '<div class="pagination">';
+    let html = '<nav aria-label="페이지 네비게이션"><ul class="pagination">';
 
-    if (pagination.current_page > 1) {
-        html += `<a href="#" onclick="searchPrograms(${pagination.current_page - 1}); return false;">&lt;</a>`;
-    } else {
-        html += '<span class="disabled">&lt;</span>';
-    }
+    const pageItem = (page, label, disabled = false) => {
+        if (disabled) {
+            return `<li class="page-item disabled"><span class="page-link">${label}</span></li>`;
+        }
+        return `<li class="page-item"><a href="#" class="page-link" data-program-page="${page}">${label}</a></li>`;
+    };
 
-    for (let i = 1; i <= pagination.last_page; i++) {
-        if (i === pagination.current_page) {
-            html += `<span class="active">${i}</span>`;
+    html += pageItem(1, '<i class="fas fa-angle-double-left"></i>', current === 1);
+    html += pageItem(current - 1, '<i class="fas fa-chevron-left"></i>', current === 1);
+
+    for (let i = startPage; i <= endPage; i++) {
+        if (i === current) {
+            html += `<li class="page-item active"><span class="page-link">${i}</span></li>`;
         } else {
-            html += `<a href="#" onclick="searchPrograms(${i}); return false;">${i}</a>`;
+            html += pageItem(i, i);
         }
     }
 
-    if (pagination.current_page < pagination.last_page) {
-        html += `<a href="#" onclick="searchPrograms(${pagination.current_page + 1}); return false;">&gt;</a>`;
-    } else {
-        html += '<span class="disabled">&gt;</span>';
-    }
+    html += pageItem(current + 1, '<i class="fas fa-chevron-right"></i>', current === lastPage);
+    html += pageItem(lastPage, '<i class="fas fa-angle-double-right"></i>', current === lastPage);
 
-    html += '</div>';
+    html += '</ul></nav>';
     container.innerHTML = html;
+
+    container.querySelectorAll('a[data-program-page]').forEach((link) => {
+        link.addEventListener('click', function (event) {
+            event.preventDefault();
+            const targetPage = Number(this.dataset.programPage);
+            if (!targetPage || targetPage === currentProgramPage) {
+                return;
+            }
+            selectedProgram = null;
+            updateProgramConfirmButton();
+            searchPrograms(targetPage);
+        });
+    });
 }
 
 // 프로그램 확인 버튼 상태 업데이트
@@ -450,6 +605,51 @@ function updateProgramConfirmButton() {
     if (confirmBtn) {
         confirmBtn.disabled = !selectedProgram;
     }
+}
+
+function updateProgramDirectInputState() {
+    const directInput = document.getElementById('popup_direct_program_name');
+    const fallbackInput = document.getElementById('popup_program_keyword') || document.getElementById('popup_search_keyword');
+    const directConfirmButton = document.getElementById('popup-confirm-btn');
+
+    if (directConfirmButton) {
+        const hasValue = directInput && directInput.value.trim().length > 0;
+        directConfirmButton.disabled = !hasValue;
+    }
+
+    if (directInput) {
+        focusElementWithoutScroll(directInput, '#program-search-modal .category-modal-content');
+    } else if (fallbackInput) {
+        focusElementWithoutScroll(fallbackInput, '#program-search-modal .category-modal-content');
+    }
+}
+
+function applyProgramDirectInput() {
+    const directInput = document.getElementById('popup_direct_program_name');
+    if (!directInput) {
+        return;
+    }
+
+    const programName = directInput.value.trim();
+    if (!programName) {
+        alert('프로그램명을 입력해주세요.');
+        focusElementWithoutScroll(directInput, '#program-search-modal .category-modal-content');
+        return;
+    }
+
+    const programNameInput = document.getElementById('program_name');
+    if (programNameInput) {
+        programNameInput.value = programName;
+    }
+
+    const programIdInput = document.getElementById('program_reservation_id');
+    if (programIdInput) {
+        programIdInput.value = '';
+    }
+
+    selectedProgram = null;
+    updateProgramConfirmButton();
+    closeProgramSearchModal();
 }
 
 // 선택한 프로그램 적용
@@ -496,6 +696,42 @@ function applySelectedProgram() {
         educationRadio.checked = true;
     }
 
+    if (Array.isArray(selectedProgram.payment_methods)) {
+        document.querySelectorAll('input[name="payment_methods[]"]').forEach((checkbox) => {
+            checkbox.checked = selectedProgram.payment_methods.includes(checkbox.value);
+        });
+    }
+
     closeProgramSearchModal();
+}
+
+function focusElementWithoutScroll(element, containerSelector) {
+    if (!element) {
+        return;
+    }
+
+    const container = containerSelector ? document.querySelector(containerSelector) : null;
+
+    if (typeof element.focus === 'function') {
+        try {
+            element.focus({ preventScroll: true });
+            return;
+        } catch (error) {
+            // preventScroll 미지원 브라우저
+        }
+    }
+
+    const previousScroll = container
+        ? { top: container.scrollTop, left: container.scrollLeft }
+        : { top: window.scrollY, left: window.scrollX };
+
+    element.focus();
+
+    if (container) {
+        container.scrollTop = previousScroll.top;
+        container.scrollLeft = previousScroll.left;
+    } else {
+        window.scrollTo(previousScroll.left, previousScroll.top);
+    }
 }
 

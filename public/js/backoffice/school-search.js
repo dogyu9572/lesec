@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const confirmButton = document.getElementById('school-select-confirm');
     const searchForm = document.getElementById('school-search-form');
     const resultBody = document.getElementById('school-search-results');
+    const paginationContainer = document.getElementById('school-search-pagination');
 
     const schoolNameInput = document.getElementById('school_name');
     const schoolIdInput = document.getElementById('school_id');
@@ -20,6 +21,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const citySelect = document.getElementById('search_city');
     const districtSelect = document.getElementById('search_district');
     const levelSelect = document.getElementById('search_school_level');
+    const directInputField = document.getElementById('school_direct_input');
+    const directConfirmButton = document.getElementById('school-direct-confirm');
 
     const defaultSelection = {
         id: schoolIdInput ? schoolIdInput.value : null,
@@ -28,6 +31,7 @@ document.addEventListener('DOMContentLoaded', function () {
         district: memberDistrictInput ? memberDistrictInput.value : null,
     };
     let selectedSchool = { ...defaultSelection };
+    let currentPage = 1;
 
     if (citySelect && defaultSelection.city) {
         citySelect.dataset.defaultValue = defaultSelection.city;
@@ -44,12 +48,26 @@ document.addEventListener('DOMContentLoaded', function () {
      * 모달 열기
      */
     function openModal() {
+        const modalContent = searchModal.querySelector('.category-modal-content');
+        if (modalContent) {
+            modalContent.scrollTop = 0;
+        }
+
+        if (directInputField) {
+            directInputField.value = '';
+        }
+
+        if (closeButton && !closeButton.querySelector('i')) {
+            const icon = document.createElement('i');
+            icon.className = 'fas fa-times';
+            closeButton.appendChild(icon);
+        }
+
         searchModal.style.display = 'flex';
         document.body.classList.add('modal-open');
         toggleConfirmButton(Boolean(selectedSchool && selectedSchool.id));
-        loadSchools(function () {
-            highlightSelectedRow();
-        });
+        updateDirectInputState();
+        loadSchools(1, highlightSelectedRow);
     }
 
     /**
@@ -116,17 +134,19 @@ document.addEventListener('DOMContentLoaded', function () {
     /**
      * 학교 목록 불러오기
      */
-    function loadSchools(onComplete) {
+    function loadSchools(page = 1, onComplete) {
         const dataUrl = searchForm.dataset.url;
         if (!dataUrl) {
             return;
         }
 
-        resultBody.innerHTML = '<tr><td colspan="3" class="text-center">학교 정보를 불러오는 중입니다...</td></tr>';
+        currentPage = page;
+        resultBody.innerHTML = '<tr><td colspan="4" class="text-center">학교 정보를 불러오는 중입니다...</td></tr>';
         toggleConfirmButton(false);
 
         const formData = new FormData(searchForm);
         const params = new URLSearchParams(formData);
+        params.set('page', page);
 
         fetch(`${dataUrl}?${params.toString()}`, {
             method: 'GET',
@@ -138,7 +158,8 @@ document.addEventListener('DOMContentLoaded', function () {
             .then((response) => response.json())
             .then((data) => {
                 const schools = data.data || [];
-                renderSchoolRows(schools);
+                renderSchoolRows(schools, data.pagination);
+                renderSchoolPagination(data.pagination);
                 if (data.filters) {
                     populateSelect(citySelect, data.filters.cities || [], '시/도 선택');
                     populateSelect(districtSelect, data.filters.districts || [], '시/군/구 선택');
@@ -149,7 +170,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             })
             .catch(() => {
-                resultBody.innerHTML = '<tr><td colspan="3" class="text-center text-danger">학교 정보를 불러오는 중 오류가 발생했습니다.</td></tr>';
+                resultBody.innerHTML = '<tr><td colspan="4" class="text-center text-danger">학교 정보를 불러오는 중 오류가 발생했습니다.</td></tr>';
                 if (typeof onComplete === 'function') {
                     onComplete();
                 }
@@ -159,26 +180,33 @@ document.addEventListener('DOMContentLoaded', function () {
     /**
      * 학교 목록 렌더링
      */
-    function renderSchoolRows(schools) {
+    function renderSchoolRows(schools, pagination) {
         if (!schools.length) {
-            resultBody.innerHTML = '<tr><td colspan="3" class="text-center">검색 결과가 없습니다.</td></tr>';
+            resultBody.innerHTML = '<tr><td colspan="4" class="text-center">검색 결과가 없습니다.</td></tr>';
             toggleConfirmButton(false);
             return;
         }
 
         let template = '';
-        schools.forEach((school) => {
+        const total = pagination ? pagination.total : schools.length;
+        const perPage = pagination ? pagination.per_page : schools.length;
+        const page = pagination ? pagination.current_page : 1;
+        const baseNumber = pagination ? total - ( (page - 1) * perPage ) : schools.length;
+
+        schools.forEach((school, index) => {
             const schoolId = school.id ?? '';
             const schoolName = school.name ?? '';
             const schoolCity = school.city ?? '-';
             const schoolDistrict = school.district ?? '';
             const checked = selectedSchool && String(selectedSchool.id) === String(schoolId) ? 'checked' : '';
+            const rowNumber = Math.max(1, baseNumber - index);
 
             template += `
                 <tr class="school-row" data-id="${schoolId}" data-name="${schoolName}" data-city="${schoolCity}" data-district="${schoolDistrict}">
                     <td class="school-select-cell">
-                        <input type="checkbox" name="selected_school" value="${schoolId}" class="school-select-input" ${checked}>
+                    <input type="radio" name="selected_school" value="${schoolId}" class="school-select-input" ${checked}>
                     </td>
+                <td>${rowNumber}</td>
                     <td>${schoolCity}</td>
                     <td>${schoolName}</td>
                 </tr>
@@ -188,19 +216,13 @@ document.addEventListener('DOMContentLoaded', function () {
         resultBody.innerHTML = template;
 
         const rows = resultBody.querySelectorAll('.school-row');
-        const checkboxes = resultBody.querySelectorAll('input[name="selected_school"]');
+        const radios = resultBody.querySelectorAll('input[name="selected_school"]');
 
-        checkboxes.forEach((checkbox) => {
-            checkbox.addEventListener('change', function () {
+        radios.forEach((radio) => {
+            radio.addEventListener('change', function () {
                 if (!this.checked) {
                     return;
                 }
-
-                checkboxes.forEach((other) => {
-                    if (other !== this) {
-                        other.checked = false;
-                    }
-                });
 
                 const row = this.closest('.school-row');
                 if (!row) {
@@ -222,14 +244,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
         rows.forEach((row) => {
             row.addEventListener('click', function (event) {
-                const checkbox = this.querySelector('input[name="selected_school"]');
-                if (!checkbox) {
+                const radio = this.querySelector('input[name="selected_school"]');
+                if (!radio) {
                     return;
                 }
 
-                if (event.target !== checkbox) {
-                    checkbox.checked = true;
-                    checkbox.dispatchEvent(new Event('change'));
+                if (event.target !== radio) {
+                    radio.checked = true;
+                    radio.dispatchEvent(new Event('change'));
                 }
             });
         });
@@ -239,10 +261,10 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!selectedSchool || !selectedSchool.id) {
             return;
         }
-        const checkbox = resultBody.querySelector(`.school-row[data-id="${selectedSchool.id}"] input[name="selected_school"]`);
-        if (checkbox) {
-            checkbox.checked = true;
-            checkbox.dispatchEvent(new Event('change'));
+        const radio = resultBody.querySelector(`.school-row[data-id="${selectedSchool.id}"] input[name="selected_school"]`);
+        if (radio) {
+            radio.checked = true;
+            radio.dispatchEvent(new Event('change'));
         }
     }
 
@@ -261,7 +283,7 @@ document.addEventListener('DOMContentLoaded', function () {
         event.preventDefault();
         selectedSchool = null;
         toggleConfirmButton(false);
-        loadSchools();
+        loadSchools(1, highlightSelectedRow);
     });
 
     /**
@@ -275,9 +297,89 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             selectedSchool = null;
             toggleConfirmButton(false);
-            loadSchools();
+            loadSchools(1, highlightSelectedRow);
         });
     });
+
+    /**
+     * 직접 입력 버튼 상태 업데이트
+     */
+    function updateDirectInputState() {
+        if (!directConfirmButton) {
+            return;
+        }
+
+        const hasValue = directInputField && directInputField.value.trim().length > 0;
+        directConfirmButton.disabled = !hasValue;
+
+        if (hasValue) {
+            focusInputWithoutScroll(directInputField, '#school-search-modal .category-modal-content');
+        }
+    }
+
+    function focusInputWithoutScroll(element, containerSelector) {
+        if (!element) {
+            return;
+        }
+
+        const container = containerSelector ? document.querySelector(containerSelector) : null;
+
+        if (typeof element.focus === 'function') {
+            try {
+                element.focus({ preventScroll: true });
+                return;
+            } catch (error) {
+                // 브라우저가 preventScroll을 지원하지 않는 경우
+            }
+        }
+
+        const previousScroll = container
+            ? { top: container.scrollTop, left: container.scrollLeft }
+            : { top: window.scrollY, left: window.scrollX };
+
+        element.focus();
+
+        if (container) {
+            container.scrollTop = previousScroll.top;
+            container.scrollLeft = previousScroll.left;
+        } else {
+            window.scrollTo(previousScroll.left, previousScroll.top);
+        }
+    }
+
+    directInputField?.addEventListener('input', function () {
+        selectedSchool = null;
+        toggleConfirmButton(false);
+        updateDirectInputState();
+    });
+
+    directConfirmButton?.addEventListener('click', function () {
+        const directValue = directInputField ? directInputField.value.trim() : '';
+        if (!directValue) {
+            alert('학교명을 입력해 주세요.');
+            focusInputWithoutScroll(directInputField, '#school-search-modal .category-modal-content');
+            return;
+        }
+
+        if (schoolNameInput) {
+            schoolNameInput.value = directValue;
+        }
+        if (schoolIdInput) {
+            schoolIdInput.value = '';
+        }
+        if (memberCityInput) {
+            memberCityInput.value = citySelect?.value || '';
+        }
+        if (memberDistrictInput) {
+            memberDistrictInput.value = districtSelect?.value || '';
+        }
+
+        selectedSchool = null;
+        toggleConfirmButton(false);
+        closeModal();
+    });
+
+    updateDirectInputState();
 
     /**
      * 확인 버튼 클릭 시 값 반영
@@ -309,4 +411,54 @@ document.addEventListener('DOMContentLoaded', function () {
 
         closeModal();
     });
+
+    function renderSchoolPagination(pagination) {
+        if (!paginationContainer) {
+            return;
+        }
+
+        const lastPage = Math.max(1, pagination?.last_page ?? 1);
+        const current = Math.min(lastPage, pagination?.current_page ?? currentPage);
+        const startPage = Math.max(1, current - 2);
+        const endPage = Math.min(lastPage, current + 2);
+
+        let html = '<nav aria-label="페이지 네비게이션"><ul class="pagination">';
+
+        const pageItem = (page, label, disabled = false) => {
+            if (disabled) {
+                return `<li class="page-item disabled"><span class="page-link">${label}</span></li>`;
+            }
+            return `<li class="page-item"><a href="#" class="page-link" data-page="${page}">${label}</a></li>`;
+        };
+
+        html += pageItem(1, '<i class="fas fa-angle-double-left"></i>', current === 1);
+        html += pageItem(current - 1, '<i class="fas fa-chevron-left"></i>', current === 1);
+
+        for (let page = startPage; page <= endPage; page++) {
+            if (page === current) {
+                html += `<li class="page-item active"><span class="page-link">${page}</span></li>`;
+            } else {
+                html += pageItem(page, page);
+            }
+        }
+
+        html += pageItem(current + 1, '<i class="fas fa-chevron-right"></i>', current === lastPage);
+        html += pageItem(lastPage, '<i class="fas fa-angle-double-right"></i>', current === lastPage);
+
+        html += '</ul></nav>';
+        paginationContainer.innerHTML = html;
+
+        paginationContainer.querySelectorAll('a[data-page]').forEach((link) => {
+            link.addEventListener('click', function (event) {
+                event.preventDefault();
+                const targetPage = Number(this.dataset.page);
+                if (!targetPage || targetPage === currentPage) {
+                    return;
+                }
+                selectedSchool = null;
+                toggleConfirmButton(false);
+                loadSchools(targetPage, highlightSelectedRow);
+            });
+        });
+    }
 });

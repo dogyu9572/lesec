@@ -265,6 +265,21 @@ Route::prefix('backoffice')->middleware(['backoffice'])->group(function () {
     Route::get('programs', [ProgramController::class, 'index'])->name('backoffice.programs.index');
     Route::put('programs/{program}', [ProgramController::class, 'update'])->name('backoffice.programs.update');
 
+    // 단체 신청 내역 관리
+    Route::prefix('group-applications')->name('backoffice.group-applications.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Backoffice\GroupApplicationController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\Backoffice\GroupApplicationController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\Backoffice\GroupApplicationController::class, 'store'])->name('store');
+        Route::get('/{application}/edit', [\App\Http\Controllers\Backoffice\GroupApplicationController::class, 'edit'])->name('edit');
+        Route::put('/{application}', [\App\Http\Controllers\Backoffice\GroupApplicationController::class, 'update'])->name('update');
+        Route::delete('/{application}', [\App\Http\Controllers\Backoffice\GroupApplicationController::class, 'destroy'])->name('destroy');
+        Route::get('/search-schools', [\App\Http\Controllers\Backoffice\GroupApplicationController::class, 'searchSchools'])->name('search-schools');
+        Route::get('/search-members', [\App\Http\Controllers\Backoffice\GroupApplicationController::class, 'searchMembers'])->name('search-members');
+        Route::get('/search-programs', [\App\Http\Controllers\Backoffice\GroupApplicationController::class, 'searchPrograms'])->name('search-programs');
+        Route::get('/{application}/roster', [\App\Http\Controllers\Backoffice\GroupApplicationController::class, 'downloadRoster'])->name('download-roster');
+        Route::get('/{application}/quotation', [\App\Http\Controllers\Backoffice\GroupApplicationController::class, 'downloadQuotation'])->name('download-quotation');
+    });
+
     // 단체 프로그램 관리
     Route::prefix('group-programs')->name('backoffice.group-programs.')->group(function () {
         Route::get('/', [GroupProgramController::class, 'index'])->name('index');

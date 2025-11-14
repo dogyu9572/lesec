@@ -1,6 +1,6 @@
 @extends('backoffice.layouts.app')
 
-@section('title', '개인 신청 내역 등록')
+@section('title', '단체 신청 내역 등록')
 
 @section('styles')
 <link rel="stylesheet" href="{{ asset('css/common/buttons.css') }}">
@@ -11,21 +11,17 @@
 
 @section('content')
 @php
+    $generalApplicationError = $errors->first('application');
+    $otherErrors = collect($errors->getMessages())->except('application')->flatten();
     $oldParticipationDate = old('participation_date');
     $participationDateDisplay = $oldParticipationDate ? \Carbon\Carbon::parse($oldParticipationDate)->format('Y.m.d') : '';
     $oldParticipationFee = old('participation_fee');
     $participationFeeDisplay = $oldParticipationFee !== null && $oldParticipationFee !== '' ? number_format((int) $oldParticipationFee) : '';
-    $oldGrade = old('applicant_grade');
-    $oldClass = old('applicant_class');
-    $oldDrawResult = old('draw_result', \App\Models\ProgramApplication::DRAW_RESULT_PENDING);
-@endphp
-@php
-    $generalApplicationError = $errors->first('application');
-    $otherErrors = collect($errors->getMessages())->except('application')->flatten();
+    $oldApplicantCount = old('applicant_count', 1);
 @endphp
 <div class="admin-form-container">
     <div class="form-header">
-        <a href="{{ route('backoffice.individual-applications.index') }}" class="btn btn-secondary">
+        <a href="{{ route('backoffice.group-applications.index') }}" class="btn btn-secondary">
             <i class="fas fa-arrow-left"></i> <span class="btn-text">목록으로</span>
         </a>
     </div>
@@ -56,33 +52,26 @@
         <div class="col-12">
             <div class="admin-card">
                 <div class="admin-card-header">
-                    <h6>개인 신청 내역 등록</h6>
+                    <h6>단체 신청 내역 등록</h6>
                 </div>
                 <div class="admin-card-body">
-                    <form method="POST" action="{{ route('backoffice.individual-applications.store') }}">
+                    <div id="application-search-config"
+                         data-member-search-url="{{ route('backoffice.group-applications.search-members') }}"
+                         data-program-search-url="{{ route('backoffice.group-applications.search-programs') }}">
+                    </div>
+                    <form method="POST" action="{{ route('backoffice.group-applications.store') }}">
                         @csrf
 
                         <div class="program-section">
                             <div class="section-title">프로그램 정보</div>
                             <div class="form-grid grid-2">
-                                <div class="form-group">
-                                    <label for="reception_type">신청유형</label>
-                                    <select id="reception_type" name="reception_type" required>
-                                        @foreach($receptionTypes as $key => $name)
-                                            <option value="{{ $key }}" @selected(old('reception_type', 'first_come') == $key)>{{ $name }}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('reception_type')
-                                        <div class="invalid-feedback d-block">{{ $message }}</div>
-                                    @enderror
-                                </div>
                                 <div>
                                     <label>교육유형</label>
                                     <div class="radio-group">
-                                        @foreach($educationTypes as $key => $name)
+                                        @foreach(data_get($formOptions, 'education_types', []) as $value => $label)
                                             <label class="radio-label">
-                                                <input type="radio" name="education_type" value="{{ $key }}" @checked(old('education_type') == $key)>
-                                                <span>{{ $name }}</span>
+                                                <input type="radio" name="education_type" value="{{ $value }}" @checked(old('education_type') === $value)>
+                                                <span>{{ $label }}</span>
                                             </label>
                                         @endforeach
                                     </div>
@@ -100,9 +89,6 @@
                                         </button>
                                     </div>
                                     @error('program_reservation_id')
-                                        <div class="invalid-feedback d-block">{{ $message }}</div>
-                                    @enderror
-                                    @error('program_name')
                                         <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
                                 </div>
@@ -124,15 +110,18 @@
                                 </div>
                                 <div>
                                     <label>결제방법</label>
-                                    <div class="radio-group">
-                                        @foreach($paymentMethods as $key => $name)
-                                            <label class="radio-label">
-                                                <input type="radio" name="payment_method" value="{{ $key }}" @checked(old('payment_method') == $key)>
-                                                <span>{{ $name }}</span>
+                                    <div class="checkbox-group">
+                                        @foreach(data_get($formOptions, 'payment_methods', []) as $value => $label)
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" name="payment_methods[]" value="{{ $value }}" @checked(in_array($value, old('payment_methods', []), true))>
+                                                <span>{{ $label }}</span>
                                             </label>
                                         @endforeach
                                     </div>
-                                    @error('payment_method')
+                                    @error('payment_methods')
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
+                                    @error('payment_methods.*')
                                         <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
                                 </div>
@@ -144,103 +133,79 @@
                             <div class="form-grid grid-2">
                                 <div class="form-group">
                                     <label for="application_number">신청번호</label>
-                                    <input type="text" id="application_number" value="저장 후 자동 생성" readonly>
+                                    <input type="text" id="application_number" value="저장 시 자동 생성" readonly>
                                 </div>
                                 <div class="form-group">
-                                    <label for="draw_result_select">추첨결과</label>
-                                    <input type="hidden" id="draw_result" name="draw_result" value="{{ $oldDrawResult }}">
-                                    <select id="draw_result_select" class="form-control" @if(old('reception_type', 'first_come') !== 'lottery') disabled @endif>
-                                        <option value="">-</option>
-                                        @foreach($drawResults as $key => $name)
-                                            <option value="{{ $key }}" @selected($oldDrawResult === $key)>{{ $name }}</option>
+                                    <label for="application_status">신청상태</label>
+                                    <select id="application_status" name="application_status">
+                                        @foreach(data_get($formOptions, 'application_statuses', []) as $value => $label)
+                                            <option value="{{ $value }}" @selected(old('application_status', 'pending') === $value)>{{ $label }}</option>
                                         @endforeach
                                     </select>
-                                    @error('draw_result')
+                                    @error('application_status')
                                         <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
                                 </div>
                                 <div class="form-group">
                                     <label for="applicant_name">신청자명</label>
                                     <div class="school-search-wrapper">
-                                    <input type="text" id="applicant_name" name="applicant_name" value="{{ old('applicant_name') }}" readonly>
-                                    <input type="hidden" id="member_id" name="member_id" value="{{ old('member_id') }}">
-                                    <button type="button" id="member-search-btn" class="btn btn-secondary btn-sm">
-                                        <i class="fas fa-search"></i> 회원 검색
-                                    </button>
+                                        <input type="text" id="applicant_name" name="applicant_name" value="{{ old('applicant_name') }}" readonly>
+                                        <input type="hidden" id="member_id" name="member_id" value="{{ old('member_id') }}">
+                                        <button type="button" id="member-search-btn" class="btn btn-secondary btn-sm">
+                                            <i class="fas fa-search"></i> 회원 검색
+                                        </button>
                                     </div>
-                                    @error('member_id')
-                                        <div class="invalid-feedback d-block">{{ $message }}</div>
-                                    @enderror
                                     @error('applicant_name')
                                         <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
                                 </div>
                                 <div class="form-group">
-                                    <label for="school_name">학교/학교</label>
+                                    <label for="applicant_contact">연락처</label>
+                                    <input type="text" id="applicant_contact" name="applicant_contact" value="{{ old('applicant_contact') }}">
+                                    @error('applicant_contact')
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="form-group">
+                                    <label for="school_level">학교급</label>
+                                    <input type="text" id="school_level" name="school_level" value="{{ old('school_level') }}">
+                                    @error('school_level')
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="form-group">
+                                    <label for="school_name">학교명</label>
                                     <div class="school-search-wrapper">
-                                        <input type="text" id="school_name" name="applicant_school_name" value="{{ old('applicant_school_name') }}" readonly>
-                                        <input type="hidden" id="school_id" value="">
+                                        <input type="hidden" id="school_id" value="{{ old('school_id') }}">
+                                        <input type="text" id="school_name" name="school_name" value="{{ old('school_name') }}" readonly>
                                         <button type="button" id="school-search-btn" class="btn btn-secondary btn-sm">
                                             <i class="fas fa-search"></i> 검색
                                         </button>
                                     </div>
-                                    @error('applicant_school_name')
+                                    @error('school_name')
                                         <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
                                 </div>
                                 <div class="form-group">
-                                    <label>학년/반</label>
-                                    <div class="grade-class-wrapper">
-                                        <div class="grade-class-item">
-                                            <input type="hidden" id="applicant_grade" name="applicant_grade" value="{{ old('applicant_grade') }}">
-                                            <input type="text" id="applicant_grade_display" value="{{ $oldGrade ? $oldGrade . '학년' : '' }}" readonly>
-                                        </div>
-                                        <div class="grade-class-item">
-                                            <input type="hidden" id="applicant_class" name="applicant_class" value="{{ old('applicant_class') }}">
-                                            <input type="text" id="applicant_class_display" value="{{ $oldClass ? $oldClass . '반' : '' }}" readonly>
-                                        </div>
-                                    </div>
-                                    @error('applicant_grade')
-                                        <div class="invalid-feedback d-block">{{ $message }}</div>
-                                    @enderror
-                                    @error('applicant_class')
-                                        <div class="invalid-feedback d-block">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                <div class="form-group">
-                                    <label>연락처</label>
-                                    <div class="grade-class-wrapper contact-wrapper">
-                                        <div class="grade-class-item">
-                                            <input type="text" id="applicant_contact" name="applicant_contact" value="{{ old('applicant_contact') }}" readonly>
-                                        </div>
-                                        <div class="grade-class-item">
-                                            <input type="text" id="guardian_contact" name="guardian_contact" value="{{ old('guardian_contact') }}" readonly>
-                                        </div>
-                                    </div>
-                                    @error('applicant_contact')
-                                        <div class="invalid-feedback d-block">{{ $message }}</div>
-                                    @enderror
-                                    @error('guardian_contact')
+                                    <label for="applicant_count">신청인원</label>
+                                    <input type="number" id="applicant_count" name="applicant_count" min="1" value="{{ $oldApplicantCount }}">
+                                    @error('applicant_count')
                                         <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
                                 </div>
                                 <div>
                                     <label>결제상태</label>
                                     <div class="radio-group">
-                                        @foreach($paymentStatuses as $key => $name)
+                                        @foreach(data_get($formOptions, 'payment_statuses', []) as $value => $label)
                                             <label class="radio-label">
-                                                <input type="radio" name="payment_status" value="{{ $key }}" @checked(old('payment_status', 'unpaid') == $key)>
-                                                <span>{{ $name }}</span>
+                                                <input type="radio" name="payment_status" value="{{ $value }}" @checked(old('payment_status', 'unpaid') === $value)>
+                                                <span>{{ $label }}</span>
                                             </label>
                                         @endforeach
                                     </div>
                                     @error('payment_status')
                                         <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
-                                </div>
-                                <div class="form-group">
-                                    <label for="applied_at">신청일시</label>
-                                    <input type="text" id="applied_at" value="저장 시 자동 입력" readonly>
                                 </div>
                             </div>
                         </div>
@@ -249,7 +214,7 @@
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-save"></i> 저장
                             </button>
-                            <a href="{{ route('backoffice.individual-applications.index') }}" class="btn btn-secondary">
+                            <a href="{{ route('backoffice.group-applications.index') }}" class="btn btn-secondary">
                                 <i class="fas fa-times"></i> 취소
                             </a>
                         </div>
@@ -264,12 +229,9 @@
 @include('backoffice.modals.member-search', ['selectionMode' => 'single', 'formAction' => route('backoffice.member-groups.search-members')])
 @include('backoffice.modals.program-search', [
     'mode' => 'reservation',
-    'searchAction' => route('backoffice.individual-applications.search-programs'),
-    'educationTypes' => $educationTypes ?? [],
+    'searchAction' => route('backoffice.group-applications.search-programs'),
+    'educationTypes' => data_get($formOptions, 'education_types', []),
     'modalTitle' => '프로그램 검색',
-    'showDirectInputNotice' => true,
-    'programInputId' => 'program_name',
-    'showFooter' => false,
 ])
 @endsection
 
@@ -277,4 +239,5 @@
 <script src="{{ asset('js/backoffice/school-search.js') }}"></script>
 <script src="{{ asset('js/backoffice/individual-application-search.js') }}"></script>
 @endsection
+
 

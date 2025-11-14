@@ -3,6 +3,8 @@
  */
 
 let currentPage = 1;
+let programSearchUrl = '';
+let directInputTargetInputId = 'program_name';
 
 document.addEventListener('DOMContentLoaded', function() {
     // 제한없음 체크박스 처리
@@ -44,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // 모달 내 검색 버튼
-    const popupSearchBtn = document.getElementById('popup-search-btn');
+    const popupSearchBtn = document.getElementById('popup-program-search-btn') || document.getElementById('popup-search-btn');
     if (popupSearchBtn) {
         popupSearchBtn.addEventListener('click', function() {
             searchPrograms(1);
@@ -52,7 +54,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // 모달 내 검색어 입력 시 엔터키 처리
-    const popupSearchKeyword = document.getElementById('popup_search_keyword');
+    const popupSearchKeyword = document.getElementById('popup_program_keyword') || document.getElementById('popup_direct_program_name') || document.getElementById('popup_search_keyword');
     if (popupSearchKeyword) {
         popupSearchKeyword.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
@@ -60,19 +62,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 searchPrograms(1);
             }
         });
+        popupSearchKeyword.addEventListener('input', updateDirectInputButtonState);
     }
 
     // 확인 버튼 (프로그램명이 없을 경우 직접 입력)
     const popupConfirmBtn = document.getElementById('popup-confirm-btn');
     if (popupConfirmBtn) {
-        popupConfirmBtn.addEventListener('click', function() {
-            const searchKeyword = document.getElementById('popup_search_keyword').value.trim();
-            if (searchKeyword) {
-                selectProgramName(searchKeyword);
-            } else {
-                alert('프로그램명을 입력해주세요.');
-            }
-        });
+        popupConfirmBtn.addEventListener('click', applyDirectInputProgramName);
     }
 
     // 날짜 입력 필드 초기화 (showPicker 사용 - 클릭 시에만)
@@ -118,6 +114,16 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }, false);
     }
+    const modal = document.getElementById('program-search-modal');
+    if (modal) {
+        programSearchUrl = modal.dataset.programSearchUrl || '/backoffice/group-programs/search-programs';
+        directInputTargetInputId = modal.dataset.programInputId || 'program_name';
+    } else {
+        programSearchUrl = '/backoffice/group-programs/search-programs';
+        directInputTargetInputId = 'program_name';
+    }
+
+    updateDirectInputButtonState();
 });
 
 /**
@@ -126,8 +132,23 @@ document.addEventListener('DOMContentLoaded', function() {
 function openProgramSearchModal() {
     const modal = document.getElementById('program-search-modal');
     if (modal) {
+        const closeButton = modal.querySelector('.category-modal-close');
+        if (closeButton) {
+            let icon = closeButton.querySelector('i');
+            if (!icon) {
+                icon = document.createElement('i');
+                closeButton.appendChild(icon);
+            }
+            icon.className = 'fas fa-times';
+        }
+
         modal.style.display = 'flex';
+        const modalContent = modal.querySelector('.category-modal-content');
+        if (modalContent) {
+            modalContent.scrollTop = 0;
+        }
         currentPage = 1;
+        updateDirectInputButtonState();
         searchPrograms(1);
     }
 }
@@ -148,8 +169,10 @@ function closeProgramSearchModal() {
  */
 function searchPrograms(page = 1) {
     currentPage = page;
-    const educationType = document.getElementById('popup_education_type').value;
-    const searchKeyword = document.getElementById('popup_search_keyword').value;
+    const educationTypeSelect = document.getElementById('popup_education_type');
+    const keywordInput = document.getElementById('popup_program_keyword') || document.getElementById('popup_search_keyword');
+    const educationType = educationTypeSelect ? educationTypeSelect.value : '';
+    const searchKeyword = keywordInput ? keywordInput.value : '';
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
     const params = new URLSearchParams({
@@ -159,7 +182,7 @@ function searchPrograms(page = 1) {
         per_page: 10
     });
 
-    fetch(`/backoffice/group-programs/search-programs?${params.toString()}`, {
+    fetch(`${programSearchUrl}?${params.toString()}`, {
         method: 'GET',
         headers: {
             'X-CSRF-TOKEN': csrfToken,
@@ -175,11 +198,16 @@ function searchPrograms(page = 1) {
             document.getElementById('popup-program-list-body').innerHTML = 
                 '<tr><td colspan="3" class="text-center">검색 중 오류가 발생했습니다.</td></tr>';
         }
+        updateDirectInputButtonState();
     })
     .catch(error => {
         console.error('Error:', error);
-        document.getElementById('popup-program-list-body').innerHTML = 
+        const tbody = document.getElementById('popup-program-list-body');
+        if (tbody) {
+            tbody.innerHTML =
             '<tr><td colspan="3" class="text-center">검색 중 오류가 발생했습니다.</td></tr>';
+        }
+        updateDirectInputButtonState();
     });
 }
 
@@ -191,7 +219,10 @@ function renderProgramList(programs, pagination) {
     
     if (!programs || programs.length === 0) {
         tbody.innerHTML = '<tr><td colspan="3" class="text-center">검색 결과가 없습니다.</td></tr>';
-        document.getElementById('popup-pagination').innerHTML = '';
+        const paginationContainer = document.getElementById('popup-program-pagination') || document.getElementById('popup-pagination');
+        if (paginationContainer) {
+            paginationContainer.innerHTML = '';
+        }
         return;
     }
 
@@ -219,40 +250,42 @@ function renderProgramList(programs, pagination) {
  * 페이지네이션 렌더링
  */
 function renderPagination(pagination) {
-    const paginationContainer = document.getElementById('popup-pagination');
+    const paginationContainer = document.getElementById('popup-program-pagination') || document.getElementById('popup-pagination');
     
-    if (pagination.last_page <= 1) {
-        paginationContainer.innerHTML = '';
+    if (!paginationContainer) {
         return;
     }
 
-    let html = '<div class="pagination">';
-    
-    // 첫 페이지
+    let html = '<nav aria-label="페이지 네비게이션"><ul class="pagination">';
+
     if (pagination.current_page > 1) {
-        html += `<a href="#" class="page-link" onclick="searchPrograms(1); return false;">&laquo;</a>`;
-        html += `<a href="#" class="page-link" onclick="searchPrograms(${pagination.current_page - 1}); return false;">&lsaquo;</a>`;
+        html += `<li class="page-item"><a href="#" class="page-link" onclick="searchPrograms(1); return false;"><i class="fas fa-angle-double-left"></i></a></li>`;
+        html += `<li class="page-item"><a href="#" class="page-link" onclick="searchPrograms(${pagination.current_page - 1}); return false;"><i class="fas fa-chevron-left"></i></a></li>`;
+    } else {
+        html += '<li class="page-item disabled"><span class="page-link"><i class="fas fa-angle-double-left"></i></span></li>';
+        html += '<li class="page-item disabled"><span class="page-link"><i class="fas fa-chevron-left"></i></span></li>';
     }
 
-    // 페이지 번호
     const startPage = Math.max(1, pagination.current_page - 2);
     const endPage = Math.min(pagination.last_page, pagination.current_page + 2);
 
     for (let i = startPage; i <= endPage; i++) {
         if (i === pagination.current_page) {
-            html += `<span class="page-link active">${i}</span>`;
+            html += `<li class="page-item active"><span class="page-link">${i}</span></li>`;
         } else {
-            html += `<a href="#" class="page-link" onclick="searchPrograms(${i}); return false;">${i}</a>`;
+            html += `<li class="page-item"><a href="#" class="page-link" onclick="searchPrograms(${i}); return false;">${i}</a></li>`;
         }
     }
 
-    // 마지막 페이지
     if (pagination.current_page < pagination.last_page) {
-        html += `<a href="#" class="page-link" onclick="searchPrograms(${pagination.current_page + 1}); return false;">&rsaquo;</a>`;
-        html += `<a href="#" class="page-link" onclick="searchPrograms(${pagination.last_page}); return false;">&raquo;</a>`;
+        html += `<li class="page-item"><a href="#" class="page-link" onclick="searchPrograms(${pagination.current_page + 1}); return false;"><i class="fas fa-chevron-right"></i></a></li>`;
+        html += `<li class="page-item"><a href="#" class="page-link" onclick="searchPrograms(${pagination.last_page}); return false;"><i class="fas fa-angle-double-right"></i></a></li>`;
+    } else {
+        html += '<li class="page-item disabled"><span class="page-link"><i class="fas fa-chevron-right"></i></span></li>';
+        html += '<li class="page-item disabled"><span class="page-link"><i class="fas fa-angle-double-right"></i></span></li>';
     }
 
-    html += '</div>';
+    html += '</ul></nav>';
     paginationContainer.innerHTML = html;
 }
 
@@ -260,9 +293,62 @@ function renderPagination(pagination) {
  * 프로그램명 선택
  */
 function selectProgramName(programName) {
-    const programNameInput = document.getElementById('program_name');
+    const programNameInput = document.getElementById(directInputTargetInputId);
     if (programNameInput) {
         programNameInput.value = programName;
         closeProgramSearchModal();
+    }
+}
+
+function updateDirectInputButtonState() {
+    const keywordField = document.getElementById('popup_direct_program_name') || document.getElementById('popup_program_keyword') || document.getElementById('popup_search_keyword');
+    const popupConfirmBtn = document.getElementById('popup-confirm-btn');
+    if (keywordField) {
+        keywordField.disabled = false;
+        keywordField.readOnly = false;
+        focusInputWithoutScroll(keywordField, '#program-search-modal .category-modal-content');
+    }
+    if (popupConfirmBtn) {
+        popupConfirmBtn.disabled = false;
+    }
+}
+
+function applyDirectInputProgramName() {
+    const keywordField = document.getElementById('popup_direct_program_name') || document.getElementById('popup_program_keyword') || document.getElementById('popup_search_keyword');
+    const programName = keywordField ? keywordField.value.trim() : '';
+
+    if (!programName) {
+        alert('프로그램명을 입력해주세요.');
+        return;
+    }
+
+    selectProgramName(programName);
+}
+
+function focusInputWithoutScroll(element, containerSelector) {
+    if (!element) {
+        return;
+    }
+
+    const container = containerSelector ? document.querySelector(containerSelector) : null;
+
+    if (typeof element.focus === 'function') {
+        try {
+            element.focus({ preventScroll: true });
+            return;
+        } catch (error) {
+            // preventScroll 미지원 브라우저
+        }
+    }
+
+    const previousScroll = container ? { top: container.scrollTop, left: container.scrollLeft } : { top: window.scrollY, left: window.scrollX };
+
+    element.focus();
+
+    if (container) {
+        container.scrollTop = previousScroll.top;
+        container.scrollLeft = previousScroll.left;
+    } else {
+        window.scrollTo(previousScroll.left, previousScroll.top);
     }
 }

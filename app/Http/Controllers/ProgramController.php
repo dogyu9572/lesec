@@ -3,17 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Program\IndividualProgramApplyRequest;
+use App\Http\Requests\Program\GroupProgramApplyRequest;
 use App\Models\Program;
 use App\Models\ProgramApplication;
 use App\Models\ProgramReservation;
+use App\Models\GroupApplication;
 use App\Models\Member;
 use App\Services\ProgramService;
 use App\Services\ProgramReservationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class ProgramController extends Controller
 {
@@ -186,7 +190,7 @@ class ProgramController extends Controller
      */
     public function submitIndividualApplication(IndividualProgramApplyRequest $request, $type): RedirectResponse
     {
-        $reservation = $this->programReservationService->getIndividualProgramById((int) $request->input('program_reservation_id'));
+        $reservation = $this->programReservationService->getGroupProgramById((int) $request->input('program_reservation_id'));
 
         if (!$reservation || $reservation->education_type !== $type) {
             return back()
@@ -256,6 +260,88 @@ class ProgramController extends Controller
     }
 
     /**
+     * 단체 신청 저장
+     */
+    public function submitGroupApplication(GroupProgramApplyRequest $request, $type): JsonResponse
+    {
+        $reservationId = (int) $request->input('program_reservation_id');
+        $reservation = $this->programReservationService->getGroupProgramById($reservationId);
+
+        if (!$reservation || $reservation->education_type !== $type) {
+            return response()->json([
+                'success' => false,
+                'message' => '유효하지 않은 프로그램입니다.',
+            ], 400);
+        }
+
+        $member = Auth::guard('member')->user();
+
+        if (!$member instanceof Member) {
+            return response()->json([
+                'success' => false,
+                'message' => '로그인 후 신청해 주세요.',
+            ], 401);
+        }
+
+        $memberContact = $member->contact;
+        if (empty($memberContact)) {
+            return response()->json([
+                'success' => false,
+                'message' => '회원 정보에 연락처가 등록되어 있지 않습니다. 마이페이지에서 연락처를 먼저 등록해주세요.',
+            ], 400);
+        }
+
+        $participationDate = optional($reservation->education_start_date)->toDateString();
+
+        if ($participationDate === null) {
+            return response()->json([
+                'success' => false,
+                'message' => '참가일 정보를 확인할 수 없습니다. 관리자에게 문의해 주세요.',
+            ], 400);
+        }
+
+        $paymentMethod = null;
+        if (is_array($reservation->payment_methods) && count($reservation->payment_methods) > 0) {
+            $paymentMethod = $reservation->payment_methods[0];
+        }
+
+        try {
+            $application = $this->programReservationService->createGroupApplication(
+                $reservation,
+                [
+                    'member_id' => $member->id,
+                    'participation_date' => $participationDate,
+                    'applicant_count' => (int) $request->input('applicant_count'),
+                    'participation_fee' => $reservation->education_fee,
+                    'applicant_name' => $member->name,
+                    'applicant_contact' => $memberContact,
+                    'school_name' => $member->school_name,
+                    'school_level' => $member->school?->school_level ?? null,
+                    'payment_method' => $paymentMethod,
+                    'payment_status' => 'unpaid',
+                    'application_status' => 'pending',
+                    'reception_status' => 'application',
+                ]
+            );
+        } catch (\InvalidArgumentException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 400);
+        }
+
+        $request->session()->put('group_application.completed', [
+            'application_id' => $application->id,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => '신청이 완료되었습니다.',
+            'redirect_url' => route('program.complete.group', [$type]),
+        ]);
+    }
+
+    /**
      * 단체 신청 완료 페이지
      */
     public function completeGroup(Request $request, $type)
@@ -265,7 +351,32 @@ class ProgramController extends Controller
         $sNum = $this->programService->getSubMenuNumber($type);
         $gName = "프로그램";
         $sName = $this->programService->getTypeName($type);
-        $completionContext = $this->buildGroupCompletionContext($request, $program);
+
+        $sessionData = $request->session()->pull('group_application.completed');
+
+        if (!$sessionData || empty($sessionData['application_id'])) {
+            return redirect()
+                ->route('program.select.group', [$type])
+                ->withErrors(['application' => '정상적인 신청 완료 단계가 아닙니다. 다시 신청을 진행해주세요.']);
+        }
+
+        $application = GroupApplication::query()
+            ->with('reservation')
+            ->find($sessionData['application_id']);
+
+        if (!$application) {
+            return redirect()
+                ->route('program.select.group', [$type])
+                ->withErrors(['application' => '신청 정보를 찾을 수 없습니다. 다시 신청을 진행해주세요.']);
+        }
+
+        if ($application->reservation && $application->reservation->education_type !== $type) {
+            return redirect()
+                ->route('program.select.group', [$type])
+                ->withErrors(['application' => '선택하신 교육유형과 신청 정보가 일치하지 않습니다.']);
+        }
+
+        $completionContext = $this->buildGroupCompletionContext($application);
 
         return view('program.complete-group', compact('gNum', 'sNum', 'gName', 'sName', 'type', 'program', 'completionContext'));
     }
@@ -336,15 +447,28 @@ class ProgramController extends Controller
         );
     }
 
-    private function buildGroupCompletionContext(Request $request, ?Program $program): array
+    private function buildGroupCompletionContext(GroupApplication $application): array
     {
+        $participationTimestamp = $application->participation_date
+            ? strtotime((string) $application->participation_date)
+            : false;
+
+        $appliedTimestamp = $application->applied_at
+            ? strtotime((string) $application->applied_at)
+            : false;
+
+        $programName = '';
+        if ($application->reservation) {
+            $programName = $application->reservation->program_name ?? '';
+        }
+
         return [
-            'program_name' => $program ? ($program->title ?? $program->name ?? '') : '',
-            'education_date' => $request->input('education_date', 'YYYY.MM.DD'),
-            'application_number' => $request->input('application_number', '신청번호 표시'),
-            'applicant_name' => $request->input('applicant_name', '홍길동'),
-            'applicant_count' => $request->input('applicant_count', '10명'),
-            'submitted_at' => $request->input('submitted_at', '2025-09-10 09:00'),
+            'program_name' => $programName,
+            'education_date' => $participationTimestamp ? date('Y.m.d', $participationTimestamp) : '교육일이 지정되지 않았습니다.',
+            'application_number' => $application->application_number,
+            'applicant_name' => $application->applicant_name,
+            'applicant_count' => $application->applicant_count . '명',
+            'submitted_at' => $appliedTimestamp ? date('Y.m.d H:i', $appliedTimestamp) : now()->format('Y.m.d H:i'),
         ];
     }
 

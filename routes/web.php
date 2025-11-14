@@ -78,6 +78,10 @@ Route::prefix('program')->name('program.')->group(function () {
 		->where('type', 'middle_semester|middle_vacation|high_semester|high_vacation|special')
 		->name('apply.individual.submit');
 	
+	Route::post('/{type}/apply-group', [ProgramController::class, 'submitGroupApplication'])
+		->where('type', 'middle_semester|middle_vacation|high_semester|high_vacation|special')
+		->name('apply.group.submit');
+	
 	// 교육 선택 페이지
 	Route::get('/{type}/select-group', [ProgramController::class, 'selectGroup'])
 		->where('type', 'middle_semester|middle_vacation|high_semester|high_vacation|special')
@@ -102,12 +106,31 @@ Route::prefix('program')->name('program.')->group(function () {
 Route::prefix('board')->name('board.')->group(function () {
 	//공지사항
 	Route::get('/notice', [SubController::class, 'notice'])->name('notice');
-	Route::get('/notice_view', [SubController::class, 'notice_view'])->name('notice_view');
+	Route::get('/notice/attachments/{postId}/{attachmentIndex}', [SubController::class, 'downloadBoardAttachment'])
+		->whereNumber('postId')
+		->whereNumber('attachmentIndex')
+		->defaults('boardType', 'notice')
+		->name('notice.attachment');
+	Route::get('/notice/{postId}', [SubController::class, 'notice_view'])
+		->whereNumber('postId')
+		->name('notice.view');
 	//FAQ
 	Route::get('/faq', [SubController::class, 'faq'])->name('faq');
+	Route::get('/faq/attachments/{postId}/{attachmentIndex}', [SubController::class, 'downloadBoardAttachment'])
+		->whereNumber('postId')
+		->whereNumber('attachmentIndex')
+		->defaults('boardType', 'faq')
+		->name('faq.attachment');
 	//자료실
 	Route::get('/dataroom', [SubController::class, 'dataroom'])->name('dataroom');
-	Route::get('/dataroom_view', [SubController::class, 'dataroom_view'])->name('dataroom_view');
+	Route::get('/dataroom/attachments/{postId}/{attachmentIndex}', [SubController::class, 'downloadBoardAttachment'])
+		->whereNumber('postId')
+		->whereNumber('attachmentIndex')
+		->defaults('boardType', 'dataroom')
+		->name('dataroom.attachment');
+	Route::get('/dataroom/{postId}', [SubController::class, 'dataroom_view'])
+		->whereNumber('postId')
+		->name('dataroom.view');
 });
 
 //마이페이지

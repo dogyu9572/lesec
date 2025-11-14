@@ -223,7 +223,15 @@
 
 @include('backoffice.modals.school-search')
 @include('backoffice.modals.member-search', ['selectionMode' => 'single', 'formAction' => route('backoffice.member-groups.search-members')])
-@include('backoffice.modals.program-search')
+@include('backoffice.modals.program-search', [
+    'mode' => 'reservation',
+    'searchAction' => route('backoffice.individual-applications.search-programs'),
+    'educationTypes' => $educationTypes ?? [],
+    'modalTitle' => '프로그램 검색',
+    'showDirectInputNotice' => true,
+    'programInputId' => 'program_name',
+    'showFooter' => false,
+])
 
 @endsection
 

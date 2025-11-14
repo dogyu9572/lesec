@@ -6,65 +6,75 @@
 		
 		<div class="board_top vab">
 			<div class="board_tab">
-				<a href="#this" class="on">전체</a>
-				<a href="#this">신청/입금/환불</a>
-				<a href="#this">수료증</a>
-				<a href="#this">대기자</a>
-				<a href="#this">회원정보</a>
-				<a href="#this">일반</a>
+				<a href="{{ route('board.faq', array_merge(request()->except('page', 'category'), ['category' => null])) }}" class="{{ empty($filters['category']) ? 'on' : '' }}">전체</a>
+				@foreach($categories as $category)
+				<a href="{{ route('board.faq', array_merge(request()->except('page', 'category'), ['category' => $category])) }}" class="{{ ($filters['category'] ?? '') === $category ? 'on' : '' }}">{{ $category }}</a>
+				@endforeach
 			</div>
-			<div class="search_wrap">
-				<select name="" id="">
-					<option value="">제목</option>
-					<option value="">내용</option>
+			<form class="search_wrap" method="get" action="{{ route('board.faq') }}">
+				<select name="search_type" id="search_type">
+					<option value="title" @if(($filters['search_type'] ?? 'title') === 'title') selected @endif>제목</option>
+					<option value="content" @if(($filters['search_type'] ?? '') === 'content') selected @endif>내용</option>
 				</select>
 				<div class="search_area">
-					<input type="text" placeholder="검색어를 입력해주세요.">
-					<button type="button" class="btn">검색</button>
+					<input type="text" name="keyword" value="{{ $filters['keyword'] ?? '' }}" placeholder="검색어를 입력해주세요.">
+					<button type="submit" class="btn">검색</button>
 				</div>
-			</div>
+				@if(!empty($filters['category']))
+					<input type="hidden" name="category" value="{{ $filters['category'] }}">
+				@endif
+			</form>
 		</div>
 
 		<div class="faq_wrap">
+			@forelse($posts as $post)
 			<dl>
-				<dt><button type="button">신청/입금 확인은 어떻게 하나요?<i></i></button></dt>
-				<dd>신청한 프로그램, 참가날짜, 입금 확인은 홈페이지 로그인 후 MYPAGE에서 가능합니다.<br/>
-					<br/>
-					<img src="/images/img_faq_sample.jpg" alt="">
+				<dt>
+					<button type="button">
+						@if(!empty($post->category))
+						[{{ $post->category }}]
+						@endif
+						{{ $post->title }}
+						<i></i>
+					</button>
+				</dt>
+				<dd>
+					{!! $post->content !!}
+					@if(!empty($post->attachments))
 					<div class="btns">
-						<a href="#this" class="btn btn_download flex_center">다운로드</a>
+						@foreach($post->attachments as $index => $attachment)
+						<a href="{{ route('board.faq.attachment', ['postId' => $post->id, 'attachmentIndex' => $index]) }}" class="btn btn_download flex_center">
+							{{ $attachment['name'] ?? basename($attachment['path']) }}
+						</a>
+						@endforeach
 					</div>
+					@endif
 				</dd>
 			</dl>
+			@empty
 			<dl>
-				<dt><button type="button">입금자명을 "학생이름+학교"(6자)로 하지 않았어요. 어떻게 하죠?<i></i></button></dt>
-				<dd>내용</dd>
+				<dt><button type="button">등록된 FAQ가 없습니다.<i></i></button></dt>
+				<dd>등록된 FAQ가 없습니다.</dd>
 			</dl>
-			<dl>
-				<dt><button type="button">재발급<i></i></button></dt>
-				<dd>내용</dd>
-			</dl>
-			<dl>
-				<dt><button type="button">체험학습은 어디에서 진행되나요?<i></i></button></dt>
-				<dd>내용</dd>
-			</dl>
-			<dl>
-				<dt><button type="button">돌아가는 교통편은 몇시로 예약해야 하나요?<i></i></button></dt>
-				<dd>내용</dd>
-			</dl>
+			@endforelse
 		</div>
 
 		<div class="board_bottom">
 			<div class="paging">
-				<a href="#this" class="arrow two first">맨끝</a>
-				<a href="#this" class="arrow one prev">이전</a>
-				<a href="#this" class="on">1</a>
-				<a href="#this">2</a>
-				<a href="#this">3</a>
-				<a href="#this">4</a>
-				<a href="#this">5</a>
-				<a href="#this" class="arrow one next">다음</a>
-				<a href="#this" class="arrow two last">맨끝</a>
+				@php
+					$currentPage = $posts->currentPage();
+					$lastPage = $posts->lastPage();
+					$start = max(1, $currentPage - 2);
+					$end = min($lastPage, $start + 4);
+					$start = max(1, $end - 4);
+				@endphp
+				<a href="{{ $posts->url(1) }}" class="arrow two first">맨끝</a>
+				<a href="{{ $posts->previousPageUrl() ?? $posts->url(1) }}" class="arrow one prev">이전</a>
+				@for($page = $start; $page <= $end; $page++)
+				<a href="{{ $posts->url($page) }}" @if($page === $currentPage) class="on" @endif>{{ $page }}</a>
+				@endfor
+				<a href="{{ $posts->nextPageUrl() ?? $posts->url($lastPage) }}" class="arrow one next">다음</a>
+				<a href="{{ $posts->url($lastPage) }}" class="arrow two last">맨끝</a>
 			</div>
 		</div> <!-- //board_bottom -->
 

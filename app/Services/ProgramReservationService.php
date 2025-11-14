@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\ProgramApplication;
 use App\Models\ProgramReservation;
+use App\Models\GroupApplication;
 use App\Models\Member;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
@@ -49,6 +50,15 @@ class ProgramReservationService
         return ProgramReservation::query()
             ->where('id', $id)
             ->where('application_type', 'individual')
+            ->active()
+            ->first();
+    }
+
+    public function getGroupProgramById(int $id): ?ProgramReservation
+    {
+        return ProgramReservation::query()
+            ->where('id', $id)
+            ->where('application_type', 'group')
             ->active()
             ->first();
     }
@@ -435,6 +445,93 @@ class ProgramReservationService
         } else {
             return 'application';
         }
+    }
+
+    /**
+     * 단체 신청 생성
+     */
+    public function createGroupApplication(ProgramReservation $reservation, array $data): GroupApplication
+    {
+        return DB::transaction(function () use ($reservation, $data) {
+            $requestedCount = $data['applicant_count'] ?? 10;
+
+            if (!$reservation->is_active) {
+                throw new \InvalidArgumentException('비활성화된 프로그램입니다.');
+            }
+
+            $now = now();
+            if ($reservation->application_start_date && $now->lt($reservation->application_start_date)) {
+                throw new \InvalidArgumentException('접수 예정인 프로그램입니다.');
+            }
+
+            if ($reservation->application_end_date && $now->gt($reservation->application_end_date)) {
+                throw new \InvalidArgumentException('접수 마감된 프로그램입니다.');
+            }
+
+            if (!$reservation->is_unlimited_capacity) {
+                $remainingCapacity = $reservation->remaining_capacity;
+                if ($remainingCapacity < $requestedCount) {
+                    throw new \InvalidArgumentException('잔여 정원이 부족합니다. (잔여: ' . $remainingCapacity . '명)');
+                }
+            }
+
+            $applicationNumber = $this->generateGroupApplicationNumber($reservation);
+
+            $applicantContact = $this->normalizeContactNumber($data['applicant_contact'] ?? null);
+
+            $paymentMethods = $reservation->payment_methods ?? [];
+            if (!is_array($paymentMethods)) {
+                $paymentMethods = [];
+            }
+
+            $application = GroupApplication::create([
+                'program_reservation_id' => $reservation->id,
+                'application_number' => $applicationNumber,
+                'education_type' => $reservation->education_type,
+                'payment_methods' => $paymentMethods,
+                'payment_method' => $data['payment_method'] ?? null,
+                'application_status' => $data['application_status'] ?? 'pending',
+                'reception_status' => $data['reception_status'] ?? 'application',
+                'applicant_name' => $data['applicant_name'] ?? null,
+                'member_id' => $data['member_id'] ?? null,
+                'applicant_contact' => $applicantContact,
+                'school_level' => $data['school_level'] ?? null,
+                'school_name' => $data['school_name'] ?? null,
+                'applicant_count' => $requestedCount,
+                'payment_status' => $data['payment_status'] ?? 'unpaid',
+                'participation_fee' => $data['participation_fee'] ?? $reservation->education_fee,
+                'participation_date' => $data['participation_date'] ?? null,
+                'applied_at' => now(),
+            ]);
+
+            if (!$reservation->is_unlimited_capacity) {
+                $reservation->increment('applied_count', $requestedCount);
+            }
+
+            return $application;
+        });
+    }
+
+    /**
+     * 단체 신청번호 생성
+     */
+    private function generateGroupApplicationNumber(ProgramReservation $reservation): string
+    {
+        $year = now()->format('Y');
+        $prefix = 'G';
+
+        $latestNumber = GroupApplication::query()
+            ->where('application_number', 'like', $prefix . $year . '%')
+            ->orderBy('application_number', 'desc')
+            ->lockForUpdate()
+            ->value('application_number');
+
+        $nextSequence = 1;
+        if ($latestNumber && preg_match('/^' . preg_quote($prefix . $year, '/') . '(\d{4})$/', $latestNumber, $matches)) {
+            $nextSequence = ((int) $matches[1]) + 1;
+        }
+
+        return sprintf('%s%s%04d', $prefix, $year, $nextSequence);
     }
 }
 

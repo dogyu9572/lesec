@@ -5,8 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class ProgramApplication extends Model
+class IndividualApplication extends Model
 {
+    protected $table = 'individual_applications';
+
     public const RECEPTION_TYPE_LABELS = [
         'first_come' => '선착순',
         'lottery' => '추첨',
@@ -108,5 +110,4 @@ class ProgramApplication extends Model
         return $this->belongsTo(Member::class, 'member_id');
     }
 }
-
 

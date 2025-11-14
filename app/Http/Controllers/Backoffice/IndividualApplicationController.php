@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Backoffice;
 use App\Http\Requests\Backoffice\IndividualApplications\StoreIndividualApplicationRequest;
 use App\Http\Requests\Backoffice\IndividualApplications\UpdateIndividualApplicationRequest;
 use App\Services\Backoffice\IndividualApplicationService;
-use App\Models\ProgramApplication;
+use App\Models\IndividualApplication;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use InvalidArgumentException;
@@ -56,7 +56,7 @@ class IndividualApplicationController extends BaseController
     /**
      * 개인 신청 수정 화면
      */
-    public function edit(ProgramApplication $application)
+    public function edit(IndividualApplication $application)
     {
         $application->load(['reservation', 'member']);
         $options = $this->getSharedOptions();
@@ -79,7 +79,7 @@ class IndividualApplicationController extends BaseController
         $validated = $request->validated();
 
         if ($validated['reception_type'] !== 'lottery') {
-            $validated['draw_result'] = ProgramApplication::DRAW_RESULT_PENDING;
+            $validated['draw_result'] = IndividualApplication::DRAW_RESULT_PENDING;
         }
 
         try {
@@ -104,12 +104,12 @@ class IndividualApplicationController extends BaseController
     /**
      * 개인 신청 정보 업데이트
      */
-    public function update(UpdateIndividualApplicationRequest $request, ProgramApplication $application): RedirectResponse
+    public function update(UpdateIndividualApplicationRequest $request, IndividualApplication $application): RedirectResponse
     {
         $validated = $request->validated();
 
         if ($validated['reception_type'] !== 'lottery') {
-            $validated['draw_result'] = ProgramApplication::DRAW_RESULT_PENDING;
+            $validated['draw_result'] = IndividualApplication::DRAW_RESULT_PENDING;
         }
 
         $this->individualApplicationService->updateApplication($application, $validated);
@@ -122,7 +122,7 @@ class IndividualApplicationController extends BaseController
     /**
      * 개인 신청 삭제
      */
-    public function destroy(ProgramApplication $application): RedirectResponse
+    public function destroy(IndividualApplication $application): RedirectResponse
     {
         $this->individualApplicationService->deleteApplication($application);
 

@@ -11,6 +11,16 @@
 		<div class="btit"><strong>교육 선택</strong><p>원하는 교육 프로그램을 선택 후 신청하기 버튼을 눌러주세요.</p></div>
 
 		@php
+			$authMember = Auth::guard('member')->user();
+			$isGuest = !$authMember;
+			$isTeacher = $authMember && $authMember->member_type === 'teacher';
+			$isStudent = $authMember && $authMember->member_type === 'student';
+			
+			// 학교급 체크
+			$schoolLevel = $isStudent ? $authMember->school?->school_level : null;
+			$programLevel = str_starts_with($type, 'middle') ? 'middle' : (str_starts_with($type, 'high') ? 'high' : null);
+			$isWrongLevel = $isStudent && $schoolLevel && $programLevel && $schoolLevel !== $programLevel;
+			
 			$statusOptions = [
 				'' => '신청 상태 전체',
 				'apply' => '신청하기',
@@ -18,6 +28,14 @@
 				'scheduled' => '접수예정',
 			];
 		@endphp
+
+		@if($isGuest)
+		<p class="error_alert mb16">로그인 후 신청 가능합니다.</p>
+		@elseif($isTeacher)
+		<p class="error_alert mb16">개인 신청은 학생만 가능합니다. 단체 신청을 이용해주세요.</p>
+		@elseif($isWrongLevel)
+		<p class="error_alert mb16">회원님은 {{ $schoolLevel === 'middle' ? '중등' : '고등' }} 프로그램만 신청 가능합니다.</p>
+		@endif
 
 		<div class="board_top">
 			<div class="total">TOTAL <strong>{{ $programs->count() }}</strong></div>
@@ -100,7 +118,13 @@
 							@endif
 						</td>
 						<td class="edu07">
-							@if($program->individual_action_type === 'waitlist')
+							@if($isGuest)
+								<button type="button" class="btn btn_kwk disabled" disabled>로그인 필요</button>
+							@elseif($isTeacher)
+								<button type="button" class="btn btn_kwk disabled" disabled>학생만 신청 가능</button>
+							@elseif($isWrongLevel)
+								<button type="button" class="btn btn_kwk disabled" disabled>학교급 불일치</button>
+							@elseif($program->individual_action_type === 'waitlist')
 								<a href="{{ $program->waitlist_url }}" target="_blank" class="btn btn_kwk">대기자 신청</a>
 							@elseif($program->individual_action_type === 'scheduled')
 								<span class="btn btn_kwk disabled">접수예정</span>

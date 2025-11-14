@@ -4,6 +4,20 @@
     
 	<div class="inner ">
 		<div class="btit"><strong>단체 신청</strong></div>
+
+		@php
+			$member = Auth::guard('member')->user();
+			$isGuest = !$member;
+			$isStudent = $member && $member->member_type === 'student';
+			$canApply = $member && $member->member_type === 'teacher';
+		@endphp
+
+		@if($isGuest)
+		<p class="error_alert mb16">로그인 후 신청 가능합니다.</p>
+		@elseif($isStudent)
+		<p class="error_alert mb16">단체 신청은 교사만 가능합니다. 개인 신청을 이용해주세요.</p>
+		@endif
+
 		<div
             class="schedule_wrap"
             data-program-page="select"
@@ -14,7 +28,8 @@
             data-month="{{ $month }}"
             data-base-url="{{ route('program.select.group', $type) }}"
             data-complete-url="{{ route('program.complete.group', $type) }}"
-            data-apply-url="{{ route('program.apply.group.submit', $type) }}">
+            data-apply-url="{{ route('program.apply.group.submit', $type) }}"
+            data-can-apply="{{ $canApply ? 'true' : 'false' }}">
 
 			<div class="schedule_table">
 				<div class="schedule_top">
@@ -121,13 +136,25 @@
 					<div class="count">
 						<strong>신청 인원수</strong>
 						<div class="flex">
-							<button class="btn minus">-</button>
+							<button class="btn minus" @if(!$canApply) disabled @endif>-</button>
 							<input type="text" value="10" readonly>
-							<button class="btn plus">+</button>
+							<button class="btn plus" @if(!$canApply) disabled @endif>+</button>
 						</div>
 					</div>
 					<div class="btns">
-						<button type="button" class="btn_apply" data-layer-open="pop_approval">신청하기</button>
+						@if($canApply)
+							<button type="button" class="btn_apply" data-layer-open="pop_approval">신청하기</button>
+						@else
+							<button type="button" class="btn_apply disabled" disabled>
+								@if($isGuest)
+									로그인 필요
+								@elseif($isStudent)
+									교사만 신청 가능
+								@else
+									신청 불가
+								@endif
+							</button>
+						@endif
 					</div>
 				</div>
 			</div>

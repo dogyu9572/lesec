@@ -220,6 +220,6 @@ class ProgramReservation extends Model
 
     public function applications(): HasMany
     {
-        return $this->hasMany(ProgramApplication::class, 'program_reservation_id');
+        return $this->hasMany(IndividualApplication::class, 'program_reservation_id');
     }
 }

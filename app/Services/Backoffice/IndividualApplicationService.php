@@ -2,7 +2,7 @@
 
 namespace App\Services\Backoffice;
 
-use App\Models\ProgramApplication;
+use App\Models\IndividualApplication;
 use App\Models\ProgramReservation;
 use App\Models\Member;
 use App\Services\ProgramReservationService;
@@ -25,7 +25,7 @@ class IndividualApplicationService
      */
     public function getFilteredApplications(Request $request): LengthAwarePaginator
     {
-        $query = ProgramApplication::query()
+        $query = IndividualApplication::query()
             ->with(['reservation', 'member'])
             ->orderBy('created_at', 'desc');
 
@@ -96,7 +96,7 @@ class IndividualApplicationService
      */
     public function getReceptionTypes(): array
     {
-        return ProgramApplication::RECEPTION_TYPE_LABELS;
+        return IndividualApplication::RECEPTION_TYPE_LABELS;
     }
 
     /**
@@ -104,7 +104,7 @@ class IndividualApplicationService
      */
     public function getEducationTypes(): array
     {
-        return ProgramApplication::EDUCATION_TYPE_LABELS;
+        return IndividualApplication::EDUCATION_TYPE_LABELS;
     }
 
     /**
@@ -113,9 +113,9 @@ class IndividualApplicationService
     public function getDrawResults(): array
     {
         return [
-            ProgramApplication::DRAW_RESULT_PENDING => ProgramApplication::DRAW_RESULT_LABELS[ProgramApplication::DRAW_RESULT_PENDING],
-            ProgramApplication::DRAW_RESULT_WIN => ProgramApplication::DRAW_RESULT_LABELS[ProgramApplication::DRAW_RESULT_WIN],
-            ProgramApplication::DRAW_RESULT_FAIL => ProgramApplication::DRAW_RESULT_LABELS[ProgramApplication::DRAW_RESULT_FAIL],
+            IndividualApplication::DRAW_RESULT_PENDING => IndividualApplication::DRAW_RESULT_LABELS[IndividualApplication::DRAW_RESULT_PENDING],
+            IndividualApplication::DRAW_RESULT_WIN => IndividualApplication::DRAW_RESULT_LABELS[IndividualApplication::DRAW_RESULT_WIN],
+            IndividualApplication::DRAW_RESULT_FAIL => IndividualApplication::DRAW_RESULT_LABELS[IndividualApplication::DRAW_RESULT_FAIL],
         ];
     }
 
@@ -125,8 +125,8 @@ class IndividualApplicationService
     public function getPaymentStatuses(): array
     {
         return [
-            ProgramApplication::PAYMENT_STATUS_UNPAID => ProgramApplication::PAYMENT_STATUS_LABELS[ProgramApplication::PAYMENT_STATUS_UNPAID],
-            ProgramApplication::PAYMENT_STATUS_PAID => ProgramApplication::PAYMENT_STATUS_LABELS[ProgramApplication::PAYMENT_STATUS_PAID],
+            IndividualApplication::PAYMENT_STATUS_UNPAID => IndividualApplication::PAYMENT_STATUS_LABELS[IndividualApplication::PAYMENT_STATUS_UNPAID],
+            IndividualApplication::PAYMENT_STATUS_PAID => IndividualApplication::PAYMENT_STATUS_LABELS[IndividualApplication::PAYMENT_STATUS_PAID],
         ];
     }
 
@@ -145,7 +145,7 @@ class IndividualApplicationService
     /**
      * 개인 신청 신규 생성
      */
-    public function createApplication(array $data): ProgramApplication
+    public function createApplication(array $data): IndividualApplication
     {
         $reservationId = $data['program_reservation_id'] ?? null;
 
@@ -183,7 +183,7 @@ class IndividualApplicationService
                 'applicant_contact' => $data['applicant_contact'],
                 'guardian_contact' => $data['guardian_contact'] ?? null,
                 'payment_method' => $data['payment_method'] ?? null,
-                'payment_status' => $data['payment_status'] ?? ProgramApplication::PAYMENT_STATUS_UNPAID,
+                'payment_status' => $data['payment_status'] ?? IndividualApplication::PAYMENT_STATUS_UNPAID,
                 'draw_result' => $data['draw_result'] ?? null,
             ],
             $member,
@@ -198,7 +198,7 @@ class IndividualApplicationService
     /**
      * 신청 정보 업데이트
      */
-    public function updateApplication(ProgramApplication $application, array $data): bool
+    public function updateApplication(IndividualApplication $application, array $data): bool
     {
         $updateData = [];
 
@@ -274,7 +274,7 @@ class IndividualApplicationService
     /**
      * 신청 삭제
      */
-    public function deleteApplication(ProgramApplication $application): bool
+    public function deleteApplication(IndividualApplication $application): bool
     {
         // 신청 삭제 시 프로그램 신청 인원 감소
         if ($application->reservation && !$application->reservation->is_unlimited_capacity) {

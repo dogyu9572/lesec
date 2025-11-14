@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Program\IndividualProgramApplyRequest;
 use App\Http\Requests\Program\GroupProgramApplyRequest;
 use App\Models\Program;
-use App\Models\ProgramApplication;
+use App\Models\IndividualApplication;
 use App\Models\ProgramReservation;
 use App\Models\GroupApplication;
 use App\Models\Member;
@@ -83,6 +83,14 @@ class ProgramController extends Controller
      */
     public function selectGroup($type, Request $request)
     {
+        // 학생은 단체 신청 불가
+        $member = Auth::guard('member')->user();
+        if ($member && $member instanceof Member && $member->member_type === 'student') {
+            return redirect()
+                ->route('program.show', $type)
+                ->withErrors(['access' => '단체 신청은 교사만 가능합니다. 개인 신청을 이용해주세요.']);
+        }
+
         $year = $request->input('year', now()->year);
         $month = $request->input('month', now()->month);
         
@@ -109,6 +117,27 @@ class ProgramController extends Controller
      */
     public function selectIndividual($type, Request $request)
     {
+        // 교사는 개인 신청 불가
+        $member = Auth::guard('member')->user();
+        if ($member && $member instanceof Member && $member->member_type === 'teacher') {
+            return redirect()
+                ->route('program.show', $type)
+                ->withErrors(['access' => '개인 신청은 학생만 가능합니다. 단체 신청을 이용해주세요.']);
+        }
+
+        // 학생의 경우 학교급과 프로그램 타입 일치 여부 체크
+        if ($member && $member instanceof Member && $member->member_type === 'student') {
+            $schoolLevel = $member->school?->school_level;
+            $programLevel = str_starts_with($type, 'middle') ? 'middle' : (str_starts_with($type, 'high') ? 'high' : null);
+            
+            if ($schoolLevel && $programLevel && $schoolLevel !== $programLevel) {
+                $levelName = $schoolLevel === 'middle' ? '중등' : '고등';
+                return redirect()
+                    ->route('program.show', $type)
+                    ->withErrors(['access' => "회원님은 {$levelName} 프로그램만 신청 가능합니다."]);
+            }
+        }
+
         $filterMonthInput = $request->input('month');
         $filterMonth = is_numeric($filterMonthInput) ? (int) $filterMonthInput : null;
         $filterProgram = $request->input('program');
@@ -130,12 +159,12 @@ class ProgramController extends Controller
         /** @var Member|null $member */
         $member = Auth::guard('member')->user();
         if ($member && $member instanceof Member && $member->member_type === 'student') {
-            $applications = ProgramApplication::query()
+            $applications = IndividualApplication::query()
                 ->where('member_id', $member->id)
                 ->get(['program_reservation_id', 'program_name']);
 
             $appliedPrefixes = $applications
-                ->map(function (ProgramApplication $application) {
+                ->map(function (IndividualApplication $application) {
                     return Str::upper(Str::substr($application->program_name, 0, 2));
                 })
                 ->filter()
@@ -206,6 +235,27 @@ class ProgramController extends Controller
                 ->route('member.login')
                 ->withErrors(['login' => '로그인 후 신청해 주세요.']);
         }
+
+        // 교사는 개인 신청 불가
+        if ($member->member_type === 'teacher') {
+            return back()
+                ->withErrors(['application' => '개인 신청은 학생만 가능합니다.'])
+                ->withInput();
+        }
+
+        // 학생의 경우 학교급과 프로그램 타입 일치 여부 체크
+        if ($member->member_type === 'student') {
+            $schoolLevel = $member->school?->school_level;
+            $programLevel = str_starts_with($type, 'middle') ? 'middle' : (str_starts_with($type, 'high') ? 'high' : null);
+            
+            if ($schoolLevel && $programLevel && $schoolLevel !== $programLevel) {
+                $levelName = $schoolLevel === 'middle' ? '중등' : '고등';
+                return back()
+                    ->withErrors(['application' => "회원님은 {$levelName} 프로그램만 신청 가능합니다."])
+                    ->withInput();
+            }
+        }
+
         $memberForCreation = $member;
 
         $memberContact = $member->contact;
@@ -242,8 +292,8 @@ class ProgramController extends Controller
                     'applicant_grade' => $member->grade,
                     'applicant_class' => $member->class_number,
                     'payment_method' => $paymentMethod,
-                    'payment_status' => ProgramApplication::PAYMENT_STATUS_UNPAID,
-                    'draw_result' => ProgramApplication::DRAW_RESULT_PENDING,
+                    'payment_status' => IndividualApplication::PAYMENT_STATUS_UNPAID,
+                    'draw_result' => IndividualApplication::DRAW_RESULT_PENDING,
                 ]
             );
         } catch (\InvalidArgumentException $e) {
@@ -281,6 +331,14 @@ class ProgramController extends Controller
                 'success' => false,
                 'message' => '로그인 후 신청해 주세요.',
             ], 401);
+        }
+
+        // 학생은 단체 신청 불가
+        if ($member->member_type === 'student') {
+            return response()->json([
+                'success' => false,
+                'message' => '단체 신청은 교사만 가능합니다.',
+            ], 403);
         }
 
         $memberContact = $member->contact;
@@ -400,7 +458,7 @@ class ProgramController extends Controller
                 ->withErrors(['application' => '정상적인 신청 완료 단계가 아닙니다. 다시 신청을 진행해주세요.']);
         }
 
-        $application = ProgramApplication::query()
+        $application = IndividualApplication::query()
             ->with('reservation')
             ->find($sessionData['application_id']);
 
@@ -472,7 +530,7 @@ class ProgramController extends Controller
         ];
     }
 
-    private function buildIndividualCompletionContext(ProgramApplication $application): array
+    private function buildIndividualCompletionContext(IndividualApplication $application): array
     {
         $participationTimestamp = $application->participation_date
             ? strtotime((string) $application->participation_date)

@@ -41,7 +41,7 @@ return new class extends Migration
             $table->index('is_active');
         });
 
-        Schema::create('program_applications', function (Blueprint $table) {
+        Schema::create('individual_applications', function (Blueprint $table) {
             $table->id();
             $table->foreignId('program_reservation_id')->constrained('program_reservations')->cascadeOnUpdate()->restrictOnDelete()->comment('프로그램 예약 ID');
             $table->foreignId('member_id')->nullable()->constrained('members')->cascadeOnUpdate()->nullOnDelete()->comment('신청 회원 ID');
@@ -78,7 +78,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('program_applications');
+        Schema::dropIfExists('individual_applications');
         Schema::dropIfExists('program_reservations');
     }
 };

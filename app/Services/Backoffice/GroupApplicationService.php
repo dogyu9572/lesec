@@ -365,10 +365,26 @@ class GroupApplicationService
         return response()->noContent();
     }
 
+    /**
+     * 3월 기준 학사연도 계산
+     */
+    private function getAcademicYear(): int
+    {
+        $now = Carbon::now();
+        $year = $now->year;
+        
+        // 3월 1일 이전이면 전년도 사용
+        if ($now->month < 3) {
+            $year--;
+        }
+        
+        return $year;
+    }
+
     private function generateApplicationNumber(ProgramReservation $reservation): string
     {
-        $year = Carbon::now()->format('Y');
-        $prefix = 'G';
+        $year = $this->getAcademicYear();
+        $prefix = 'T'; // 교사만 단체 신청 가능
 
         $latestNumber = GroupApplication::query()
             ->where('application_number', 'like', $prefix . $year . '%')

@@ -11,7 +11,7 @@
 
 @section('content')
 @php
-    $drawResultValue = $application->draw_result ?? \App\Models\ProgramApplication::DRAW_RESULT_PENDING;
+    $drawResultValue = $application->draw_result ?? \App\Models\IndividualApplication::DRAW_RESULT_PENDING;
 @endphp
 <div class="admin-form-container">
     <div class="form-header">      

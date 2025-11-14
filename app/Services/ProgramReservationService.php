@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\ProgramApplication;
+use App\Models\IndividualApplication;
 use App\Models\ProgramReservation;
 use App\Models\GroupApplication;
 use App\Models\Member;
@@ -122,7 +122,7 @@ class ProgramReservationService
             ->values();
     }
 
-    public function createIndividualApplication(ProgramReservation $reservation, array $data, ?Member $member = null, bool $allowAdminOverride = false): ProgramApplication
+    public function createIndividualApplication(ProgramReservation $reservation, array $data, ?Member $member = null, bool $allowAdminOverride = false): IndividualApplication
     {
         if ($reservation->application_type !== 'individual') {
             throw new \InvalidArgumentException('개인 신청 프로그램이 아닙니다.');
@@ -164,10 +164,10 @@ class ProgramReservationService
          if ($memberModel && $memberModel->member_type === 'student') {
             $programPrefix = Str::upper(Str::substr($reservation->program_name, 0, 2));
 
-            $existingApplication = ProgramApplication::query()
+            $existingApplication = IndividualApplication::query()
                 ->where('member_id', $memberModel->id)
                 ->get(['program_name'])
-                ->contains(function (ProgramApplication $application) use ($programPrefix) {
+                ->contains(function (IndividualApplication $application) use ($programPrefix) {
                     $existingPrefix = Str::upper(Str::substr($application->program_name, 0, 2));
                     return $existingPrefix === $programPrefix;
                 });
@@ -194,7 +194,7 @@ class ProgramReservationService
         $programNameValue = $data['program_name'] ?? $reservation->program_name;
 
         return DB::transaction(function () use ($reservation, $data, $requestedCount, $applicantContact, $guardianContact, $participationDate, $memberModel, $participationFeeValue, $programNameValue) {
-            $application = ProgramApplication::create([
+            $application = IndividualApplication::create([
                 'program_reservation_id' => $reservation->id,
                 'member_id' => $memberModel?->id ?? $data['member_id'] ?? null,
                 'application_number' => $this->generateIndividualApplicationNumber($reservation, $memberModel),
@@ -204,8 +204,8 @@ class ProgramReservationService
                 'participation_date' => $participationDate,
                 'participation_fee' => $participationFeeValue,
                 'payment_method' => $data['payment_method'] ?? null,
-                'payment_status' => $data['payment_status'] ?? ProgramApplication::PAYMENT_STATUS_UNPAID,
-                'draw_result' => $data['draw_result'] ?? ProgramApplication::DRAW_RESULT_PENDING,
+                'payment_status' => $data['payment_status'] ?? IndividualApplication::PAYMENT_STATUS_UNPAID,
+                'draw_result' => $data['draw_result'] ?? IndividualApplication::DRAW_RESULT_PENDING,
                 'applicant_name' => $data['applicant_name'],
                 'applicant_school_name' => $data['applicant_school_name'] ?? $memberModel?->school_name,
                 'applicant_grade' => $data['applicant_grade'] ?? $memberModel?->grade,
@@ -371,21 +371,29 @@ class ProgramReservationService
 
     private function generateIndividualApplicationNumber(ProgramReservation $reservation, ?Member $member = null): string
     {
-        $year = now()->format('Y');
+        $year = $this->getAcademicYear();
 
+        // 회원 정보 기반으로 접두사 결정
         if ($member && $member->member_type === 'teacher') {
+            // 교사는 개인 신청 불가하지만 만약의 경우 T
             $prefix = 'T';
         } elseif ($member && $member->member_type === 'student') {
-            $programPrefix = Str::upper(Str::substr($reservation->program_name, 0, 2));
-            $prefix = str_starts_with($reservation->education_type, 'high') ? 'H' : 'M';
-            if (Str::startsWith($programPrefix, ['M', 'H'])) {
-                $prefix = Str::substr($programPrefix, 0, 1);
+            // 학생은 학교급(school_level)으로 판단
+            $schoolLevel = $member->school?->school_level;
+            if ($schoolLevel === 'high') {
+                $prefix = 'H';
+            } elseif ($schoolLevel === 'middle') {
+                $prefix = 'M';
+            } else {
+                // school_level이 없으면 프로그램 타입으로 판단
+                $prefix = str_starts_with($reservation->education_type, 'high') ? 'H' : 'M';
             }
         } else {
-            $prefix = str_starts_with($reservation->education_type, 'high') ? 'H' : (str_starts_with($reservation->education_type, 'middle') ? 'M' : 'S');
+            // 회원 정보가 없으면 프로그램 타입으로 판단
+            $prefix = str_starts_with($reservation->education_type, 'high') ? 'H' : 'M';
         }
 
-        $latestNumber = ProgramApplication::query()
+        $latestNumber = IndividualApplication::query()
             ->where('application_number', 'like', $prefix . $year . '%')
             ->orderBy('application_number', 'desc')
             ->lockForUpdate()
@@ -425,6 +433,22 @@ class ProgramReservationService
         $digits = preg_replace('/[^0-9]/', '', $number);
 
         return $digits !== '' ? $digits : null;
+    }
+
+    /**
+     * 3월 기준 학사연도 계산
+     */
+    private function getAcademicYear(): int
+    {
+        $now = now();
+        $year = $now->year;
+        
+        // 3월 1일 이전이면 전년도 사용
+        if ($now->month < 3) {
+            $year--;
+        }
+        
+        return $year;
     }
 
     /**
@@ -517,8 +541,8 @@ class ProgramReservationService
      */
     private function generateGroupApplicationNumber(ProgramReservation $reservation): string
     {
-        $year = now()->format('Y');
-        $prefix = 'G';
+        $year = $this->getAcademicYear();
+        $prefix = 'T'; // 교사만 단체 신청 가능
 
         $latestNumber = GroupApplication::query()
             ->where('application_number', 'like', $prefix . $year . '%')

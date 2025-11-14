@@ -17,7 +17,7 @@
     $participationFeeDisplay = $oldParticipationFee !== null && $oldParticipationFee !== '' ? number_format((int) $oldParticipationFee) : '';
     $oldGrade = old('applicant_grade');
     $oldClass = old('applicant_class');
-    $oldDrawResult = old('draw_result', \App\Models\ProgramApplication::DRAW_RESULT_PENDING);
+    $oldDrawResult = old('draw_result', \App\Models\IndividualApplication::DRAW_RESULT_PENDING);
 @endphp
 @php
     $generalApplicationError = $errors->first('application');

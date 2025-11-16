@@ -3,9 +3,11 @@
 namespace App\Services\Backoffice;
 
 use App\Models\GroupApplication;
+use App\Models\GroupApplicationParticipant;
 use App\Models\Member;
 use App\Models\ProgramReservation;
 use App\Models\School;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
@@ -13,6 +15,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use InvalidArgumentException;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class GroupApplicationService
 {
@@ -365,6 +368,123 @@ class GroupApplicationService
         return response()->noContent();
     }
 
+    public function downloadRosterSample(): StreamedResponse
+    {
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="group_roster_sample.csv"',
+        ];
+        return response()->stream(function () {
+            $out = fopen('php://output', 'w');
+            fprintf($out, chr(0xEF).chr(0xBB).chr(0xBF));
+            fputcsv($out, ['이름', '학년', '반', '생년월일(YYYYMMDD)']);
+            fputcsv($out, ['홍길동', '1', '1', '20010101']);
+            fputcsv($out, ['김철수', '2', '3', '20020202']);
+            fclose($out);
+        }, 200, $headers);
+    }
+
+    public function uploadRoster(int $applicationId, UploadedFile $file): int
+    {
+        $application = GroupApplication::query()->findOrFail($applicationId);
+        $handle = fopen($file->getRealPath(), 'r');
+        // header skip
+        fgetcsv($handle);
+        $rows = 0;
+        while (($data = fgetcsv($handle)) !== false) {
+            $name = trim($data[0] ?? '');
+            $grade = trim($data[1] ?? '');
+            $class = trim($data[2] ?? '');
+            $birthdayRaw = trim($data[3] ?? '');
+            if ($name === '' || $grade === '' || $class === '') {
+                continue;
+            }
+            $birthday = null;
+            $digits = preg_replace('/[^0-9]/', '', $birthdayRaw);
+            if (strlen($digits) === 8 && ctype_digit($digits)) {
+                try {
+                    $birthday = Carbon::createFromFormat('Ymd', $digits)->format('Y-m-d');
+                } catch (\Throwable $e) {
+                    $birthday = null;
+                }
+            }
+            GroupApplicationParticipant::create([
+                'group_application_id' => $application->id,
+                'name' => $name,
+                'grade' => (int) $grade,
+                'class' => $class,
+                'birthday' => $birthday,
+            ]);
+            $rows++;
+        }
+        fclose($handle);
+
+        $count = GroupApplicationParticipant::where('group_application_id', $application->id)->count();
+        $application->applicant_count = $count;
+        $application->save();
+
+        return $rows;
+    }
+
+    public function storeParticipant(int $applicationId, array $data): void
+    {
+        $application = GroupApplication::query()->findOrFail($applicationId);
+        $birthday = null;
+        $digits = preg_replace('/[^0-9]/', '', $data['birthday'] ?? '');
+        if (strlen($digits) === 8 && ctype_digit($digits)) {
+            try {
+                $birthday = Carbon::createFromFormat('Ymd', $digits)->format('Y-m-d');
+            } catch (\Throwable $e) {
+                $birthday = null;
+            }
+        }
+        GroupApplicationParticipant::create([
+            'group_application_id' => $application->id,
+            'name' => $data['name'],
+            'grade' => (int) $data['grade'],
+            'class' => $data['class'],
+            'birthday' => $birthday,
+        ]);
+        $count = GroupApplicationParticipant::where('group_application_id', $application->id)->count();
+        $application->applicant_count = $count;
+        $application->save();
+    }
+
+    public function updateParticipant(int $applicationId, int $participantId, array $data): void
+    {
+        $participant = GroupApplicationParticipant::query()
+            ->where('id', $participantId)
+            ->where('group_application_id', $applicationId)
+            ->firstOrFail();
+        $birthday = null;
+        $digits = preg_replace('/[^0-9]/', '', $data['birthday'] ?? '');
+        if (strlen($digits) === 8 && ctype_digit($digits)) {
+            try {
+                $birthday = Carbon::createFromFormat('Ymd', $digits)->format('Y-m-d');
+            } catch (\Throwable $e) {
+                $birthday = null;
+            }
+        }
+        $participant->update([
+            'name' => $data['name'],
+            'grade' => (int) $data['grade'],
+            'class' => $data['class'],
+            'birthday' => $birthday,
+        ]);
+    }
+
+    public function destroyParticipant(int $applicationId, int $participantId): void
+    {
+        $participant = GroupApplicationParticipant::query()
+            ->where('id', $participantId)
+            ->where('group_application_id', $applicationId)
+            ->firstOrFail();
+        $participant->delete();
+        $application = GroupApplication::query()->findOrFail($applicationId);
+        $count = GroupApplicationParticipant::where('group_application_id', $application->id)->count();
+        $application->applicant_count = $count;
+        $application->save();
+    }
     /**
      * 3월 기준 학사연도 계산
      */

@@ -11,11 +11,16 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use App\Services\Member\MemberRegisterService;
 
 class MemberRegisterController extends Controller
 {
     private const REGISTRATION_SESSION_KEY = 'member_registration';
     private const COMPLETED_SESSION_KEY = 'member_registration_completed';
+
+    public function __construct(private readonly MemberRegisterService $registerService)
+    {
+    }
 
     /**
      * 회원 구분 선택 화면
@@ -232,7 +237,7 @@ class MemberRegisterController extends Controller
         }
 
         if ($field === 'email') {
-            $value = $this->normalizeEmailForCheck($value);
+            $value = $this->registerService->normalizeEmailForCheck($value);
 
             if ($value === null) {
                 return response()->json([
@@ -243,7 +248,7 @@ class MemberRegisterController extends Controller
         }
 
         if ($field === 'contact') {
-            $value = $this->normalizeContactNumber($value);
+            $value = $this->registerService->normalizeContact($value);
 
             if ($value === null) {
                 return response()->json([
@@ -258,7 +263,7 @@ class MemberRegisterController extends Controller
                 $query->where(function ($nested) use ($value) {
                     $nested->where('contact', $value);
 
-                    $formatted = $this->formatContactNumberForDisplay($value);
+                    $formatted = $this->registerService->formatContactForDisplay($value);
                     if ($formatted !== null) {
                         $nested->orWhere('contact', $formatted);
                     }
@@ -324,46 +329,11 @@ class MemberRegisterController extends Controller
         $sessionData = $this->getRegistrationSession($request);
         $memberType = $sessionData['member_type'] ?? 'student';
 
-        $contact = $this->normalizeContactNumber($data['contact'] ?? '');
-        $parentContact = $this->normalizeContactNumber($additional['parent_contact'] ?? '');
-        $birthDate = Carbon::createFromFormat('Ymd', $data['birth_date'])->format('Y-m-d');
-        $notificationAgreed = (bool) ($data['notification_agree'] ?? false);
+        // Normalize contact numbers and delegate creation to service
+        $data['contact'] = $this->registerService->normalizeContact($data['contact'] ?? '');
+        $additional['parent_contact'] = $this->registerService->normalizeContact($additional['parent_contact'] ?? '');
 
-        $hashedPassword = Hash::make($data['password']);
-
-        return DB::transaction(function () use ($data, $additional, $memberType, $contact, $parentContact, $birthDate, $notificationAgreed, $hashedPassword) {
-            return Member::create([
-                'login_id' => $data['login_id'],
-                'password' => $hashedPassword,
-                'member_type' => $memberType,
-                'member_group_id' => null,
-                'name' => $data['name'],
-                'email' => $data['email'],
-                'birth_date' => $birthDate,
-                'gender' => $data['gender'],
-                'contact' => $contact,
-                'parent_contact' => $parentContact ?: null,
-                'city' => $data['city'] ?? null,
-                'district' => $data['district'] ?? null,
-                'school_name' => $data['school_name'] ?? null,
-                'school_id' => $data['school_id'] ?? null,
-                'grade' => $additional['grade'] ?? null,
-                'class_number' => $additional['class_number'] ?? null,
-                'address' => null,
-                'zipcode' => null,
-                'emergency_contact' => null,
-                'emergency_contact_relation' => null,
-                'profile_image' => null,
-                'email_consent' => $notificationAgreed,
-                'sms_consent' => $notificationAgreed,
-                'memo' => null,
-                'is_active' => true,
-                'joined_at' => now(),
-                'last_login_at' => null,
-                'withdrawal_at' => null,
-                'withdrawal_reason' => null,
-            ]);
-        });
+        return $this->registerService->createMember($data, $additional, $memberType);
     }
 
     /**

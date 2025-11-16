@@ -17,27 +17,27 @@
 						<table>
 							<tr>
 								<th>견적번호</th>
-								<td>2024-EM-A-01302</td>
+								<td>{{ $estimate['number'] ?? '-' }}</td>
 							</tr>
 							<tr>
 								<th>견적일자</th>
-								<td>YYYY.MM.DD</td>
+								<td>{{ $estimate['date'] ?? 'YYYY.MM.DD' }}</td>
 							</tr>
 							<tr>
 								<th>수신</th>
-								<td>홍길동</td>
+								<td>{{ $estimate['recipient_name'] ?? '-' }}</td>
 							</tr>
 							<tr>
 								<th>학교명</th>
-								<td>제주중앙고등학교</td>
+								<td>{{ $estimate['school_name'] ?? '-' }}</td>
 							</tr>
 							<tr>
 								<th>전화번호</th>
-								<td>010-1234-5678</td>
+								<td>{{ $estimate['phone'] ?? '-' }}</td>
 							</tr>
 							<tr>
 								<th>이메일</th>
-								<td>test1234@naver.com</td>
+								<td>{{ $estimate['email'] ?? '-' }}</td>
 							</tr>
 						</table>
 					</div>
@@ -96,14 +96,20 @@
 						</tr>
 					</thead>
 					<tbody>
+						@forelse(($estimate['items'] ?? []) as $row)
 						<tr>
-							<td>1</td>
-							<td>YYYY.MM.DD</td>
-							<td class="tal">프로그램명입니다. 프로그램명입니다. 프로그램명입니다.</td>
-							<td>10</td>
-							<td>60,000원</td>
-							<td>600,000원</td>
+							<td>{{ $row['no'] }}</td>
+							<td>{{ $row['education_date'] }}</td>
+							<td class="tal">{{ $row['program_name'] }}</td>
+							<td>{{ number_format($row['count']) }}</td>
+							<td>{{ number_format($row['unit_price']) }}원</td>
+							<td>{{ number_format($row['amount']) }}원</td>
 						</tr>
+						@empty
+						<tr>
+							<td colspan="6">표시할 내역이 없습니다.</td>
+						</tr>
+						@endforelse
 					</tbody>
 				</table>
 			</div>
@@ -112,24 +118,24 @@
 					<tbody>
 						<tr>
 							<th>소계</th>
-							<td>3,000,000원</td>
+							<td>{{ isset($estimate['subtotal']) ? number_format($estimate['subtotal']) . '원' : '0원' }}</td>
 						</tr>
 						<tr>
 							<th>부가세</th>
-							<td>300,000원</td>
+							<td>{{ isset($estimate['vat']) ? number_format($estimate['vat']) . '원' : '0원' }}</td>
 						</tr>
 					</tbody>
 					<tfoot>
 						<tr>
 							<th>합계</th>
-							<td>3,300,000원</td>
+							<td>{{ isset($estimate['total']) ? number_format($estimate['total']) . '원' : '0원' }}</td>
 						</tr>
 					</tfoot>
 				</table>
 			</div>
 			<div class="print_btm">
 				<p>상기 견적의 유효기간은 견적일로 부터 1개월 입니다.</p>
-				<div class="date">YYYY년 MM월 DD일</div>
+				<div class="date">{{ $estimate['print_date'] ?? '' }}</div>
 				<div class="copy">서울대학교 농생명과학공동기기원 생명·환경과학교육센터<div class="stamp"><img src="/images/img_stamp.png" alt=""></div></div>
 			</div>
 			<div class="tbl row etc">
@@ -137,7 +143,7 @@
 					<tbody>
 						<tr>
 							<th>비고</th>
-							<td>비고입니다.</td>
+							<td>{{ $estimate['note'] ?? '' }}</td>
 						</tr>
 					</tbody>
 				</table>

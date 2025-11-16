@@ -18,6 +18,12 @@
     <div id="application-search-config"
         data-member-search-url="{{ route('backoffice.group-applications.search-members') }}"
         data-program-search-url="{{ route('backoffice.group-applications.search-programs') }}"></div>
+    <div id="roster-config"
+        data-application-id="{{ (int) ($applicationId ?? 0) }}"
+        data-sample-url="{{ route('backoffice.group-applications.download-roster-sample', $applicationId) }}"
+        data-upload-url="{{ route('backoffice.group-applications.upload-roster', $applicationId) }}"
+        data-participant-store-url="{{ route('backoffice.group-applications.participants.store', $applicationId) }}"
+        data-csrf-token="{{ csrf_token() }}"></div>
     <div class="form-header">
         <a href="{{ route('backoffice.group-applications.index') }}" class="btn btn-secondary">
             <i class="fas fa-arrow-left"></i> <span class="btn-text">목록으로</span>
@@ -54,7 +60,7 @@
                         <div class="program-section">
                             <div class="section-title">프로그램 정보</div>
                             <div class="form-grid grid-2">
-                                <div class="form-group">
+                                <div>
                                     <label>교육유형</label>
                                     <div class="radio-group">
                                         @foreach(data_get($formOptions, 'education_types', []) as $value => $label)
@@ -69,7 +75,7 @@
                                     <label for="program_name">프로그램명</label>
                                     <div class="school-search-wrapper">
                                         <input type="hidden" id="program_reservation_id" name="program_reservation_id" value="{{ data_get($application, 'program_reservation_id') }}">
-                                        <input type="text" id="program_name" value="{{ data_get($application, 'program_name_label') }}" readonly>
+                                        <input type="text" id="program_name" value="{{ data_get($application, 'reservation.program_name', data_get($application, 'program_name')) }}" readonly>
                                         <button type="button" id="program-search-btn" class="btn btn-secondary btn-sm">
                                             <i class="fas fa-search"></i> 검색
                                         </button>
@@ -79,7 +85,7 @@
                                     <label for="participation_date">참가일</label>
                                     <input type="text" id="participation_date" name="participation_date" value="{{ data_get($application, 'participation_date_formatted', data_get($application, 'participation_date')) }}" readonly>
                                 </div>
-                                <div class="form-group">
+                                <div>
                                     <label>결제방법</label>
                                     <div class="checkbox-group">
                                         @foreach(data_get($formOptions, 'payment_methods', []) as $value => $label)
@@ -125,7 +131,11 @@
                                 <div class="form-group">
                                     <label for="school_level">학교급/학교</label>
                                     <div class="school-search-wrapper">
-                                        <input type="text" id="school_level" name="school_level" value="{{ data_get($application, 'school_level') }}">
+                                        @php
+                                            $level = data_get($application, 'school_level');
+                                            $levelLabel = $level === 'middle' ? '중학교' : ($level === 'high' ? '고등학교' : $level);
+                                        @endphp
+                                        <input type="text" id="school_level" name="school_level" value="{{ $levelLabel }}">
                                         <input type="text" id="school_name" name="school_name" value="{{ data_get($application, 'school_name') }}" readonly>
                                         <button type="button" id="school-search-btn" class="btn btn-secondary btn-sm">
                                             <i class="fas fa-search"></i> 검색
@@ -140,7 +150,7 @@
                                     <label for="applied_at">신청일시</label>
                                     <input type="text" id="applied_at" value="{{ data_get($application, 'applied_at_formatted', data_get($application, 'applied_at')) }}" readonly>
                                 </div>
-                                <div class="form-group">
+                                <div>
                                     <label>결제상태</label>
                                     <div class="radio-group">
                                         @foreach(data_get($formOptions, 'payment_statuses', []) as $value => $label)
@@ -158,10 +168,14 @@
                             <div class="section-title d-flex align-items-center justify-content-between">
                                 <span>신청 명단</span>
                                 <div>
-                                    <button type="button" class="btn btn-light btn-sm" disabled>
-                                        <i class="fas fa-upload"></i> 명단 업로드
+                                    <a href="{{ route('backoffice.group-applications.download-roster-sample', $applicationId) }}" class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-file-download"></i> 샘플파일 받기
+                                    </a>
+                                    <input type="file" id="admin_csv_upload" accept=".csv" style="display:none;">
+                                    <button type="button" class="btn btn-light btn-sm" id="btn-admin-upload">
+                                        <i class="fas fa-upload"></i> 일괄 업로드
                                     </button>
-                                    <button type="button" class="btn btn-secondary btn-sm" disabled>
+                                    <button type="button" class="btn btn-secondary btn-sm" id="btn-admin-add-row">
                                         <i class="fas fa-plus"></i> 추가
                                     </button>
                                 </div>
@@ -181,16 +195,22 @@
                                     <tbody>
                                         @if(!empty($participants))
                                             @foreach($participants as $index => $participant)
-                                                <tr>
+                                                <tr data-participant-id="{{ data_get($participant, 'id') }}">
                                                     <td>{{ $index + 1 }}</td>
-                                                    <td>{{ data_get($participant, 'name', '-') }}</td>
-                                                    <td>{{ data_get($participant, 'grade', '-') }}</td>
-                                                    <td>{{ data_get($participant, 'class', '-') }}</td>
-                                                    <td>{{ data_get($participant, 'birthday', '-') }}</td>
+                                                    <td class="pv-name">{{ data_get($participant, 'name', '-') }}</td>
+                                                    <td class="pv-grade">{{ data_get($participant, 'grade', '-') }}</td>
+                                                    <td class="pv-class">{{ data_get($participant, 'class', '-') }}</td>
+                                                    <td class="pv-birthday">
+                                                        @php
+                                                            $b = data_get($participant, 'birthday');
+                                                            $bFormatted = $b ? \Carbon\Carbon::parse($b)->format('Y-m-d') : '-';
+                                                        @endphp
+                                                        {{ $bFormatted }}
+                                                    </td>
                                                     <td>
                                                         <div class="board-btn-group">
-                                                            <button type="button" class="btn btn-primary btn-sm" disabled>수정</button>
-                                                            <button type="button" class="btn btn-danger btn-sm" disabled>삭제</button>
+                                                            <button type="button" class="btn btn-primary btn-sm" data-action="edit">수정</button>
+                                                            <button type="button" class="btn btn-danger btn-sm" data-action="delete">삭제</button>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -215,9 +235,9 @@
                             <button type="button" class="btn btn-danger" onclick="if(confirm('정말 삭제하시겠습니까?')) { document.getElementById('delete-form').submit(); }">
                                 <i class="fas fa-trash"></i> 삭제
                             </button>
-                            <button type="button" class="btn btn-dark" disabled>
+                            <a href="{{ route('print.estimate', ['id' => $applicationId]) }}" target="_blank" class="btn btn-dark">
                                 <i class="fas fa-file-alt"></i> 견적서 출력
-                            </button>
+                            </a>
                         </div>
                     </form>
 
@@ -244,6 +264,7 @@
 @section('scripts')
 <script src="{{ asset('js/backoffice/school-search.js') }}"></script>
 <script src="{{ asset('js/backoffice/individual-application-search.js') }}"></script>
+<script src="{{ asset('js/backoffice/group-application-roster.js') }}"></script>
 @endsection
 
 

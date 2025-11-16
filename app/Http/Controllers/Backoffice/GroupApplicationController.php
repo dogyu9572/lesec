@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Backoffice;
 
 use App\Http\Requests\Backoffice\GroupApplications\StoreGroupApplicationRequest;
+use App\Http\Requests\Backoffice\GroupApplications\GroupApplicationUpdateRequest;
+use App\Http\Requests\Backoffice\GroupApplications\ParticipantRequest;
 use App\Services\Backoffice\GroupApplicationService;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
@@ -84,10 +86,9 @@ class GroupApplicationController extends BaseController
     /**
      * 단체 신청 정보 업데이트
      */
-    public function update(Request $request, int $applicationId): RedirectResponse
+    public function update(GroupApplicationUpdateRequest $request, int $applicationId): RedirectResponse
     {
-        $validated = $this->groupApplicationService->validateUpdateRequest($request);
-        $this->groupApplicationService->updateApplication($applicationId, $validated);
+        $this->groupApplicationService->updateApplication($applicationId, $request->validated());
 
         return redirect()
             ->route('backoffice.group-applications.index')
@@ -150,6 +151,66 @@ class GroupApplicationController extends BaseController
     public function downloadQuotation(int $applicationId)
     {
         return $this->groupApplicationService->downloadQuotation($applicationId);
+    }
+
+    /**
+     * 명단 샘플 다운로드 (CSV)
+     */
+    public function downloadRosterSample(int $applicationId)
+    {
+        return $this->groupApplicationService->downloadRosterSample();
+    }
+
+    /**
+     * CSV 일괄 업로드 (누적 추가)
+     */
+    public function uploadRoster(ParticipantRequest $request, int $applicationId)
+    {
+        $rows = $this->groupApplicationService->uploadRoster($applicationId, $request->file('csv_file'));
+
+        return response()->json([
+            'success' => true,
+            'message' => "{$rows}명의 명단을 추가했습니다.",
+        ]);
+    }
+
+    /**
+     * 단일 참가자 추가 (행 추가 저장)
+     */
+    public function storeParticipant(ParticipantRequest $request, int $applicationId)
+    {
+        $this->groupApplicationService->storeParticipant($applicationId, $request->validated());
+
+        return response()->json([
+            'success' => true,
+            'message' => '참가자가 추가되었습니다.',
+        ]);
+    }
+
+    /**
+     * 참가자 수정
+     */
+    public function updateParticipant(ParticipantRequest $request, int $applicationId, int $participantId)
+    {
+        $this->groupApplicationService->updateParticipant($applicationId, $participantId, $request->validated());
+
+        return response()->json([
+            'success' => true,
+            'message' => '참가자 정보가 수정되었습니다.',
+        ]);
+    }
+
+    /**
+     * 참가자 삭제
+     */
+    public function destroyParticipant(int $applicationId, int $participantId)
+    {
+        $this->groupApplicationService->destroyParticipant($applicationId, $participantId);
+
+        return response()->json([
+            'success' => true,
+            'message' => '참가자가 삭제되었습니다.',
+        ]);
     }
 }
 

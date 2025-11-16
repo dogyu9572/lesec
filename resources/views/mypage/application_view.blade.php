@@ -113,7 +113,7 @@
 
 		<div class="btns_tac">
 			<a href="{{ route('mypage.application_write', $application->id) }}" class="btn_submit btn_wbb">수정하기</a>
-			<a href="/print/estimate" target="_blank" class="btn btn_bwb btn_print">견적서</a>
+			<a href="{{ route('print.estimate', ['id' => $application->id]) }}" target="_blank" class="btn btn_bwb btn_print">견적서</a>
 		</div>
 
 	</div>

@@ -278,6 +278,11 @@ Route::prefix('backoffice')->middleware(['backoffice'])->group(function () {
         Route::get('/search-programs', [\App\Http\Controllers\Backoffice\GroupApplicationController::class, 'searchPrograms'])->name('search-programs');
         Route::get('/{application}/roster', [\App\Http\Controllers\Backoffice\GroupApplicationController::class, 'downloadRoster'])->name('download-roster');
         Route::get('/{application}/quotation', [\App\Http\Controllers\Backoffice\GroupApplicationController::class, 'downloadQuotation'])->name('download-quotation');
+        Route::get('/{application}/roster/sample', [\App\Http\Controllers\Backoffice\GroupApplicationController::class, 'downloadRosterSample'])->name('download-roster-sample');
+        Route::post('/{application}/roster/upload', [\App\Http\Controllers\Backoffice\GroupApplicationController::class, 'uploadRoster'])->name('upload-roster');
+        Route::post('/{application}/participants', [\App\Http\Controllers\Backoffice\GroupApplicationController::class, 'storeParticipant'])->name('participants.store');
+        Route::post('/{application}/participants/{participant}', [\App\Http\Controllers\Backoffice\GroupApplicationController::class, 'updateParticipant'])->name('participants.update');
+        Route::delete('/{application}/participants/{participant}', [\App\Http\Controllers\Backoffice\GroupApplicationController::class, 'destroyParticipant'])->name('participants.destroy');
     });
 
     // 단체 프로그램 관리

@@ -169,7 +169,7 @@
                                     <td>
                                         <div class="board-btn-group">
                                             <a href="{{ route('backoffice.group-applications.edit', data_get($application, 'id', 0)) }}" class="btn btn-primary btn-sm">
-                                                <i class="fas fa-eye"></i> 보기
+                                                <i class="fas fa-edit"></i> 수정
                                             </a>
                                         </div>
                                     </td>

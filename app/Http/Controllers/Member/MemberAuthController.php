@@ -5,10 +5,14 @@ namespace App\Http\Controllers\Member;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Member\MemberLoginRequest;
 use Illuminate\Http\Request;
+use App\Services\Member\MemberAuthService;
 use Illuminate\Support\Facades\Auth;
 
 class MemberAuthController extends Controller
 {
+    public function __construct(private readonly MemberAuthService $authService)
+    {
+    }
     /**
      * 로그인 페이지 표시
      */
@@ -33,7 +37,7 @@ class MemberAuthController extends Controller
             'is_active' => true,
         ];
 
-        if (Auth::guard('member')->attempt($credentials, $request->boolean('remember_login_id'))) {
+        if ($this->authService->attemptLogin($credentials, $request->boolean('remember_login_id'))) {
             $request->session()->regenerate();
 
             return redirect()->intended(route('home'));
@@ -49,7 +53,7 @@ class MemberAuthController extends Controller
      */
     public function logout(Request $request): \Illuminate\Http\RedirectResponse
     {
-        Auth::guard('member')->logout();
+        $this->authService->logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();

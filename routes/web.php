@@ -215,7 +215,7 @@ Route::prefix('terms')->name('terms.')->group(function () {
 //인쇄
 Route::prefix('print')->name('print.')->group(function () {
 	//견적서
-	Route::get('/estimate', [SubController::class, 'estimate'])->name('estimate');
+	Route::get('/estimate', [MemberMypageController::class, 'printEstimate'])->name('estimate');
 });
 
 //오류

@@ -3,41 +3,22 @@
 namespace App\Http\Controllers\Member;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Member\SchoolSearchRequest;
 use App\Models\School;
-use Illuminate\Http\Request;
+use App\Services\Member\SchoolSearchService;
+use Illuminate\Http\JsonResponse;
 
 class SchoolSearchController extends Controller
 {
+    public function __construct(private readonly SchoolSearchService $schoolSearchService)
+    {
+    }
     /**
      * 학교 검색 결과 반환
      */
-    public function search(Request $request): \Illuminate\Http\JsonResponse
+    public function search(SchoolSearchRequest $request): JsonResponse
     {
-        $request->validate([
-            'city' => ['nullable', 'string', 'max:100'],
-            'district' => ['nullable', 'string', 'max:100'],
-            'school_level' => ['nullable', 'in:elementary,middle,high'],
-            'keyword' => ['nullable', 'string', 'max:255'],
-        ]);
-
-        $query = School::query()
-            ->where('status', 'normal')
-            ->when($request->filled('city'), fn ($q) => $q->where('city', $request->input('city')))
-            ->when($request->filled('district'), fn ($q) => $q->where('district', $request->input('district')))
-            ->when($request->filled('school_level'), fn ($q) => $q->where('school_level', $request->input('school_level')))
-            ->when($request->filled('keyword'), function ($q) use ($request) {
-                $keyword = trim($request->input('keyword'));
-                $q->where('school_name', 'like', '%' . $keyword . '%');
-            })
-            ->orderBy('school_name');
-
-        $schools = $query->limit(50)->get([
-            'id',
-            'city',
-            'district',
-            'school_level',
-            'school_name',
-        ]);
+        $schools = $this->schoolSearchService->search($request->validated());
 
         $cities = School::query()
             ->where('status', 'normal')
@@ -70,7 +51,7 @@ class SchoolSearchController extends Controller
         ];
 
         return response()->json([
-            'data' => $schools->map(function (School $school) use ($levelLabels) {
+            'data' => $schools->getCollection()->map(function (School $school) use ($levelLabels) {
                 return [
                     'id' => $school->id,
                     'city' => $school->city,
@@ -81,7 +62,9 @@ class SchoolSearchController extends Controller
                 ];
             }),
             'meta' => [
-                'count' => $schools->count(),
+                'count' => $schools->total(),
+                'current_page' => $schools->currentPage(),
+                'last_page' => $schools->lastPage(),
             ],
             'filters' => [
                 'cities' => $cities,

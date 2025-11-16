@@ -10,12 +10,17 @@ use App\Models\Member;
 use Carbon\CarbonInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use App\Services\Member\MemberRecoveryService;
 
 class MemberRecoveryController extends Controller
 {
     private const FIND_ID_SESSION_KEY = 'member_find_id_result';
     private const PASSWORD_RESET_SESSION_KEY = 'member_password_reset';
     private const PASSWORD_RESET_DONE_KEY = 'member_password_reset_done';
+
+    public function __construct(private readonly MemberRecoveryService $recoveryService)
+    {
+    }
 
     /**
      * 아이디 찾기 화면
@@ -35,7 +40,7 @@ class MemberRecoveryController extends Controller
      */
     public function findId(MemberFindIdRequest $request)
     {
-        $contact = $this->normalizeContactNumber($request->input('contact'));
+        $contact = $this->recoveryService->normalizeContact($request->input('contact'));
 
         if ($contact === null) {
             return back()
@@ -43,16 +48,7 @@ class MemberRecoveryController extends Controller
                 ->withInput();
         }
 
-        $member = Member::where('name', $request->input('name'))
-            ->where(function ($query) use ($contact) {
-                $query->where('contact', $contact);
-
-                $formatted = $this->formatContactNumberForDisplay($contact);
-                if ($formatted !== null) {
-                    $query->orWhere('contact', $formatted);
-                }
-            })
-            ->first();
+        $member = $this->recoveryService->findMemberByNameAndContact($request->input('name'), $contact);
 
         if ($member === null) {
             return back()
@@ -115,7 +111,7 @@ class MemberRecoveryController extends Controller
      */
     public function verifyForPassword(MemberFindPasswordRequest $request)
     {
-        $contact = $this->normalizeContactNumber($request->input('contact'));
+        $contact = $this->recoveryService->normalizeContact($request->input('contact'));
 
         if ($contact === null) {
             return back()
@@ -123,17 +119,7 @@ class MemberRecoveryController extends Controller
                 ->withInput();
         }
 
-        $member = Member::where('login_id', $request->input('login_id'))
-            ->where('name', $request->input('name'))
-            ->where(function ($query) use ($contact) {
-                $query->where('contact', $contact);
-
-                $formatted = $this->formatContactNumberForDisplay($contact);
-                if ($formatted !== null) {
-                    $query->orWhere('contact', $formatted);
-                }
-            })
-            ->first();
+        $member = $this->recoveryService->findMemberForPassword($request->input('login_id'), $request->input('name'), $contact);
 
         if ($member === null) {
             return back()
@@ -192,8 +178,7 @@ class MemberRecoveryController extends Controller
                 ->withErrors(['find_pw_flow' => '회원 정보를 다시 확인해주세요.']);
         }
 
-        $member->password = Hash::make($request->input('password'));
-        $member->save();
+        $this->recoveryService->updatePassword($member, $request->input('password'));
 
         $request->session()->forget(self::PASSWORD_RESET_SESSION_KEY);
         $request->session()->put(self::PASSWORD_RESET_DONE_KEY, true);
@@ -237,33 +222,6 @@ class MemberRecoveryController extends Controller
         $maskedLength = max($length - 3, 0);
 
         return $visible . str_repeat('*', $maskedLength);
-    }
-
-    /**
-     * 연락처 포맷팅
-     */
-    private function normalizeContactNumber(string $number): ?string
-    {
-        $digits = preg_replace('/[^0-9]/', '', $number);
-
-        return $digits !== '' ? $digits : null;
-    }
-
-    private function formatContactNumberForDisplay(?string $digits): ?string
-    {
-        if (empty($digits)) {
-            return null;
-        }
-
-        if (strlen($digits) === 11) {
-            return preg_replace('/(\d{3})(\d{4})(\d{4})/', '$1-$2-$3', $digits);
-        }
-
-        if (strlen($digits) === 10) {
-            return preg_replace('/(\d{3})(\d{3})(\d{4})/', '$1-$2-$3', $digits);
-        }
-
-        return $digits;
     }
 }
 

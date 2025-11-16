@@ -510,6 +510,87 @@ class MemberMypageController extends Controller
     }
 
     /**
+     * 인쇄 - 견적서
+     * 퍼블 컨트롤러(SubController) 대신 마이페이지 컨트롤러에서 처리
+     */
+    public function printEstimate(Request $request)
+    {
+        $member = Auth::guard('member')->user();
+        if (!$member) {
+            return redirect()->route('member.login')
+                ->withErrors(['auth' => '로그인이 필요합니다.']);
+        }
+
+        $gNum = "print"; $sNum = ""; $gName = "견적서"; $sName = "";
+
+        $application = null;
+        $estimate = null;
+
+        $id = (int) $request->query('id', 0);
+        if ($id > 0) {
+            $application = GroupApplication::query()
+                ->with(['reservation'])
+                ->where('id', $id)
+                ->where('member_id', $member->id)
+                ->first();
+
+            if ($application) {
+                $educationDate = $application->participation_date
+                    ? \Carbon\Carbon::parse($application->participation_date)->format('Y.m.d')
+                    : 'YYYY.MM.DD';
+
+                $programName = optional($application->reservation)->program_name ?? '';
+                $applicantCount = (int) ($application->applicant_count ?? 0);
+                $unitPrice = (int) ($application->participation_fee ?? 0);
+                $amount = $applicantCount * $unitPrice;
+                $vat = (int) floor($amount * 0.1);
+                $total = $amount + $vat;
+
+                $recipientName = $application->applicant_name ?? '';
+                $schoolName = $application->school_name ?? '';
+                $phone = $this->formatPhoneNumberSimple($application->applicant_contact ?? '');
+                $email = $member->email ?? '';
+
+                $estimate = [
+                    'number' => $application->application_number ?? '',
+                    'date' => now()->format('Y.m.d'),
+                    'recipient_name' => $recipientName,
+                    'school_name' => $schoolName,
+                    'phone' => $phone,
+                    'email' => $email,
+                    'items' => [[
+                        'no' => 1,
+                        'education_date' => $educationDate,
+                        'program_name' => $programName,
+                        'count' => $applicantCount,
+                        'unit_price' => $unitPrice,
+                        'amount' => $amount,
+                    ]],
+                    'subtotal' => $amount,
+                    'vat' => $vat,
+                    'total' => $total,
+                    'print_date' => now()->format('Y년 m월 d일'),
+                    'note' => '',
+                ];
+            }
+        }
+
+        return view('print.estimate', compact('gNum', 'sNum', 'gName', 'sName', 'estimate'));
+    }
+
+    private function formatPhoneNumberSimple(?string $digits): string
+    {
+        if (empty($digits)) return '';
+        $only = preg_replace('/[^0-9]/', '', $digits);
+        if (strlen($only) === 11) {
+            return preg_replace('/(\\d{3})(\\d{4})(\\d{4})/', '$1-$2-$3', $only);
+        }
+        if (strlen($only) === 10) {
+            return preg_replace('/(\\d{3})(\\d{3})(\\d{4})/', '$1-$2-$3', $only);
+        }
+        return $digits;
+    }
+    /**
      * 이메일 파싱 (ID와 도메인 분리)
      */
     private function parseEmail(?string $email): array

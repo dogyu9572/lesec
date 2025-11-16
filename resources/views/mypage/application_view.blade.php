@@ -10,47 +10,68 @@
 				<tbody>
 					<tr>
 						<th>신청번호</th>
-						<td>신청번호</td>
+						<td>{{ $application->application_number ?? '-' }}</td>
 					</tr>
 					<tr>
 						<th>신청상태</th>
-						<td><span class="statebox complet">승인완료</span></td>
+						<td>
+							@if($application->application_status === 'pending')
+								<span class="statebox wait">승인대기</span>
+							@elseif($application->application_status === 'approved')
+								<span class="statebox complet">승인완료</span>
+							@elseif($application->application_status === 'cancelled')
+								<span class="statebox">취소/반려</span>
+							@else
+								<span class="statebox complet">승인완료</span>
+							@endif
+						</td>
 					</tr>
 					<tr>
 						<th>신청일시</th>
-						<td>2025.09.10 09:00</td>
+						<td>{{ optional($application->applied_at)->format('Y.m.d H:i') ?? '-' }}</td>
 					</tr>
 					<tr>
 						<th>신청자명</th>
-						<td>홍길동</td>
+						<td>{{ $application->applicant_name ?? '-' }}</td>
 					</tr>
 					<tr>
 						<th>학교</th>
-						<td>제주중앙고등학교</td>
+						<td>{{ $application->school_name ?? '-' }}</td>
 					</tr>
 					<tr>
 						<th>신청인원</th>
-						<td>10명</td>
+						<td>{{ $application->applicant_count ? $application->applicant_count . '명' : '-' }}</td>
 					</tr>
 					<tr>
 						<th>교육유형</th>
-						<td>고등학기</td>
+						<td>{{ $application->education_type_label }}</td>
 					</tr>
 					<tr>
 						<th>프로그램명</th>
-						<td>프로그램명입니다. 프로그램명입니다.</td>
+						<td>{{ $application->reservation->program_name ?? '-' }}</td>
 					</tr>
 					<tr>
 						<th>교육일</th>
-						<td>2025.09.10(수)</td>
+						<td>
+							@if($application->participation_date)
+								{{ $application->participation_date->format('Y.m.d') }}
+								@php
+									$dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+									$dayName = $dayNames[$application->participation_date->dayOfWeek];
+								@endphp
+								({{ $dayName }})
+							@else
+								-
+							@endif
+						</td>
 					</tr>
 					<tr>
 						<th>교육료</th>
-						<td>150,000원</td>
+						<td>{{ $application->participation_fee ? number_format($application->participation_fee) . '원' : '-' }}</td>
 					</tr>
 					<tr>
 						<th>결제방법</th>
-						<td>방문 카드결제</td>
+						<td>{{ $application->payment_method_label }}</td>
 					</tr>
 				</tbody>
 			</table>
@@ -74,84 +95,24 @@
 					</tr>
 				</thead>
 				<tbody>
+					@forelse($application->participants as $participant)
 					<tr>
-						<td>홍길동</td>
-						<td>1학년</td>
-						<td>1반</td>
-						<td>YYYY.MM.DD</td>
+						<td>{{ $participant->name ?? '-' }}</td>
+						<td>{{ $participant->grade ? $participant->grade . '학년' : '-' }}</td>
+						<td>{{ $participant->class ?? '-' }}</td>
+						<td>{{ $participant->birthday ? $participant->birthday->format('Y.m.d') : '-' }}</td>
 					</tr>
+					@empty
 					<tr>
-						<td>홍길동</td>
-						<td>1학년</td>
-						<td>1반</td>
-						<td>YYYY.MM.DD</td>
+						<td colspan="4" class="empty_message">등록된 명단이 없습니다.</td>
 					</tr>
-					<tr>
-						<td>홍길동</td>
-						<td>1학년</td>
-						<td>1반</td>
-						<td>YYYY.MM.DD</td>
-					</tr>
-					<tr>
-						<td>홍길동</td>
-						<td>1학년</td>
-						<td>1반</td>
-						<td>YYYY.MM.DD</td>
-					</tr>
-					<tr>
-						<td>홍길동</td>
-						<td>1학년</td>
-						<td>1반</td>
-						<td>YYYY.MM.DD</td>
-					</tr>
-					<tr>
-						<td>홍길동</td>
-						<td>1학년</td>
-						<td>1반</td>
-						<td>YYYY.MM.DD</td>
-					</tr>
-					<tr>
-						<td>홍길동</td>
-						<td>1학년</td>
-						<td>1반</td>
-						<td>YYYY.MM.DD</td>
-					</tr>
-					<tr>
-						<td>홍길동</td>
-						<td>1학년</td>
-						<td>1반</td>
-						<td>YYYY.MM.DD</td>
-					</tr>
-					<tr>
-						<td>홍길동</td>
-						<td>1학년</td>
-						<td>1반</td>
-						<td>YYYY.MM.DD</td>
-					</tr>
-					<tr>
-						<td>홍길동</td>
-						<td>1학년</td>
-						<td>1반</td>
-						<td>YYYY.MM.DD</td>
-					</tr>
-					<tr>
-						<td>홍길동</td>
-						<td>1학년</td>
-						<td>1반</td>
-						<td>YYYY.MM.DD</td>
-					</tr>
-					<tr>
-						<td>홍길동</td>
-						<td>1학년</td>
-						<td>1반</td>
-						<td>YYYY.MM.DD</td>
-					</tr>
+					@endforelse
 				</tbody>
 			</table>
 		</div>
 
 		<div class="btns_tac">
-			<button type="submit" class="btn_submit btn_wbb">수정하기</button>
+			<a href="{{ route('mypage.application_write', $application->id) }}" class="btn_submit btn_wbb">수정하기</a>
 			<a href="/print/estimate" target="_blank" class="btn btn_bwb btn_print">견적서</a>
 		</div>
 

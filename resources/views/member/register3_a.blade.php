@@ -32,13 +32,17 @@
 						<dt>아이디<span>*</span></dt>
 						<dd>
 							<div class="flex inbtn">
-								<input type="text" name="login_id" value="{{ old('login_id') }}" placeholder="아이디를 입력해주세요.">
+								<input type="text" name="login_id" value="{{ old('login_id') }}" placeholder="아이디를 입력해주세요." data-original-login-id="{{ old('login_id') }}">
 								<button type="button"
 									class="btn btn_wkk btn_error js-duplicate-check"
 									data-field="login_id"
 									data-input="[name='login_id']">중복 확인</button>
 							</div>
+							<input type="hidden" name="login_id_verified" value="0">
 							@error('login_id')
+							<p class="error_alert">{{ $message }}</p>
+							@enderror
+							@error('login_id_verified')
 							<p class="error_alert">{{ $message }}</p>
 							@enderror
 						</dd>
@@ -92,13 +96,17 @@
 						<dt>연락처<span>*</span></dt>
 						<dd>
 							<div class="flex inbtn">
-								<input type="text" name="contact" value="{{ old('contact') }}" placeholder="휴대폰번호를 입력해주세요." data-phone-input inputmode="tel" autocomplete="tel">
+								<input type="text" name="contact" value="{{ old('contact') }}" placeholder="휴대폰번호를 입력해주세요." data-phone-input inputmode="tel" autocomplete="tel" data-original-contact="{{ preg_replace('/[^0-9]/', '', old('contact') ?? '') }}">
 								<button type="button"
 									class="btn btn_wkk btn_error js-duplicate-check"
 									data-field="contact"
 									data-input="[name='contact']">중복 확인</button>
 							</div>
+							<input type="hidden" name="contact_verified" value="0">
 							@error('contact')
+							<p class="error_alert">{{ $message }}</p>
+							@enderror
+							@error('contact_verified')
 							<p class="error_alert">{{ $message }}</p>
 							@enderror
 						</dd>

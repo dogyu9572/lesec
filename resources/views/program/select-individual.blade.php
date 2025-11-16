@@ -149,15 +149,37 @@
                                         신청 불가
                                     </button>
                                 @else
-                                    <form method="POST"
-                                        action="{{ route('program.apply.individual.submit', $type) }}"
-                                        class="inline-form"
-                                        style="display:inline">
-                                        @csrf
-                                        <input type="hidden" name="program_reservation_id" value="{{ $program->id }}">
-                                        <input type="hidden" name="participation_date" value="{{ optional($program->education_start_date)->format('Y-m-d') }}">
-                                        <button type="submit" class="btn btn_wkk">신청하기</button>
-                                    </form>
+                                    @php
+                                        // 신청기간 전인지 체크
+                                        $now = now();
+                                        $isBeforeApplicationPeriod = $program->application_start_date && $program->application_start_date->greaterThan($now);
+                                        
+                                        // 신청 인원 체크
+                                        $hasAppliedCount = $program->applied_count_display > 0;
+                                    @endphp
+                                    @if($isBeforeApplicationPeriod)
+                                        <a href="javascript:void(0);" class="btn btn_gray">접수예정</a>
+                                    @elseif($hasAppliedCount)
+                                        <form method="POST"
+                                            action="{{ route('program.apply.individual.submit', $type) }}"
+                                            class="inline-form"
+                                            style="display:inline">
+                                            @csrf
+                                            <input type="hidden" name="program_reservation_id" value="{{ $program->id }}">
+                                            <input type="hidden" name="participation_date" value="{{ optional($program->education_start_date)->format('Y-m-d') }}">
+                                            <button type="submit" class="btn btn_kwk">대기자 신청</button>
+                                        </form>
+                                    @else
+                                        <form method="POST"
+                                            action="{{ route('program.apply.individual.submit', $type) }}"
+                                            class="inline-form"
+                                            style="display:inline">
+                                            @csrf
+                                            <input type="hidden" name="program_reservation_id" value="{{ $program->id }}">
+                                            <input type="hidden" name="participation_date" value="{{ optional($program->education_start_date)->format('Y-m-d') }}">
+                                            <button type="submit" class="btn btn_wkk">신청하기</button>
+                                        </form>
+                                    @endif
                                 @endif
                             @else
                                 <span class="btn btn_kwk disabled">마감</span>
@@ -172,6 +194,25 @@
 				</tbody>
 			</table>
 		</div>
+
+		<div class="board_bottom">
+			<div class="paging">
+				@php
+					$currentPage = $programs->currentPage();
+					$lastPage = $programs->lastPage();
+					$start = max(1, $currentPage - 2);
+					$end = min($lastPage, $start + 4);
+					$start = max(1, $end - 4);
+				@endphp
+				<a href="{{ $programs->url(1) }}" class="arrow two first">맨끝</a>
+				<a href="{{ $programs->previousPageUrl() ?? $programs->url(1) }}" class="arrow one prev">이전</a>
+				@for($page = $start; $page <= $end; $page++)
+				<a href="{{ $programs->url($page) }}" @if($page === $currentPage) class="on" @endif>{{ $page }}</a>
+				@endfor
+				<a href="{{ $programs->nextPageUrl() ?? $programs->url($lastPage) }}" class="arrow one next">다음</a>
+				<a href="{{ $programs->url($lastPage) }}" class="arrow two last">맨끝</a>
+			</div>
+		</div> <!-- //board_bottom -->
 		
 	</div>
 

@@ -19,6 +19,7 @@
         this.bindPhoneFormatting();
         this.bindEmailDomainToggle();
         this.bindSchoolModal();
+        this.bindInputChange();
         this.showServerInlineErrors();
         this.focusServerErrorField();
         // 페이지 로드 시 학교 데이터 미리 불러오기
@@ -112,15 +113,36 @@
                 }
 
                 if (success) {
-                    if ($error.length) {
-                        $error.hide();
-                    }
+                    // 중복 확인 관련 에러 메시지 모두 제거
+                    $wrapper.find('.error_alert').each(function () {
+                        var errorText = $(this).text();
+                        if (errorText.indexOf('중복 확인') !== -1) {
+                            $(this).remove();
+                        } else {
+                            $(this).hide();
+                        }
+                    });
+                    
                     $wrapper.append('<p class="success_alert c_green">' + message + '</p>');
+                    
+                    // 중복 확인 성공 시 verified 상태 설정
+                    if (field === 'login_id') {
+                        self.$form.find('[name="login_id_verified"]').val('1');
+                    } else if (field === 'contact') {
+                        self.$form.find('[name="contact_verified"]').val('1');
+                    }
                 } else {
                     if (!$error.length) {
                         $error = $('<p class="error_alert"></p>').appendTo($wrapper);
                     }
                     $error.text(message).show();
+                    
+                    // 중복 확인 실패 시 verified 상태 리셋
+                    if (field === 'login_id') {
+                        self.$form.find('[name="login_id_verified"]').val('0');
+                    } else if (field === 'contact') {
+                        self.$form.find('[name="contact_verified"]').val('0');
+                    }
                 }
             }
         });
@@ -152,6 +174,34 @@
                 $custom.hide().val('');
             }
         }
+    };
+
+    MemberRegister.prototype.bindInputChange = function () {
+        var self = this;
+        
+        // 아이디 입력값 변경 시 verified 리셋
+        this.$form.on('input', '[name="login_id"]', function () {
+            var $input = $(this);
+            var currentValue = $input.val().trim();
+            var originalValue = $input.data('original-login-id') || '';
+            
+            if (currentValue !== originalValue) {
+                self.$form.find('[name="login_id_verified"]').val('0');
+                $input.closest('dd').find('.success_alert').remove();
+            }
+        });
+        
+        // 연락처 입력값 변경 시 verified 리셋
+        this.$form.on('input', '[name="contact"], [name="student_contact"]', function () {
+            var $input = $(this);
+            var currentValue = self.normalizePhone($input.val());
+            var originalValue = $input.data('original-contact') || '';
+            
+            if (currentValue !== originalValue) {
+                self.$form.find('[name="contact_verified"]').val('0');
+                $input.closest('dd').find('.success_alert').remove();
+            }
+        });
     };
 
     MemberRegister.prototype.bindPhoneFormatting = function () {

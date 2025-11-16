@@ -3,7 +3,7 @@
 <main class="pb">
     
 	<div class="inner">
-		<div class="apply_write" data-program-page="apply" data-apply-mode="group">
+		<div class="apply_write" data-program-page="apply" data-apply-mode="group" data-member-type="{{ $member ? $member->member_type : '' }}">
 			<div class="point" id="start"></div>
 			<div class="point" id="end"></div>
 			<div class="btit"><strong>단체 신청</strong></div>

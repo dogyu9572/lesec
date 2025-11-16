@@ -81,7 +81,19 @@
 						<button type="button" class="mo_vw">마이페이지<i></i></button>
 						<div class="snb">
 							<a href="/mypage/member" class="{{ ($gNum == '03' && $sNum == '01') ? 'on' : '' }}">회원정보</a>
-							<a href="/mypage/application_list" class="{{ ($gNum == '03' && $sNum == '02') ? 'on' : '' }}">신청내역</a>
+							@php
+								$currentMember = Auth::guard('member')->user();
+								$isTeacher = $currentMember && $currentMember->member_type === 'teacher';
+								$applicationListUrl = $isTeacher ? '/mypage/application_list' : '/mypage/application_indi_list';
+								$isApplicationPage = ($gNum == '03' && $sNum == '02') && (
+									request()->routeIs('mypage.application_list')
+									|| request()->routeIs('mypage.application_indi_list')
+									|| request()->routeIs('mypage.application_indi_view')
+									|| request()->routeIs('mypage.application_view')
+									|| request()->routeIs('mypage.application_write')
+								);
+							@endphp
+							<a href="{{ $applicationListUrl }}" class="{{ $isApplicationPage ? 'on' : '' }}">신청내역</a>
 						</div>
 					</div>
 					<div class="menu {{ $gNum == '04' ? 'on' : '' }}">
@@ -141,7 +153,19 @@
 				<a href="/board/dataroom" class="{{ ($sNum == '03') ? 'on' : '' }}">자료실</a>
 			@elseif($gNum == "03")
 				<a href="/mypage/member" class="{{ ($sNum == '01') ? 'on' : '' }}">회원정보</a>
-				<a href="/mypage/application_list" class="{{ ($sNum == '02') ? 'on' : '' }}">신청내역</a>
+				@php
+					$currentMember = Auth::guard('member')->user();
+					$isTeacher = $currentMember && $currentMember->member_type === 'teacher';
+					$applicationListUrl = $isTeacher ? '/mypage/application_list' : '/mypage/application_indi_list';
+					$isApplicationPage = ($sNum == '02') && (
+						request()->routeIs('mypage.application_list')
+						|| request()->routeIs('mypage.application_indi_list')
+						|| request()->routeIs('mypage.application_indi_view')
+						|| request()->routeIs('mypage.application_view')
+						|| request()->routeIs('mypage.application_write')
+					);
+				@endphp
+				<a href="{{ $applicationListUrl }}" class="{{ $isApplicationPage ? 'on' : '' }}">신청내역</a>
 			@elseif($gNum == "04")
 				<a href="/introduction/greeting" class="{{ ($sNum == '01') ? 'on' : '' }}">인사말</a>
 				<a href="/introduction/establishment" class="{{ ($sNum == '02') ? 'on' : '' }}">설립목적</a>

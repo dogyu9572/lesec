@@ -59,6 +59,7 @@ class GroupApplication extends Model
     public const PAYMENT_STATUS_LABELS = [
         'unpaid' => '미입금',
         'paid' => '입금완료',
+        'cancelled' => '신청 취소',
     ];
 
     public const PAYMENT_METHOD_LABELS = [

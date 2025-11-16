@@ -4,7 +4,6 @@ namespace App\Http\Requests\Member;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\Rules\Unique;
 
 class MemberOverFourteenRegisterRequest extends FormRequest
@@ -26,22 +25,24 @@ class MemberOverFourteenRegisterRequest extends FormRequest
 
         return [
             'login_id' => ['required', 'string', 'min:4', 'max:50', 'unique:members,login_id'],
+            'login_id_verified' => ['required', 'in:1'],
             'password' => [
                 'required',
                 'string',
-                'min:8',
-                'max:20',
+                'min:9',
+                'max:12',
                 'confirmed',
-                Password::min(8)->letters()->numbers()->symbols(),
+                'regex:/^(?!.*[\x{AC00}-\x{D7AF}]).+$/u',
             ],
             'name' => ['required', 'string', 'max:255'],
             'birth_date' => ['required', 'date_format:Ymd', 'before:today'],
             'gender' => ['required', 'in:male,female'],
             'contact' => ['required', 'string', 'max:50', $this->uniqueContactRule()],
+            'contact_verified' => ['required', 'in:1'],
             'parent_contact' => $memberType === 'student'
                 ? ['required', 'string', 'max:50']
                 : ['nullable', 'string', 'max:50'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:members,email'],
+            'email' => ['required', 'string', 'email', 'max:255'],
             'city' => ['nullable', 'string', 'max:100'],
             'district' => ['nullable', 'string', 'max:100'],
             'school_name' => ['required', 'string', 'max:255'],
@@ -66,9 +67,12 @@ class MemberOverFourteenRegisterRequest extends FormRequest
             'login_id.required' => '아이디를 입력해주세요.',
             'login_id.min' => '아이디는 최소 4자 이상 입력해주세요.',
             'login_id.unique' => '이미 사용 중인 아이디입니다.',
+            'login_id_verified.required' => '아이디 중복 확인을 해주세요.',
+            'login_id_verified.in' => '아이디 중복 확인을 해주세요.',
             'password.required' => '비밀번호를 입력해주세요.',
-            'password.min' => '비밀번호는 8자 이상 입력해주세요.',
-            'password.password' => '비밀번호는 영문, 숫자, 특수문자를 모두 포함해 8~20자로 입력해주세요.',
+            'password.min' => '비밀번호는 9자 이상 입력해주세요.',
+            'password.max' => '비밀번호는 12자 이하로 입력해주세요.',
+            'password.regex' => '한글을 제외한 영문/숫자/특수문자로 9~12자리로 입력해주세요.',
             'password.confirmed' => '비밀번호 확인이 일치하지 않습니다.',
             'name.required' => '이름을 입력해주세요.',
             'birth_date.required' => '생년월일을 입력해주세요.',
@@ -77,10 +81,11 @@ class MemberOverFourteenRegisterRequest extends FormRequest
             'gender.required' => '성별을 선택해주세요.',
             'contact.required' => '연락처를 입력해주세요.',
             'contact.unique' => '이미 등록된 연락처입니다.',
+            'contact_verified.required' => '학생 연락처 중복 확인을 해주세요.',
+            'contact_verified.in' => '학생 연락처 중복 확인을 해주세요.',
             'parent_contact.required' => '보호자 연락처를 입력해주세요.',
             'email.required' => '이메일을 입력해주세요.',
             'email.email' => '올바른 이메일 형식을 입력해주세요.',
-            'email.unique' => '이미 등록된 이메일입니다.',
             'school_name.required' => '학교명을 입력해주세요.',
             'school_id.exists' => '선택한 학교 정보가 올바르지 않습니다.',
             'grade.required' => '학년을 선택해주세요.',

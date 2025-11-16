@@ -34,6 +34,7 @@ class IndividualApplication extends Model
         'unpaid' => '미입금',
         'paid' => '입금완료',
         'refunded' => '환불',
+        'cancelled' => '신청 취소',
     ];
 
     protected $fillable = [
@@ -68,6 +69,7 @@ class IndividualApplication extends Model
     public const PAYMENT_STATUS_UNPAID = 'unpaid';
     public const PAYMENT_STATUS_PAID = 'paid';
     public const PAYMENT_STATUS_REFUNDED = 'refunded';
+    public const PAYMENT_STATUS_CANCELLED = 'cancelled';
 
     public const DRAW_RESULT_PENDING = 'pending';
     public const DRAW_RESULT_WIN = 'win';

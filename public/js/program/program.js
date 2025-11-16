@@ -63,8 +63,28 @@
             handleScroll();
         });
 
-        $(document).on('click', '[data-navigate-select]', function () {
-            const url = $(this).data('selectUrl');
+        $(document).on('click', '[data-navigate-select]', function (e) {
+            e.preventDefault();
+            const $button = $(this);
+            const url = $button.data('selectUrl');
+            const mode = $button.data('navigateSelect');
+            const $wrap = $button.closest('[data-apply-mode]');
+            const memberType = $wrap.length ? $wrap.data('memberType') : null;
+            
+            // 단체 신청 체크: 학생은 단체 신청 불가
+            if (mode === 'group' && memberType === 'student') {
+                alert('단체 신청은 교사만 가능합니다. 개인 신청을 이용해주세요.');
+                window.history.back();
+                return;
+            }
+            
+            // 개인 신청 체크: 교사는 개인 신청 불가
+            if (mode === 'individual' && memberType === 'teacher') {
+                alert('개인 신청은 학생만 가능합니다. 단체 신청을 이용해주세요.');
+                window.history.back();
+                return;
+            }
+            
             navigateTo(url);
         });
     }

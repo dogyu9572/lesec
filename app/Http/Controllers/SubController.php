@@ -152,12 +152,6 @@ class SubController extends Controller
         return $response;
     }
 //마이페이지
-	//회원정보
-    public function member()
-    {
-        $gNum = "03"; $sNum = "01"; $gName = "마이페이지"; $sName = "회원정보";
-        return view('mypage.member', compact('gNum', 'sNum', 'gName', 'sName'));
-    }
 	//신청내역 - 단체목록
     public function application_list()
     {

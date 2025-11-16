@@ -10,67 +10,106 @@
 				<tbody>
 					<tr>
 						<th>신청번호</th>
-						<td>신청번호</td>
+						<td>{{ $application->application_number ?? '-' }}</td>
 					</tr>
 					<tr>
 						<th>신청일시</th>
-						<td>2025.09.10 09:00</td>
+						<td>{{ optional($application->applied_at)->format('Y.m.d H:i') ?? '-' }}</td>
 					</tr>
 					<tr>
 						<th>신청유형</th>
-						<td>선착순</td>
+						<td>{{ $application->reception_type_label }}</td>
 					</tr>
 					<tr>
 						<th>신청자명</th>
-						<td>홍길동</td>
+						<td>{{ $application->applicant_name ?? '-' }}</td>
 					</tr>
 					<tr>
 						<th>학교</th>
-						<td>제주중앙고등학교</td>
+						<td>{{ $application->applicant_school_name ?? '-' }}</td>
 					</tr>
 					<tr>
 						<th>학년</th>
-						<td>1학년</td>
+						<td>{{ $application->applicant_grade ? $application->applicant_grade . '학년' : '-' }}</td>
 					</tr>
 					<tr>
 						<th>반</th>
-						<td>1반</td>
+						<td>{{ $application->applicant_class ? $application->applicant_class . '반' : '-' }}</td>
 					</tr>
 					<tr>
 						<th>교육유형</th>
-						<td>고등학기</td>
+						<td>{{ $application->education_type_label }}</td>
 					</tr>
 					<tr>
 						<th>프로그램명</th>
-						<td>프로그램명입니다. 프로그램명입니다.</td>
+						<td>{{ $application->program_name ?? $application->reservation->program_name ?? '-' }}</td>
 					</tr>
 					<tr>
 						<th>교육일</th>
-						<td>2025.09.10(수)</td>
+						<td>
+							@if($application->participation_date)
+								{{ $application->participation_date->format('Y.m.d') }}
+								@php
+									$dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+									$dayName = $dayNames[$application->participation_date->dayOfWeek];
+								@endphp
+								({{ $dayName }})
+							@else
+								-
+							@endif
+						</td>
 					</tr>
 					<tr>
 						<th>교육료</th>
-						<td>60,000원</td>
+						<td>{{ $application->participation_fee ? number_format($application->participation_fee) . '원' : '-' }}</td>
 					</tr>
 					<tr>
 						<th>결제방법</th>
-						<td>무통장 입금</td>
+						<td>
+							@php
+								$paymentMethods = [
+									'bank_transfer' => '무통장 입금',
+									'on_site_card' => '방문 카드결제',
+									'online_card' => '온라인 카드결제',
+								];
+							@endphp
+							{{ $application->payment_method ? ($paymentMethods[$application->payment_method] ?? $application->payment_method) : '-' }}
+						</td>
 					</tr>
 					<tr>
 						<th>결제상태</th>
-						<td><span class="statebox complet">입금완료</span></td>
+						<td>
+							@if($application->payment_status === 'unpaid')
+								<span class="statebox complet">미입금</span>
+							@elseif($application->payment_status === 'paid')
+								<span class="statebox complet">입금완료</span>
+							@elseif($application->payment_status === 'refunded')
+								<span class="statebox complet">환불</span>
+							@elseif($application->payment_status === 'cancelled')
+								<span class="statebox complet">신청 취소</span>
+							@else
+								-
+							@endif
+						</td>
 					</tr>
 					<tr>
 						<th>추첨결과</th>
-						<td>-</td>
+						<td>{{ $application->draw_result_label }}</td>
 					</tr>
 				</tbody>
 			</table>
 		</div>
 
 		<div class="btns_tac">
-			<a href="/mypage/application_indi_list" class="btn btn_wbb">목록</a>
-			<button type="button" class="btn btn_bwb" onclick="layerShow('pop_cancel')">신청취소</button>
+			<a href="{{ route('mypage.application_indi_list') }}" class="btn btn_wbb">목록</a>
+			@if($application->payment_status === 'cancelled')
+				<a href="javascript:void(0);" class="btn btn_gray">취소 완료</a>
+			@elseif($application->draw_result !== 'fail' && $application->payment_status !== 'refunded')
+				<form method="POST" action="{{ route('mypage.application_indi_cancel', $application->id) }}" style="display: inline;" onsubmit="return confirm('정말 신청을 취소하시겠습니까?');">
+					@csrf
+					<button type="submit" class="btn btn_bwb">신청취소</button>
+				</form>
+			@endif
 		</div>
 
 	</div>

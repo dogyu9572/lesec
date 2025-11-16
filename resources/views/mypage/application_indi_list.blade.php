@@ -7,9 +7,10 @@
 		<div class="btit"><strong>나의 신청내역</strong></div>
 		
 		<div class="board_top vab">
-			<div class="total">TOTAL<strong>100</strong></div>
+			<div class="total">TOTAL<strong>{{ $applications->total() }}</strong></div>
 		</div>
 
+		@if($applications->count() > 0)
 		<div class="board_list tablet_break_tbl">
 			<table>
 				<colgroup>
@@ -37,82 +38,101 @@
 					</tr>
 				</thead>
 				<tbody>
+					@foreach($applications as $application)
 					<tr>
-						<td class="num">5</td>
-						<td class="appli02">신청번호</td>
-						<td class="appli11">추첨</td>
-						<td class="appli03">고등방학</td>
-						<td class="appli04 tal"><a href="/mypage/application_indi_view">프로그램명입니다. 프로그램명입니다. 프로그램명입니다. 프로그램명입니다. 프로그램명입니다. 프로그램명입니다. </a></td>
-						<td class="appli05">YYYY.MM.DD</td>
-						<td class="appli07"><strong class="c_red">미입금</strong></td>
-						<td class="appli08"><div class="statebox wait">승인대기</div></td>
-						<td class="appli10"><button type="button" class="btn btn_kwk">취소</button></td>
+						<td class="num">{{ $applications->total() - ($applications->currentPage() - 1) * $applications->perPage() - $loop->index }}</td>
+						<td class="appli02">{{ $application->application_number ?? '-' }}</td>
+						<td class="appli11">{{ $application->reception_type_label }}</td>
+						<td class="appli03">{{ $application->education_type_label }}</td>
+						<td class="appli04 tal">
+							<a href="{{ route('mypage.application_indi_view', $application->id) }}">
+								{{ $application->program_name ?? $application->reservation->program_name ?? '-' }}
+							</a>
+						</td>
+						<td class="appli05">{{ optional($application->participation_date)->format('Y.m.d') ?? '-' }}</td>
+						<td class="appli07">
+							@if($application->payment_status === 'unpaid')
+								<strong class="c_red">미입금</strong>
+							@elseif($application->payment_status === 'paid')
+								<strong>입금완료</strong>
+							@elseif($application->payment_status === 'refunded')
+								<strong>환불</strong>
+							@elseif($application->payment_status === 'cancelled')
+								<strong>신청 취소</strong>
+							@else
+								-
+							@endif
+						</td>
+						<td class="appli08">
+							@if($application->draw_result === 'pending')
+								<div class="statebox wait">대기중</div>
+							@elseif($application->draw_result === 'win')
+								<div class="statebox complet">당첨</div>
+							@elseif($application->draw_result === 'waitlist')
+								<div class="statebox wait">대기중</div>
+							@elseif($application->draw_result === 'fail')
+								<div class="statebox">미당첨</div>
+							@else
+								-
+							@endif
+						</td>
+						<td class="appli10">
+							@if($application->payment_status === 'cancelled')
+								<a href="javascript:void(0);" class="btn btn_gray">취소 완료</a>
+							@elseif($application->draw_result === 'fail' || $application->payment_status === 'refunded')
+								<a href="javascript:void(0);" class="btn btn_gray btn_impossible">불가</a>
+							@else
+								<form method="POST" action="{{ route('mypage.application_indi_cancel', $application->id) }}" style="display: inline;" onsubmit="return confirm('정말 신청을 취소하시겠습니까?');">
+									@csrf
+									<button type="submit" class="btn btn_kwk">취소</button>
+								</form>
+							@endif
+						</td>
 					</tr>
-					<tr>
-						<td class="num">4</td>
-						<td class="appli02">신청번호</td>
-						<td class="appli11">선착순</td>
-						<td class="appli03">고등방학</td>
-						<td class="appli04 tal"><a href="/mypage/application_indi_view">프로그램명입니다. 프로그램명입니다. 프로그램명입니다.</a></td>
-						<td class="appli05">YYYY.MM.DD</td>
-						<td class="appli07"><strong class="c_red">미입금</strong></td>
-						<td class="appli08"><div class="statebox wait">승인대기</div></td>
-						<td class="appli10"><button type="button" class="btn btn_kwk">취소</button></td>
-					</tr>
-					<tr>
-						<td class="num">3</td>
-						<td class="appli02">신청번호</td>
-						<td class="appli11">선착순</td>
-						<td class="appli03">고등방학</td>
-						<td class="appli04 tal"><a href="/mypage/application_indi_view">프로그램명입니다. 프로그램명입니다. 프로그램명입니다.</a></td>
-						<td class="appli05">YYYY.MM.DD</td>
-						<td class="appli07"></td>
-						<td class="appli08"><div class="statebox wait">승인대기</div></td>
-						<td class="appli10"><a href="javascript:void(0);" class="btn btn_gray">취소 완료</a></td>
-					</tr>
-					<tr>
-						<td class="num">2</td>
-						<td class="appli02">신청번호</td>
-						<td class="appli11">추첨</td>
-						<td class="appli03">중등방학</td>
-						<td class="appli04 tal"><a href="/mypage/application_indi_view">프로그램명입니다. 프로그램명입니다. 프로그램명입니다.</a></td>
-						<td class="appli05">YYYY.MM.DD</td>
-						<td class="appli07"><strong>입금완료</strong></td>
-						<td class="appli08"><div class="statebox complet">승인완료</div></td>
-						<td class="appli10"><a href="javascript:void(0);" class="btn btn_gray btn_impossible">불가</a></td>
-					</tr>
-					<tr>
-						<td class="num">1</td>
-						<td class="appli02">신청번호</td>
-						<td class="appli11">추첨</td>
-						<td class="appli03">중등방학</td>
-						<td class="appli04 tal"><a href="/mypage/application_indi_view">프로그램명입니다. 프로그램명입니다. 프로그램명입니다.</a></td>
-						<td class="appli05">YYYY.MM.DD</td>
-						<td class="appli07"><strong>입금완료</strong></td>
-						<td class="appli08"><div class="statebox complet">승인완료</div></td>
-						<td class="appli10"><a href="javascript:void(0);" class="btn btn_gray btn_impossible">불가</a></td>
-					</tr>
+					@endforeach
 				</tbody>
 			</table>
 		</div>
 
 		<div class="board_bottom">
 			<div class="paging">
-				<a href="#this" class="arrow two first">맨끝</a>
-				<a href="#this" class="arrow one prev">이전</a>
-				<a href="#this" class="on">1</a>
-				<a href="#this">2</a>
-				<a href="#this">3</a>
-				<a href="#this">4</a>
-				<a href="#this">5</a>
-				<a href="#this" class="arrow one next">다음</a>
-				<a href="#this" class="arrow two last">맨끝</a>
+				@php
+					$currentPage = $applications->currentPage();
+					$lastPage = $applications->lastPage();
+					$start = max(1, $currentPage - 2);
+					$end = min($lastPage, $start + 4);
+					$start = max(1, $end - 4);
+				@endphp
+				<a href="{{ $applications->url(1) }}" class="arrow two first">맨끝</a>
+				<a href="{{ $applications->previousPageUrl() ?? $applications->url(1) }}" class="arrow one prev">이전</a>
+				@for($page = $start; $page <= $end; $page++)
+				<a href="{{ $applications->url($page) }}" @if($page === $currentPage) class="on" @endif>{{ $page }}</a>
+				@endfor
+				<a href="{{ $applications->nextPageUrl() ?? $applications->url($lastPage) }}" class="arrow one next">다음</a>
+				<a href="{{ $applications->url($lastPage) }}" class="arrow two last">맨끝</a>
 			</div>
 		</div> <!-- //board_bottom -->
+		@else
+		<div class="board_list">
+			<p class="empty_message">신청내역이 없습니다.</p>
+		</div>
+		@endif
 
 	</div>
 
 </main>
+
+@if(session('success'))
+<script>
+	alert('{{ session('success') }}');
+</script>
+@endif
+
+@if($errors->has('cancel'))
+<script>
+	alert('{{ $errors->first('cancel') }}');
+</script>
+@endif
 
 <div class="popup pop_info" id="pop_cannot">
 	<div class="dm" onclick="layerHide('pop_cannot')"></div>

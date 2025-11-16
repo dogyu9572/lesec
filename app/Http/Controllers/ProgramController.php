@@ -18,6 +18,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class ProgramController extends Controller
 {
@@ -37,13 +38,14 @@ class ProgramController extends Controller
      */
     public function show($type)
     {
+        $member = Auth::guard('member')->user();
         $program = $this->programService->getProgramByType($type);
         $gNum = "01"; 
         $sNum = $this->programService->getSubMenuNumber($type);
         $gName = "프로그램"; 
         $sName = $this->programService->getTypeName($type);
         
-        return view('program.show', compact('program', 'gNum', 'sNum', 'gName', 'sName', 'type'));
+        return view('program.show', compact('program', 'gNum', 'sNum', 'gName', 'sName', 'type', 'member'));
     }
     
     /**
@@ -51,6 +53,27 @@ class ProgramController extends Controller
      */
     public function applyGroup($type)
     {
+        // 학생은 단체 신청 불가
+        $member = Auth::guard('member')->user();
+        if ($member && $member instanceof Member && $member->member_type === 'student') {
+            return redirect()
+                ->route('program.show', $type)
+                ->withErrors(['access' => '단체 신청은 교사만 가능합니다. 개인 신청을 이용해주세요.']);
+        }
+
+        // 교사의 경우 학교급과 프로그램 타입 일치 여부 체크
+        if ($member && $member instanceof Member && $member->member_type === 'teacher') {
+            $schoolLevel = $member->school?->school_level;
+            $programLevel = str_starts_with($type, 'middle') ? 'middle' : (str_starts_with($type, 'high') ? 'high' : null);
+            
+            if ($schoolLevel && $programLevel && $schoolLevel !== $programLevel) {
+                $levelName = $schoolLevel === 'middle' ? '중등' : '고등';
+                return redirect()
+                    ->route('program.show', $type)
+                    ->withErrors(['access' => "회원님은 {$levelName} 프로그램만 신청 가능합니다."]);
+            }
+        }
+
         $program = $this->programService->getProgramByType($type);
         $gNum = "01"; 
         $sNum = $this->programService->getSubMenuNumber($type);
@@ -59,7 +82,7 @@ class ProgramController extends Controller
         $programService = $this->programService;
         $periodSummary = $this->formatProgramPeriod($program);
         
-        return view('program.apply-group', compact('program', 'gNum', 'sNum', 'gName', 'sName', 'type', 'programService', 'periodSummary'));
+        return view('program.apply-group', compact('program', 'gNum', 'sNum', 'gName', 'sName', 'type', 'programService', 'periodSummary', 'member'));
     }
     
     /**
@@ -67,6 +90,7 @@ class ProgramController extends Controller
      */
     public function applyIndividual($type)
     {
+        $member = Auth::guard('member')->user();
         $program = $this->programService->getProgramByType($type);
         $gNum = "01"; 
         $sNum = $this->programService->getSubMenuNumber($type);
@@ -75,7 +99,7 @@ class ProgramController extends Controller
         $programService = $this->programService;
         $periodSummary = $this->formatProgramPeriod($program);
         
-        return view('program.apply-individual', compact('program', 'gNum', 'sNum', 'gName', 'sName', 'type', 'programService', 'periodSummary'));
+        return view('program.apply-individual', compact('program', 'gNum', 'sNum', 'gName', 'sName', 'type', 'programService', 'periodSummary', 'member'));
     }
 
     /**
@@ -89,6 +113,19 @@ class ProgramController extends Controller
             return redirect()
                 ->route('program.show', $type)
                 ->withErrors(['access' => '단체 신청은 교사만 가능합니다. 개인 신청을 이용해주세요.']);
+        }
+
+        // 교사의 경우 학교급과 프로그램 타입 일치 여부 체크
+        if ($member && $member instanceof Member && $member->member_type === 'teacher') {
+            $schoolLevel = $member->school?->school_level;
+            $programLevel = str_starts_with($type, 'middle') ? 'middle' : (str_starts_with($type, 'high') ? 'high' : null);
+            
+            if ($schoolLevel && $programLevel && $schoolLevel !== $programLevel) {
+                $levelName = $schoolLevel === 'middle' ? '중등' : '고등';
+                return redirect()
+                    ->route('program.show', $type)
+                    ->withErrors(['access' => "회원님은 {$levelName} 프로그램만 신청 가능합니다."]);
+            }
         }
 
         $year = $request->input('year', now()->year);
@@ -196,6 +233,21 @@ class ProgramController extends Controller
         $sName = $this->programService->getTypeName($type);
 
         $totalCount = $programs->count();
+        
+        // 페이지네이션 적용
+        $perPage = 10;
+        $currentPage = $request->get('page', 1);
+        $items = $programs->forPage($currentPage, $perPage);
+        $programsPaginated = new LengthAwarePaginator(
+            $items,
+            $totalCount,
+            $perPage,
+            $currentPage,
+            [
+                'path' => $request->url(),
+                'query' => $request->query(),
+            ]
+        );
 
         return view('program.select-individual', [
             'gNum' => $gNum,
@@ -203,7 +255,7 @@ class ProgramController extends Controller
             'gName' => $gName,
             'sName' => $sName,
             'type' => $type,
-            'programs' => $programs,
+            'programs' => $programsPaginated,
             'totalPrograms' => $totalCount,
             'availableMonths' => $availableMonths,
             'availableProgramNames' => $availableProgramNames,
@@ -219,7 +271,7 @@ class ProgramController extends Controller
      */
     public function submitIndividualApplication(IndividualProgramApplyRequest $request, $type): RedirectResponse
     {
-        $reservation = $this->programReservationService->getGroupProgramById((int) $request->input('program_reservation_id'));
+        $reservation = $this->programReservationService->getIndividualProgramById((int) $request->input('program_reservation_id'));
 
         if (!$reservation || $reservation->education_type !== $type) {
             return back()

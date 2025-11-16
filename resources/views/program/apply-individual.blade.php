@@ -3,7 +3,7 @@
 <main class="pb">
     
 	<div class="inner ">
-		<div class="apply_write" data-program-page="apply" data-apply-mode="individual">
+		<div class="apply_write" data-program-page="apply" data-apply-mode="individual" data-member-type="{{ $member ? $member->member_type : '' }}">
 			<div class="point" id="start"></div>
 			<div class="point" id="end"></div>
 			<div class="btit"><strong>개인 신청</strong></div>

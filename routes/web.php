@@ -11,6 +11,7 @@ use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\Backoffice\PopupController;
 use App\Http\Controllers\Member\MemberAuthController;
 use App\Http\Controllers\Member\MemberRegisterController;
+use App\Http\Controllers\Member\MemberMypageController;
 use App\Http\Controllers\Member\MemberRecoveryController;
 use App\Http\Controllers\Member\SchoolSearchController;
 
@@ -136,14 +137,20 @@ Route::prefix('board')->name('board.')->group(function () {
 //마이페이지
 Route::prefix('mypage')->name('mypage.')->group(function () {
 	//회원정보
-	Route::get('/member', [SubController::class, 'member'])->name('member');
+	Route::get('/member', [MemberMypageController::class, 'show'])->name('member');
+	Route::post('/member', [MemberMypageController::class, 'update'])->name('member.update');
 	//신청내역 - 단체
-	Route::get('/application_list', [SubController::class, 'application_list'])->name('application_list');
-	Route::get('/application_view', [SubController::class, 'application_view'])->name('application_view');
-	Route::get('/application_write', [SubController::class, 'application_write'])->name('application_write');
+	Route::get('/application_list', [MemberMypageController::class, 'groupApplicationList'])->name('application_list');
+	Route::post('/application_cancel/{id}', [MemberMypageController::class, 'cancelGroupApplication'])->name('application_cancel');
+	Route::get('/application_view/{id}', [MemberMypageController::class, 'groupApplicationShow'])->name('application_view');
+	Route::get('/application_write/{id}', [MemberMypageController::class, 'groupApplicationWrite'])->name('application_write');
+	Route::post('/application_write/{id}', [MemberMypageController::class, 'groupApplicationWriteUpdate'])->name('application_write.update');
+	Route::get('/application_write/{id}/sample', [MemberMypageController::class, 'groupApplicationWriteSample'])->name('application_write.sample');
+	Route::post('/application_write/{id}/upload', [MemberMypageController::class, 'groupApplicationWriteUpload'])->name('application_write.upload');
 	//신청내역 - 개인
-	Route::get('/application_indi_list', [SubController::class, 'application_indi_list'])->name('application_indi_list');
-	Route::get('/application_indi_view', [SubController::class, 'application_indi_view'])->name('application_indi_view');
+	Route::get('/application_indi_list', [MemberMypageController::class, 'individualApplicationList'])->name('application_indi_list');
+	Route::get('/application_indi_view/{id}', [MemberMypageController::class, 'individualApplicationShow'])->name('application_indi_view');
+	Route::post('/application_indi_cancel/{id}', [MemberMypageController::class, 'cancelIndividualApplication'])->name('application_indi_cancel');
 });
 
 //센터소개

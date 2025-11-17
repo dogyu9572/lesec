@@ -21,6 +21,8 @@ use App\Http\Controllers\Backoffice\PopupController;
 use App\Http\Controllers\Backoffice\ProgramController;
 use App\Http\Controllers\Backoffice\GroupProgramController;
 use App\Http\Controllers\Backoffice\IndividualProgramController;
+use App\Http\Controllers\Backoffice\ReservationCalendarController;
+use App\Http\Controllers\Backoffice\ScheduleController;
 use App\Http\Controllers\Backoffice\SchoolController;
 
 // =============================================================================
@@ -317,7 +319,22 @@ Route::prefix('backoffice')->middleware(['backoffice'])->group(function () {
         Route::delete('/{application}', [\App\Http\Controllers\Backoffice\IndividualApplicationController::class, 'destroy'])->name('destroy');
         Route::get('/search-members', [\App\Http\Controllers\Backoffice\IndividualApplicationController::class, 'searchMembers'])->name('search-members');
         Route::get('/search-programs', [\App\Http\Controllers\Backoffice\IndividualApplicationController::class, 'searchPrograms'])->name('search-programs');
+        Route::get('/sample', [\App\Http\Controllers\Backoffice\IndividualApplicationController::class, 'downloadSample'])->name('sample');
+        Route::post('/bulk-upload', [\App\Http\Controllers\Backoffice\IndividualApplicationController::class, 'bulkUpload'])->name('bulk-upload');
     });
+
+    // 예약 캘린더
+    Route::prefix('reservation-calendar')->name('backoffice.reservation-calendar.')->group(function () {
+        Route::get('/', [ReservationCalendarController::class, 'index'])->name('index');
+        Route::get('/reservations', [ReservationCalendarController::class, 'getReservationsByDate'])->name('reservations');
+    });
+
+    // 일정 관리
+    Route::get('schedules/by-date', [ScheduleController::class, 'getSchedulesByDate'])
+        ->name('backoffice.schedules.schedules');
+    Route::resource('schedules', ScheduleController::class, [
+        'names' => 'backoffice.schedules'
+    ]);
 
     // 학교 관리
     Route::resource('schools', SchoolController::class, [

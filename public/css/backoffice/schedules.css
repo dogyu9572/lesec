@@ -1,0 +1,279 @@
+/* 일정관리 전용 CSS */
+.schedule-disabled {
+    background-color: #dc2626;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 2px;
+    margin-top: 4px;
+    display: inline-block;
+}
+
+/* 예약 캘린더와 동일한 레이아웃 - reservation-calendar.css의 스타일을 오버라이드하지 않음 */
+
+.board-container .schedule_table .table {
+    width: 100%;
+}
+
+.board-container .schedule_table .table table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+.board-container .schedule-list-panel .day {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.board-container .schedule-list-panel .day dt {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.board-container .schedule-list-panel .day dd {
+    font-size: 18px;
+    font-weight: 600;
+    color: #222;
+}
+
+.schedule-list-panel .scroll {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.schedule-list-panel table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.schedule-list-panel table th,
+.schedule-list-panel table td {
+    padding: 10px 8px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.schedule-list-panel table th {
+    background: #f7f8f9;
+    font-weight: 600;
+    font-size: 14px;
+    color: #333;
+}
+
+.schedule-list-panel table tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+.schedule-list-panel .btn-sm {
+    padding: 4px 8px;
+    font-size: 12px;
+    margin-right: 4px;
+}
+
+.schedule-month-section {
+    margin-top: 32px;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    background: #fff;
+    padding: 24px;
+}
+
+.schedule-month-section .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 20px;
+}
+
+.schedule-month-section .section-header h6 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #222;
+}
+
+.schedule-month-section .section-header p {
+    margin: 0;
+    font-size: 13px;
+    color: #666;
+}
+
+.schedule-month-section .content-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.schedule-month-section .content-table th,
+.schedule-month-section .content-table td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #e9ecef;
+    text-align: left;
+}
+
+.schedule-month-section .content-table th {
+    background: #f7f8f9;
+    font-weight: 600;
+    color: #333;
+}
+
+.schedule-month-section .content-table tbody tr:hover {
+    background: #f9fafc;
+}
+
+.schedule-month-section .btn-sm {
+    padding: 4px 10px;
+    font-size: 12px;
+    margin-right: 4px;
+}
+
+/* 모달 스타일 */
+.schedule-modal {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1200;
+}
+
+.schedule-modal .category-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+}
+
+.schedule-modal .category-modal-content {
+    position: relative;
+    width: 560px;
+    max-width: 92%;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    animation: fadeInScale 0.25s ease-out;
+}
+
+.schedule-modal .category-modal-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.schedule-modal .category-modal-header h5 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.schedule-modal .category-modal-close {
+    background: none;
+    border: none;
+    color: #666;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.schedule-modal .category-modal-close:hover {
+    color: #222;
+}
+
+.schedule-modal .category-modal-body {
+    padding: 24px;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.schedule-modal .category-modal-footer {
+    padding: 16px 24px 24px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.schedule-modal .modal-form-group {
+    margin-bottom: 20px;
+}
+
+.schedule-modal .modal-form-label {
+    display: block;
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.schedule-modal .modal-form-label .required {
+    color: #dc3545;
+    margin-left: 4px;
+}
+
+.schedule-modal .modal-form-control {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #d9d9d9;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+}
+
+.schedule-modal .modal-form-control:focus {
+    border-color: #5c6bc0;
+    outline: none;
+}
+
+.schedule-modal textarea.modal-form-control {
+    resize: vertical;
+}
+
+.schedule-modal .modal-form-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.schedule-modal .modal-form-col {
+    flex: 1;
+    min-width: 200px;
+}
+
+.schedule-modal .modal-form-checkbox label {
+    font-weight: 500;
+    color: #444;
+    margin-left: 6px;
+}
+
+.schedule-modal #disable_application {
+    width: auto;
+    margin-right: 4px;
+}
+
+.schedule-modal .category-modal-footer .btn {
+    min-width: 100px;
+    padding: 10px 18px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.2;
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+

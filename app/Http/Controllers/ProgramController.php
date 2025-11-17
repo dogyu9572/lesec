@@ -11,6 +11,7 @@ use App\Models\GroupApplication;
 use App\Models\Member;
 use App\Services\ProgramService;
 use App\Services\ProgramReservationService;
+use App\Services\Backoffice\ScheduleService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
@@ -24,13 +25,16 @@ class ProgramController extends Controller
 {
     protected $programService;
     protected $programReservationService;
+    protected ScheduleService $scheduleService;
     
     public function __construct(
         ProgramService $programService,
-        ProgramReservationService $programReservationService
+        ProgramReservationService $programReservationService,
+        ScheduleService $scheduleService
     ) {
         $this->programService = $programService;
         $this->programReservationService = $programReservationService;
+        $this->scheduleService = $scheduleService;
     }
     
     /**
@@ -137,8 +141,9 @@ class ProgramController extends Controller
         // 날짜별 그룹화
         $programsByDate = $this->programReservationService->groupProgramsByDate($programs);
         
+        $disabledDates = $this->scheduleService->getDisabledDates($year, $month);
         // 캘린더 생성
-        $calendar = $this->programReservationService->generateCalendar($year, $month, $programsByDate);
+        $calendar = $this->programReservationService->generateCalendar($year, $month, $programsByDate, $disabledDates);
         
         // 페이지 정보
         $gNum = "01";

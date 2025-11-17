@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Backoffice;
 
 use App\Http\Requests\Backoffice\IndividualApplications\StoreIndividualApplicationRequest;
 use App\Http\Requests\Backoffice\IndividualApplications\UpdateIndividualApplicationRequest;
+use App\Http\Requests\Backoffice\IndividualApplications\BulkUploadRequest;
 use App\Services\Backoffice\IndividualApplicationService;
 use App\Models\IndividualApplication;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
 use InvalidArgumentException;
 
 class IndividualApplicationController extends BaseController
@@ -191,6 +193,48 @@ class IndividualApplicationController extends BaseController
                     'per_page' => 10,
                     'total' => 0,
                 ]
+            ], 500);
+        }
+    }
+
+    /**
+     * 샘플 파일 다운로드
+     */
+    public function downloadSample()
+    {
+        return $this->individualApplicationService->downloadSample();
+    }
+
+    /**
+     * 일괄 업로드 처리
+     */
+    public function bulkUpload(BulkUploadRequest $request): JsonResponse
+    {
+        try {
+            $result = $this->individualApplicationService->bulkUploadApplications($request->file('file'));
+
+            $message = "{$result['success_count']}건의 신청이 등록되었습니다.";
+            if ($result['error_count'] > 0) {
+                $message .= " ({$result['error_count']}건 실패)";
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'success_count' => $result['success_count'],
+                'error_count' => $result['error_count'],
+                'errors' => $result['errors'],
+            ]);
+        } catch (InvalidArgumentException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 400);
+        } catch (\Throwable $e) {
+            report($e);
+            return response()->json([
+                'success' => false,
+                'message' => '일괄 업로드 중 오류가 발생했습니다: ' . $e->getMessage(),
             ], 500);
         }
     }

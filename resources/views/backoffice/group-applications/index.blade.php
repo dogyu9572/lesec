@@ -24,9 +24,12 @@
 
     <div class="board-page-header">
         <div class="board-page-buttons">
-            <a href="{{ route('backoffice.group-applications.create') }}" class="btn btn-primary">
+            <button type="button" id="print-estimate-btn" class="btn btn-dark">
+                <i class="fas fa-file-alt"></i> 견적서
+            </button>
+            <a href="{{ route('backoffice.group-applications.create') }}" class="btn btn-success">
                 <i class="fas fa-plus"></i> 신규등록
-            </a>
+            </a>           
         </div>
     </div>
 
@@ -127,7 +130,7 @@
                     <table class="board-table">
                         <thead>
                             <tr>
-                                <th style="width: 40px;"><input type="checkbox" disabled></th>
+                                <th style="width: 40px;"><input type="checkbox" id="select-all-checkbox"></th>
                                 <th>No</th>
                                 <th>신청번호</th>
                                 <th>신청상태</th>
@@ -147,7 +150,7 @@
                         <tbody>
                             @foreach($applications as $application)
                                 <tr>
-                                    <td><input type="checkbox" disabled></td>
+                                    <td><input type="checkbox" class="application-checkbox" value="{{ data_get($application, 'id', 0) }}"></td>
                                     <td>{{ $applications->total() - ($applications->currentPage() - 1) * $applications->perPage() - $loop->index }}</td>
                                     <td>{{ data_get($application, 'application_number', '-') }}</td>
                                     <td>{{ data_get($application, 'application_status_label', '-') }}</td>
@@ -190,4 +193,6 @@
 </div>
 @endsection
 
-
+@section('scripts')
+<script src="{{ asset('js/backoffice/group-applications-index.js') }}"></script>
+@endsection

@@ -62,9 +62,14 @@
 						@foreach($calendar as $week)
 						<tr>
 							@foreach($week as $dayData)
+							@php
+								$isDisabledDate = $dayData['is_disabled_date'] ?? false;
+							@endphp
 							<td @if($dayData['disabled']) class="disabled" @endif>
 								<span>{{ $dayData['day'] }}</span>
-								@if(!$dayData['disabled'] && count($dayData['programs']) > 0)
+								@if($isDisabledDate)
+								<div class="schedule-disabled">예약불가</div>
+								@elseif(!$dayData['disabled'] && count($dayData['programs']) > 0)
 								<ul class="list">
 									@foreach($dayData['programs'] as $program)
 									@php

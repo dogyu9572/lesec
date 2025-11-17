@@ -58,10 +58,10 @@
                 <table class="board-table school-search-table">
                     <thead>
                         <tr>
-                            <th style="width: 40px;">선택</th>
-                            <th>No</th>
-                            <th>시/도</th>
+                            <th style="width: 60px;">No</th>
                             <th>학교명</th>
+                            <th>지역</th>
+                            <th style="width: 100px;">선택</th>
                         </tr>
                     </thead>
                     <tbody id="school-search-results">
@@ -71,10 +71,7 @@
                     </tbody>
                 </table>
             </div>
-            <div id="school-search-pagination" class="board-pagination"></div>
-        </div>
-        <div class="category-modal-footer">
-            <button type="button" id="school-select-confirm" class="btn btn-primary" disabled>확인</button>
+            <div id="school-search-pagination" class="board-pagination" style="margin-top: 15px;"></div>
         </div>
     </div>
 </div>

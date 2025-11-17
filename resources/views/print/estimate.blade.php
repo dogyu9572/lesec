@@ -1,8 +1,16 @@
 @extends('layouts.app')
 @section('content')
+@php
+    // 기존 호환성: $estimate가 있으면 배열로 변환
+    if (isset($estimate) && !isset($estimates)) {
+        $estimates = [$estimate];
+    } elseif (!isset($estimates)) {
+        $estimates = [];
+    }
+@endphp
 <main>
-    
-	<div class="estimate_wrap">
+    @foreach($estimates as $index => $estimate)
+	<div class="estimate_wrap" @if($index > 0) style="page-break-before: always;" @endif>
 
 		<div class="top">
 			<div class="tit">견적서</div>
@@ -151,6 +159,7 @@
 		</div>
 
 	</div>
+    @endforeach
 
 </main>
 

@@ -22,8 +22,18 @@
         </div>
     @endif
 
+    <div id="bulk-upload-config"
+        data-upload-url="{{ route('backoffice.individual-applications.bulk-upload') }}"
+        data-csrf-token="{{ csrf_token() }}"></div>
     <div class="board-page-header">
         <div class="board-page-buttons">
+            <button type="button" id="bulk-upload-btn" class="btn btn-primary">
+                <i class="fas fa-upload"></i> 일괄 업로드
+            </button>
+            <input type="file" id="bulk-upload-file" accept=".csv,.xlsx,.xls" style="display: none;">
+            <a href="{{ route('backoffice.individual-applications.sample') }}" class="btn btn-secondary">
+                <i class="fas fa-download"></i> 샘플파일 받기
+            </a>
             <a href="{{ route('backoffice.individual-applications.create') }}" class="btn btn-success">
                 <i class="fas fa-plus"></i> 신규등록
             </a>
@@ -202,5 +212,9 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script src="{{ asset('js/backoffice/individual-applications-index.js') }}"></script>
 @endsection
 

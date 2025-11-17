@@ -511,71 +511,90 @@ class MemberMypageController extends Controller
 
     /**
      * 인쇄 - 견적서
-     * 퍼블 컨트롤러(SubController) 대신 마이페이지 컨트롤러에서 처리
+     * 로그인 없이도 접근 가능
+     * 여러 개 선택 시 하나의 페이지에서 순차적으로 출력
      */
     public function printEstimate(Request $request)
     {
-        $member = Auth::guard('member')->user();
-        if (!$member) {
-            return redirect()->route('member.login')
-                ->withErrors(['auth' => '로그인이 필요합니다.']);
-        }
-
         $gNum = "print"; $sNum = ""; $gName = "견적서"; $sName = "";
 
-        $application = null;
-        $estimate = null;
+        $estimates = [];
 
-        $id = (int) $request->query('id', 0);
-        if ($id > 0) {
-            $application = GroupApplication::query()
-                ->with(['reservation'])
-                ->where('id', $id)
-                ->where('member_id', $member->id)
-                ->first();
+        // 여러 ID 처리 (ids 파라미터)
+        $idsParam = $request->query('ids', '');
+        if (!empty($idsParam)) {
+            $ids = array_filter(array_map('intval', explode(',', $idsParam)));
+            if (!empty($ids)) {
+                $applications = GroupApplication::query()
+                    ->with(['reservation', 'member'])
+                    ->whereIn('id', $ids)
+                    ->orderByRaw('FIELD(id, ' . implode(',', $ids) . ')')
+                    ->get();
 
-            if ($application) {
-                $educationDate = $application->participation_date
-                    ? \Carbon\Carbon::parse($application->participation_date)->format('Y.m.d')
-                    : 'YYYY.MM.DD';
+                foreach ($applications as $application) {
+                    $estimates[] = $this->buildEstimateData($application);
+                }
+            }
+        } else {
+            // 단일 ID 처리 (id 파라미터 - 기존 호환성 유지)
+            $id = (int) $request->query('id', 0);
+            if ($id > 0) {
+                $application = GroupApplication::query()
+                    ->with(['reservation', 'member'])
+                    ->where('id', $id)
+                    ->first();
 
-                $programName = optional($application->reservation)->program_name ?? '';
-                $applicantCount = (int) ($application->applicant_count ?? 0);
-                $unitPrice = (int) ($application->participation_fee ?? 0);
-                $amount = $applicantCount * $unitPrice;
-                $vat = (int) floor($amount * 0.1);
-                $total = $amount + $vat;
-
-                $recipientName = $application->applicant_name ?? '';
-                $schoolName = $application->school_name ?? '';
-                $phone = $this->formatPhoneNumberSimple($application->applicant_contact ?? '');
-                $email = $member->email ?? '';
-
-                $estimate = [
-                    'number' => $application->application_number ?? '',
-                    'date' => now()->format('Y.m.d'),
-                    'recipient_name' => $recipientName,
-                    'school_name' => $schoolName,
-                    'phone' => $phone,
-                    'email' => $email,
-                    'items' => [[
-                        'no' => 1,
-                        'education_date' => $educationDate,
-                        'program_name' => $programName,
-                        'count' => $applicantCount,
-                        'unit_price' => $unitPrice,
-                        'amount' => $amount,
-                    ]],
-                    'subtotal' => $amount,
-                    'vat' => $vat,
-                    'total' => $total,
-                    'print_date' => now()->format('Y년 m월 d일'),
-                    'note' => '',
-                ];
+                if ($application) {
+                    $estimates[] = $this->buildEstimateData($application);
+                }
             }
         }
 
-        return view('print.estimate', compact('gNum', 'sNum', 'gName', 'sName', 'estimate'));
+        return view('print.estimate', compact('gNum', 'sNum', 'gName', 'sName', 'estimates'));
+    }
+
+    /**
+     * 견적서 데이터 생성
+     */
+    private function buildEstimateData(GroupApplication $application): array
+    {
+        $educationDate = $application->participation_date
+            ? \Carbon\Carbon::parse($application->participation_date)->format('Y.m.d')
+            : 'YYYY.MM.DD';
+
+        $programName = optional($application->reservation)->program_name ?? '';
+        $applicantCount = (int) ($application->applicant_count ?? 0);
+        $unitPrice = (int) ($application->participation_fee ?? 0);
+        $amount = $applicantCount * $unitPrice;
+        $vat = (int) floor($amount * 0.1);
+        $total = $amount + $vat;
+
+        $recipientName = $application->applicant_name ?? '';
+        $schoolName = $application->school_name ?? '';
+        $phone = $this->formatPhoneNumberSimple($application->applicant_contact ?? '');
+        $email = optional($application->member)->email ?? '';
+
+        return [
+            'number' => $application->application_number ?? '',
+            'date' => now()->format('Y.m.d'),
+            'recipient_name' => $recipientName,
+            'school_name' => $schoolName,
+            'phone' => $phone,
+            'email' => $email,
+            'items' => [[
+                'no' => 1,
+                'education_date' => $educationDate,
+                'program_name' => $programName,
+                'count' => $applicantCount,
+                'unit_price' => $unitPrice,
+                'amount' => $amount,
+            ]],
+            'subtotal' => $amount,
+            'vat' => $vat,
+            'total' => $total,
+            'print_date' => now()->format('Y년 m월 d일'),
+            'note' => '',
+        ];
     }
 
     private function formatPhoneNumberSimple(?string $digits): string

@@ -226,33 +226,20 @@
     vertical-align: middle;
 }
 
-.school-select-cell {
-    text-align: center;
-    width: 70px;
-}
-
-.school-select-input {
-    width: 16px;
-    height: 16px;
-}
-
-.school-row.selected {
+.school-search-table tbody tr.selected {
     background-color: #f1f3f5;
 }
 
-.category-modal-footer {
+.school-select-action {
+    text-align: right;
+}
+
+.school-select-action .btn {
+    min-width: 60px;
+    padding: 4px 12px;
+    display: inline-flex;
+    align-items: center;
     justify-content: center;
-    gap: 10px;
-}
-
-.category-modal-footer .btn-dark:disabled {
-    background-color: #adb5bd;
-    border-color: #adb5bd;
-}
-
-.category-modal-footer .btn-dark {
-    min-width: 140px;
-    border: none;
 }
 
 body.modal-open {

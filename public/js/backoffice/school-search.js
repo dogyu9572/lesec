@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const overlay = searchModal ? searchModal.querySelector('.category-modal-overlay') : null;
     const closeButton = searchModal ? searchModal.querySelector('.category-modal-close') : null;
     const cancelButton = searchModal ? searchModal.querySelector('.school-search-cancel') : null;
-    const confirmButton = document.getElementById('school-select-confirm');
     const searchForm = document.getElementById('school-search-form');
     const resultBody = document.getElementById('school-search-results');
     const paginationContainer = document.getElementById('school-search-pagination');
@@ -30,6 +29,7 @@ document.addEventListener('DOMContentLoaded', function () {
         city: memberCityInput ? memberCityInput.value : null,
         district: memberDistrictInput ? memberDistrictInput.value : null,
     };
+
     let selectedSchool = { ...defaultSelection };
     let currentPage = 1;
 
@@ -44,17 +44,10 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
     }
 
-    /**
-     * 모달 열기
-     */
     function openModal() {
         const modalContent = searchModal.querySelector('.category-modal-content');
         if (modalContent) {
             modalContent.scrollTop = 0;
-        }
-
-        if (directInputField) {
-            directInputField.value = '';
         }
 
         if (closeButton && !closeButton.querySelector('i')) {
@@ -63,34 +56,21 @@ document.addEventListener('DOMContentLoaded', function () {
             closeButton.appendChild(icon);
         }
 
+        if (directInputField) {
+            directInputField.value = '';
+        }
+
         searchModal.style.display = 'flex';
         document.body.classList.add('modal-open');
-        toggleConfirmButton(Boolean(selectedSchool && selectedSchool.id));
         updateDirectInputState();
-        loadSchools(1, highlightSelectedRow);
+        loadSchools(1);
     }
 
-    /**
-     * 모달 닫기
-     */
     function closeModal() {
         searchModal.style.display = 'none';
         document.body.classList.remove('modal-open');
     }
 
-    /**
-     * 확인 버튼 상태 제어
-     */
-    function toggleConfirmButton(enabled) {
-        if (!confirmButton) {
-            return;
-        }
-        confirmButton.disabled = !enabled;
-    }
-
-    /**
-     * 셀렉트 옵션 구성
-     */
     function populateSelect(selectElement, items, placeholder) {
         if (!selectElement) {
             return;
@@ -131,10 +111,7 @@ document.addEventListener('DOMContentLoaded', function () {
         selectElement.dataset.defaultValue = '';
     }
 
-    /**
-     * 학교 목록 불러오기
-     */
-    function loadSchools(page = 1, onComplete) {
+    function loadSchools(page = 1) {
         const dataUrl = searchForm.dataset.url;
         if (!dataUrl) {
             return;
@@ -142,7 +119,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         currentPage = page;
         resultBody.innerHTML = '<tr><td colspan="4" class="text-center">학교 정보를 불러오는 중입니다...</td></tr>';
-        toggleConfirmButton(false);
 
         const formData = new FormData(searchForm);
         const params = new URLSearchParams(formData);
@@ -165,252 +141,62 @@ document.addEventListener('DOMContentLoaded', function () {
                     populateSelect(districtSelect, data.filters.districts || [], '시/군/구 선택');
                     populateSelect(levelSelect, data.filters.levels || [], '학교급 선택');
                 }
-                if (typeof onComplete === 'function') {
-                    onComplete();
-                }
             })
             .catch(() => {
                 resultBody.innerHTML = '<tr><td colspan="4" class="text-center text-danger">학교 정보를 불러오는 중 오류가 발생했습니다.</td></tr>';
-                if (typeof onComplete === 'function') {
-                    onComplete();
-                }
             });
     }
 
-    /**
-     * 학교 목록 렌더링
-     */
     function renderSchoolRows(schools, pagination) {
         if (!schools.length) {
             resultBody.innerHTML = '<tr><td colspan="4" class="text-center">검색 결과가 없습니다.</td></tr>';
-            toggleConfirmButton(false);
             return;
         }
 
-        let template = '';
         const total = pagination ? pagination.total : schools.length;
         const perPage = pagination ? pagination.per_page : schools.length;
         const page = pagination ? pagination.current_page : 1;
-        const baseNumber = pagination ? total - ( (page - 1) * perPage ) : schools.length;
+        const baseNumber = pagination ? total - ((page - 1) * perPage) : schools.length;
 
+        let template = '';
         schools.forEach((school, index) => {
             const schoolId = school.id ?? '';
             const schoolName = school.name ?? '';
-            const schoolCity = school.city ?? '-';
+            const schoolCity = school.city ?? '';
             const schoolDistrict = school.district ?? '';
-            const checked = selectedSchool && String(selectedSchool.id) === String(schoolId) ? 'checked' : '';
+            const region = [schoolCity, schoolDistrict].filter(Boolean).join(' ') || '-';
             const rowNumber = Math.max(1, baseNumber - index);
+            const isSelected = selectedSchool && String(selectedSchool.id) === String(schoolId);
 
             template += `
-                <tr class="school-row" data-id="${schoolId}" data-name="${schoolName}" data-city="${schoolCity}" data-district="${schoolDistrict}">
-                    <td class="school-select-cell">
-                    <input type="radio" name="selected_school" value="${schoolId}" class="school-select-input" ${checked}>
-                    </td>
-                <td>${rowNumber}</td>
-                    <td>${schoolCity}</td>
+                <tr class="school-row${isSelected ? ' selected' : ''}">
+                    <td>${rowNumber}</td>
                     <td>${schoolName}</td>
+                    <td>${region}</td>
+                    <td class="school-select-action">
+                        <button type="button"
+                                class="btn btn-primary school-select-btn"
+                                data-id="${schoolId}"
+                                data-name="${schoolName}"
+                                data-city="${schoolCity}"
+                                data-district="${schoolDistrict}">
+                            선택
+                        </button>
+                    </td>
                 </tr>
             `;
         });
 
         resultBody.innerHTML = template;
 
-        const rows = resultBody.querySelectorAll('.school-row');
-        const radios = resultBody.querySelectorAll('input[name="selected_school"]');
-
-        radios.forEach((radio) => {
-            radio.addEventListener('change', function () {
-                if (!this.checked) {
-                    return;
-                }
-
-                const row = this.closest('.school-row');
-                if (!row) {
-                    return;
-                }
-
-                selectedSchool = {
-                    id: row.dataset.id,
-                    name: row.dataset.name,
-                    city: row.dataset.city,
-                    district: row.dataset.district,
-                };
-                toggleConfirmButton(true);
-
-                rows.forEach((item) => item.classList.remove('selected'));
-                row.classList.add('selected');
-            });
-        });
-
-        rows.forEach((row) => {
-            row.addEventListener('click', function (event) {
-                const radio = this.querySelector('input[name="selected_school"]');
-                if (!radio) {
-                    return;
-                }
-
-                if (event.target !== radio) {
-                    radio.checked = true;
-                    radio.dispatchEvent(new Event('change'));
-                }
+        const buttons = resultBody.querySelectorAll('.school-select-btn');
+        buttons.forEach((button) => {
+            button.addEventListener('click', function () {
+                const { id, name, city, district } = this.dataset;
+                applySelectedSchool({ id, name, city, district });
             });
         });
     }
-
-    function highlightSelectedRow() {
-        if (!selectedSchool || !selectedSchool.id) {
-            return;
-        }
-        const radio = resultBody.querySelector(`.school-row[data-id="${selectedSchool.id}"] input[name="selected_school"]`);
-        if (radio) {
-            radio.checked = true;
-            radio.dispatchEvent(new Event('change'));
-        }
-    }
-
-    /**
-     * 모달 오픈/클로즈 이벤트 바인딩
-     */
-    searchButton.addEventListener('click', openModal);
-    overlay?.addEventListener('click', closeModal);
-    closeButton?.addEventListener('click', closeModal);
-    cancelButton?.addEventListener('click', closeModal);
-
-    /**
-     * 검색 폼 submit 이벤트
-     */
-    searchForm.addEventListener('submit', function (event) {
-        event.preventDefault();
-        selectedSchool = null;
-        toggleConfirmButton(false);
-        loadSchools(1, highlightSelectedRow);
-    });
-
-    /**
-     * 필터 변경 시 재검색
-     */
-    [citySelect, districtSelect, levelSelect].forEach((select) => {
-        select?.addEventListener('change', function () {
-            if (select === citySelect && districtSelect) {
-                districtSelect.dataset.defaultValue = '';
-                districtSelect.value = '';
-            }
-            selectedSchool = null;
-            toggleConfirmButton(false);
-            loadSchools(1, highlightSelectedRow);
-        });
-    });
-
-    /**
-     * 직접 입력 버튼 상태 업데이트
-     */
-    function updateDirectInputState() {
-        if (!directConfirmButton) {
-            return;
-        }
-
-        const hasValue = directInputField && directInputField.value.trim().length > 0;
-        directConfirmButton.disabled = !hasValue;
-
-        if (hasValue) {
-            focusInputWithoutScroll(directInputField, '#school-search-modal .category-modal-content');
-        }
-    }
-
-    function focusInputWithoutScroll(element, containerSelector) {
-        if (!element) {
-            return;
-        }
-
-        const container = containerSelector ? document.querySelector(containerSelector) : null;
-
-        if (typeof element.focus === 'function') {
-            try {
-                element.focus({ preventScroll: true });
-                return;
-            } catch (error) {
-                // 브라우저가 preventScroll을 지원하지 않는 경우
-            }
-        }
-
-        const previousScroll = container
-            ? { top: container.scrollTop, left: container.scrollLeft }
-            : { top: window.scrollY, left: window.scrollX };
-
-        element.focus();
-
-        if (container) {
-            container.scrollTop = previousScroll.top;
-            container.scrollLeft = previousScroll.left;
-        } else {
-            window.scrollTo(previousScroll.left, previousScroll.top);
-        }
-    }
-
-    directInputField?.addEventListener('input', function () {
-        selectedSchool = null;
-        toggleConfirmButton(false);
-        updateDirectInputState();
-    });
-
-    directConfirmButton?.addEventListener('click', function () {
-        const directValue = directInputField ? directInputField.value.trim() : '';
-        if (!directValue) {
-            alert('학교명을 입력해 주세요.');
-            focusInputWithoutScroll(directInputField, '#school-search-modal .category-modal-content');
-            return;
-        }
-
-        if (schoolNameInput) {
-            schoolNameInput.value = directValue;
-        }
-        if (schoolIdInput) {
-            schoolIdInput.value = '';
-        }
-        if (memberCityInput) {
-            memberCityInput.value = citySelect?.value || '';
-        }
-        if (memberDistrictInput) {
-            memberDistrictInput.value = districtSelect?.value || '';
-        }
-
-        selectedSchool = null;
-        toggleConfirmButton(false);
-        closeModal();
-    });
-
-    updateDirectInputState();
-
-    /**
-     * 확인 버튼 클릭 시 값 반영
-     */
-    confirmButton?.addEventListener('click', function () {
-        if (!selectedSchool) {
-            return;
-        }
-
-        if (schoolNameInput) {
-            schoolNameInput.value = selectedSchool.name || '';
-        }
-        if (schoolIdInput) {
-            schoolIdInput.value = selectedSchool.id || '';
-        }
-        if (memberCityInput) {
-            memberCityInput.value = selectedSchool.city || '';
-        }
-        if (memberDistrictInput) {
-            memberDistrictInput.value = selectedSchool.district || '';
-        }
-
-        if (citySelect) {
-            citySelect.dataset.defaultValue = selectedSchool.city || '';
-        }
-        if (districtSelect) {
-            districtSelect.dataset.defaultValue = selectedSchool.district || '';
-        }
-
-        closeModal();
-    });
 
     function renderSchoolPagination(pagination) {
         if (!paginationContainer) {
@@ -444,8 +230,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         html += pageItem(current + 1, '<i class="fas fa-chevron-right"></i>', current === lastPage);
         html += pageItem(lastPage, '<i class="fas fa-angle-double-right"></i>', current === lastPage);
-
         html += '</ul></nav>';
+
         paginationContainer.innerHTML = html;
 
         paginationContainer.querySelectorAll('a[data-page]').forEach((link) => {
@@ -455,10 +241,134 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (!targetPage || targetPage === currentPage) {
                     return;
                 }
-                selectedSchool = null;
-                toggleConfirmButton(false);
-                loadSchools(targetPage, highlightSelectedRow);
+                loadSchools(targetPage);
             });
         });
     }
+
+    function applySelectedSchool(data) {
+        if (!data) {
+            return;
+        }
+
+        selectedSchool = { ...data };
+
+        if (schoolNameInput) {
+            schoolNameInput.value = data.name || '';
+        }
+        if (schoolIdInput) {
+            schoolIdInput.value = data.id || '';
+        }
+        if (memberCityInput) {
+            memberCityInput.value = data.city || '';
+        }
+        if (memberDistrictInput) {
+            memberDistrictInput.value = data.district || '';
+        }
+        if (citySelect) {
+            citySelect.dataset.defaultValue = data.city || '';
+        }
+        if (districtSelect) {
+            districtSelect.dataset.defaultValue = data.district || '';
+        }
+
+        closeModal();
+    }
+
+    function updateDirectInputState() {
+        if (!directConfirmButton) {
+            return;
+        }
+
+        const hasValue = directInputField && directInputField.value.trim().length > 0;
+        directConfirmButton.disabled = !hasValue;
+
+        if (hasValue) {
+            focusInputWithoutScroll(directInputField, '#school-search-modal .category-modal-content');
+        }
+    }
+
+    function focusInputWithoutScroll(element, containerSelector) {
+        if (!element) {
+            return;
+        }
+
+        const container = containerSelector ? document.querySelector(containerSelector) : null;
+
+        if (typeof element.focus === 'function') {
+            try {
+                element.focus({ preventScroll: true });
+                return;
+            } catch (error) {
+                // preventScroll 미지원 브라우저
+            }
+        }
+
+        const previousScroll = container
+            ? { top: container.scrollTop, left: container.scrollLeft }
+            : { top: window.scrollY, left: window.scrollX };
+
+        element.focus();
+
+        if (container) {
+            container.scrollTop = previousScroll.top;
+            container.scrollLeft = previousScroll.left;
+        } else {
+            window.scrollTo(previousScroll.left, previousScroll.top);
+        }
+    }
+
+    searchButton.addEventListener('click', openModal);
+    overlay?.addEventListener('click', closeModal);
+    closeButton?.addEventListener('click', closeModal);
+    cancelButton?.addEventListener('click', closeModal);
+
+    searchForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+        selectedSchool = null;
+        loadSchools(1);
+    });
+
+    [citySelect, districtSelect, levelSelect].forEach((select) => {
+        select?.addEventListener('change', function () {
+            if (select === citySelect && districtSelect) {
+                districtSelect.dataset.defaultValue = '';
+                districtSelect.value = '';
+            }
+            selectedSchool = null;
+            loadSchools(1);
+        });
+    });
+
+    directInputField?.addEventListener('input', function () {
+        selectedSchool = null;
+        updateDirectInputState();
+    });
+
+    directConfirmButton?.addEventListener('click', function () {
+        const directValue = directInputField ? directInputField.value.trim() : '';
+        if (!directValue) {
+            alert('학교명을 입력해 주세요.');
+            focusInputWithoutScroll(directInputField, '#school-search-modal .category-modal-content');
+            return;
+        }
+
+        if (schoolNameInput) {
+            schoolNameInput.value = directValue;
+        }
+        if (schoolIdInput) {
+            schoolIdInput.value = '';
+        }
+        if (memberCityInput) {
+            memberCityInput.value = citySelect?.value || '';
+        }
+        if (memberDistrictInput) {
+            memberDistrictInput.value = districtSelect?.value || '';
+        }
+
+        selectedSchool = null;
+        closeModal();
+    });
+
+    updateDirectInputState();
 });

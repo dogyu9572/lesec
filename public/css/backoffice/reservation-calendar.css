@@ -1,0 +1,306 @@
+/* 캘린더 관련 CSS만 선택적으로 적용 (사이드바에 영향 없도록) */
+.board-container .board-card-body {
+    padding: 0;
+}
+.board-container .schedule_wrap {
+    gap: 0;
+    width: 100%;
+    display: flex;
+    overflow: hidden;
+}
+.board-container .schedule_wrap .schedule_table {
+    flex: 1.8;
+    padding: 1.5rem;
+    border-right: 1px solid #e9ecef;
+    display: flex;
+    flex-direction: column;
+}
+.board-container .schedule_wrap .glbox.select_day {
+    flex: 1.2;
+    padding: 1.5rem;
+    min-width: 340px;
+    display: flex;
+    flex-direction: column;
+}
+.board-container .schedule_top {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px 20px;
+    margin-bottom: 24px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e9ecef;
+}
+.board-container .schedule_top .month {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.board-container .schedule_top .month .arrow {
+    width: 30px;
+    height: 30px;
+    border: #ddd 1px solid;
+    border-radius: 50%;
+    background: url('/images/arrow_month.svg') no-repeat 50% 50%;
+    font-size: 0;
+    cursor: pointer;
+}
+.board-container .schedule_top .month .next {
+    transform: scaleX(-1);
+}
+.board-container .schedule_top .month strong {
+    font-size: 24px;
+    color: #222;
+    line-height: 38px;
+}
+.board-container .schedule_top .month .btn_today {
+    display: block;
+    font-size: 16px;
+    color: #222;
+    font-weight: 500;
+    line-height: 38px;
+    height: 40px;
+    border: #ddd 1px solid;
+    border-radius: 4px;
+    margin-left: 12px;
+    padding: 0 16px;
+    cursor: pointer;
+    background: #fff;
+}
+.board-container .schedule_top .info {
+    gap: 40px;
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+}
+.board-container .schedule_top .info li {
+    position: relative;
+    padding-left: 20px;
+    font-size: 14px;
+    color: #222;
+    line-height: 26px;
+    white-space: nowrap;
+}
+.board-container .schedule_top .info li:before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 14px;
+    height: 14px;
+    border-radius: 2px;
+    transform: translateY(-50%);
+}
+.board-container .schedule_top .info li.i_select:before {
+    border: #283891 2px solid;
+}
+.board-container .schedule_top .info li.i_possible:before {
+    background: #39B54A;
+}
+.board-container .schedule_top .info li.i_impossible:before {
+    background: #EBEBEB;
+    border: #ddd 1px solid;
+}
+.board-container .schedule_table .table {
+    border: #ddd 1px solid;
+    border-radius: 12px;
+    overflow: hidden;
+    width: auto;
+    max-width: 100%;
+    table-layout: auto;
+}
+.board-container .schedule_table .table th,
+.board-container .schedule_table .table td {
+    border-left: #ddd 1px solid;
+    border-right: #ddd 1px solid;
+    border-top: 0 !important;
+    width: auto !important;
+    min-width: 100px;
+    max-width: 148px;
+    padding: 4px 8px;
+}
+.board-container .schedule_table .table th:first-child,
+.board-container .schedule_table .table td:first-child {
+    border-left: 0;
+    color: #DC2626;
+}
+.board-container .schedule_table .table th:last-child,
+.board-container .schedule_table .table td:last-child {
+    border-right: 0;
+    color: #283891;
+}
+.board-container .schedule_table .table thead th {
+    font-size: 16px;
+    color: #333;
+    line-height: 48px;
+    border-top: 0 !important;
+    border-bottom: 1px solid #ddd !important;
+}
+.board-container .schedule_table .table tbody td {
+    position: relative;
+    border-top: #ddd 1px solid !important;
+    padding: 4px;
+    height: 120px;
+    vertical-align: top;
+}
+.board-container .schedule_table .table tbody tr:first-child td {
+    border-top: 0 !important;
+}
+.board-container .schedule_table .table tbody td.disabled {
+    pointer-events: none;
+    background: #F7F8F9;
+}
+.board-container .schedule_table .table tbody td.disabled span {
+    opacity: 0.6;
+}
+.board-container .schedule_table .table tbody td span {
+    display: block;
+    font-size: 14px;
+    color: inherit;
+    line-height: 26px;
+    padding: 0 4px;
+}
+.board-container .schedule_table .table tbody td .list {
+    margin-top: 4px;
+    padding: 0;
+    list-style: none;
+    width: 100%;
+}
+.board-container .schedule_table .table tbody td .list li {
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 16px;
+    padding: 2px 4px;
+    display: block;
+    border-radius: 2px;
+    width: 100%;
+    box-sizing: border-box;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.board-container .schedule_table .table tbody td .list li + li {
+    margin-top: 2px;
+}
+.board-container .schedule_table .table tbody td .list li.i_possible {
+    color: #fff;
+    background: #39B54A;
+}
+.board-container .schedule_table .table tbody td .list li.i_impossible {
+    color: #999;
+    line-height: 16px;
+    background: #EBEBEB;
+    border: #ddd 1px solid;
+}
+.calendar-day.clickable {
+    cursor: pointer;
+}
+.calendar-day.selected {
+    background-color: #f0f0f0;
+}
+.calendar-day.selected:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: #283891 2px solid;
+    pointer-events: none;
+}
+.glbox.select_day {
+    border: #ddd 1px solid;
+    border-radius: 12px;
+    background: #fff;
+}
+.glbox.select_day .top {
+    padding: 32px 18px 32px 32px;
+}
+.glbox.select_day .day {
+    display: flex;
+    gap: 12px;
+    font-size: 20px;
+    color: #222;
+    font-weight: 600;
+    padding-bottom: 16px;
+}
+.glbox.select_day .day dd {
+    margin: 0;
+}
+.glbox.select_day .day dd span {
+    color: #666;
+    font-weight: 400;
+    margin-left: 4px;
+}
+.glbox.select_day .scroll {
+    overflow-y: auto;
+    padding-right: 10px;
+    flex: 1;
+}
+.glbox.select_day .tbl table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+.glbox.select_day .tbl col.w80 {
+    width: 35%;
+}
+.glbox.select_day .tbl col.w100 {
+    width: 30%;
+}
+.glbox.select_day .tbl col:not([class]) {
+    width: 35%;
+}
+.glbox.select_day .tbl th,
+.glbox.select_day .tbl td {
+    padding: 12px 8px;
+    text-align: left;
+    border-bottom: #ddd 1px solid;
+}
+.glbox.select_day .tbl th {
+    background: #f7f8f9;
+    font-weight: 600;
+    font-size: 14px;
+    color: #333;
+}
+.glbox.select_day .tbl tbody tr:hover {
+    background-color: #f9f9f9;
+}
+.glbox.select_day .tbl .w80 {
+    width: 12.58%;
+}
+.glbox.select_day .tbl .w100 {
+    width: 15%;
+}
+#individual-section h6,
+#group-section h6 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #222;
+    margin-bottom: 12px;
+}
+.badge {
+    display: inline-block;
+    padding: 2px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 12px;
+    margin-left: 8px;
+}
+.badge-danger {
+    background-color: #dc2626;
+    color: #fff;
+}
+.schedule-disabled {
+    background-color: #dc2626;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 2px;
+    margin-top: 6px;
+    display: block;
+    width: 100%;
+    text-align: right;
+}
+

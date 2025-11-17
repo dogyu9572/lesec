@@ -7,6 +7,7 @@ use App\Models\GroupApplicationParticipant;
 use App\Models\Member;
 use App\Models\ProgramReservation;
 use App\Models\School;
+use App\Services\Concerns\DownloadsCsvSample;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -19,6 +20,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class GroupApplicationService
 {
+    use DownloadsCsvSample;
     public function getFilteredApplications(Request $request): LengthAwarePaginator
     {
         $query = GroupApplication::query()
@@ -370,18 +372,14 @@ class GroupApplicationService
 
     public function downloadRosterSample(): StreamedResponse
     {
-        $headers = [
-            'Content-Type' => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => 'attachment; filename="group_roster_sample.csv"',
+        $filename = 'group_roster_sample.csv';
+        $headers = ['이름', '학년', '반', '생년월일(YYYYMMDD)'];
+        $sampleRows = [
+            ['홍길동', '1', '1', '20010101'],
+            ['김철수', '2', '3', '20020202'],
         ];
-        return response()->stream(function () {
-            $out = fopen('php://output', 'w');
-            fprintf($out, chr(0xEF).chr(0xBB).chr(0xBF));
-            fputcsv($out, ['이름', '학년', '반', '생년월일(YYYYMMDD)']);
-            fputcsv($out, ['홍길동', '1', '1', '20010101']);
-            fputcsv($out, ['김철수', '2', '3', '20020202']);
-            fclose($out);
-        }, 200, $headers);
+
+        return $this->downloadCsvSample($filename, $headers, $sampleRows);
     }
 
     public function uploadRoster(int $applicationId, UploadedFile $file): int

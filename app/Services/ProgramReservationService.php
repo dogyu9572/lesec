@@ -254,7 +254,7 @@ class ProgramReservationService
     /**
      * 캘린더 구조 생성
      */
-    public function generateCalendar(int $year, int $month, array $programsByDate): array
+    public function generateCalendar(int $year, int $month, array $programsByDate, array $disabledDates = []): array
     {
         $firstDay = mktime(0, 0, 0, $month, 1, $year);
         $daysInMonth = date('t', $firstDay);
@@ -277,6 +277,7 @@ class ProgramReservationService
             $week[] = [
                 'day' => $daysInPrevMonth - ($dayOfWeek - $i - 1),
                 'disabled' => true,
+                'is_disabled_date' => false,
                 'programs' => []
             ];
         }
@@ -284,10 +285,12 @@ class ProgramReservationService
         // 현재 달 날짜
         while ($day <= $daysInMonth) {
             $dateKey = sprintf('%d-%02d-%02d', $year, $month, $day);
+            $isDisabled = isset($disabledDates[$dateKey]);
             $week[] = [
                 'day' => $day,
-                'disabled' => false,
-                'programs' => $programsByDate[$dateKey] ?? []
+                'disabled' => $isDisabled,
+                'is_disabled_date' => $isDisabled,
+                'programs' => $isDisabled ? [] : ($programsByDate[$dateKey] ?? [])
             ];
             
             if (count($week) == 7) {
@@ -304,6 +307,7 @@ class ProgramReservationService
             $week[] = [
                 'day' => $nextDay,
                 'disabled' => true,
+                'is_disabled_date' => false,
                 'programs' => []
             ];
             $nextDay++;

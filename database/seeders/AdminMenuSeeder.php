@@ -296,7 +296,7 @@ class AdminMenuSeeder extends Seeder
                 'id' => 23,
                 'parent_id' => 22,
                 'name' => '예약 캘린더',
-                'url' => '/backoffice/reservations/calendar',
+                'url' => '/backoffice/reservation-calendar',
                 'icon' => null,
                 'order' => 1,
                 'is_active' => 1,

@@ -22,7 +22,7 @@ return new class extends Migration
             
             // 개인 정보
             $table->string('name')->comment('이름');
-            $table->string('email')->unique()->comment('이메일');
+            $table->string('email')->comment('이메일');
             $table->date('birth_date')->nullable()->comment('생년월일');
             $table->enum('gender', ['male', 'female'])->nullable()->comment('성별');
             $table->string('contact', 50)->nullable()->comment('연락처');

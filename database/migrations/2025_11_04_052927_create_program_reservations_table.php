@@ -52,7 +52,7 @@ return new class extends Migration
             $table->date('participation_date')->comment('참가일');
             $table->unsignedInteger('participation_fee')->nullable()->comment('참가비');
             $table->enum('payment_method', ['bank_transfer', 'on_site_card', 'online_card'])->nullable()->comment('결제방법');
-            $table->enum('payment_status', ['unpaid', 'paid', 'refunded'])->default('unpaid')->comment('결제상태');
+            $table->enum('payment_status', ['unpaid', 'paid', 'refunded', 'cancelled'])->default('unpaid')->comment('결제상태');
             $table->enum('draw_result', ['pending', 'win', 'waitlist', 'fail'])->default('pending')->comment('추첨결과');
             $table->string('applicant_name', 50)->comment('신청자명');
             $table->string('applicant_school_name', 100)->nullable()->comment('학교명');

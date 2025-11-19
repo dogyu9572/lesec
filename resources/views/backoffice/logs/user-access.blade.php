@@ -31,7 +31,7 @@
         <div class="board-card-body">
             <!-- 검색 필터 -->
             <div class="user-filter">
-                <form method="GET" action="{{ route('backoffice.logs.user-access') }}" class="filter-form">
+                <form method="GET" action="{{ route('backoffice.user-access-logs') }}" class="filter-form">
                     <div class="filter-row">
                         <div class="filter-group">
                             <label for="name" class="filter-label">회원명</label>
@@ -53,7 +53,7 @@
                                 <button type="submit" class="btn btn-primary">
                                     <i class="fas fa-search"></i> 검색
                                 </button>
-                                <a href="{{ route('backoffice.logs.user-access') }}" class="btn btn-secondary">
+                                <a href="{{ route('backoffice.user-access-logs') }}" class="btn btn-secondary">
                                     <i class="fas fa-undo"></i> 초기화
                                 </a>
                             </div>
@@ -64,12 +64,12 @@
 
             @if($logs->count() > 0)
                 <!-- 목록 개수 선택 -->
-                <div class="user-list-header">
+                <div class="board-list-header">
                     <div class="list-info">
                         <span class="list-count">Total : {{ $logs->total() }}</span>
                     </div>
                     <div class="list-controls">
-                        <form method="GET" action="{{ route('backoffice.logs.user-access') }}" class="per-page-form">
+                        <form method="GET" action="{{ route('backoffice.user-access-logs') }}" class="per-page-form">
                             @foreach(request()->except('per_page') as $key => $value)
                                 <input type="hidden" name="{{ $key }}" value="{{ $value }}">
                             @endforeach

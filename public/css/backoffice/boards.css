@@ -577,3 +577,115 @@
     }
 }
 
+/* 회원 통계 */
+.member-stats-page .board-card {
+    margin-top: 1rem;
+}
+
+.member-stats-summary {
+    display: flex;
+    gap: 2rem;
+    padding: 1.25rem;
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+}
+
+.member-stats-summary .summary-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.member-stats-summary .summary-label {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+.member-stats-summary .summary-value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1f70ff;
+}
+
+.member-stats-section {
+    margin-bottom: 2.5rem;
+}
+
+.member-stats-section:last-child {
+    margin-bottom: 0;
+}
+
+.member-stats-section .section-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-bottom: 1rem;
+}
+
+.member-stats-section .section-header h5 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.member-stats-section .section-description {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.member-stats-table {
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.member-stats-row {
+    display: grid;
+    grid-auto-flow: column;
+    gap: 0;
+}
+
+.member-stats-row--labels {
+    background-color: #f5f7fb;
+}
+
+.member-stats-cell {
+    padding: 0.75rem 0.5rem;
+    text-align: center;
+    border-right: 1px solid #e9ecef;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.member-stats-row--values .member-stats-cell {
+    font-weight: 600;
+    color: #333;
+}
+
+.member-stats-row .member-stats-cell:last-child {
+    border-right: none;
+}
+
+.member-stats-table--wide .member-stats-row {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+}
+
+@media (max-width: 992px) {
+    .member-stats-summary {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .member-stats-row {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .member-stats-cell {
+        flex: 1 0 33.33%;
+    }
+}
+

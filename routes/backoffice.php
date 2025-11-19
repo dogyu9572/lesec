@@ -22,6 +22,7 @@ use App\Http\Controllers\Backoffice\ProgramController;
 use App\Http\Controllers\Backoffice\GroupProgramController;
 use App\Http\Controllers\Backoffice\IndividualProgramController;
 use App\Http\Controllers\Backoffice\ReservationCalendarController;
+use App\Http\Controllers\Backoffice\RosterController;
 use App\Http\Controllers\Backoffice\ScheduleController;
 use App\Http\Controllers\Backoffice\SchoolController;
 
@@ -321,6 +322,16 @@ Route::prefix('backoffice')->middleware(['backoffice'])->group(function () {
         Route::get('/search-programs', [\App\Http\Controllers\Backoffice\IndividualApplicationController::class, 'searchPrograms'])->name('search-programs');
         Route::get('/sample', [\App\Http\Controllers\Backoffice\IndividualApplicationController::class, 'downloadSample'])->name('sample');
         Route::post('/bulk-upload', [\App\Http\Controllers\Backoffice\IndividualApplicationController::class, 'bulkUpload'])->name('bulk-upload');
+    });
+
+    // 명단 관리
+    Route::prefix('rosters')->name('backoffice.rosters.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Backoffice\RosterController::class, 'index'])->name('index');
+        Route::post('/download-list', [\App\Http\Controllers\Backoffice\RosterController::class, 'downloadList'])->name('download-list');
+        Route::get('/{reservation}/edit', [\App\Http\Controllers\Backoffice\RosterController::class, 'edit'])->name('edit');
+        Route::post('/{reservation}/lottery', [\App\Http\Controllers\Backoffice\RosterController::class, 'lottery'])->name('lottery');
+        Route::post('/{reservation}/send-sms-email', [\App\Http\Controllers\Backoffice\RosterController::class, 'sendSmsEmail'])->name('send-sms-email');
+        Route::post('/{reservation}/download', [\App\Http\Controllers\Backoffice\RosterController::class, 'download'])->name('download');
     });
 
     // 예약 캘린더

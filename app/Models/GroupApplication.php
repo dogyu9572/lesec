@@ -130,6 +130,11 @@ class GroupApplication extends Model
     {
         return $this->applied_at?->format('Y.m.d H:i');
     }
+
+    public function getProgramNameLabelAttribute(): ?string
+    {
+        return $this->reservation?->program_name ?? '-';
+    }
 }
 
 

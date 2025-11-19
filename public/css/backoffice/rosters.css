@@ -1,0 +1,207 @@
+/**
+ * 명단 관리 페이지 전용 스타일
+ * 라우팅: /backoffice/rosters
+ */
+
+/* 프로그램 섹션 스타일 */
+.rosters-page .board-page-header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+.rosters-page .board-page-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.rosters-page .program-section {
+    margin-bottom: 30px;
+}
+
+.rosters-page .section-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #333;
+    border-bottom: none;
+}
+
+.program-info-list {
+    margin: 0;
+    padding: 0;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    background: #fff;
+}
+
+.program-info-row {
+    display: flex;
+    align-items: center;
+    padding: 18px 24px;
+}
+
+.program-info-row:not(:last-child) {
+    border-bottom: 1px solid #f1f3f5;
+}
+
+.program-info-row dt {
+    flex: 0 0 180px;
+    margin: 0;
+    font-weight: 600;
+    color: #6b7280;
+    letter-spacing: -0.01em;
+}
+
+.program-info-row dd {
+    margin: 0;
+    flex: 1;
+    color: #111827;
+    font-size: 16px;
+}
+
+/* 섹션 타이틀 내 버튼 그룹 스타일 */
+.rosters-page .section-title > .d-flex {
+    gap: 0.5rem;
+}
+
+.rosters-page .section-title .btn {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    min-width: auto;
+}
+
+.roster-filter-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+}
+
+.roster-filter-select {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    height: calc(0.875rem * 1.5 + 0.375rem * 2 + 2px);
+    max-width: 160px;
+}
+
+.roster-filter-submit {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    min-width: auto;
+    width: auto;
+    height: calc(0.875rem * 1.5 + 0.375rem * 2 + 2px);
+}
+
+.roster-table-actions {
+    width: 110px;
+    text-align: center;
+}
+
+.roster-table-actions .view-btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    min-width: auto;
+    width: auto;
+}
+
+.roster-checkbox-column {
+    width: 50px;
+    text-align: center;
+}
+
+.roster-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 10000;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+}
+
+.roster-modal__dialog {
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    max-width: 480px;
+    width: 100%;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.2);
+}
+
+.roster-modal__dialog--wide {
+    max-width: 600px;
+}
+
+.roster-modal__title {
+    margin-bottom: 12px;
+    font-weight: 600;
+    color: #111827;
+}
+
+.roster-modal__body {
+    margin-bottom: 20px;
+    color: #4b5563;
+}
+
+.roster-modal__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* 다운로드 모달 스타일 */
+.roster-download-section-title {
+    margin-bottom: 20px;
+}
+
+.roster-column-select-actions {
+    margin-bottom: 15px;
+}
+
+.roster-column-select-actions .btn {
+    margin-right: 10px;
+}
+
+.roster-column-checkboxes {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 10px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+}
+
+.roster-column-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+@media (max-width: 768px) {
+    .program-info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .rosters-page .board-page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .roster-modal__dialog {
+        padding: 20px;
+    }
+}
+

@@ -322,6 +322,11 @@ class IndividualApplicationService
             ->active()
             ->orderBy('created_at', 'desc');
 
+        // 네이버 폼 프로그램만 조회 (reception_type이 전달된 경우)
+        if ($request->filled('reception_type')) {
+            $query->where('reception_type', $request->reception_type);
+        }
+
         if ($request->filled('education_type')) {
             $query->where('education_type', $request->education_type);
         }
@@ -334,11 +339,40 @@ class IndividualApplicationService
         $perPage = (int) $request->get('per_page', 10);
 
         return $query->paginate($perPage)->through(function ($program) {
+            $days = ['일', '월', '화', '수', '목', '금', '토'];
+            $startDate = null;
+            $endDate = null;
+            
+            if ($program->education_start_date instanceof Carbon) {
+                $startDay = $days[$program->education_start_date->dayOfWeek] ?? '';
+                $startDate = $program->education_start_date->format('Y.m.d') . '(' . $startDay . ')';
+            }
+            
+            if ($program->education_end_date instanceof Carbon) {
+                $endDay = $days[$program->education_end_date->dayOfWeek] ?? '';
+                $endDate = $program->education_end_date->format('Y.m.d') . '(' . $endDay . ')';
+            }
+            
+            $participationSchedule = '';
+            if ($startDate && $endDate) {
+                if ($program->education_start_date->equalTo($program->education_end_date)) {
+                    $participationSchedule = $startDate;
+                } else {
+                    $participationSchedule = $startDate . '~' . $endDate;
+                }
+            } elseif ($startDate) {
+                $participationSchedule = $startDate;
+            } else {
+                $participationSchedule = '-';
+            }
+            
             return [
                 'id' => $program->id,
                 'program_name' => $program->program_name,
                 'education_type' => $program->education_type,
                 'education_start_date' => optional($program->education_start_date)->format('Y-m-d'),
+                'education_end_date' => optional($program->education_end_date)->format('Y-m-d'),
+                'participation_schedule' => $participationSchedule,
                 'education_fee' => $program->education_fee,
             ];
         });
@@ -411,7 +445,7 @@ class IndividualApplicationService
     /**
      * CSV/엑셀 파일 일괄 업로드
      */
-    public function bulkUploadApplications(UploadedFile $file): array
+    public function bulkUploadApplications(UploadedFile $file, int $programReservationId): array
     {
         $successCount = 0;
         $errorCount = 0;
@@ -423,9 +457,9 @@ class IndividualApplicationService
         DB::beginTransaction();
         try {
             if ($extension === 'csv') {
-                $this->processCsvFile($filePath, $successCount, $errorCount, $errors);
+                $this->processCsvFile($filePath, $programReservationId, $successCount, $errorCount, $errors);
             } elseif (in_array($extension, ['xlsx', 'xls'])) {
-                $this->processExcelFile($filePath, $successCount, $errorCount, $errors);
+                $this->processExcelFile($filePath, $programReservationId, $successCount, $errorCount, $errors);
             } else {
                 throw new InvalidArgumentException('지원하지 않는 파일 형식입니다.');
             }
@@ -447,7 +481,7 @@ class IndividualApplicationService
     /**
      * CSV 파일 처리
      */
-    private function processCsvFile(string $filePath, int &$successCount, int &$errorCount, array &$errors): void
+    private function processCsvFile(string $filePath, int $programReservationId, int &$successCount, int &$errorCount, array &$errors): void
     {
         $handle = fopen($filePath, 'r');
         if (!$handle) {
@@ -471,7 +505,7 @@ class IndividualApplicationService
         while (($data = fgetcsv($handle)) !== false) {
             $lineNumber++;
             try {
-                $this->createApplicationFromRow($data, $lineNumber);
+                $this->createApplicationFromRow($data, $lineNumber, $programReservationId);
                 $successCount++;
             } catch (\Throwable $e) {
                 $errorCount++;
@@ -485,7 +519,7 @@ class IndividualApplicationService
     /**
      * 엑셀 파일 처리
      */
-    private function processExcelFile(string $filePath, int &$successCount, int &$errorCount, array &$errors): void
+    private function processExcelFile(string $filePath, int $programReservationId, int &$successCount, int &$errorCount, array &$errors): void
     {
         // PhpSpreadsheet 사용 (설치되어 있다고 가정)
         // 없으면 CSV만 지원하도록 처리
@@ -507,7 +541,7 @@ class IndividualApplicationService
                 continue;
             }
             try {
-                $this->createApplicationFromRow($row, $lineNumber);
+                $this->createApplicationFromRow($row, $lineNumber, $programReservationId);
                 $successCount++;
             } catch (\Throwable $e) {
                 $errorCount++;
@@ -520,9 +554,9 @@ class IndividualApplicationService
      * CSV/엑셀 행 데이터로 신청 생성
      * 컬럼 순서: 신청유형, 교육유형, 프로그램명, 참가일, 참가비, 결제방법, 신청자명, 학교명, 학년, 반, 연락처1, 연락처2, 결제상태, 추첨결과, 신청일시
      */
-    private function createApplicationFromRow(array $row, int $lineNumber): void
+    private function createApplicationFromRow(array $row, int $lineNumber, int $programReservationId): void
     {
-        $receptionTypeText = trim($row[0] ?? '');
+        // CSV의 신청유형 컬럼 무시 (선택한 프로그램 정보 사용)
         $educationTypeText = trim($row[1] ?? '');
         $programName = trim($row[2] ?? '');
         $participationDate = trim($row[3] ?? '');
@@ -539,9 +573,6 @@ class IndividualApplicationService
         $appliedAt = trim($row[14] ?? '');
 
         // 필수 필드 검증
-        if (empty($programName)) {
-            throw new InvalidArgumentException('프로그램명은 필수입니다.');
-        }
         if (empty($applicantName)) {
             throw new InvalidArgumentException('신청자명은 필수입니다.');
         }
@@ -549,31 +580,32 @@ class IndividualApplicationService
             throw new InvalidArgumentException('연락처1은 필수입니다.');
         }
 
+        // 선택한 프로그램 정보 조회
+        $reservation = ProgramReservation::findOrFail($programReservationId);
+
         // 한글 텍스트를 코드값으로 변환
-        $receptionType = $this->convertReceptionTypeToCode($receptionTypeText);
-        $educationType = $this->convertEducationTypeToCode($educationTypeText);
+        // CSV의 교육유형은 무시하고 선택한 프로그램의 교육유형 사용 (단, CSV에 값이 있으면 우선)
+        $educationType = !empty($educationTypeText) 
+            ? $this->convertEducationTypeToCode($educationTypeText) 
+            : $reservation->education_type;
+        
         $paymentMethod = $this->convertPaymentMethodToCode($paymentMethodText);
         $paymentStatus = $this->convertPaymentStatusToCode($paymentStatusText);
         $drawResult = $this->convertDrawResultToCode($drawResultText);
 
-        // 일괄 업로드의 경우 program_reservation_id는 더미 값 사용 (프로그램명은 자유 입력)
-        $dummyReservation = ProgramReservation::query()
-            ->byApplicationType('individual')
-            ->active()
-            ->first();
-
-        if (!$dummyReservation) {
-            throw new InvalidArgumentException('일괄 업로드를 위한 프로그램 정보를 찾을 수 없습니다.');
-        }
-
         // 데이터 정리
+        // 선택한 프로그램의 정보 우선 사용 (프로그램명은 CSV 값 있으면 사용, 없으면 프로그램 정보 사용)
         $data = [
-            'program_reservation_id' => $dummyReservation->id,
-            'reception_type' => $receptionType ?: 'first_come',
-            'education_type' => $educationType ?: 'middle_semester',
-            'program_name' => $programName,
-            'participation_date' => $participationDate ? Carbon::parse($participationDate)->format('Y-m-d') : null,
-            'participation_fee' => $participationFee ? (int) $participationFee : 0,
+            'program_reservation_id' => $reservation->id,
+            'reception_type' => 'naver_form', // 네이버 폼으로 고정
+            'education_type' => $educationType ?: $reservation->education_type,
+            'program_name' => !empty($programName) ? $programName : $reservation->program_name,
+            'participation_date' => $participationDate 
+                ? Carbon::parse($participationDate)->format('Y-m-d') 
+                : ($reservation->education_start_date ? $reservation->education_start_date->format('Y-m-d') : null),
+            'participation_fee' => $participationFee 
+                ? (int) $participationFee 
+                : ($reservation->education_fee ?? 0),
             'payment_method' => $paymentMethod,
             'applicant_name' => $applicantName,
             'applicant_school_name' => $schoolName ?: null,
@@ -582,16 +614,11 @@ class IndividualApplicationService
             'applicant_contact' => $contact,
             'guardian_contact' => $guardianContact ?: null,
             'payment_status' => $paymentStatus ?: IndividualApplication::PAYMENT_STATUS_UNPAID,
-            'draw_result' => $drawResult,
+            'draw_result' => IndividualApplication::DRAW_RESULT_PENDING, // 네이버 폼은 추첨 없음
         ];
 
-        // 신청유형이 추첨이 아니면 추첨결과를 pending으로
-        if ($data['reception_type'] !== 'lottery') {
-            $data['draw_result'] = IndividualApplication::DRAW_RESULT_PENDING;
-        }
-
         // 일괄 업로드는 직접 생성 (ProgramReservationService 거치지 않음)
-        $application = $this->createApplicationDirectly($data, $dummyReservation);
+        $application = $this->createApplicationDirectly($data, $reservation);
 
         // 신청일시가 있으면 업데이트
         if ($appliedAt) {
@@ -608,7 +635,7 @@ class IndividualApplicationService
     /**
      * 일괄 업로드용 직접 생성 (ProgramReservationService 거치지 않음)
      */
-    private function createApplicationDirectly(array $data, ProgramReservation $dummyReservation): IndividualApplication
+    private function createApplicationDirectly(array $data, ProgramReservation $reservation): IndividualApplication
     {
         $year = $this->getAcademicYear();
         $prefix = str_starts_with($data['education_type'], 'high') ? 'H' : 'M';
@@ -627,7 +654,7 @@ class IndividualApplicationService
         $applicationNumber = sprintf('%s%s%04d', $prefix, $year, $nextSequence);
 
         return IndividualApplication::create([
-            'program_reservation_id' => $dummyReservation->id,
+            'program_reservation_id' => $reservation->id,
             'member_id' => null,
             'application_number' => $applicationNumber,
             'education_type' => $data['education_type'],

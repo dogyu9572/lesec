@@ -211,7 +211,11 @@ class IndividualApplicationController extends BaseController
     public function bulkUpload(BulkUploadRequest $request): JsonResponse
     {
         try {
-            $result = $this->individualApplicationService->bulkUploadApplications($request->file('file'));
+            $programReservationId = $request->input('program_reservation_id');
+            $result = $this->individualApplicationService->bulkUploadApplications(
+                $request->file('file'),
+                $programReservationId
+            );
 
             $message = "{$result['success_count']}건의 신청이 등록되었습니다.";
             if ($result['error_count'] > 0) {

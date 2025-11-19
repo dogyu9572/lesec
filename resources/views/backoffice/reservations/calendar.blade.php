@@ -109,7 +109,7 @@
                                         <tr>
                                             <th>일자</th>
                                             <th>프로그램명</th>
-                                            <th>신청인원/정원</th>
+                                            <th>인원/정원</th>
                                         </tr>
                                     </thead>
                                     <tbody id="individual-reservations">
@@ -136,7 +136,7 @@
                                         <tr>
                                             <th>일자</th>
                                             <th>프로그램명</th>
-                                            <th>신청인원/정원</th>
+                                            <th>인원/정원</th>
                                         </tr>
                                     </thead>
                                     <tbody id="group-reservations">

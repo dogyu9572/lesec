@@ -111,7 +111,9 @@
 							@endif
 						</td>
 						<td class="edu06">
-							@if($program->is_unlimited_capacity)
+							@if($program->reception_type === 'lottery' || $program->reception_type === 'naver_form')
+								
+							@elseif($program->is_unlimited_capacity)
 								제한없음
 							@else
 								{{ $program->applied_count_display }}/{{ $program->capacity }}
@@ -154,22 +156,31 @@
                                         $now = now();
                                         $isBeforeApplicationPeriod = $program->application_start_date && $program->application_start_date->greaterThan($now);
                                         
-                                        // 신청 인원 체크
-                                        $hasAppliedCount = $program->applied_count_display > 0;
+                                        // 선착순에서 정원 마감 여부 체크
+                                        $isFirstComeFull = $program->reception_type === 'first_come' 
+                                            && !$program->is_unlimited_capacity 
+                                            && $program->capacity 
+                                            && $program->applied_count_display >= $program->capacity;
                                     @endphp
                                     @if($isBeforeApplicationPeriod)
                                         <a href="javascript:void(0);" class="btn btn_gray">접수예정</a>
-                                    @elseif($hasAppliedCount)
-                                        <form method="POST"
-                                            action="{{ route('program.apply.individual.submit', $type) }}"
-                                            class="inline-form"
-                                            style="display:inline">
-                                            @csrf
-                                            <input type="hidden" name="program_reservation_id" value="{{ $program->id }}">
-                                            <input type="hidden" name="participation_date" value="{{ optional($program->education_start_date)->format('Y-m-d') }}">
-                                            <button type="submit" class="btn btn_kwk">대기자 신청</button>
-                                        </form>
+                                    @elseif($isFirstComeFull)
+                                        {{-- 선착순 정원 마감 시 대기자 신청 --}}
+                                        @if($program->waitlist_url)
+                                            <a href="{{ $program->waitlist_url }}" target="_blank" class="btn btn_kwk">대기자 신청</a>
+                                        @else
+                                            <form method="POST"
+                                                action="{{ route('program.apply.individual.submit', $type) }}"
+                                                class="inline-form"
+                                                style="display:inline">
+                                                @csrf
+                                                <input type="hidden" name="program_reservation_id" value="{{ $program->id }}">
+                                                <input type="hidden" name="participation_date" value="{{ optional($program->education_start_date)->format('Y-m-d') }}">
+                                                <button type="submit" class="btn btn_kwk">대기자 신청</button>
+                                            </form>
+                                        @endif
                                     @else
+                                        {{-- 정원 마감 전 또는 추첨/네이버폼 --}}
                                         <form method="POST"
                                             action="{{ route('program.apply.individual.submit', $type) }}"
                                             class="inline-form"

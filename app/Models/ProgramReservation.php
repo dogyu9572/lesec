@@ -142,11 +142,40 @@ class ProgramReservation extends Model
     }
 
     /**
-     * 현재 접수유형 자동 판정 (단체 프로그램용)
+     * 현재 접수유형 자동 판정 (단체/개인 프로그램용)
      */
     public function getCurrentReceptionTypeAttribute(): string
     {
-        // 정원 무제한이면 항상 신청 가능
+        // 개인 프로그램인 경우 reception_type에 따라 처리
+        if ($this->application_type === 'individual') {
+            // 추첨은 정원 여부와 상관없이 항상 신청 가능
+            if ($this->reception_type === 'lottery') {
+                return 'application';
+            }
+            
+            // 네이버폼도 항상 신청 가능
+            if ($this->reception_type === 'naver_form') {
+                return 'application';
+            }
+            
+            // 선착순만 정원 체크
+            if ($this->reception_type === 'first_come') {
+                if ($this->is_unlimited_capacity) {
+                    return 'application';
+                }
+                
+                $capacity = $this->capacity ?? 0;
+                $appliedCount = $this->applied_count ?? 0;
+                
+                if ($appliedCount >= $capacity) {
+                    return 'closed';
+                }
+                
+                return 'application';
+            }
+        }
+        
+        // 단체 프로그램용 기존 로직
         if ($this->is_unlimited_capacity) {
             return 'application';
         }

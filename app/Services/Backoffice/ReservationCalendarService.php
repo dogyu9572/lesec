@@ -65,46 +65,60 @@ class ReservationCalendarService
     {
         $dateCarbon = Carbon::parse($date);
 
-        // 개인 신청 내역
+        // 개인 신청 내역 - program_reservation_id별로 그룹화
         $individualApplications = IndividualApplication::query()
             ->whereDate('participation_date', $dateCarbon->format('Y-m-d'))
             ->with(['reservation'])
-            ->orderBy('participation_date', 'asc')
             ->get()
-            ->map(function ($application) {
+            ->groupBy('program_reservation_id')
+            ->map(function ($applications) {
+                $firstApplication = $applications->first();
+                $reservation = $firstApplication->reservation;
+                
                 return [
-                    'id' => $application->id,
+                    'id' => $firstApplication->id,
+                    'program_reservation_id' => $firstApplication->program_reservation_id,
                     'type' => 'individual',
-                    'date' => optional($application->participation_date)->format('Y-m-d') ?? '',
-                    'program_name' => $application->program_name,
-                    'applicant_count' => 1,
-                    'capacity' => $application->reservation->capacity ?? null,
-                    'is_unlimited' => $application->reservation->is_unlimited_capacity ?? false,
-                    'applicant_name' => $application->applicant_name,
-                    'application_number' => $application->application_number,
+                    'date' => optional($firstApplication->participation_date)->format('Y-m-d') ?? '',
+                    'program_name' => $firstApplication->program_name,
+                    'applicant_count' => $applications->count(),
+                    'capacity' => $reservation->capacity ?? null,
+                    'is_unlimited' => $reservation->is_unlimited_capacity ?? false,
+                    'applicant_name' => $firstApplication->applicant_name,
+                    'application_number' => $firstApplication->application_number,
                 ];
-            });
+            })
+            ->values();
 
-        // 단체 신청 내역
+        // 단체 신청 내역 - program_reservation_id별로 그룹화
         $groupApplications = GroupApplication::query()
             ->whereDate('participation_date', $dateCarbon->format('Y-m-d'))
             ->with(['reservation'])
-            ->orderBy('participation_date', 'asc')
             ->get()
-            ->map(function ($application) {
-                $reservation = $application->reservation;
+            ->groupBy('program_reservation_id')
+            ->map(function ($applications) {
+                $firstApplication = $applications->first();
+                $reservation = $firstApplication->reservation;
+                
+                // 같은 프로그램의 인원 수 합산
+                $totalApplicantCount = $applications->sum(function ($application) {
+                    return $application->applicant_count ?? 0;
+                });
+                
                 return [
-                    'id' => $application->id,
+                    'id' => $firstApplication->id,
+                    'program_reservation_id' => $firstApplication->program_reservation_id,
                     'type' => 'group',
-                    'date' => optional($application->participation_date)->format('Y-m-d') ?? '',
+                    'date' => optional($firstApplication->participation_date)->format('Y-m-d') ?? '',
                     'program_name' => $reservation->program_name ?? '',
-                    'applicant_count' => $application->applicant_count ?? 0,
+                    'applicant_count' => $totalApplicantCount,
                     'capacity' => $reservation->capacity ?? null,
                     'is_unlimited' => $reservation->is_unlimited_capacity ?? false,
-                    'applicant_name' => $application->applicant_name,
-                    'application_number' => $application->application_number,
+                    'applicant_name' => $firstApplication->applicant_name,
+                    'application_number' => $firstApplication->application_number,
                 ];
-            });
+            })
+            ->values();
 
         return [
             'individual' => $individualApplications->toArray(),

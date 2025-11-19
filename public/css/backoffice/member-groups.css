@@ -124,6 +124,17 @@
     border-top: 1px solid #e9ecef;
 }
 
+.category-modal-footer--inline {
+    padding: 0;
+    margin-bottom: 10px;
+    border-top: none;
+    justify-content: flex-end;
+}
+
+.category-modal-footer--inline .btn {
+    min-width: auto;
+}
+
 /* 모달 폼 스타일 */
 .modal-form-group {
     margin-bottom: 20px;

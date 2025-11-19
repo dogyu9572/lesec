@@ -105,18 +105,16 @@
     border: #ddd 1px solid;
     border-radius: 12px;
     overflow: hidden;
-    width: auto;
+    width: 100%;
     max-width: 100%;
-    table-layout: auto;
+    table-layout: fixed;
 }
 .board-container .schedule_table .table th,
 .board-container .schedule_table .table td {
     border-left: #ddd 1px solid;
     border-right: #ddd 1px solid;
     border-top: 0 !important;
-    width: auto !important;
-    min-width: 100px;
-    max-width: 148px;
+    width: 14.28% !important;
     padding: 4px 8px;
 }
 .board-container .schedule_table .table th:first-child,
@@ -243,19 +241,23 @@
     table-layout: fixed;
 }
 .glbox.select_day .tbl col.w80 {
-    width: 35%;
+    width: 15% !important;
 }
 .glbox.select_day .tbl col.w100 {
-    width: 30%;
+    width: 15% !important;
 }
 .glbox.select_day .tbl col:not([class]) {
-    width: 35%;
+    width: 70% !important;
 }
 .glbox.select_day .tbl th,
 .glbox.select_day .tbl td {
     padding: 12px 8px;
     text-align: left;
     border-bottom: #ddd 1px solid;
+}
+.glbox.select_day .tbl th:nth-child(2),
+.glbox.select_day .tbl td:nth-child(2) {
+    text-align: center;
 }
 .glbox.select_day .tbl th {
     background: #f7f8f9;

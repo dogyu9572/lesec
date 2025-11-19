@@ -38,29 +38,39 @@
         <div class="board-card-body">
             <!-- 검색 필터 -->
             <div class="board-filter">
-                <form method="GET" action="{{ route('backoffice.board-templates.index') }}" class="board-filter-form">
-                    <div class="board-filter-row">
-                        <div class="board-filter-col">
-                            <input type="text" name="name" class="board-form-control" placeholder="템플릿명 검색" value="{{ request('name') }}">
+                <form method="GET" action="{{ route('backoffice.board-templates.index') }}" class="filter-form">
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label for="name" class="filter-label">템플릿명</label>
+                            <input type="text" id="name" name="name" class="filter-input"
+                                placeholder="템플릿명을 입력하세요" value="{{ request('name') }}">
                         </div>
-                        <div class="board-filter-col">
-                            <select name="skin_id" class="board-form-control">
-                                <option value="">전체 스킨</option>
+                        <div class="filter-group">
+                            <label for="skin_id" class="filter-label">스킨</label>
+                            <select id="skin_id" name="skin_id" class="filter-select">
+                                <option value="">전체</option>
                                 @foreach($skins as $skin)
                                     <option value="{{ $skin->id }}" @selected(request('skin_id') == $skin->id)>{{ $skin->name }}</option>
                                 @endforeach
                             </select>
                         </div>
-                        <div class="board-filter-col">
-                            <select name="is_active" class="board-form-control">
-                                <option value="">전체 상태</option>
-                                <option value="1" @selected(request('is_active') === '1')>활성</option>
-                                <option value="0" @selected(request('is_active') === '0')>비활성</option>
+                        <div class="filter-group">
+                            <label for="is_active" class="filter-label">상태</label>
+                            <select id="is_active" name="is_active" class="filter-select">
+                                <option value="">전체</option>
+                                <option value="1" @selected(request('is_active') == '1')>활성</option>
+                                <option value="0" @selected(request('is_active') == '0')>비활성</option>
                             </select>
                         </div>
-                        <div class="board-filter-col">
-                            <button type="submit" class="btn btn-primary">검색</button>
-                            <a href="{{ route('backoffice.board-templates.index') }}" class="btn btn-secondary">초기화</a>
+                        <div class="filter-group">
+                            <div class="filter-buttons">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search"></i> 검색
+                                </button>
+                                <a href="{{ route('backoffice.board-templates.index') }}" class="btn btn-secondary">
+                                    <i class="fas fa-undo"></i> 초기화
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </form>
@@ -117,23 +127,23 @@
                                     @endif
                                 </td>
                                 <td>{{ $template->created_at->format('Y-m-d H:i') }}</td>
-                                <td style="text-align: center;">
-                                    <div class="template-actions">
-                                        <a href="{{ route('backoffice.board-templates.edit', $template) }}" class="btn btn-sm btn-primary">
+                                <td>
+                                    <div class="board-btn-group">
+                                        <a href="{{ route('backoffice.board-templates.edit', $template) }}" class="btn btn-primary btn-sm">
                                             <i class="fas fa-edit"></i> 수정
                                         </a>
-                                        <form action="{{ route('backoffice.board-templates.duplicate', $template) }}" method="POST" style="display: inline;">
+                                        <form action="{{ route('backoffice.board-templates.duplicate', $template) }}" method="POST" class="d-inline">
                                             @csrf
-                                            <button type="submit" class="btn btn-sm btn-info">
+                                            <button type="submit" class="btn btn-info btn-sm">
                                                 <i class="fas fa-copy"></i> 복제
                                             </button>
                                         </form>
                                         @if($template->boards()->count() == 0)
                                             <form action="{{ route('backoffice.board-templates.destroy', $template) }}" method="POST" 
-                                                  onsubmit="return confirm('정말 삭제하시겠습니까?')" style="display: inline;">
+                                                  class="d-inline" onsubmit="return confirm('정말 삭제하시겠습니까?')">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-danger">
+                                                <button type="submit" class="btn btn-danger btn-sm">
                                                     <i class="fas fa-trash"></i> 삭제
                                                 </button>
                                             </form>

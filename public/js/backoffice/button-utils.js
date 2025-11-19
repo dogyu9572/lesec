@@ -171,7 +171,7 @@ class ButtonManager {
         }
 
         // 버튼 상태 확인
-        if (button.disabled || button.classList.contains('disabled') || button.classList.contains('submitting')) {
+        if (button.disabled || button.classList.contains('disabled') || button.dataset.processing === 'true') {
             event.preventDefault();
             event.stopPropagation();
             return;
@@ -213,29 +213,11 @@ class ButtonManager {
      */
     setButtonProcessing(button, isProcessing) {
         if (isProcessing) {
-            button.disabled = true;
-            button.classList.add('submitting');
-            
-            // 원본 텍스트 저장
-            if (!button.dataset.originalText) {
-                button.dataset.originalText = button.textContent || button.innerHTML;
-            }
-            
-            // 로딩 텍스트 설정 (펼치기 버튼, 1차 추가 버튼, 그룹 추가 버튼은 제외)
-            if (button.tagName === 'BUTTON' && !button.classList.contains('expand-toggle') && !button.classList.contains('add-first-depth-btn') && !button.classList.contains('add-group-btn')) {
-                button.innerHTML = '<span class="spinner"></span> 처리 중...';
-            }
+            button.dataset.processing = 'true';
+            this.clickedButtons.add(button);
         } else {
-            button.disabled = false;
-            button.classList.remove('submitting');
-            
-            // 원본 텍스트 복원
-            if (button.dataset.originalText) {
-                if (button.tagName === 'BUTTON') {
-                    button.innerHTML = button.dataset.originalText;
-                }
-                delete button.dataset.originalText;
-            }
+            delete button.dataset.processing;
+            this.clickedButtons.delete(button);
         }
     }
 
@@ -252,7 +234,7 @@ class ButtonManager {
      */
     restoreAllButtons() {
         this.clickedButtons.clear();
-        document.querySelectorAll('button.submitting, .btn.submitting').forEach(button => {
+        document.querySelectorAll('button[data-processing="true"], .btn[data-processing="true"]').forEach(button => {
             this.setButtonProcessing(button, false);
         });
     }
@@ -278,28 +260,3 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 100);
 });
 
-// CSS 스피너 스타일 추가
-const style = document.createElement('style');
-style.textContent = `
-    .spinner {
-        display: inline-block;
-        width: 12px;
-        height: 12px;
-        border: 2px solid transparent;
-        border-top: 2px solid currentColor;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-        margin-right: 0.5rem;
-    }
-    
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-    
-    .btn.submitting {
-        opacity: 0.8;
-        cursor: not-allowed;
-    }
-`;
-document.head.appendChild(style);

@@ -418,37 +418,6 @@
     white-space: nowrap;
 }
 
-/* 템플릿 액션 버튼들 */
-.template-actions {
-    display: flex;
-    gap: 4px;
-    align-items: center;
-    flex-wrap: nowrap;
-    justify-content: center;
-    flex-direction: row;
-    width: 100%;
-}
-
-.template-actions .btn {
-    border-radius: 4px !important;
-    white-space: nowrap;
-    margin: 0;
-    font-size: 0.7rem;
-    padding: 0.2rem 0.4rem;
-    min-width: auto;
-}
-
-.template-actions form {
-    margin: 0;
-    display: inline-flex;
-}
-
-.template-actions button {
-    white-space: nowrap;
-    font-size: 0.7rem;
-    padding: 0.2rem 0.4rem;
-}
-
 /* 필터 및 목록 헤더 스타일 (공통) */
 /* 회원 검색 필터 스타일 */
 .user-filter {
@@ -479,7 +448,6 @@
 .filter-group {
     display: flex;
     flex-direction: column;
-    min-width: 150px;
     flex: 1;
 }
 

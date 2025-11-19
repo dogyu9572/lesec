@@ -114,10 +114,43 @@ Route::prefix('backoffice')->middleware(['backoffice'])->group(function () {
     // 접속 로그 관리
     Route::get('logs/access', [LogController::class, 'access'])
         ->name('backoffice.logs.access');
-    Route::get('logs/user-access', [LogController::class, 'userAccessLogs'])
-        ->name('backoffice.logs.user-access');
-    Route::get('logs/admin-access', [LogController::class, 'adminAccessLogs'])
-        ->name('backoffice.logs.admin-access');
+    Route::get('user-access-logs', [LogController::class, 'userAccessLogs'])
+        ->name('backoffice.user-access-logs');
+    Route::get('admin-access-logs', [LogController::class, 'adminAccessLogs'])
+        ->name('backoffice.admin-access-logs');
+    
+    // 통계 관리
+    Route::get('member-statistics', function () {
+        // TODO: StatisticsController 구현 후 연결
+        return abort(404, '회원 통계 페이지는 준비 중입니다.');
+    })->name('backoffice.member-statistics');
+    
+    Route::get('access-statistics', function () {
+        // TODO: StatisticsController 구현 후 연결
+        return abort(404, '접속 통계 페이지는 준비 중입니다.');
+    })->name('backoffice.access-statistics');
+    
+    Route::get('revenue-statistics', function () {
+        // TODO: StatisticsController 구현 후 연결
+        return abort(404, '수익 통계 페이지는 준비 중입니다.');
+    })->name('backoffice.revenue-statistics');
+    
+    // 레거시 라우트 (리다이렉트)
+    Route::get('logs/user-access', function () {
+        return redirect()->route('backoffice.user-access-logs');
+    });
+    Route::get('logs/admin-access', function () {
+        return redirect()->route('backoffice.admin-access-logs');
+    });
+    Route::get('statistics/members', function () {
+        return redirect()->route('backoffice.member-statistics');
+    });
+    Route::get('statistics/access', function () {
+        return redirect()->route('backoffice.access-statistics');
+    });
+    Route::get('statistics/revenue', function () {
+        return redirect()->route('backoffice.revenue-statistics');
+    });
 
     // 관리자 계정 관리
     Route::post('admins/bulk-destroy', [AdminController::class, 'bulkDestroy'])

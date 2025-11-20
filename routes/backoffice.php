@@ -25,6 +25,9 @@ use App\Http\Controllers\Backoffice\ReservationCalendarController;
 use App\Http\Controllers\Backoffice\RosterController;
 use App\Http\Controllers\Backoffice\ScheduleController;
 use App\Http\Controllers\Backoffice\SchoolController;
+use App\Http\Controllers\Backoffice\AccessStatisticsController;
+use App\Http\Controllers\Backoffice\RevenueStatisticsController;
+use App\Http\Controllers\Backoffice\MailSmsController;
 
 // =============================================================================
 // 백오피스 인증 라우트
@@ -123,13 +126,19 @@ Route::prefix('backoffice')->middleware(['backoffice'])->group(function () {
     Route::get('member-statistics', [\App\Http\Controllers\Backoffice\MemberStatisticsController::class, 'index'])
         ->name('backoffice.member-statistics');
     
-    Route::get('access-statistics', function () {
-        return abort(404, '접속 통계 페이지는 준비 중입니다.');
-    })->name('backoffice.access-statistics');
+    Route::get('access-statistics', [AccessStatisticsController::class, 'index'])
+        ->name('backoffice.access-statistics');
+    Route::get('access-statistics/get-statistics', [AccessStatisticsController::class, 'getStatistics'])
+        ->name('backoffice.access-statistics.get-statistics');
     
-    Route::get('revenue-statistics', function () {
-        return abort(404, '수익 통계 페이지는 준비 중입니다.');
-    })->name('backoffice.revenue-statistics');
+    // 수익 통계 관리
+    Route::post('revenue-statistics/bulk-destroy', [RevenueStatisticsController::class, 'bulkDestroy'])
+        ->name('backoffice.revenue-statistics.bulk-destroy');
+    Route::get('revenue-statistics/{revenueStatistics}/download', [RevenueStatisticsController::class, 'download'])
+        ->name('backoffice.revenue-statistics.download');
+    Route::resource('revenue-statistics', RevenueStatisticsController::class, [
+        'names' => 'backoffice.revenue-statistics'
+    ]);
     
     // 레거시 라우트 제거 (직접 접근)
 
@@ -265,6 +274,25 @@ Route::prefix('backoffice')->middleware(['backoffice'])->group(function () {
         ->name('backoffice.user-groups.add-members');
     Route::post('user-groups/{member_group}/remove-member', [MemberGroupController::class, 'removeMember'])
         ->name('backoffice.user-groups.remove-member');
+
+    // 메일/SMS 관리
+    Route::prefix('mail-sms')->name('backoffice.mail-sms.')->group(function () {
+        Route::get('/', [MailSmsController::class, 'index'])->name('index');
+        Route::get('/create', [MailSmsController::class, 'create'])->name('create');
+        Route::post('/', [MailSmsController::class, 'store'])->name('store');
+        Route::get('/search/members', [MailSmsController::class, 'searchMembers'])->name('search-members');
+        Route::get('/{mailSmsMessage}/edit', [MailSmsController::class, 'edit'])->name('edit');
+        Route::put('/{mailSmsMessage}', [MailSmsController::class, 'update'])->name('update');
+        Route::delete('/{mailSmsMessage}', [MailSmsController::class, 'destroy'])->name('destroy');
+        Route::post('/{mailSmsMessage}/send', [MailSmsController::class, 'send'])->name('send');
+        Route::get('/{mailSmsMessage}', [MailSmsController::class, 'show'])->name('show');
+    });
+
+    // 메일/SMS 발송 로그
+    Route::prefix('mail-sms-logs')->name('backoffice.mail-sms-logs.')->group(function () {
+        Route::get('/', [MailSmsController::class, 'logs'])->name('index');
+        Route::get('/{mailSmsMessage}', [MailSmsController::class, 'logShow'])->name('show');
+    });
 
     // 배너 관리
     Route::resource('banners', BannerController::class, [

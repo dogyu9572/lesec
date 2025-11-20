@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Member\MemberLoginRequest;
 use Illuminate\Http\Request;
 use App\Services\Member\MemberAuthService;
-use Illuminate\Support\Facades\Auth;
 
 class MemberAuthController extends Controller
 {

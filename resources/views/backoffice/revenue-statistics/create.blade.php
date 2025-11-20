@@ -1,6 +1,6 @@
 @extends('backoffice.layouts.app')
 
-@section('title', '회원 그룹 등록')
+@section('title', '수익 통계 등록')
 
 @section('styles')
 <link rel="stylesheet" href="{{ asset('css/common/buttons.css') }}">
@@ -12,7 +12,7 @@
 @section('content')
 <div class="admin-form-container">
     <div class="form-header">      
-        <a href="{{ route('backoffice.member-groups.index') }}" class="btn btn-secondary">
+        <a href="{{ route('backoffice.revenue-statistics.index') }}" class="btn btn-secondary">
             <i class="fas fa-arrow-left"></i> <span class="btn-text">목록으로</span>
         </a>
     </div>
@@ -31,45 +31,46 @@
         <div class="col-12">
             <div class="admin-card">
                 <div class="admin-card-header">
-                    <h6>회원 그룹 정보</h6>
+                    <h6>수익 통계(상세)</h6>
                 </div>
                 <div class="admin-card-body">
-                    <form id="memberGroupForm" action="{{ route('backoffice.member-groups.store') }}" method="POST">
+                    <form id="revenueStatisticsForm" action="{{ route('backoffice.revenue-statistics.store') }}" method="POST">
                         @csrf                       
                         
                         <div class="form-section">
-                            <h3>회원 그룹 관리</h3>
+                            <h3>제목</h3>
                             <div class="form-grid">
                                 <div class="form-group">
-                                    <label for="name">그룹명</label>
-                                    <input type="text" id="name" name="name" value="{{ old('name') }}" required>
+                                    <label for="title">제목</label>
+                                    <input type="text" id="title" name="title" value="{{ old('title') }}" required placeholder="제목을 입력하세요">
                                 </div>
                             </div>
                         </div>
 
                         <div class="form-section">
-                            <h3>소속 정보</h3>
+                            <h3>통계 내용</h3>
                             <div class="member-list-header">
-                                <button type="button" id="add-member-btn" class="btn btn-success btn-sm">
-                                    <i class="fas fa-plus"></i> 회원 추가
+                                <button type="button" id="download-btn" class="btn btn-secondary btn-sm" disabled>
+                                    <i class="fas fa-download"></i> 다운로드
                                 </button>
+                                <button type="button" id="add-item-btn" class="btn btn-success btn-sm">
+                                    <i class="fas fa-plus"></i> 추가
+                                </button>                              
                             </div>
                             <div class="table-responsive">
-                                <table class="board-table">
+                                <table class="board-table" id="items-table">
                                     <thead>
                                         <tr>
-                                            <th>No</th>
-                                            <th>이름</th>
-                                            <th>(학생)연락처</th>
-                                            <th>부모 연락처</th>
-                                            <th>이메일</th>
-                                            <th>등록일</th>
-                                            <th>삭제</th>
+                                            <th>항목</th>
+                                            <th>참가인원</th>
+                                            <th>참가학교</th>
+                                            <th>수익</th>
+                                            <th style="width: 150px;">관리</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="member-list-body">
-                                        <tr style="border: none;">
-                                            <td colspan="7" class="text-center" style="padding: 40px 20px; border: none !important; border-bottom: none !important;">등록된 회원이 없습니다.</td>
+                                    <tbody id="items-body">
+                                        <tr class="empty-row" style="border: none;">
+                                            <td colspan="5" class="text-center" style="padding: 40px 20px; border: none !important; border-bottom: none !important;">등록된 항목이 없습니다.</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -80,7 +81,7 @@
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-save"></i> 저장
                             </button>
-                            <a href="{{ route('backoffice.member-groups.index') }}" class="btn btn-secondary">
+                            <a href="{{ route('backoffice.revenue-statistics.index') }}" class="btn btn-secondary">
                                 <i class="fas fa-times"></i> 취소
                             </a>
                         </div>
@@ -90,14 +91,9 @@
         </div>
     </div>
 </div>
-
-@include('backoffice.modals.member-search', [
-    'selectionMode' => 'multiple',
-    'formAction' => route('backoffice.member-groups.search-members')
-])
-
 @endsection
+
 @section('scripts')
-<script src="{{ asset('js/backoffice/member-groups.js') }}"></script>
+<script src="{{ asset('js/backoffice/revenue-statistics.js') }}"></script>
 @endsection
 

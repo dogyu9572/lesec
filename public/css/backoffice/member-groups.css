@@ -4,6 +4,7 @@
 .member-list-header {
     display: flex;
     justify-content: flex-end;
+    gap: 10px;
     margin-bottom: 15px;
 }
 
@@ -11,11 +12,13 @@
     margin-bottom: 20px;
 }
 
-#member-list-body tr:only-child {
+#member-list-body tr:only-child,
+#items-body tr.empty-row:only-child {
     border: none !important;
 }
 
-#member-list-body tr:only-child td {
+#member-list-body tr:only-child td,
+#items-body tr.empty-row:only-child td {
     border: none !important;
     border-bottom: none !important;
 }

@@ -22,6 +22,12 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->append(TrackVisitor::class);
         
     })
+    ->withSchedule(function ($schedule) {
+        // 학교 알리미 API 동기화 스케줄러 (매년 3월 1일)
+        $schedule->command('schools:sync-from-schoolinfo')
+            ->cron('0 0 1 3 *') // 매년 3월 1일 00:00
+            ->description('학교 알리미 API에서 학교 정보 자동 동기화');
+    })
     ->withExceptions(function (Exceptions $exceptions) {
         //
     })->create();

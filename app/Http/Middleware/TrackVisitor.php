@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use App\Models\VisitorLog;
 use App\Models\DailyVisitorStat;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -50,8 +51,19 @@ class TrackVisitor
             ->whereBetween('created_at', [$startOfDay, $endOfDay])
             ->exists();
 
-        // 방문 로그 기록
+        // 로그인한 일반 사용자 확인 (Member 모델)
+        $member = Auth::guard('member')->user();
+        $memberId = null;
+        
+        // 일반 사용자(member)만 member_id 기록
+        if ($member) {
+            $memberId = $member->id;
+        }
+        
+        // 방문 로그 기록 (관리자는 AdminAccessLog에 별도 기록되므로 여기서는 기록하지 않음)
         VisitorLog::create([
+            'user_id' => null, // 관리자는 별도 테이블에 기록
+            'member_id' => $memberId,
             'ip_address' => $ipAddress,
             'user_agent' => $request->userAgent(),
             'page_url' => $request->fullUrl(),

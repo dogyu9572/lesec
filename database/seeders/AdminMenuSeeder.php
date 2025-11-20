@@ -539,7 +539,7 @@ class AdminMenuSeeder extends Seeder
                 'permission_key' => null,
             ],
             [
-                'id' => 43,
+                'id' => 44,
                 'parent_id' => 38,
                 'name' => '수익 통계',
                 'url' => '/backoffice/revenue-statistics',

@@ -51,7 +51,7 @@
                         <div class="form-section">
                             <h3>소속 정보</h3>
                             <div class="member-list-header">
-                                <button type="button" id="add-member-btn" class="btn btn-success">
+                                <button type="button" id="add-member-btn" class="btn btn-success btn-sm">
                                     <i class="fas fa-plus"></i> 회원 추가
                                 </button>
                             </div>

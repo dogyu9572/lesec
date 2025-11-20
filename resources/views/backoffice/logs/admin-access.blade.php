@@ -5,6 +5,7 @@
 @section('styles')
 <link rel="stylesheet" href="{{ asset('css/common/buttons.css') }}">
 <link rel="stylesheet" href="{{ asset('css/backoffice/users.css') }}">
+<link rel="stylesheet" href="{{ asset('css/backoffice/boards.css') }}">
 @endsection
 
 @section('content')
@@ -101,8 +102,8 @@
                                     <td>{{ $logs->total() - ($logs->currentPage() - 1) * $logs->perPage() - $loop->index }}</td>
                                     <td>{{ $log->name }}</td>
                                     <td>{{ $log->ip_address }}</td>
-                                    <td>{{ $log->user ? $log->user->created_at->format('Y-m-d H:i:s') : '-' }}</td>
-                                    <td>{{ $log->login_at->format('Y-m-d H:i:s') }}</td>
+                                    <td>{{ $log->admin ? $log->admin->created_at->format('Y-m-d H:i:s') : '-' }}</td>
+                                    <td>{{ $log->accessed_at->format('Y-m-d H:i:s') }}</td>
                                     <td>{{ $log->referer ?: '-' }}</td>
                                 </tr>
                             @endforeach

@@ -8,6 +8,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -118,6 +119,45 @@ class BoardContentService
         }
 
         return Storage::disk('public')->download($path, $downloadName);
+    }
+
+    /**
+     * 활성화된 게시글을 모아온다.
+     */
+    public function getActivePosts(Board $board, int $limit = 0, ?callable $queryCallback = null): Collection
+    {
+        $table = $this->getTableName($board->slug);
+        $query = DB::table($table)->whereNull('deleted_at');
+
+        if (Schema::hasColumn($table, 'is_active')) {
+            $query->where('is_active', true);
+        }
+
+        if ($queryCallback) {
+            $queryCallback($query);
+        }
+
+        if ($board->enable_sorting) {
+            $query->orderBy('sort_order', 'desc');
+        }
+
+        $query->orderBy('created_at', 'desc');
+
+        if ($limit > 0) {
+            $query->limit($limit);
+        }
+
+        $posts = $query->get();
+
+        return $posts->map(fn ($post) => $this->transformPost($post));
+    }
+
+    /**
+     * 최신 게시글 한 건을 얻는다.
+     */
+    public function getLatestPost(Board $board): ?object
+    {
+        return $this->getActivePosts($board, 1)->first();
     }
 
     /**

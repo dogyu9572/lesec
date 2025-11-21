@@ -34,6 +34,8 @@
             <form action="{{ route('backoffice.board-posts.update', [$board->slug ?? 'notice', $post->id]) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
+                <input type="hidden" name="title" value="{{ old('title', $post->title) }}">
+                <input type="hidden" name="content" value="{{ old('content', $post->content) }}">
 
                 @if($board->isNoticeEnabled())
                 <div class="board-form-group">

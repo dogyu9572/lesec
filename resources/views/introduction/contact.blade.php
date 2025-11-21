@@ -22,31 +22,35 @@
 					</tr>
 				</thead>
 				<tbody>
-					<tr>
-						<td rowspan="4" class="contact0 bdr">교육센터</td>
-						<td class="contact1">책임연구원</td>
-						<td class="contact2">02-880-4948</td>
-						<td class="contact3 tal dots_list"><p>담당업무 내용입니다.담당업무 내용입니다.담당업무 내용입니다.</p></td>
-						<td class="contact4"><a href="#this" class="btn_email">이메일</a></td>
-					</tr>
-					<tr>
-						<td class="contact1">선임분석원</td>
-						<td class="contact2">02-888-0932</td>
-						<td class="contact3 tal dots_list"><p>담당업무 내용입니다.담당업무 내용입니다.담당업무 내용입니다.</p></td>
-						<td class="contact4"><a href="#this" class="btn_email">이메일</a></td>
-					</tr>
-					<tr>
-						<td class="contact1">연구원</td>
-						<td class="contact2">02-888-0933</td>
-						<td class="contact3 tal dots_list"><p>담당업무 내용입니다.담당업무 내용입니다.담당업무 내용입니다.</p></td>
-						<td class="contact4"><a href="#this" class="btn_email">이메일</a></td>
-					</tr>
-					<tr>
-						<td class="contact1">연구원</td>
-						<td class="contact2">02-888-4948</td>
-						<td class="contact3 tal dots_list"><p>담당업무 내용입니다.담당업무 내용입니다.담당업무 내용입니다.</p></td>
-						<td class="contact4"><a href="#this" class="btn_email">이메일</a></td>
-					</tr>
+					@forelse($contacts as $contact)
+						@php
+							$fields = is_array($contact->custom_fields ?? []) ? $contact->custom_fields : [];
+							$team = $fields['team'] ?? $contact->title ?? '';
+							$position = $fields['position'] ?? '';
+							$phone = $fields['contact'] ?? '';
+							$responsibilities = $fields['responsibilities'] ?? '';
+							$email = $fields['email'] ?? '';
+						@endphp
+						<tr>
+							<td class="contact0 bdr">{{ $team }}</td>
+							<td class="contact1">{{ $position }}</td>
+							<td class="contact2">{{ $phone }}</td>
+							<td class="contact3 tal dots_list">
+								<p>{{ $responsibilities }}</p>
+							</td>
+							<td class="contact4">
+								@if(!empty($email))
+									<a href="mailto:{{ $email }}" class="btn_email">이메일</a>
+								@else
+									-
+								@endif
+							</td>
+						</tr>
+					@empty
+						<tr>
+							<td colspan="5" class="text-center">등록된 연락처가 없습니다.</td>
+						</tr>
+					@endforelse
 				</tbody>
 			</table>
 		</div>

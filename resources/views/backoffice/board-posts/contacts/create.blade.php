@@ -34,6 +34,9 @@
             <form action="{{ route('backoffice.board-posts.store', $board->slug ?? 'notice') }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
+                <input type="hidden" name="title" value="{{ old('title', '연구원 연락처') }}">
+                <input type="hidden" name="content" value="{{ old('content', '연구원 연락처 정보를 저장합니다.') }}">
+
                 @if($board->isNoticeEnabled())
                 <div class="board-form-group">
                     <div class="board-checkbox-item">

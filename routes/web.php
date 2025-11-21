@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\SubController;
+use App\Http\Controllers\Introduction\GreetingContactController;
 use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\Backoffice\PopupController;
 use App\Http\Controllers\Member\MemberAuthController;
@@ -156,11 +157,11 @@ Route::prefix('mypage')->name('mypage.')->group(function () {
 //센터소개
 Route::prefix('introduction')->name('introduction.')->group(function () {
 	//인사말
-	Route::get('/greeting', [SubController::class, 'greeting'])->name('greeting');
+	Route::get('/greeting', [GreetingContactController::class, 'greeting'])->name('greeting');
 	//설립목적
 	Route::get('/establishment', [SubController::class, 'establishment'])->name('establishment');
 	//연락처
-	Route::get('/contact', [SubController::class, 'contact'])->name('contact');
+	Route::get('/contact', [GreetingContactController::class, 'contact'])->name('contact');
 });
 
 //위치안내

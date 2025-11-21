@@ -111,15 +111,26 @@
                                     <th class="w5">순서</th>
                                 @endif
                                 <th class="w5">번호</th>
-                                <th class="w10">구분</th>
-                                <th>제목</th>
-                                <th class="w10">작성자</th>
-                                <th class="w10">작성일</th>
+                                <th class="w15">팀</th>
+                                <th class="w10">이름</th>
+                                <th class="w10">직위</th>
+                                <th class="w10">담당업무</th>
+                                <th class="w15">전화번호</th>
+                                <th class="w10">노출여부</th>
+                                <th class="w10">등록일</th>
                                 <th class="w15">관리</th>
                             </tr>
                         </thead>
                         <tbody @if($board->enable_sorting) id="sortable-tbody" @endif>
                             @forelse($posts as $post)
+                                @php
+                                    $customFields = is_string($post->custom_fields) ? json_decode($post->custom_fields, true) : ($post->custom_fields ?? []);
+                                    $team = $customFields['team'] ?? '';
+                                    $name = $customFields['name'] ?? '';
+                                    $position = $customFields['position'] ?? '';
+                                    $responsibilities = $customFields['responsibilities'] ?? '';
+                                    $contact = $customFields['contact'] ?? '';
+                                @endphp
                                 <tr @if($board->enable_sorting) data-post-id="{{ $post->id }}" @endif>
                                     <td>
                                         <input type="checkbox" name="selected_posts[]" value="{{ $post->id }}" class="form-check-input post-checkbox">
@@ -129,23 +140,17 @@
                                             <i class="fas fa-grip-vertical sort-handle" title="드래그하여 순서 변경"></i>
                                         </td>
                                     @endif
+                                    <td>{{ $post->id }}</td>
+                                    <td>{{ $team }}</td>
+                                    <td>{{ $name }}</td>
+                                    <td>{{ $position }}</td>
+                                    <td class="text-start">{{ $responsibilities }}</td>
+                                    <td>{{ $contact }}</td>
                                     <td>
-                                        @if ($post->is_notice)
-                                            <span class="board-notice-badge">공지</span>
-                                        @else
-                                            @php
-                                                $postNumber = $posts->total() - ($posts->currentPage() - 1) * $posts->perPage() - $loop->index;
-                                            @endphp
-                                            {{ $postNumber }}
-                                        @endif
+                                        <span class="status-badge {{ $post->is_active ? 'status-success' : 'status-muted' }}">
+                                            {{ $post->is_active ? 'Y' : 'N' }}
+                                        </span>
                                     </td>
-                                    <td>
-                                        <span class="status-badge status-general">일반</span>
-                                    </td>
-                                    <td>
-                                        {{ $post->title }}
-                                    </td>
-                                    <td>{{ $post->author_name ?? '알 수 없음' }}</td>
                                     <td>{{ $post->created_at->format('Y-m-d') }}</td>
                                     <td>
                                         <div class="board-btn-group">
@@ -168,7 +173,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="{{ $board->enable_sorting ? '8' : '7' }}" class="text-center">등록된 게시글이 없습니다.</td>
+                                    <td colspan="{{ $board->enable_sorting ? '11' : '10' }}" class="text-center">등록된 게시글이 없습니다.</td>
                                 </tr>
                             @endforelse
                         </tbody>

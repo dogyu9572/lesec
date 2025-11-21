@@ -183,23 +183,11 @@ class SubController extends Controller
         return view('mypage.application_indi_view', compact('gNum', 'sNum', 'gName', 'sName'));
     }
 //센터소개
-	//인사말
-    public function greeting()
-    {
-        $gNum = "04"; $sNum = "01"; $gName = "센터소개"; $sName = "인사말";
-        return view('introduction.greeting', compact('gNum', 'sNum', 'gName', 'sName'));
-    }
 	//설립목적
     public function establishment()
     {
         $gNum = "04"; $sNum = "02"; $gName = "센터소개"; $sName = "인사말";
         return view('introduction.establishment', compact('gNum', 'sNum', 'gName', 'sName'));
-    }
-	//연락처
-    public function contact()
-    {
-        $gNum = "04"; $sNum = "03"; $gName = "센터소개"; $sName = "인사말";
-        return view('introduction.contact', compact('gNum', 'sNum', 'gName', 'sName'));
     }
 //위치안내
 	//오시는 길

@@ -3,9 +3,9 @@
 namespace App\Services\Backoffice;
 
 use App\Models\Board;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class BoardPostService
 {
@@ -315,7 +315,7 @@ class BoardPostService
             'is_notice' => $request->has('is_notice'),
             'is_secret' => $request->has('is_secret'),
             'is_active' => $request->has('is_active'),
-            'author_name' => $validated['author_name'] ?? null,
+            'author_name' => $validated['author_name'] ?? '관리자',
             'password' => $validated['password'] ?? null,
             'thumbnail' => $this->handleThumbnail($request, $slug),
             'attachments' => json_encode($this->handleAttachments($request, $slug)),

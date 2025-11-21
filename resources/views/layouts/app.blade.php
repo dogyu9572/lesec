@@ -205,8 +205,8 @@
 						<li class="copy">COPYRIGHT (C) 2025, 농생명과학공동기기원. ALL RIGHTS RESERVED.</li>
 					</ul>
 					<div class="links">
-						<a href="/terms/privacy_policy.php" class="link">개인정보처리방침</a>
-						<a href="/terms/no_email_collection.php" class="link">이메일무단수집거부</a>
+						<a href="{{ route('terms.privacy_policy') }}" class="link">개인정보처리방침</a>
+						<a href="{{ route('terms.no_email_collection') }}" class="link">이메일무단수집거부</a>
 					</div>
 				</div>
 			</div>

@@ -8,20 +8,28 @@ use App\Models\Popup;
 use App\Models\Banner;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Route;
+use App\Services\Board\BoardContentService;
 
 class HomeController extends Controller
 {
+    protected BoardContentService $boardContentService;
+
+    public function __construct(BoardContentService $boardContentService)
+    {
+        $this->boardContentService = $boardContentService;
+    }
+
     public function index()
     {
         $gNum = "main";
         $gName = "";
-        $sName = "";
+        $sName = "";       
+       
         
-        // gallerys 게시판 최신글 4개
-        $galleryPosts = $this->getLatestPosts('gallerys', 4);
-        
-        // notices 게시판 최신글 4개  
-        $noticePosts = $this->getLatestPosts('notices', 4);
+        $noticePosts = $this->getLatestBoardPosts('notices', 'notice');
+        $dataRoomPosts = $this->getLatestBoardPosts('library', 'dataroom');
+        $faqPosts = $this->getLatestBoardPosts('faq', 'faq');
         
         // 활성화된 팝업 조회 (쿠키 확인하여 숨겨진 팝업 제외)
         $popups = Popup::select('id', 'title', 'popup_type', 'popup_display_type', 'popup_image', 'popup_content', 'url', 'url_target', 'width', 'height', 'position_top', 'position_left')
@@ -41,7 +49,7 @@ class HomeController extends Controller
             ->ordered()
             ->get();
         
-        return view('home.index', compact('gNum', 'gName', 'sName', 'galleryPosts', 'noticePosts', 'popups', 'banners'));
+        return view('home.index', compact('gNum', 'gName', 'sName', 'noticePosts', 'dataRoomPosts', 'faqPosts', 'popups', 'banners'));
     }
     
     /**
@@ -83,5 +91,40 @@ class HomeController extends Controller
             Log::error("게시판 데이터 조회 오류: " . $e->getMessage());
             return collect();
         }
+    }
+
+    private function getLatestBoardPosts(string $boardSlug, string $routeNameBase, int $limit = 4)
+    {
+        try {
+            $board = $this->boardContentService->getBoard($boardSlug);
+        } catch (\Exception $e) {
+            Log::error("게시판 데이터 조회 오류: " . $e->getMessage());
+            return collect();
+        }
+
+        /** @var \Illuminate\Contracts\Pagination\LengthAwarePaginator $paginator */
+        $paginator = $this->boardContentService->getPostPaginator($board, ['per_page' => $limit]);
+        $posts = collect($paginator->items());
+
+        return $posts->map(function ($post) use ($routeNameBase) {
+            return (object) [
+                'id' => $post->id,
+                'title' => $post->title,
+                'created_at' => $post->created_at,
+                'category' => $post->category ?? null,
+                'url' => $this->resolveBoardPostUrl($routeNameBase, $post->id)
+            ];
+        });
+    }
+
+    private function resolveBoardPostUrl(string $routeNameBase, int $postId): string
+    {
+        $detailRoute = "board.{$routeNameBase}.view";
+
+        if (Route::has($detailRoute)) {
+            return route($detailRoute, [$postId]);
+        }
+
+        return route("board.{$routeNameBase}");
     }
 }

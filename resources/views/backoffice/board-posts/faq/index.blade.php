@@ -154,7 +154,9 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <span class="status-badge status-general">일반</span>
+                                        <span class="status-badge status-general">
+                                            {{ $post->category ?: '' }}
+                                        </span>
                                     </td>
                                     <td>
                                         {{ $post->title }}

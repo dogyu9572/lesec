@@ -15,15 +15,15 @@
 			<dl class="c1 on">
 				<dt>중등<button type="button" class="mo_vw">열기</button></dt>
 				<dd>
-					<a href="#this" class="i1"><span class="tt">중등학기 신청<i></i></span><p>클릭 후 해당 페이지에서 <br/>신청할 수 있습니다.</p></a>
-					<a href="#this" class="i2"><span class="tt">중등방학 신청<i></i></span><p>클릭 후 해당 페이지에서 <br/>신청할 수 있습니다.</p></a>
+					<a href="{{ route('program.show', 'middle_semester') }}" class="i1"><span class="tt">중등학기 신청<i></i></span><p>클릭 후 해당 페이지에서 <br/>신청할 수 있습니다.</p></a>
+					<a href="{{ route('program.show', 'middle_vacation') }}" class="i2"><span class="tt">중등방학 신청<i></i></span><p>클릭 후 해당 페이지에서 <br/>신청할 수 있습니다.</p></a>
 				</dd>
 			</dl>
 			<dl class="c2">
 				<dt>고등<button type="button" class="mo_vw">열기</button></dt>
 				<dd>
-					<a href="#this" class="i1"><span class="tt">고등학기 신청<i></i></span><p>클릭 후 해당 페이지에서 <br/>신청할 수 있습니다.</p></a>
-					<a href="#this" class="i2"><span class="tt">고등방학 신청<i></i></span><p>클릭 후 해당 페이지에서 <br/>신청할 수 있습니다.</p></a>
+					<a href="{{ route('program.show', 'high_semester') }}" class="i1"><span class="tt">고등학기 신청<i></i></span><p>클릭 후 해당 페이지에서 <br/>신청할 수 있습니다.</p></a>
+					<a href="{{ route('program.show', 'high_vacation') }}" class="i2"><span class="tt">고등방학 신청<i></i></span><p>클릭 후 해당 페이지에서 <br/>신청할 수 있습니다.</p></a>
 				</dd>
 			</dl>
 		</div>
@@ -32,30 +32,45 @@
 	<div class="main_board">
 		<div class="inner">
 			<div class="box">
-				<div class="tit">공지사항 <a href="" class="more">View more</a></div>
+				<div class="tit">공지사항 <a href="{{ route('board.notice') }}" class="more">View more</a></div>
 				<div class="list">
-					<a href="">[중학생 학기 프로그램] 인증서 받는 방법<span>2025.07.19</span></a>
-					<a href="">4월 응급처치교육/워크숍 안내<span>2025.07.19</span></a>
-					<a href="">10월 15일 개교기념일 휴무<span>2025.07.19</span></a>
-					<a href="">생명환경과학교육센터 이전 및 문의처 안내<span>2025.07.19</span></a>
+					@forelse($noticePosts as $post)
+						<a href="{{ $post->url }}">
+							{{ $post->title }}
+							<span>{{ $post->created_at?->format('Y.m.d') }}</span>
+						</a>
+					@empty
+						<div class="text-muted">등록된 공지사항이 없습니다.</div>
+					@endforelse
 				</div>
 			</div>
 			<div class="box">
-				<div class="tit">자료실  <a href="" class="more">View more</a></div>
+				<div class="tit">자료실  <a href="{{ route('board.dataroom') }}" class="more">View more</a></div>
 				<div class="list">
-					<a href="">2025.8.15.-8.16. 참가 / Mid2. CSI 속 과학이야기(스누베어)<span>2025.07.19</span></a>
-					<a href="">2025.8.15.-8.16. 참가 / Mid2. CSI 속 과학이야기<span>2025.07.19</span></a>
-					<a href="">2025.8.15.-8.16. 참가 / M3. Blood 관찰 및 DNA 추출<span>2025.07.19</span></a>
-					<a href="">2025.8.15.-8.16. 참가 / P2. Plasmid DNA와 제한효소(608호)<span>2025.07.19</span></a>
+					@forelse($dataRoomPosts as $post)
+						<a href="{{ $post->url }}">
+							{{ $post->title }}
+							<span>{{ $post->created_at?->format('Y.m.d') }}</span>
+						</a>
+					@empty
+						<div class="text-muted">등록된 자료가 없습니다.</div>
+					@endforelse
 				</div>
 			</div>
 			<div class="box main_faq">
-				<div class="tit">자주 묻는 질문  <a href="" class="more">View more</a></div>
+				<div class="tit">자주 묻는 질문  <a href="{{ route('board.faq') }}" class="more">View more</a></div>
 				<div class="list">
-					<a href=""><i>신청/입금</i>신청/입금 확인은 어떻게 하나요?<span>2025.07.19</span></a>
-					<a href=""><i>신청/입금</i>입금자명을 "학생이름+학교"(6자)로 하지 않았어...<span>2025.07.19</span></a>
-					<a href=""><i>수료증</i>재발급<span>2025.07.19</span></a>
-					<a href=""><i>신청/입금</i>단체 신청의 기준인원은 몇명인가요?<span>2025.07.19</span></a>
+					@forelse($faqPosts as $post)
+						<a href="{{ $post->url }}">
+							@if($post->category)
+								<i>{{ $post->category }}</i>
+							@endif
+							{{ $post->title }}
+							<span>{{ $post->created_at?->format('Y.m.d') }}</span>
+						</a>
+					@empty
+						<div class="text-muted">등록된 FAQ가 없습니다.</div>
+					@endforelse
 				</div>
 			</div>
 		</div>

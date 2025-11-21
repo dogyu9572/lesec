@@ -8,7 +8,6 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -128,10 +127,6 @@ class BoardContentService
     {
         $table = $this->getTableName($board->slug);
         $query = DB::table($table)->whereNull('deleted_at');
-
-        if (Schema::hasColumn($table, 'is_active')) {
-            $query->where('is_active', true);
-        }
 
         if ($queryCallback) {
             $queryCallback($query);

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('password')->nullable();
             $table->boolean('is_notice')->default(false);
             $table->boolean('is_secret')->default(false);
+            $table->boolean('is_active')->default(true)->comment('활성화 여부');
             $table->string('category')->nullable();
             $table->json('attachments')->nullable();
             $table->integer('view_count')->default(0);

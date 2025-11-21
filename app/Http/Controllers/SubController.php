@@ -291,13 +291,19 @@ class SubController extends Controller
     public function privacy_policy()
     {
         $gNum = "terms"; $sNum = ""; $gName = "개인정보처리방침"; $sName = "";
-        return view('terms.privacy_policy', compact('gNum', 'sNum', 'gName', 'sName'));
+        $board = $this->boardContentService->getBoard('privacy-policy');
+        $post = $this->boardContentService->getLatestPost($board);
+
+        return view('terms.privacy_policy', compact('gNum', 'sNum', 'gName', 'sName', 'post'));
     }
 	//이메일무단수집거부
     public function no_email_collection()
     {
         $gNum = "terms"; $sNum = ""; $gName = "이메일무단수집거부"; $sName = "";
-        return view('terms.no_email_collection', compact('gNum', 'sNum', 'gName', 'sName'));
+        $board = $this->boardContentService->getBoard('privacy-policy');
+        $post = $this->boardContentService->getLatestPost($board);
+
+        return view('terms.no_email_collection', compact('gNum', 'sNum', 'gName', 'sName', 'post'));
     }
 //인쇄
 	//견적서

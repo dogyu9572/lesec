@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,6 +27,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // HTTPS 강제 (.env의 APP_URL이 https://로 시작하는 경우)
+        $applicationUrl = config('app.url');
+        if (is_string($applicationUrl) && str_starts_with($applicationUrl, 'https://')) {
+            URL::forceScheme('https');
+        }
+
         // 백오피스 경로에서 현재 메뉴 정보를 뷰에 공유
         if (Request::is('backoffice*')) {
             View::composer('*', function ($view) {

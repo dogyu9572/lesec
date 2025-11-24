@@ -735,3 +735,15 @@ function focusElementWithoutScroll(element, containerSelector) {
     }
 }
 
+document.addEventListener('DOMContentLoaded', () => {
+    const participationDateInput = document.getElementById('participation_date');
+    const participationDateDisplay = document.getElementById('participation_date_display');
+
+    if (participationDateInput && participationDateDisplay && !participationDateInput.value && participationDateDisplay.value) {
+        const normalized = participationDateDisplay.value.split('(')[0].trim().replace(/\./g, '-');
+        if (/^\d{4}-\d{2}-\d{2}$/.test(normalized)) {
+            participationDateInput.value = normalized;
+        }
+    }
+});
+

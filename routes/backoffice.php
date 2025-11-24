@@ -280,6 +280,8 @@ Route::prefix('backoffice')->middleware(['backoffice'])->group(function () {
         Route::get('/', [MailSmsController::class, 'index'])->name('index');
         Route::get('/create', [MailSmsController::class, 'create'])->name('create');
         Route::post('/', [MailSmsController::class, 'store'])->name('store');
+        Route::get('/member-groups/{memberGroup}/members', [MailSmsController::class, 'membersByGroup'])
+            ->name('member-groups.members');
         Route::get('/search/members', [MailSmsController::class, 'searchMembers'])->name('search-members');
         Route::get('/{mailSmsMessage}/edit', [MailSmsController::class, 'edit'])->name('edit');
         Route::put('/{mailSmsMessage}', [MailSmsController::class, 'update'])->name('update');

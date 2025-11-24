@@ -259,6 +259,24 @@ class MailSmsService
     }
 
     /**
+     * 회원 그룹별 전체 회원 조회
+     */
+    public function getMembersByGroup(int $groupId): array
+    {
+        return Member::query()
+            ->where('member_group_id', $groupId)
+            ->orderBy('name')
+            ->get(['id', 'name', 'email', 'contact'])
+            ->map(fn (Member $member) => [
+                'id' => $member->id,
+                'name' => $member->name,
+                'email' => $member->email,
+                'contact' => $member->contact,
+            ])
+            ->toArray();
+    }
+
+    /**
      * 대상 회원 동기화
      */
     private function syncRecipients(MailSmsMessage $message, array $memberIds): void

@@ -82,8 +82,9 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label for="participation_date">참가일</label>
-                                    <input type="text" id="participation_date" name="participation_date" value="{{ data_get($application, 'participation_date_formatted', data_get($application, 'participation_date')) }}" readonly>
+                                    <label for="participation_date_display">참가일</label>
+                                    <input type="hidden" id="participation_date" name="participation_date" value="{{ data_get($application, 'participation_date') }}">
+                                    <input type="text" id="participation_date_display" value="{{ data_get($application, 'participation_date_formatted', data_get($application, 'participation_date')) }}" readonly>
                                 </div>
                                 <div>
                                     <label>결제방법</label>

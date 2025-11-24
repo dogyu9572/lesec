@@ -41,14 +41,20 @@
                 @error('member_group_id')
                     <p class="text-danger">{{ $message }}</p>
                 @enderror
+                <p class="text-muted small" id="memberGroupGuide">
+                    회원 그룹을 선택하면 해당 그룹의 전체 회원이 자동으로 선택되며, 개별 검색은 사용할 수 없습니다.
+                </p>
             </div>
             <div class="form-group grid-span-2">
                 <label>회원 <span class="text-danger">*</span></label>
                 <div class="school-search-wrapper">
                     <input type="text" id="selected_members_display" value="{{ $selectedMembers->pluck('member_name')->join(', ') }}" readonly placeholder="회원을 선택해주세요">
-                    <button type="button" id="openMemberSearchBtn" class="btn btn-secondary btn-sm">
+                    <button type="button" id="openMemberSearchBtn" class="btn btn-secondary btn-sm" data-disabled-label="회원 그룹 선택 시 검색을 사용할 수 없습니다.">
                         <i class="fas fa-search"></i> 검색
                     </button>
+                </div>
+                <div class="text-muted small" id="memberSelectionStatus" style="margin-top: 6px;">
+                    회원 그룹을 선택하거나 검색 버튼을 통해 발송 대상을 지정해 주세요.
                 </div>
                 <div class="table-responsive" id="selectedMembersWrapper" style="margin-top: 10px;">
                     <table class="board-table">
@@ -130,7 +136,8 @@
 <script>
     window.mailSmsFormConfig = {
         searchUrl: "{{ route('backoffice.mail-sms.search-members') }}",
-        csrfToken: "{{ csrf_token() }}"
+        csrfToken: "{{ csrf_token() }}",
+        groupMembersUrlTemplate: "{{ route('backoffice.mail-sms.member-groups.members', ['memberGroup' => '__GROUP_ID__']) }}"
     };
 </script>
 @endpush

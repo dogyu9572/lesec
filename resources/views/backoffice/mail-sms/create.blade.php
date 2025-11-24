@@ -13,6 +13,7 @@
 <div class="admin-form-container">
     <div id="member-search-config"
         data-member-search-url="{{ route('backoffice.mail-sms.search-members') }}"
+        data-member-group-url="{{ route('backoffice.mail-sms.member-groups.members', ['memberGroup' => '__GROUP_ID__']) }}"
         data-csrf-token="{{ csrf_token() }}"></div>
     <div class="form-header">
         <a href="{{ route('backoffice.mail-sms.index') }}" class="btn btn-secondary">

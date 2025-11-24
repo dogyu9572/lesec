@@ -10,6 +10,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const memberListBody = document.getElementById('popup-member-list-body');
     const paginationContainer = document.getElementById('popup-pagination');
     const selectedMembersBody = document.getElementById('selectedMembersBody');
+    const selectedMembersDisplay = document.getElementById('selected_members_display');
+    const memberSelectionStatus = document.getElementById('memberSelectionStatus');
 
     if (!modal || !openBtn || !memberListBody || !selectedMembersBody) {
         return;
@@ -17,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const config = window.mailSmsFormConfig || {};
     const selectedMemberIds = new Set();
+    let isGroupSelectionMode = false;
 
     /**
      * 초기 선택 상태 구성
@@ -77,6 +80,223 @@ document.addEventListener('DOMContentLoaded', () => {
             row.classList.add('selected-member-empty');
             row.innerHTML = '<td colspan="4" class="text-center text-muted">선택된 회원이 없습니다.</td>';
             selectedMembersBody.appendChild(row);
+        }
+    }
+
+    /**
+     * 선택된 회원 표시 input 업데이트
+     */
+    function updateSelectedMembersDisplay() {
+        if (!selectedMembersDisplay) {
+            return;
+        }
+
+        const names = Array.from(selectedMembersBody.querySelectorAll('tr[data-member-id] td:first-child'))
+            .map((cell) => cell.textContent.trim())
+            .filter((text) => !!text);
+
+        selectedMembersDisplay.value = names.join(', ');
+    }
+
+    /**
+     * 상태 문구 출력
+     */
+    function setMemberSelectionStatus(message, tone = 'info') {
+        if (!memberSelectionStatus) {
+            return;
+        }
+        memberSelectionStatus.textContent = message;
+        memberSelectionStatus.classList.remove('text-danger', 'text-success', 'text-muted');
+        const classMap = {
+            error: 'text-danger',
+            success: 'text-success',
+            info: 'text-muted',
+        };
+        memberSelectionStatus.classList.add(classMap[tone] || 'text-muted');
+    }
+
+    /**
+     * 검색 버튼 상태 제어
+     */
+    function toggleSearchButton(disabled) {
+        if (!openBtn) {
+            return;
+        }
+        openBtn.disabled = disabled;
+        if (disabled) {
+            openBtn.classList.add('disabled');
+            if (openBtn.dataset.disabledLabel) {
+                openBtn.setAttribute('title', openBtn.dataset.disabledLabel);
+            }
+        } else {
+            openBtn.classList.remove('disabled');
+            openBtn.removeAttribute('title');
+        }
+    }
+
+    /**
+     * 선택된 회원 목록 비우기
+     */
+    function clearSelectedMembers() {
+        selectedMemberIds.clear();
+        selectedMembersBody.innerHTML = '';
+        renderSelectedMembersEmptyRow();
+        updateSelectedMembersDisplay();
+    }
+
+    /**
+     * 선택된 회원 행 생성
+     */
+    function createSelectedMemberRow(member, options = {}) {
+        const removable = options.removable !== false;
+        const row = document.createElement('tr');
+        row.dataset.memberId = member.id ? member.id.toString() : '';
+
+        const removeButton = removable
+            ? `<button type="button" class="btn btn-outline-danger btn-sm selected-member-remove" data-member-id="${member.id}">삭제</button>`
+            : '<span class="text-muted">자동 선택</span>';
+
+        row.innerHTML = `
+            <td>${member.name || '-'}</td>
+            <td>${member.email || '-'}</td>
+            <td>${member.contact || '-'}</td>
+            <td>
+                ${removeButton}
+                <input type="hidden" name="member_ids[]" value="${member.id}">
+            </td>
+        `;
+
+        return row;
+    }
+
+    /**
+     * 선택된 회원에 추가
+     */
+    function addMembersToSelection(members, options = {}) {
+        if (!Array.isArray(members) || members.length === 0) {
+            renderSelectedMembersEmptyRow();
+            updateSelectedMembersDisplay();
+            return;
+        }
+
+        members.forEach((member) => {
+            const memberId = parseInt(member.id, 10);
+            if (!memberId || selectedMemberIds.has(memberId)) {
+                return;
+            }
+
+            selectedMemberIds.add(memberId);
+            selectedMembersBody.appendChild(
+                createSelectedMemberRow(
+                    {
+                        id: memberId,
+                        name: member.name || '-',
+                        email: member.email || '-',
+                        contact: member.contact || '-',
+                    },
+                    options
+                )
+            );
+        });
+
+        renderSelectedMembersEmptyRow();
+        updateSelectedMembersDisplay();
+    }
+
+    /**
+     * 회원 목록을 새로 구성
+     */
+    function replaceSelectedMembers(members, options = {}) {
+        selectedMembersBody.innerHTML = '';
+        selectedMemberIds.clear();
+        addMembersToSelection(members, options);
+    }
+
+    /**
+     * 회원 그룹 조회 URL 생성
+     */
+    function buildGroupMembersUrl(groupId) {
+        if (!config.groupMembersUrlTemplate || !groupId) {
+            return null;
+        }
+        return config.groupMembersUrlTemplate.replace('__GROUP_ID__', groupId);
+    }
+
+    /**
+     * 회원 그룹 구성원 불러오기
+     */
+    function fetchGroupMembers(groupId) {
+        const url = buildGroupMembersUrl(groupId);
+
+        if (!url) {
+            setMemberSelectionStatus('회원 그룹 조회 경로가 설정되지 않았습니다.', 'error');
+            return;
+        }
+
+        isGroupSelectionMode = true;
+        toggleSearchButton(true);
+        setMemberSelectionStatus('선택한 회원 그룹의 회원 정보를 불러오는 중입니다...', 'info');
+
+        selectedMembersBody.innerHTML = `
+            <tr class="selected-member-loading">
+                <td colspan="4" class="text-center text-muted">회원 정보를 불러오는 중입니다...</td>
+            </tr>
+        `;
+
+        fetch(url, {
+            headers: {
+                'X-CSRF-TOKEN': config.csrfToken || '',
+                Accept: 'application/json',
+            },
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error('회원 그룹 정보를 불러오지 못했습니다.');
+                }
+                return response.json();
+            })
+            .then((data) => {
+                const members = (data && data.members) || [];
+                replaceSelectedMembers(members, { removable: false });
+                const meta = data && data.meta ? data.meta : {};
+                const groupName = meta.group_name || '선택한 회원 그룹';
+                const count = typeof meta.count === 'number' ? meta.count : members.length;
+
+                if (members.length === 0) {
+                    setMemberSelectionStatus(`${groupName}에 등록된 회원이 없습니다.`, 'error');
+                } else {
+                    setMemberSelectionStatus(`${groupName} 회원 ${count}명이 자동으로 선택되었습니다.`, 'success');
+                }
+            })
+            .catch((error) => {
+                console.error(error);
+                memberGroupSelect.value = '';
+                isGroupSelectionMode = false;
+                toggleSearchButton(false);
+                clearSelectedMembers();
+                setMemberSelectionStatus('회원 그룹 정보를 불러오지 못했습니다. 다시 시도해 주세요.', 'error');
+            });
+    }
+
+    /**
+     * 그룹 선택 해제 시 초기화
+     */
+    function resetToManualSelection() {
+        isGroupSelectionMode = false;
+        toggleSearchButton(false);
+        clearSelectedMembers();
+        setMemberSelectionStatus('회원 그룹을 선택하거나 검색 버튼으로 회원을 추가해 주세요.', 'info');
+    }
+
+    /**
+     * 회원 그룹 변경 처리
+     */
+    function handleMemberGroupChange() {
+        const groupId = memberGroupSelect ? memberGroupSelect.value : '';
+        if (groupId) {
+            fetchGroupMembers(groupId);
+        } else {
+            resetToManualSelection();
         }
     }
 
@@ -220,28 +440,14 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        checkboxes.forEach((checkbox) => {
-            const memberId = parseInt(checkbox.value, 10);
-            if (!memberId || selectedMemberIds.has(memberId)) {
-                return;
-            }
+        const members = Array.from(checkboxes).map((checkbox) => ({
+            id: parseInt(checkbox.value, 10),
+            name: checkbox.dataset.name || '-',
+            email: checkbox.dataset.email || '-',
+            contact: checkbox.dataset.contact || '-',
+        }));
 
-            selectedMemberIds.add(memberId);
-            const row = document.createElement('tr');
-            row.dataset.memberId = memberId.toString();
-            row.innerHTML = `
-                <td>${checkbox.dataset.name || '-'}</td>
-                <td>${checkbox.dataset.email || '-'}</td>
-                <td>${checkbox.dataset.contact || '-'}</td>
-                <td>
-                    <button type="button" class="btn btn-outline-danger btn-sm selected-member-remove" data-member-id="${memberId}">삭제</button>
-                    <input type="hidden" name="member_ids[]" value="${memberId}">
-                </td>
-            `;
-            selectedMembersBody.appendChild(row);
-        });
-
-        renderSelectedMembersEmptyRow();
+        addMembersToSelection(members, { removable: true });
         closeMemberSearchModal();
     }
 
@@ -265,6 +471,7 @@ document.addEventListener('DOMContentLoaded', () => {
             row.remove();
         }
         renderSelectedMembersEmptyRow();
+        updateSelectedMembersDisplay();
     });
 
     /**
@@ -311,7 +518,20 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    if (memberGroupSelect) {
+        memberGroupSelect.addEventListener('change', handleMemberGroupChange);
+        if (memberGroupSelect.value) {
+            fetchGroupMembers(memberGroupSelect.value);
+        } else {
+            resetToManualSelection();
+        }
+    } else {
+        setMemberSelectionStatus('회원 그룹을 선택하거나 검색 버튼으로 회원을 추가해 주세요.', 'info');
+    }
+
+    toggleSearchButton(isGroupSelectionMode);
     renderSelectedMembersEmptyRow();
+    updateSelectedMembersDisplay();
 });
 
 

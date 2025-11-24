@@ -128,6 +128,23 @@ class MailSmsController extends BaseController
     }
 
     /**
+     * 회원 그룹별 회원 조회
+     */
+    public function membersByGroup(MemberGroup $memberGroup): JsonResponse
+    {
+        $members = $this->mailSmsService->getMembersByGroup($memberGroup->id);
+
+        return response()->json([
+            'members' => $members,
+            'meta' => [
+                'group_id' => $memberGroup->id,
+                'group_name' => $memberGroup->name,
+                'count' => count($members),
+            ],
+        ]);
+    }
+
+    /**
      * 회원 검색 (모달)
      */
     public function searchMembers(Request $request): JsonResponse

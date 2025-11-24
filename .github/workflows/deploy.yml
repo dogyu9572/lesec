@@ -76,7 +76,7 @@ jobs:
           
           echo "=== 서비스 재시작 ==="
           php artisan queue:restart
-          sudo systemctl reload nginx
+          sudo systemctl reload nginx 2>/dev/null || echo "⚠️  nginx reload skipped (권한 없음, 수동 재시작 필요)"
           
           echo "=== 배포 완료 ==="
           echo "최종 상태:"

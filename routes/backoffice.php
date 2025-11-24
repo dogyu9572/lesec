@@ -393,8 +393,6 @@ Route::prefix('backoffice')->middleware(['backoffice'])->group(function () {
     Route::resource('schools', SchoolController::class, [
         'names' => 'backoffice.schools'
     ]);
-    Route::get('schools/{school}/show', [SchoolController::class, 'show'])
-        ->name('backoffice.schools.show');
     Route::post('schools/sync-from-api', [SchoolController::class, 'syncFromApi'])
         ->name('backoffice.schools.sync-from-api');
     Route::get('schools/search', [SchoolController::class, 'search'])

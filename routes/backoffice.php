@@ -394,7 +394,7 @@ Route::prefix('backoffice')->middleware(['backoffice'])->group(function () {
         'names' => 'backoffice.schools'
     ]);
     Route::get('schools/{school}/show', [SchoolController::class, 'show'])
-    ->name('backoffice.schools.show');
+    ->name('backoffice.schools.show-detail');
     Route::post('schools/sync-from-api', [SchoolController::class, 'syncFromApi'])
         ->name('backoffice.schools.sync-from-api');
     Route::get('schools/search', [SchoolController::class, 'search'])

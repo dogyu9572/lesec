@@ -28,6 +28,6 @@ return [
     |
     */
 
-    'compiled' => env('VIEW_COMPILED_PATH', sys_get_temp_dir() . '/views'),
+    'compiled' => env('VIEW_COMPILED_PATH', realpath(storage_path('framework/views'))),
 
 ];

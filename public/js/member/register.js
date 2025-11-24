@@ -10,6 +10,8 @@
         this.schoolDataLoaded = false;
         this.serverErrors = this.$form.data('errors') || null;
         this.serverErrorKeys = this.serverErrors ? Object.keys(this.serverErrors) : [];
+        this.schoolPaginationMeta = null;
+        this.currentSchoolPage = 1;
 
         this.init();
     }
@@ -391,21 +393,25 @@
 
         this.$modal.on('click', '.btn_search_school', function (event) {
             event.preventDefault();
+            self.currentSchoolPage = 1;
             self.fetchSchools(true);
         });
 
         this.$modal.on('change', '.search_city', function () {
             self.$modal.find('.search_district').val('');
+            self.currentSchoolPage = 1;
             self.fetchSchools(true);
         });
 
         this.$modal.on('change', '.search_level', function () {
+            self.currentSchoolPage = 1;
             self.fetchSchools(true);
         });
 
         this.$modal.on('keypress', '.search_keyword', function (event) {
             if (event.which === 13) {
                 event.preventDefault();
+                self.currentSchoolPage = 1;
                 self.fetchSchools(true);
             }
         });
@@ -429,6 +435,20 @@
         this.$modal.on('click', '.btn_select_school', function (event) {
             event.preventDefault();
             self.confirmSchoolSelection();
+        });
+
+        // 페이지네이션 클릭 이벤트
+        this.$modal.on('click', '.school_pagination a[data-page]', function (event) {
+            event.preventDefault();
+            var $link = $(this);
+            if ($link.hasClass('on') || $link.attr('onclick') === 'return false;') {
+                return;
+            }
+            var page = parseInt($link.data('page'), 10);
+            if (page && page > 0) {
+                self.currentSchoolPage = page;
+                self.fetchSchools(true);
+            }
         });
     };
 
@@ -475,7 +495,8 @@
             city: this.$modal.find('.search_city').val(),
             district: this.$modal.find('.search_district').val(),
             school_level: this.$modal.find('.search_level').val(),
-            keyword: this.$modal.find('.search_keyword').val()
+            keyword: this.$modal.find('.search_keyword').val(),
+            page: this.currentSchoolPage || 1
         };
 
         // 로딩 중 표시
@@ -495,6 +516,16 @@
                 self.renderSchools(list);
                 self.updateResultMessage(data && data.meta ? data.meta.count : list.length);
 
+                // 페이지네이션 메타 정보 저장
+                if (data && data.meta) {
+                    self.schoolPaginationMeta = data.meta;
+                    self.currentSchoolPage = data.meta.current_page || 1;
+                    self.renderPagination(data.meta);
+                } else {
+                    self.schoolPaginationMeta = null;
+                    self.$modal.find('.school_pagination').hide().empty();
+                }
+
                 if (data && data.filters) {
                     if (data.filters.cities) {
                         self.setSelectOptions(self.$modal.find('.search_city'), data.filters.cities, '전체');
@@ -512,6 +543,8 @@
             .fail(function () {
                 self.renderSchools([]);
                 self.updateResultMessage(0);
+                self.schoolPaginationMeta = null;
+                self.$modal.find('.school_pagination').hide().empty();
                 window.alert('학교 정보를 불러오는 중 오류가 발생했습니다.');
             })
             .always(function () {
@@ -543,6 +576,65 @@
 
             $tbody.append(rowHtml);
         });
+    };
+
+    MemberRegister.prototype.renderPagination = function (meta) {
+        var self = this;
+        var $pagination = this.$modal.find('.school_pagination');
+        
+        if (!meta || meta.last_page <= 1) {
+            $pagination.hide().empty();
+            return;
+        }
+
+        var currentPage = meta.current_page || 1;
+        var lastPage = meta.last_page || 1;
+        
+        // 페이지 범위 계산 (현재 페이지 기준 앞뒤 2페이지씩)
+        var start = Math.max(1, currentPage - 2);
+        var end = Math.min(lastPage, start + 4);
+        start = Math.max(1, end - 4);
+
+        var html = '';
+        
+        // 맨끝 (첫 페이지)
+        if (currentPage === 1) {
+            html += '<a href="#" class="arrow two first" data-page="1" onclick="return false;">맨끝</a>';
+        } else {
+            html += '<a href="#" class="arrow two first" data-page="1">맨끝</a>';
+        }
+        
+        // 이전
+        if (currentPage === 1) {
+            html += '<a href="#" class="arrow one prev" data-page="1" onclick="return false;">이전</a>';
+        } else {
+            html += '<a href="#" class="arrow one prev" data-page="' + (currentPage - 1) + '">이전</a>';
+        }
+        
+        // 페이지 번호들
+        for (var page = start; page <= end; page++) {
+            if (page === currentPage) {
+                html += '<a href="#" class="on" data-page="' + page + '" onclick="return false;">' + page + '</a>';
+            } else {
+                html += '<a href="#" data-page="' + page + '">' + page + '</a>';
+            }
+        }
+        
+        // 다음
+        if (currentPage >= lastPage) {
+            html += '<a href="#" class="arrow one next" data-page="' + lastPage + '" onclick="return false;">다음</a>';
+        } else {
+            html += '<a href="#" class="arrow one next" data-page="' + (currentPage + 1) + '">다음</a>';
+        }
+        
+        // 맨끝 (마지막 페이지)
+        if (currentPage >= lastPage) {
+            html += '<a href="#" class="arrow two last" data-page="' + lastPage + '" onclick="return false;">맨끝</a>';
+        } else {
+            html += '<a href="#" class="arrow two last" data-page="' + lastPage + '">맨끝</a>';
+        }
+        
+        $pagination.html(html).show();
     };
 
     MemberRegister.prototype.setSelectOptions = function ($select, items, placeholder) {

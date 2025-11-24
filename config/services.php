@@ -40,4 +40,9 @@ return [
         'endpoint' => 'https://open.neis.go.kr/hub/schoolInfo',
     ],
 
+    'schoolinfo' => [
+        'api_key' => env('SCHOOLINFO_API_KEY'),
+        'api_endpoint' => 'https://www.schoolinfo.go.kr/openApi.do',
+    ],
+
 ];

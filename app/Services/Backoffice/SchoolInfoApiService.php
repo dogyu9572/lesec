@@ -31,7 +31,7 @@ class SchoolInfoApiService
      */
     public function fetchSchools(string $sidoCode, string $sggCode, string $schulKndCode): array
     {
-        $apiKey = env('SCHOOLINFO_API_KEY');
+        $apiKey = config('services.schoolinfo.api_key') ?: env('SCHOOLINFO_API_KEY');
 
         if (empty($apiKey)) {
             Log::error('학교 알리미 API 키가 설정되지 않았습니다.');

@@ -193,13 +193,13 @@
 							<div class="flex city">
 								<select name="grade">
 									<option value="">학년 선택</option>
-									@for ($i = 1; $i <= 12; $i++)
+									@for ($i = 1; $i <= 3; $i++)
 									<option value="{{ $i }}" @selected(old('grade') == $i)>{{ $i }}학년</option>
 									@endfor
 								</select>
 								<select name="class_number">
 									<option value="">반 선택</option>
-									@for ($i = 1; $i <= 30; $i++)
+									@for ($i = 1; $i <= 20; $i++)
 									<option value="{{ $i }}" @selected(old('class_number') == $i)>{{ $i }}반</option>
 									@endfor
 								</select>
@@ -313,6 +313,11 @@
 							</tr>
 						</tbody>
 					</table>
+				</div>
+				<div class="board_bottom">
+					<div class="paging school_pagination" style="display:none;">
+						<!-- 페이지네이션은 JavaScript로 동적 생성 -->
+					</div>
 				</div>
 			</div>
 			<button type="button" class="btn_submit btn_wbb mt4 btn_select_school">확인</button>

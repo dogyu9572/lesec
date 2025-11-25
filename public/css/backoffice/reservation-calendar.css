@@ -106,65 +106,67 @@
     border-radius: 12px;
     overflow: hidden;
     width: 100%;
-    max-width: 100%;
+}
+.board-container .schedule_table .table table {
+    width: 100%;
     table-layout: fixed;
 }
-.board-container .schedule_table .table th,
-.board-container .schedule_table .table td {
+.board-container .schedule_table .table table th,
+.board-container .schedule_table .table table td {
     border-left: #ddd 1px solid;
     border-right: #ddd 1px solid;
     border-top: 0 !important;
     width: 14.28% !important;
     padding: 4px 8px;
 }
-.board-container .schedule_table .table th:first-child,
-.board-container .schedule_table .table td:first-child {
+.board-container .schedule_table .table table th:first-child,
+.board-container .schedule_table .table table td:first-child {
     border-left: 0;
     color: #DC2626;
 }
-.board-container .schedule_table .table th:last-child,
-.board-container .schedule_table .table td:last-child {
+.board-container .schedule_table .table table th:last-child,
+.board-container .schedule_table .table table td:last-child {
     border-right: 0;
     color: #283891;
 }
-.board-container .schedule_table .table thead th {
+.board-container .schedule_table .table table thead th {
     font-size: 16px;
     color: #333;
     line-height: 48px;
     border-top: 0 !important;
     border-bottom: 1px solid #ddd !important;
 }
-.board-container .schedule_table .table tbody td {
+.board-container .schedule_table .table table tbody td {
     position: relative;
     border-top: #ddd 1px solid !important;
     padding: 4px;
     height: 120px;
     vertical-align: top;
 }
-.board-container .schedule_table .table tbody tr:first-child td {
+.board-container .schedule_table .table table tbody tr:first-child td {
     border-top: 0 !important;
 }
-.board-container .schedule_table .table tbody td.disabled {
+.board-container .schedule_table .table table tbody td.disabled {
     pointer-events: none;
     background: #F7F8F9;
 }
-.board-container .schedule_table .table tbody td.disabled span {
+.board-container .schedule_table .table table tbody td.disabled span {
     opacity: 0.6;
 }
-.board-container .schedule_table .table tbody td span {
+.board-container .schedule_table .table table tbody td span {
     display: block;
     font-size: 14px;
     color: inherit;
     line-height: 26px;
     padding: 0 4px;
 }
-.board-container .schedule_table .table tbody td .list {
+.board-container .schedule_table .table table tbody td .list {
     margin-top: 4px;
     padding: 0;
     list-style: none;
     width: 100%;
 }
-.board-container .schedule_table .table tbody td .list li {
+.board-container .schedule_table .table table tbody td .list li {
     font-size: 11px;
     font-weight: 600;
     line-height: 16px;
@@ -177,14 +179,14 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
-.board-container .schedule_table .table tbody td .list li + li {
+.board-container .schedule_table .table table tbody td .list li + li {
     margin-top: 2px;
 }
-.board-container .schedule_table .table tbody td .list li.i_possible {
+.board-container .schedule_table .table table tbody td .list li.i_possible {
     color: #fff;
     background: #39B54A;
 }
-.board-container .schedule_table .table tbody td .list li.i_impossible {
+.board-container .schedule_table .table table tbody td .list li.i_impossible {
     color: #999;
     line-height: 16px;
     background: #EBEBEB;

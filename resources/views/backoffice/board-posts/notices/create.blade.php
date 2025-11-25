@@ -221,7 +221,12 @@
                             <span class="required">*</span>
                         @endif
                     </label>
-                    <input type="text" class="board-form-control" id="author_name" name="author_name" value="{{ old('author_name') }}" @if($board->isFieldRequired('author_name')) required @endif>
+                    <input type="text"
+                           class="board-form-control"
+                           id="author_name"
+                           name="author_name"
+                           value="{{ old('author_name', auth()->user()->name ?? '') }}"
+                           @if($board->isFieldRequired('author_name')) required @endif>
                 </div>
                 @endif
 

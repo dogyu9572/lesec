@@ -213,16 +213,6 @@
                                 <div class="board-form-group">
                                     <label class="board-form-label">팝업이미지</label>
                                     
-                                    @if($popup->popup_image)
-                                        <div class="current-image">
-                                            <img src="{{ asset('storage/' . $popup->popup_image) }}" alt="현재 이미지" class="thumbnail-preview">
-                                            <button type="button" class="btn btn-sm btn-outline-danger mt-2" onclick="removeImagePreview()">
-                                                <i class="fas fa-trash"></i> 이미지 제거
-                                            </button>
-                                            <input type="hidden" name="remove_popup_image" id="remove_popup_image" value="0">
-                                        </div>
-                                    @endif
-                                    
                                     <div class="board-file-upload">
                                         <div class="board-file-input-wrapper">
                                             <input type="file" class="board-file-input" id="popup_image" name="popup_image" accept=".jpg,.jpeg,.png,.gif">
@@ -232,8 +222,16 @@
                                                 <span class="board-file-input-subtext">JPG, PNG, GIF 파일만 가능 (최대 5MB)</span>
                                             </div>
                                         </div>
-                                        <div class="board-file-preview" id="popupImagePreview"></div>
+                                        <div class="board-file-preview" id="popupImagePreview">
+                                            @if($popup->popup_image)
+                                                <img src="{{ asset('storage/' . $popup->popup_image) }}" alt="현재 이미지" class="thumbnail-preview">
+                                                <button type="button" class="btn btn-sm btn-outline-danger mt-2" onclick="removeImagePreview('popup_image', 'popupImagePreview')">
+                                                    <i class="fas fa-trash"></i> 이미지 제거
+                                                </button>
+                                            @endif
+                                        </div>
                                     </div>
+                                    <input type="hidden" name="remove_popup_image" id="remove_popup_image" value="0">
                                 </div>
                             </div>
                         </div>

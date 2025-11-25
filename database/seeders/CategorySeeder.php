@@ -18,213 +18,69 @@ class CategorySeeder extends Seeder
         \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         // ========================================
-        // 게시판 카테고리 그룹
+        // FAQ 카테고리 그룹
         // ========================================
         
-        $boardGroup = Category::create([
+        $faqGroup = Category::create([
             'parent_id' => null,
-            'code' => 'C001',
-            'name' => '게시판',
+            'code' => 'F001',
+            'name' => 'FAQ',
             'depth' => 0,
-            'display_order' => 1,
+            'display_order' => 0,
             'is_active' => true,
         ]);
 
-        // 1차: 공지사항
-        $notice = Category::create([
-            'parent_id' => $boardGroup->id,
-            'code' => 'C002',
-            'name' => '공지사항',
+        // 1차: 신청/입금/환불
+        Category::create([
+            'parent_id' => $faqGroup->id,
+            'code' => 'F002',
+            'name' => '신청/입금/환불',
             'depth' => 1,
-            'display_order' => 1,
+            'display_order' => 0,
             'is_active' => true,
         ]);
 
-        // 2차: 일반공지
-        $generalNotice = Category::create([
-            'parent_id' => $notice->id,
-            'code' => 'C003',
-            'name' => '일반공지',
-            'depth' => 2,
-            'display_order' => 1,
-            'is_active' => true,
-        ]);
-
-        // 3차: 긴급
+        // 1차: 수료증
         Category::create([
-            'parent_id' => $generalNotice->id,
-            'code' => 'C004',
-            'name' => '긴급',
-            'depth' => 2,
-            'display_order' => 1,
+            'parent_id' => $faqGroup->id,
+            'code' => 'F003',
+            'name' => '수료증',
+            'depth' => 1,
+            'display_order' => 0,
             'is_active' => true,
         ]);
 
-        // 3차: 일반
+        // 1차: 대기자
         Category::create([
-            'parent_id' => $generalNotice->id,
-            'code' => 'C005',
+            'parent_id' => $faqGroup->id,
+            'code' => 'F004',
+            'name' => '대기자',
+            'depth' => 1,
+            'display_order' => 0,
+            'is_active' => true,
+        ]);
+
+        // 1차: 회원정보
+        Category::create([
+            'parent_id' => $faqGroup->id,
+            'code' => 'F005',
+            'name' => '회원정보',
+            'depth' => 1,
+            'display_order' => 0,
+            'is_active' => true,
+        ]);
+
+        // 1차: 일반
+        Category::create([
+            'parent_id' => $faqGroup->id,
+            'code' => 'F006',
             'name' => '일반',
-            'depth' => 2,
-            'display_order' => 2,
-            'is_active' => true,
-        ]);
-
-        // 2차: 시스템공지
-        Category::create([
-            'parent_id' => $notice->id,
-            'code' => 'C006',
-            'name' => '시스템공지',
-            'depth' => 2,
-            'display_order' => 2,
-            'is_active' => true,
-        ]);
-
-        // 1차: 자료실
-        $archive = Category::create([
-            'parent_id' => $boardGroup->id,
-            'code' => 'C007',
-            'name' => '자료실',
             'depth' => 1,
-            'display_order' => 2,
-            'is_active' => true,
-        ]);
-
-        // 2차: 업무자료
-        Category::create([
-            'parent_id' => $archive->id,
-            'code' => 'C008',
-            'name' => '업무자료',
-            'depth' => 2,
-            'display_order' => 1,
-            'is_active' => true,
-        ]);
-
-        // 2차: 양식자료
-        Category::create([
-            'parent_id' => $archive->id,
-            'code' => 'C009',
-            'name' => '양식자료',
-            'depth' => 2,
-            'display_order' => 2,
-            'is_active' => true,
-        ]);
-
-        // ========================================
-        // 상품 카테고리 그룹
-        // ========================================
-
-        $productGroup = Category::create([
-            'parent_id' => null,
-            'code' => 'C010',
-            'name' => '상품',
-            'depth' => 0,
-            'display_order' => 2,
-            'is_active' => true,
-        ]);
-
-        // 1차: 의류
-        $clothing = Category::create([
-            'parent_id' => $productGroup->id,
-            'code' => 'C011',
-            'name' => '의류',
-            'depth' => 1,
-            'display_order' => 1,
-            'is_active' => true,
-        ]);
-
-        // 2차: 상의
-        $top = Category::create([
-            'parent_id' => $clothing->id,
-            'code' => 'C012',
-            'name' => '상의',
-            'depth' => 2,
-            'display_order' => 1,
-            'is_active' => true,
-        ]);
-
-        // 3차: 티셔츠
-        Category::create([
-            'parent_id' => $top->id,
-            'code' => 'C013',
-            'name' => '티셔츠',
-            'depth' => 2,
-            'display_order' => 1,
-            'is_active' => true,
-        ]);
-
-        // 3차: 셔츠
-        Category::create([
-            'parent_id' => $top->id,
-            'code' => 'C014',
-            'name' => '셔츠',
-            'depth' => 2,
-            'display_order' => 2,
-            'is_active' => true,
-        ]);
-
-        // 2차: 하의
-        $bottom = Category::create([
-            'parent_id' => $clothing->id,
-            'code' => 'C015',
-            'name' => '하의',
-            'depth' => 2,
-            'display_order' => 2,
-            'is_active' => true,
-        ]);
-
-        // 3차: 청바지
-        Category::create([
-            'parent_id' => $bottom->id,
-            'code' => 'C016',
-            'name' => '청바지',
-            'depth' => 2,
-            'display_order' => 1,
-            'is_active' => true,
-        ]);
-
-        // 3차: 슬랙스
-        Category::create([
-            'parent_id' => $bottom->id,
-            'code' => 'C017',
-            'name' => '슬랙스',
-            'depth' => 2,
-            'display_order' => 2,
-            'is_active' => true,
-        ]);
-
-        // 1차: 액세서리
-        $accessory = Category::create([
-            'parent_id' => $productGroup->id,
-            'code' => 'C018',
-            'name' => '액세서리',
-            'depth' => 1,
-            'display_order' => 2,
-            'is_active' => true,
-        ]);
-
-        // 2차: 가방
-        Category::create([
-            'parent_id' => $accessory->id,
-            'code' => 'C019',
-            'name' => '가방',
-            'depth' => 2,
-            'display_order' => 1,
-            'is_active' => true,
-        ]);
-
-        // 2차: 모자
-        Category::create([
-            'parent_id' => $accessory->id,
-            'code' => 'C020',
-            'name' => '모자',
-            'depth' => 2,
-            'display_order' => 2,
+            'display_order' => 0,
             'is_active' => true,
         ]);
 
         $this->command->info('카테고리 시더 실행 완료!');
-        $this->command->info('- 게시판 그룹: 1개 그룹, 8개 카테고리 생성');
-        $this->command->info('- 상품 그룹: 1개 그룹, 11개 카테고리 생성');
+        $this->command->info('- FAQ 그룹: 1개 그룹, 5개 카테고리 생성');
     }
 }

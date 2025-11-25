@@ -136,7 +136,7 @@ function initImagePreview() {
                 reader.onload = function(e) {
                     preview.innerHTML = `
                         <img src="${e.target.result}" alt="미리보기" class="thumbnail-preview">
-                        <button type="button" class="btn btn-sm btn-outline-danger mt-2" onclick="removeImagePreview()">
+                        <button type="button" class="btn btn-sm btn-outline-danger mt-2" onclick="removeImagePreview('popup_image', 'popupImagePreview')">
                             <i class="fas fa-trash"></i> 이미지 제거
                         </button>
                     `;
@@ -147,13 +147,13 @@ function initImagePreview() {
     }
 }
 
-// 이미지 미리보기 제거
-function removeImagePreview() {
-    const fileInput = document.getElementById('popup_image');
-    const preview = document.getElementById('popupImagePreview');
+// 이미지 미리보기 제거 (전역 함수)
+function removeImagePreview(inputId, previewId) {
+    const input = document.getElementById(inputId);
+    const preview = document.getElementById(previewId);
     const removeInput = document.getElementById('remove_popup_image');
     
-    if (fileInput) fileInput.value = '';
+    if (input) input.value = '';
     if (preview) preview.innerHTML = '';
     if (removeInput) removeInput.value = '1';
 }

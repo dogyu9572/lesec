@@ -31,6 +31,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // 서버에서 렌더링된 회원 행이 있는지 확인
+    const existingMemberRows = selectedMembersBody.querySelectorAll('tr[data-member-id]');
+    if (existingMemberRows.length > 0 && selectedMemberIds.size === 0) {
+        // 서버에서 렌더링된 회원이 있지만 selectedMemberIds에 없으면 추가
+        existingMemberRows.forEach((row) => {
+            const memberId = parseInt(row.dataset.memberId, 10);
+            if (memberId) {
+                selectedMemberIds.add(memberId);
+            }
+        });
+    }
+
     /**
      * 모달 열기
      */
@@ -67,7 +79,10 @@ document.addEventListener('DOMContentLoaded', () => {
      * 선택된 회원 출력
      */
     function renderSelectedMembersEmptyRow() {
-        if (selectedMemberIds.size > 0) {
+        // 실제 회원 행이 있는지 확인 (hidden input 기준)
+        const hasMemberRows = selectedMembersBody.querySelectorAll('tr[data-member-id]').length > 0;
+        
+        if (hasMemberRows || selectedMemberIds.size > 0) {
             const emptyRow = selectedMembersBody.querySelector('.selected-member-empty');
             if (emptyRow) {
                 emptyRow.remove();
@@ -523,10 +538,24 @@ document.addEventListener('DOMContentLoaded', () => {
         if (memberGroupSelect.value) {
             fetchGroupMembers(memberGroupSelect.value);
         } else {
+            // 편집 모드에서는 기존 회원 정보를 유지
+            const hasExistingMembers = selectedMemberIds.size > 0;
+            if (!hasExistingMembers) {
             resetToManualSelection();
+            } else {
+                // 기존 회원이 있으면 상태만 업데이트
+                toggleSearchButton(false);
+                setMemberSelectionStatus('회원 그룹을 선택하거나 검색 버튼으로 회원을 추가해 주세요.', 'info');
+            }
         }
     } else {
+        // 기존 회원이 있으면 상태만 업데이트
+        const hasExistingMembers = selectedMemberIds.size > 0;
+        if (hasExistingMembers) {
+            setMemberSelectionStatus('회원 그룹을 선택하거나 검색 버튼으로 회원을 추가해 주세요.', 'info');
+    } else {
         setMemberSelectionStatus('회원 그룹을 선택하거나 검색 버튼으로 회원을 추가해 주세요.', 'info');
+        }
     }
 
     toggleSearchButton(isGroupSelectionMode);

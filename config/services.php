@@ -45,4 +45,11 @@ return [
         'api_endpoint' => 'https://www.schoolinfo.go.kr/openApi.do',
     ],
 
+    'sms_kakao' => [
+        'api_key' => env('SMS_KAKAO_API_KEY', 'secure-api-key'),
+        'sms_api_url' => env('SMS_KAKAO_SMS_API_URL', 'https://lesecsms.hk-test.co.kr/api/sms'),
+        'kakao_api_url' => env('SMS_KAKAO_KAKAO_API_URL', 'https://lesecsms.hk-test.co.kr/api/kakao'),
+        'kakao_template_code' => env('SMS_KAKAO_TEMPLATE_CODE', 'bizp_2022012015300394819857304'),
+    ],
+
 ];

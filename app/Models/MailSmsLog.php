@@ -11,6 +11,7 @@ class MailSmsLog extends Model
 
     protected $fillable = [
         'mail_sms_message_id',
+        'send_sequence',
         'mail_sms_message_member_id',
         'member_id',
         'member_name',

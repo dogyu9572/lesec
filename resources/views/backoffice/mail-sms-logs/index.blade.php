@@ -68,7 +68,7 @@
 
             <div class="board-list-header">
                 <div class="list-info">
-                    <span class="list-count">Total : {{ $messages->total() }}</span>
+                    <span class="list-count">Total : {{ $batches->total() }}</span>
                 </div>
                 <div class="list-controls">
                     <form method="GET" action="{{ route('backoffice.mail-sms-logs.index') }}" class="per-page-form">
@@ -85,7 +85,7 @@
                 </div>
             </div>
 
-            @if($messages->count())
+            @if($batches->count())
                 <div class="table-responsive">
                     <table class="board-table">
                         <thead>
@@ -100,23 +100,32 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($messages as $index => $message)
+                            @foreach($batches as $index => $batch)
                                 <tr>
-                                    <td>{{ $messages->total() - ($messages->currentPage() - 1) * $messages->perPage() - $index }}</td>
-                                    <td>{{ $message->message_type_label }}</td>
-                                    <td>{{ $message->title }}</td>
-                                    <td>{{ $message->writer->name ?? '-' }}</td>
+                                    <td>{{ $batches->total() - ($batches->currentPage() - 1) * $batches->perPage() - $index }}</td>
+                                    <td>{{ $batch->message?->message_type_label }}</td>
+                                    <td>{{ $batch->message?->title }}</td>
+                                    <td>{{ $batch->message?->writer->name ?? '-' }}</td>
                                     <td>
-                                        @if($message->success_count > 0 || $message->failure_count > 0)
-                                            성공: {{ $message->success_count }}, 실패: {{ $message->failure_count }}
+                                        @if($batch->success_count > 0 || $batch->failure_count > 0)
+                                            성공: {{ $batch->success_count }}, 실패: {{ $batch->failure_count }}
                                         @else
                                             -
                                         @endif
                                     </td>
-                                    <td>{{ optional($message->send_completed_at)->format('Y.m.d H:i') ?? '-' }}</td>
+                                    @php
+                                        $completedAt = $batch->completed_at ?: $batch->requested_at;
+                                    @endphp
+                                    <td>
+                                        @if($completedAt)
+                                            {{ \Illuminate\Support\Carbon::parse($completedAt)->format('Y.m.d H:i') }}
+                                        @else
+                                            -
+                                        @endif
+                                    </td>
                                     <td>
                                         <div class="board-btn-group">
-                                            <a href="{{ route('backoffice.mail-sms-logs.show', $message) }}" class="btn btn-primary btn-sm">
+                                            <a href="{{ route('backoffice.mail-sms-logs.show', ['mailSmsMessage' => $batch->mail_sms_message_id, 'send_sequence' => $batch->send_sequence]) }}" class="btn btn-primary btn-sm">
                                                 <i class="fas fa-eye"></i> 상세
                                             </a>
                                         </div>
@@ -126,7 +135,7 @@
                         </tbody>
                     </table>
                 </div>
-                <x-pagination :paginator="$messages" />
+                <x-pagination :paginator="$batches" />
             @else
                 <div class="no-data">
                     <p>발송 로그가 없습니다.</p>

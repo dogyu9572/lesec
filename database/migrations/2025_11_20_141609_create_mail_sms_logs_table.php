@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('mail_sms_logs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('mail_sms_message_id')->constrained('mail_sms_messages')->cascadeOnDelete()->comment('메일/SMS 메시지 ID');
+            $table->unsignedInteger('send_sequence')->default(1)->comment('발송 회차');
             $table->foreignId('mail_sms_message_member_id')->nullable()->constrained('mail_sms_message_member')->nullOnDelete()->comment('수신 대상 연결 ID');
             $table->foreignId('member_id')->nullable()->constrained('members')->nullOnDelete()->comment('회원 ID');
             $table->string('member_name')->comment('회원 이름');
@@ -25,6 +26,7 @@ return new class extends Migration
             $table->text('response_message')->nullable()->comment('응답 메시지');
             $table->timestamps();
 
+            $table->index(['mail_sms_message_id', 'send_sequence'], 'mail_sms_logs_message_sequence_idx');
             $table->index(['mail_sms_message_id', 'result_status'], 'mail_sms_logs_message_status_idx');
             $table->index('sent_at');
         });

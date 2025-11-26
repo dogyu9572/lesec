@@ -83,8 +83,17 @@ class MailSmsController extends BaseController
     {
         $mailSmsMessage->load('recipients');
         $selectedMembers = $this->selectedMembersFromOld();
+        
+        // old input이 없으면 recipients를 사용
         if ($selectedMembers->isEmpty()) {
-            $selectedMembers = $mailSmsMessage->recipients;
+            $selectedMembers = $mailSmsMessage->recipients->map(function ($recipient) {
+                return (object) [
+                    'member_id' => $recipient->member_id,
+                    'member_name' => $recipient->member_name,
+                    'member_email' => $recipient->member_email,
+                    'member_contact' => $recipient->member_contact,
+                ];
+            });
         }
 
         return $this->view('backoffice.mail-sms.edit', [
@@ -118,13 +127,19 @@ class MailSmsController extends BaseController
     }
 
     /**
-     * 발송 요청 (더미)
+     * 발송 요청
      */
     public function send(MailSmsMessage $mailSmsMessage): RedirectResponse
     {
-        $this->mailSmsService->requestSend($mailSmsMessage);
+        try {
+            $this->mailSmsService->requestSend($mailSmsMessage);
 
-        return back()->with('success', '발송이 완료되었습니다. (테스트용 더미 데이터)');
+            return redirect()
+                ->route('backoffice.mail-sms.index')
+                ->with('success', '발송이 완료되었습니다.');
+        } catch (\Exception $e) {
+            return back()->with('error', '발송 중 오류가 발생했습니다: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -167,10 +182,10 @@ class MailSmsController extends BaseController
      */
     public function logs(Request $request)
     {
-        $messages = $this->mailSmsService->getSentMessages($request);
+        $batches = $this->mailSmsService->getLogBatches($request);
 
         return $this->view('backoffice.mail-sms-logs.index', [
-            'messages' => $messages,
+            'batches' => $batches,
             'messageTypes' => $this->messageTypes(),
         ]);
     }
@@ -178,14 +193,29 @@ class MailSmsController extends BaseController
     /**
      * 발송 로그 상세
      */
-    public function logShow(MailSmsMessage $mailSmsMessage)
+    public function logShow(Request $request, MailSmsMessage $mailSmsMessage)
     {
         $mailSmsMessage->load(['writer', 'memberGroup', 'recipients']);
-        $logs = $this->mailSmsService->getLogs($mailSmsMessage, new Request());
+
+        $sendSequence = (int) $request->input('send_sequence', 0);
+
+        if ($sendSequence <= 0) {
+            $sendSequence = (int) $mailSmsMessage->logs()->latest('created_at')->value('send_sequence');
+        }
+
+        if ($sendSequence <= 0) {
+            return redirect()->route('backoffice.mail-sms-logs.index')
+                ->with('error', '조회 가능한 발송 로그가 없습니다.');
+        }
+
+        $sequenceSummary = $this->mailSmsService->getSequenceSummary($mailSmsMessage, $sendSequence);
+        $logs = $this->mailSmsService->getLogs($mailSmsMessage, $request, $sendSequence);
 
         return $this->view('backoffice.mail-sms-logs.show', [
             'message' => $mailSmsMessage,
             'logs' => $logs,
+            'sendSequence' => $sendSequence,
+            'sequenceSummary' => $sequenceSummary,
         ]);
     }
 

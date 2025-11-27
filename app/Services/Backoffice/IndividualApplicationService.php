@@ -380,15 +380,12 @@ class IndividualApplicationService
 
     /**
      * 샘플 CSV 파일 다운로드
-     * edit 페이지의 모든 필드를 포함
+     * 네이버 폼 일괄 업로드용 (신청유형/교육유형/프로그램명/신청일시 제외)
      */
     public function downloadSample(): StreamedResponse
     {
         $filename = 'individual_application_sample.csv';
         $headers = [
-            '신청유형',
-            '교육유형',
-            '프로그램명',
             '참가일',
             '참가비',
             '결제방법',
@@ -399,14 +396,10 @@ class IndividualApplicationService
             '연락처1',
             '연락처2',
             '결제상태',
-            '추첨결과',
-            '신청일시'
+            '추첨결과'
         ];
         $sampleRows = [
             [
-                '선착순',
-                '중등학기',
-                'M1. 광학현미경을 이용한 세포 관찰',
                 '2025-01-15',
                 '50000',
                 '무통장 입금',
@@ -417,25 +410,20 @@ class IndividualApplicationService
                 '01012345678',
                 '01098765432',
                 '미입금',
-                '대기중',
-                '2025-01-10'
+                '대기중'
             ],
             [
-                '추첨',
-                '고등학기',
-                'H1. 분자생물학 실험 기초',
                 '2025-01-20',
                 '50000',
                 '방문 카드결제',
                 '김철수',
-                '서울고등학교',
+                '경기중학교교',
                 '2',
                 '3',
                 '01011112222',
                 '01033334444',
                 '입금완료',
-                '당첨',
-                '2025-01-12'
+                '대기중'
             ],
         ];
 
@@ -552,25 +540,22 @@ class IndividualApplicationService
 
     /**
      * CSV/엑셀 행 데이터로 신청 생성
-     * 컬럼 순서: 신청유형, 교육유형, 프로그램명, 참가일, 참가비, 결제방법, 신청자명, 학교명, 학년, 반, 연락처1, 연락처2, 결제상태, 추첨결과, 신청일시
+     * 컬럼 순서: 참가일, 참가비, 결제방법, 신청자명, 학교명, 학년, 반, 연락처1, 연락처2, 결제상태, 추첨결과
+     * (신청유형/교육유형/프로그램명은 선택한 프로그램 정보 사용, 신청일시는 저장 시 현재 날짜로 자동 설정)
      */
     private function createApplicationFromRow(array $row, int $lineNumber, int $programReservationId): void
     {
-        // CSV의 신청유형 컬럼 무시 (선택한 프로그램 정보 사용)
-        $educationTypeText = trim($row[1] ?? '');
-        $programName = trim($row[2] ?? '');
-        $participationDate = trim($row[3] ?? '');
-        $participationFee = trim($row[4] ?? '');
-        $paymentMethodText = trim($row[5] ?? '');
-        $applicantName = trim($row[6] ?? '');
-        $schoolName = trim($row[7] ?? '');
-        $grade = trim($row[8] ?? '');
-        $class = trim($row[9] ?? '');
-        $contact = trim($row[10] ?? '');
-        $guardianContact = trim($row[11] ?? '');
-        $paymentStatusText = trim($row[12] ?? '');
-        $drawResultText = trim($row[13] ?? '');
-        $appliedAt = trim($row[14] ?? '');
+        $participationDate = trim($row[0] ?? '');
+        $participationFee = trim($row[1] ?? '');
+        $paymentMethodText = trim($row[2] ?? '');
+        $applicantName = trim($row[3] ?? '');
+        $schoolName = trim($row[4] ?? '');
+        $grade = trim($row[5] ?? '');
+        $class = trim($row[6] ?? '');
+        $contact = trim($row[7] ?? '');
+        $guardianContact = trim($row[8] ?? '');
+        $paymentStatusText = trim($row[9] ?? '');
+        $drawResultText = trim($row[10] ?? '');
 
         // 필수 필드 검증
         if (empty($applicantName)) {
@@ -584,22 +569,16 @@ class IndividualApplicationService
         $reservation = ProgramReservation::findOrFail($programReservationId);
 
         // 한글 텍스트를 코드값으로 변환
-        // CSV의 교육유형은 무시하고 선택한 프로그램의 교육유형 사용 (단, CSV에 값이 있으면 우선)
-        $educationType = !empty($educationTypeText) 
-            ? $this->convertEducationTypeToCode($educationTypeText) 
-            : $reservation->education_type;
-        
         $paymentMethod = $this->convertPaymentMethodToCode($paymentMethodText);
         $paymentStatus = $this->convertPaymentStatusToCode($paymentStatusText);
         $drawResult = $this->convertDrawResultToCode($drawResultText);
 
-        // 데이터 정리
-        // 선택한 프로그램의 정보 우선 사용 (프로그램명은 CSV 값 있으면 사용, 없으면 프로그램 정보 사용)
+        // 데이터 정리 (선택한 프로그램 정보 사용)
         $data = [
             'program_reservation_id' => $reservation->id,
             'reception_type' => 'naver_form', // 네이버 폼으로 고정
-            'education_type' => $educationType ?: $reservation->education_type,
-            'program_name' => !empty($programName) ? $programName : $reservation->program_name,
+            'education_type' => $reservation->education_type, // 선택한 프로그램의 교육유형 사용
+            'program_name' => $reservation->program_name, // 선택한 프로그램의 프로그램명 사용
             'participation_date' => $participationDate 
                 ? Carbon::parse($participationDate)->format('Y-m-d') 
                 : ($reservation->education_start_date ? $reservation->education_start_date->format('Y-m-d') : null),
@@ -620,16 +599,9 @@ class IndividualApplicationService
         // 일괄 업로드는 직접 생성 (ProgramReservationService 거치지 않음)
         $application = $this->createApplicationDirectly($data, $reservation);
 
-        // 신청일시가 있으면 업데이트
-        if ($appliedAt) {
-            try {
-                $appliedAtDate = Carbon::parse($appliedAt);
-                $application->applied_at = $appliedAtDate;
-                $application->save();
-            } catch (\Throwable $e) {
-                // 신청일시 파싱 실패 시 무시
-            }
-        }
+        // 신청일시는 현재 날짜로 자동 설정
+        $application->applied_at = Carbon::now();
+        $application->save();
     }
 
     /**

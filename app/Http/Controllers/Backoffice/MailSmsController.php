@@ -132,7 +132,7 @@ class MailSmsController extends BaseController
     public function send(MailSmsMessage $mailSmsMessage): RedirectResponse
     {
         try {
-            $this->mailSmsService->requestSend($mailSmsMessage);
+        $this->mailSmsService->requestSend($mailSmsMessage);
 
             return redirect()
                 ->route('backoffice.mail-sms.index')

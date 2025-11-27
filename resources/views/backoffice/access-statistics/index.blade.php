@@ -90,7 +90,7 @@
 
 .stats-table th,
 .stats-table td {
-    padding: 10px;
+    padding: 5px;
     text-align: center;
     border: 1px solid #eee;
 }
@@ -103,6 +103,7 @@
 .stats-table tbody tr:hover {
     background: #f8f9fa;
 }
+
 </style>
 @endsection
 
@@ -140,10 +141,10 @@
         <!-- 연별 방문자 -->
         <div class="stats-section">
             <div class="section-header">
-                <h5>연별 방문자</h5>
+                <h5>연도별 방문자</h5>
                 <div class="date-filter">
                     <label>연도:</label>
-                    <input type="number" id="year-filter" min="2020" max="{{ now()->year }}" value="{{ $selected_year }}" class="form-control" style="width: 100px;">
+                    <input type="number" id="year-filter" min="{{ now()->year - 4 }}" max="{{ now()->year }}" value="{{ $selected_year }}" class="form-control" style="width: 100px;">
                     <button type="button" class="btn btn-primary btn-sm" onclick="loadYearStats()">조회</button>
                 </div>
             </div>
@@ -174,8 +175,10 @@
             <div class="section-header">
                 <h5>월별 방문자</h5>
                 <div class="date-filter">
-                    <label>연도:</label>
-                    <input type="number" id="month-year-filter" min="2020" max="{{ now()->year }}" value="{{ substr($selected_month, 0, 4) }}" class="form-control" style="width: 100px;">
+                    <label>시작월:</label>
+                    <input type="month" id="month-start-filter" value="{{ now()->format('Y') }}-01" class="form-control" style="width: 150px;">
+                    <label style="margin-left: 10px;">종료월:</label>
+                    <input type="month" id="month-end-filter" value="{{ now()->format('Y') }}-12" class="form-control" style="width: 150px;">
                     <button type="button" class="btn btn-primary btn-sm" onclick="loadMonthStats()">조회</button>
                 </div>
             </div>
@@ -206,8 +209,10 @@
             <div class="section-header">
                 <h5>날짜별 방문자</h5>
                 <div class="date-filter">
-                    <label>연월:</label>
-                    <input type="month" id="date-month-filter" value="{{ $selected_month }}" class="form-control" style="width: 150px;">
+                    <label>시작일:</label>
+                    <input type="date" id="date-start-filter" value="{{ $selected_date }}" class="form-control" style="width: 150px;">
+                    <label style="margin-left: 10px;">종료일:</label>
+                    <input type="date" id="date-end-filter" value="{{ $selected_date }}" class="form-control" style="width: 150px;">
                     <button type="button" class="btn btn-primary btn-sm" onclick="loadDateStats()">조회</button>
                 </div>
             </div>

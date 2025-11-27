@@ -46,12 +46,23 @@
                         </div>
                     </div>
                 </form>
-            </div>
+            </div>           
             <div class="category-modal-footer category-modal-footer--inline">
+                <div id="bulk-upload-section" style="margin-right: auto;">
+                    <div>
+                        <strong>선택 프로그램:</strong>
+                        <span id="selected-program-info"></span>
+                    </div>               
+                </div>
+                <div style="gap: 10px; align-items: center;">               
+                    <input type="file" id="bulk-upload-file" accept=".csv,.xlsx,.xls" style="display: none;">
+                    <button type="button" id="bulk-upload-file-select-btn" class="btn btn-secondary btn-sm">파일 선택</button>
+                </div>
                 <a href="{{ route('backoffice.individual-applications.sample') }}" class="btn btn-secondary btn-sm">
                     <i class="fas fa-download"></i> 양식 다운로드
                 </a>
             </div>
+            
             <div class="table-responsive">
                 <table class="board-table">
                     <thead>
@@ -70,19 +81,8 @@
                     </tbody>
                 </table>
             </div>
-            <div id="bulk-upload-pagination" class="board-pagination" style="margin-top: 15px;"></div>
-            
-            <div id="bulk-upload-section" style="display: none; margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 4px;">
-                <div style="margin-bottom: 10px;">
-                    <strong>선택한 프로그램:</strong>
-                    <span id="selected-program-info"></span>
-                </div>
-                <div style="display: flex; gap: 10px; align-items: center;">
-                    <label style="margin: 0;">일괄 업로드</label>
-                    <input type="file" id="bulk-upload-file" accept=".csv,.xlsx,.xls" style="display: none;">
-                    <button type="button" id="bulk-upload-file-select-btn" class="btn btn-secondary">파일 선택</button>
-                </div>
-            </div>
+            <div id="bulk-upload-pagination" class="board-pagination" style="margin-top: 15px;"></div>            
+           
         </div>
        
     </div>

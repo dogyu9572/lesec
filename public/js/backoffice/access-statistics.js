@@ -5,23 +5,6 @@ document.addEventListener('DOMContentLoaded', function() {
             loadYearStats();
         }
     });
-
-    // 월별 연도 필터 엔터키 처리
-    document.getElementById('month-year-filter')?.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            loadMonthStats();
-        }
-    });
-
-    // 날짜별 연월 필터 변경 처리
-    document.getElementById('date-month-filter')?.addEventListener('change', function() {
-        loadDateStats();
-    });
-
-    // 시간별 날짜 필터 변경 처리
-    document.getElementById('hour-date-filter')?.addEventListener('change', function() {
-        loadHourStats();
-    });
 });
 
 /**
@@ -34,7 +17,7 @@ function loadYearStats() {
         return;
     }
 
-    fetchStatistics('year', year, function(data) {
+    fetchStatistics('year', year, null, null, null, null, function(data) {
         updateYearStatsTable(data);
     });
 }
@@ -43,13 +26,25 @@ function loadYearStats() {
  * 월별 통계 조회
  */
 function loadMonthStats() {
-    const year = document.getElementById('month-year-filter').value;
-    if (!year) {
-        alert('연도를 입력하세요.');
+    const startMonth = document.getElementById('month-start-filter').value;
+    const endMonth = document.getElementById('month-end-filter').value;
+    
+    if (!startMonth || !endMonth) {
+        alert('시작월과 종료월을 선택하세요.');
         return;
     }
 
-    fetchStatistics('month', year, function(data) {
+    // 최대 12개월 제한 검증
+    const start = new Date(startMonth + '-01');
+    const end = new Date(endMonth + '-01');
+    const monthsDiff = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth()) + 1;
+    
+    if (monthsDiff > 12) {
+        alert('조회 기간은 최대 12개월까지 가능합니다.');
+        return;
+    }
+
+    fetchStatistics('month', null, null, null, startMonth, endMonth, function(data) {
         updateMonthStatsTable(data);
     });
 }
@@ -58,13 +53,25 @@ function loadMonthStats() {
  * 날짜별 통계 조회
  */
 function loadDateStats() {
-    const month = document.getElementById('date-month-filter').value;
-    if (!month) {
-        alert('연월을 선택하세요.');
+    const startDate = document.getElementById('date-start-filter').value;
+    const endDate = document.getElementById('date-end-filter').value;
+    
+    if (!startDate || !endDate) {
+        alert('시작일과 종료일을 선택하세요.');
         return;
     }
 
-    fetchStatistics('date', month, function(data) {
+    // 최대 30일 제한 검증
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const daysDiff = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+    
+    if (daysDiff > 30) {
+        alert('조회 기간은 최대 30일까지 가능합니다.');
+        return;
+    }
+
+    fetchStatistics('date', null, startDate, endDate, null, null, function(data) {
         updateDateStatsTable(data);
     });
 }
@@ -79,7 +86,7 @@ function loadHourStats() {
         return;
     }
 
-    fetchStatistics('hour', date, function(data) {
+    fetchStatistics('hour', date, null, null, null, null, function(data) {
         updateHourStatsTable(data);
     });
 }
@@ -87,11 +94,28 @@ function loadHourStats() {
 /**
  * AJAX 통계 조회
  */
-function fetchStatistics(type, date, callback) {
+function fetchStatistics(type, date, startDate, endDate, startMonth, endMonth, callback) {
     const url = '/backoffice/access-statistics/get-statistics';
     const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
-    fetch(url + '?type=' + type + '&date=' + date, {
+    let queryParams = 'type=' + type;
+    if (date) {
+        queryParams += '&date=' + date;
+    }
+    if (startDate) {
+        queryParams += '&start_date=' + startDate;
+    }
+    if (endDate) {
+        queryParams += '&end_date=' + endDate;
+    }
+    if (startMonth) {
+        queryParams += '&start_month=' + startMonth;
+    }
+    if (endMonth) {
+        queryParams += '&end_month=' + endMonth;
+    }
+
+    fetch(url + '?' + queryParams, {
         method: 'GET',
         headers: {
             'X-CSRF-TOKEN': token,

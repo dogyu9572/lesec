@@ -237,11 +237,7 @@
                                     @error('payment_status')
                                         <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
-                                </div>
-                                <div class="form-group">
-                                    <label for="applied_at">신청일시</label>
-                                    <input type="text" id="applied_at" value="저장 시 자동 입력" readonly>
-                                </div>
+                                </div>                                
                             </div>
                         </div>
 

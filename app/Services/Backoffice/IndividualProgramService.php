@@ -3,12 +3,14 @@
 namespace App\Services\Backoffice;
 
 use App\Models\ProgramReservation;
+use App\Services\Backoffice\Concerns\ValidatesScheduleAvailability;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
 class IndividualProgramService
 {
+    use ValidatesScheduleAvailability;
     /**
      * 필터링된 개인 프로그램 목록 조회
      */
@@ -121,6 +123,11 @@ class IndividualProgramService
             $data['education_end_date'] = $data['education_start_date'];
         }
 
+        $this->ensureEducationScheduleIsAvailable(
+            $data['education_start_date'] ?? null,
+            $data['education_end_date'] ?? null
+        );
+
         // 제한없음 체크 시 capacity는 null (추첨일 경우 제한없음 사용 불가)
         if (isset($data['is_unlimited_capacity']) && $data['is_unlimited_capacity'] && $data['reception_type'] !== 'lottery') {
             $data['capacity'] = null;
@@ -150,9 +157,15 @@ class IndividualProgramService
         $isSingleDay = !empty($data['is_single_day']);
         unset($data['is_single_day']);
 
-        if ($isSingleDay && !empty($data['education_start_date'])) {
-            $data['education_end_date'] = $data['education_start_date'];
+        $startDate = $data['education_start_date'] ?? $programReservation->education_start_date?->format('Y-m-d');
+        $endDate = $data['education_end_date'] ?? $programReservation->education_end_date?->format('Y-m-d');
+
+        if ($isSingleDay && $startDate) {
+            $data['education_end_date'] = $startDate;
+            $endDate = $startDate;
         }
+
+        $this->ensureEducationScheduleIsAvailable($startDate, $endDate);
 
         // application_type은 변경 불가
         unset($data['application_type']);

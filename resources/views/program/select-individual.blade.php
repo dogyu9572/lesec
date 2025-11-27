@@ -28,14 +28,7 @@
 				'scheduled' => '접수예정',
 			];
 		@endphp
-
-		@if($isGuest)
-		<p class="error_alert mb16">로그인 후 신청 가능합니다.</p>
-		@elseif($isTeacher)
-		<p class="error_alert mb16">개인 신청은 학생만 가능합니다. 단체 신청을 이용해주세요.</p>
-		@elseif($isWrongLevel)
-		<p class="error_alert mb16">회원님은 {{ $schoolLevel === 'middle' ? '중등' : '고등' }} 프로그램만 신청 가능합니다.</p>
-		@endif
+	
 
 		<div class="board_top">
 			<div class="total">TOTAL <strong>{{ $programs->count() }}</strong></div>

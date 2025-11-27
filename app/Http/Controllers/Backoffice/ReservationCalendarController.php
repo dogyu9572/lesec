@@ -23,18 +23,15 @@ class ReservationCalendarController extends BaseController
         $year = (int) $request->input('year', now()->year);
         $month = (int) $request->input('month', now()->month);
 
-        // 월별 프로그램 조회
-        $programs = $this->reservationCalendarService->getProgramsByMonth($year, $month);
-
-        // 날짜별 그룹화
-        $programsByDate = $this->reservationCalendarService->groupProgramsByDate($programs);
+        // 월별 예약 내역 조회
+        $reservationsByDate = $this->reservationCalendarService->getMonthlyReservations($year, $month);
 
         // 캘린더 생성
-        $calendar = $this->reservationCalendarService->generateCalendar($year, $month, $programsByDate);
+        $calendar = $this->reservationCalendarService->generateCalendar($year, $month, $reservationsByDate);
 
         return $this->view('backoffice.reservations.calendar', [
             'calendar' => $calendar,
-            'programsByDate' => $programsByDate,
+            'reservationsByDate' => $reservationsByDate,
             'year' => $year,
             'month' => $month,
         ]);

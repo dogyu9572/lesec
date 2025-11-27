@@ -8,15 +8,6 @@
 @section('title', '개인 프로그램 등록')
 
 @section('content')
-@if ($errors->any())
-    <div class="board-alert board-alert-danger">
-        <ul>
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
-@endif
 
 <div class="board-container">
     <div class="board-header">

@@ -3,12 +3,14 @@
 namespace App\Services\Backoffice;
 
 use App\Models\ProgramReservation;
+use App\Services\Backoffice\Concerns\ValidatesScheduleAvailability;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
 class GroupProgramService
 {
+    use ValidatesScheduleAvailability;
     /**
      * 필터링된 단체 프로그램 목록 조회
      */
@@ -126,6 +128,11 @@ class GroupProgramService
             $data['education_fee'] = (int) $data['education_fee'];
         }
 
+        $this->ensureEducationScheduleIsAvailable(
+            $data['education_start_date'] ?? null,
+            $data['education_end_date'] ?? null
+        );
+
         // 작성자 필드는 현재 로그인한 관리자 이름으로 자동 설정
         $data['author'] = Auth::user()?->name ?? null;
         
@@ -142,6 +149,9 @@ class GroupProgramService
     {
         // application_type은 변경 불가
         unset($data['application_type']);
+
+        $startDate = $data['education_start_date'] ?? $programReservation->education_start_date?->format('Y-m-d');
+        $endDate = $data['education_end_date'] ?? $programReservation->education_end_date?->format('Y-m-d');
 
         // 결제수단 처리
         if (isset($data['payment_methods']) && is_array($data['payment_methods'])) {
@@ -164,6 +174,8 @@ class GroupProgramService
                 ? (int) $data['education_fee']
                 : $programReservation->education_fee;
         }
+
+        $this->ensureEducationScheduleIsAvailable($startDate, $endDate);
 
         // 작성자 필드는 현재 로그인한 관리자 이름으로 자동 업데이트
         $data['author'] = Auth::user()?->name ?? $programReservation->author;

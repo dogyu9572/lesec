@@ -10,13 +10,7 @@
 			$isGuest = !$member;
 			$isStudent = $member && $member->member_type === 'student';
 			$canApply = $member && $member->member_type === 'teacher';
-		@endphp
-
-		@if($isGuest)
-		<p class="error_alert mb16">로그인 후 신청 가능합니다.</p>
-		@elseif($isStudent)
-		<p class="error_alert mb16">단체 신청은 교사만 가능합니다. 개인 신청을 이용해주세요.</p>
-		@endif
+		@endphp		
 
 		<div
             class="schedule_wrap"

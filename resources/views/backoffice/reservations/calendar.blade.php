@@ -51,30 +51,41 @@
                                     @php
                                         $dateStr = $year . '-' . str_pad($month, 2, '0', STR_PAD_LEFT) . '-' . str_pad($dayData['day'], 2, '0', STR_PAD_LEFT);
                                         $isSelected = request()->input('date') === $dateStr;
+                                        $tdClasses = ['calendar-day'];
+                                        if ($dayData['disabled']) {
+                                            $tdClasses[] = 'disabled';
+                                        } else {
+                                            $tdClasses[] = 'clickable';
+                                        }
+                                        if ($isSelected) {
+                                            $tdClasses[] = 'selected';
+                                        }
+                                        $summary = $dayData['reservation_summary'] ?? ['individual' => 0, 'group' => 0, 'total' => 0];
+                                        $reservationsForDate = $reservationsByDate[$dateStr] ?? ['individual' => [], 'group' => []];
                                     @endphp
-                                    <td @if($dayData['disabled']) class="disabled" @endif data-date="{{ $dateStr }}" class="calendar-day @if(!$dayData['disabled']) clickable @endif @if($isSelected) selected @endif">
+                                    <td class="{{ implode(' ', $tdClasses) }}" data-date="{{ $dateStr }}">
                                         <span>{{ $dayData['day'] }}</span>
                                         @if(!empty($dayData['is_disabled_date']))
-                                        <div class="schedule-disabled">예약불가</div>
-                                        @elseif(!$dayData['disabled'] && count($dayData['programs']) > 0)
-                                        <ul class="list">
-                                            @foreach($dayData['programs'] as $program)
-                                            @php
-                                                $appliedCount = $program->applied_count ?? 0;
-                                                $capacity = $program->capacity ?? 0;
-                                                $statusClass = 'i_possible';
-                                                // 예약 마감: 정원 제한이 있고, 신청 인원이 정원 이상인 경우
-                                                if (!$program->is_unlimited_capacity && $capacity > 0 && $appliedCount >= $capacity) {
-                                                    $statusClass = 'i_impossible';
-                                                }
-                                            @endphp
-                                            <li class="{{ $statusClass }}" 
-                                                data-applied="{{ $appliedCount }}" 
-                                                data-total="{{ $capacity }}">
-                                                {{ mb_strlen($program->program_name) > 15 ? mb_substr($program->program_name, 0, 15) . '...' : $program->program_name }}
-                                            </li>
-                                            @endforeach
-                                        </ul>
+                                            <div class="schedule-disabled">예약불가</div>
+                                        @elseif(!$dayData['disabled'] && ($summary['individual'] > 0 || $summary['group'] > 0))
+                                            <ul class="list">
+                                                @foreach($reservationsForDate['individual'] as $reservation)
+                                                @php
+                                                    $statusClass = ($reservation['is_closed'] ?? false) ? 'i_impossible' : 'i_possible';
+                                                @endphp
+                                                <li class="{{ $statusClass }}">
+                                                    {{ \Illuminate\Support\Str::limit($reservation['program_name'], 20) }}
+                                                </li>
+                                                @endforeach
+                                                @foreach($reservationsForDate['group'] as $reservation)
+                                                @php
+                                                    $statusClass = ($reservation['is_closed'] ?? false) ? 'i_impossible' : 'i_possible';
+                                                @endphp
+                                                <li class="{{ $statusClass }}">
+                                                    {{ \Illuminate\Support\Str::limit($reservation['program_name'], 20) }}
+                                                </li>
+                                                @endforeach
+                                            </ul>
                                         @endif
                                     </td>
                                     @endforeach

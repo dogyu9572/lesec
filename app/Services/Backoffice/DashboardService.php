@@ -4,6 +4,9 @@ namespace App\Services\Backoffice;
 
 use App\Models\Board;
 use App\Models\DailyVisitorStat;
+use App\Models\ProgramReservation;
+use App\Models\GroupApplication;
+use App\Models\IndividualApplication;
 use Illuminate\Support\Facades\DB;
 
 class DashboardService
@@ -14,11 +17,11 @@ class DashboardService
     public function getDashboardData(): array
     {
         return [
-            'boards' => $this->getBoardsOrderedByMenu(),
-            'totalBoards' => Board::where('is_single_page', false)->count(),
-            'totalPosts' => $this->getTotalPostsCount(),
-            'activeBanners' => $this->getActiveBannersCount(),
-            'activePopups' => $this->getActivePopupsCount(),
+            'programStats' => $this->getProgramStats(),
+            'applicationStats' => $this->getApplicationStats(),
+            'recentPrograms' => $this->getRecentPrograms(),
+            'recentGroupApplications' => $this->getRecentApplications('group'),
+            'recentIndividualApplications' => $this->getRecentApplications('individual'),
             'visitorStats' => $this->getVisitorStats(),
         ];
     }
@@ -223,6 +226,165 @@ class DashboardService
         } catch (\Exception $e) {
             return collect();
         }
+    }
+
+    /**
+     * 프로그램 통계 가져오기
+     */
+    public function getProgramStats(): array
+    {
+        $activePrograms = ProgramReservation::where('is_active', true)->count();
+        
+        $closedPrograms = ProgramReservation::where('is_active', true)
+            ->where(function($query) {
+                $query->where(function($q) {
+                    $q->where('is_unlimited_capacity', false)
+                      ->whereRaw('applied_count >= capacity');
+                })->orWhere(function($q) {
+                    $q->whereNotNull('application_end_date')
+                      ->where('application_end_date', '<', now());
+                });
+            })
+            ->count();
+        
+        return [
+            'active_count' => $activePrograms,
+            'closed_count' => $closedPrograms,
+        ];
+    }
+
+    /**
+     * 최근 등록된 프로그램 목록 가져오기
+     */
+    public function getRecentPrograms()
+    {
+        return ProgramReservation::where('is_active', true)
+            ->orderBy('created_at', 'desc')
+            ->take(10)
+            ->get()
+            ->map(function($program) {
+                return [
+                    'id' => $program->id,
+                    'program_name' => $program->program_name,
+                    'application_type' => $program->application_type_name,
+                    'education_type' => $program->education_type_name,
+                    'reception_type' => $program->reception_type_name ?? '-',
+                    'education_start_date' => $program->education_start_date?->format('Y.m.d'),
+                    'education_end_date' => $program->education_end_date?->format('Y.m.d'),
+                    'application_start_date' => $program->application_start_date?->format('Y.m.d'),
+                    'application_end_date' => $program->application_end_date?->format('Y.m.d'),
+                    'applied_count' => $program->applied_count ?? 0,
+                    'capacity' => $program->is_unlimited_capacity ? '무제한' : ($program->capacity ?? 0),
+                    'status' => $program->current_reception_type_name,
+                    'created_at' => $program->created_at,
+                ];
+            });
+    }
+
+    /**
+     * 신청 통계 가져오기
+     */
+    public function getApplicationStats(): array
+    {
+        $today = now()->startOfDay();
+        $endOfToday = now()->endOfDay();
+        $startOfWeek = now()->startOfWeek();
+        $endOfWeek = now()->endOfWeek();
+        $startOfMonth = now()->startOfMonth();
+        $endOfMonth = now()->endOfMonth();
+        
+        $todayGroup = GroupApplication::whereBetween('applied_at', [$today, $endOfToday])->count();
+        $todayIndividual = IndividualApplication::whereBetween('applied_at', [$today, $endOfToday])->count();
+        $todayTotal = $todayGroup + $todayIndividual;
+        
+        $weekGroup = GroupApplication::whereBetween('applied_at', [$startOfWeek, $endOfWeek])->count();
+        $weekIndividual = IndividualApplication::whereBetween('applied_at', [$startOfWeek, $endOfWeek])->count();
+        $weekTotal = $weekGroup + $weekIndividual;
+        
+        $monthGroup = GroupApplication::whereBetween('applied_at', [$startOfMonth, $endOfMonth])->count();
+        $monthIndividual = IndividualApplication::whereBetween('applied_at', [$startOfMonth, $endOfMonth])->count();
+        $monthTotal = $monthGroup + $monthIndividual;
+        
+        $pendingGroup = GroupApplication::where('application_status', 'pending')->count();
+        $pendingIndividual = IndividualApplication::where('draw_result', 'pending')->count();
+        $pendingTotal = $pendingGroup + $pendingIndividual;
+        
+        return [
+            'today_count' => $todayTotal,
+            'week_count' => $weekTotal,
+            'month_count' => $monthTotal,
+            'pending_count' => $pendingTotal,
+        ];
+    }
+
+    /**
+     * 신청 상태별 집계
+     */
+    public function getApplicationStatusCounts(): array
+    {
+        $groupPending = GroupApplication::where('application_status', 'pending')->count();
+        $groupApproved = GroupApplication::where('application_status', 'approved')->count();
+        $groupCancelled = GroupApplication::where('application_status', 'cancelled')->count();
+        
+        $individualPending = IndividualApplication::where('draw_result', 'pending')->count();
+        $individualWin = IndividualApplication::where('draw_result', 'win')->count();
+        $individualFail = IndividualApplication::where('draw_result', 'fail')->count();
+        
+        return [
+            'group' => [
+                'pending' => $groupPending,
+                'approved' => $groupApproved,
+                'cancelled' => $groupCancelled,
+            ],
+            'individual' => [
+                'pending' => $individualPending,
+                'win' => $individualWin,
+                'fail' => $individualFail,
+            ],
+        ];
+    }
+
+    /**
+     * 최근 신청 목록 가져오기
+     * 
+     * @param string $type 'group' 또는 'individual'
+     * @return \Illuminate\Support\Collection
+     */
+    public function getRecentApplications(string $type = 'individual')
+    {
+        if ($type === 'group') {
+            return GroupApplication::with('reservation')
+                ->orderBy('applied_at', 'desc')
+                ->take(5)
+                ->get()
+                ->map(function($app) {
+                    return [
+                        'type' => 'group',
+                        'application_number' => $app->application_number,
+                        'program_name' => $app->reservation?->program_name ?? '-',
+                        'applicant_name' => $app->applicant_name,
+                        'applied_at' => $app->applied_at?->format('Y.m.d H:i'),
+                        'status' => $app->application_status_label,
+                        'created_at' => $app->applied_at ?? $app->created_at,
+                    ];
+                });
+        }
+        
+        return IndividualApplication::with('reservation')
+            ->orderBy('applied_at', 'desc')
+            ->take(5)
+            ->get()
+            ->map(function($app) {
+                return [
+                    'type' => 'individual',
+                    'application_number' => $app->application_number,
+                    'program_name' => $app->reservation?->program_name ?? $app->program_name ?? '-',
+                    'applicant_name' => $app->applicant_name,
+                    'applied_at' => $app->applied_at?->format('Y.m.d H:i'),
+                    'status' => $app->draw_result_label,
+                    'created_at' => $app->applied_at ?? $app->created_at,
+                ];
+            });
     }
 }
 

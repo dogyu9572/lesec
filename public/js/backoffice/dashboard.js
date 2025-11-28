@@ -518,6 +518,9 @@ function initEventListeners() {
             exportDashboardData();
         });
     });
+    
+    // 최근 신청 현황 탭 클릭 이벤트
+    initApplicationTabs();
 }
 
 // 대시보드 새로고침
@@ -592,6 +595,63 @@ const DashboardUtils = {
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     }
 };
+
+// 최근 신청 현황 탭 초기화
+function initApplicationTabs() {
+    const tabButtons = document.querySelectorAll('.application-tab-btn');
+    const table = document.getElementById('recentApplicationsTable');
+    
+    if (!table || tabButtons.length === 0) return;
+    
+    // 초기 필터링 (활성 탭 기준)
+    const activeTab = document.querySelector('.application-tab-btn.active');
+    if (activeTab) {
+        const initialType = activeTab.dataset.type;
+        filterApplicationTable(table, initialType);
+    }
+    
+    tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const selectedType = this.dataset.type;
+            
+            // 탭 활성 상태 변경
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            // 테이블 행 필터링
+            filterApplicationTable(table, selectedType);
+        });
+    });
+}
+
+// 신청 현황 테이블 필터링
+function filterApplicationTable(table, type) {
+    const rows = table.querySelectorAll('.application-row');
+    let hasData = false;
+    
+    // 먼저 모든 행 숨기기
+    rows.forEach(row => {
+        row.style.display = 'none';
+    });
+    
+    // 선택된 타입의 데이터 행 찾기
+    rows.forEach(row => {
+        const rowType = row.dataset.applicationType;
+        
+        if (rowType === type && !row.classList.contains('empty-message')) {
+            row.style.display = '';
+            hasData = true;
+        }
+    });
+    
+    // 데이터가 없으면 빈 메시지 표시
+    if (!hasData) {
+        const emptyMessage = table.querySelector(`.empty-message[data-application-type="${type}"]`);
+        if (emptyMessage) {
+            emptyMessage.style.display = '';
+        }
+    }
+}
 
 // 전역 객체에 유틸리티 추가
 window.DashboardUtils = DashboardUtils;

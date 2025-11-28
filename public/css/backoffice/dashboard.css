@@ -117,6 +117,22 @@
     background: #fd7e14;
 }
 
+.stat-card.stat-programs::before {
+    background: #3490dc;
+}
+
+.stat-card.stat-applications::before {
+    background: #28a745;
+}
+
+.stat-card.stat-pending::before {
+    background: #ffc107;
+}
+
+.stat-card.stat-visitors::before {
+    background: #9b59b6;
+}
+
 .stat-card:hover {
     transform: translateY(-3px);
     box-shadow: 0 6px 20px rgba(0,0,0,0.12);
@@ -158,6 +174,22 @@
     background: #fd7e14;
 }
 
+.stat-programs .stat-icon {
+    background: #3490dc;
+}
+
+.stat-applications .stat-icon {
+    background: #28a745;
+}
+
+.stat-pending .stat-icon {
+    background: #ffc107;
+}
+
+.stat-visitors .stat-icon {
+    background: #9b59b6;
+}
+
 .stat-info {
     flex: 1;
     min-width: 0;
@@ -193,6 +225,22 @@
 
 .stat-popups .stat-info h3 {
     color: #fd7e14;
+}
+
+.stat-programs .stat-info h3 {
+    color: #3490dc;
+}
+
+.stat-applications .stat-info h3 {
+    color: #28a745;
+}
+
+.stat-pending .stat-info h3 {
+    color: #ffc107;
+}
+
+.stat-visitors .stat-info h3 {
+    color: #9b59b6;
 }
 
 .stat-number {
@@ -359,11 +407,30 @@
     border-radius: 6px;
     transition: all 0.3s ease;
     font-size: 0.875rem;
+    border: 1px solid transparent;
+    background: transparent;
+    cursor: pointer;
 }
 
 .more-btn:hover {
     background: #e9ecef;
     color: #333;
+}
+
+.more-btn.active {
+    background: #3490dc;
+    color: white;
+    border-color: #3490dc;
+}
+
+.more-btn.active:hover {
+    background: #2980b9;
+    color: white;
+}
+
+.more-btn-group {
+    display: flex;
+    gap: 0.5rem;
 }
 
 .grid-item-body {
@@ -378,43 +445,67 @@
     table-layout: fixed;
 }
 
-/* 게시판 현황 테이블 컬럼 너비 */
+/* 프로그램 현황 테이블 컬럼 너비 */
 .dashboard-table th:nth-child(1),
 .dashboard-table td:nth-child(1) {
-    width: 50%; /* 게시판명 */
+    width: 5%; /* 개인/단체 */
+    text-align: center;
+}
+
+.dashboard-table th:nth-child(2),
+.dashboard-table td:nth-child(2) {
+    width: 25%; /* 프로그램명 */
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.dashboard-table th:nth-child(2),
-.dashboard-table td:nth-child(2) {
-    width: 15%; /* 게시글 */
-    text-align: center;
-}
-
 .dashboard-table th:nth-child(3),
 .dashboard-table td:nth-child(3) {
-    width: 20%; /* 최근활동 */
+    width: 10%; /* 교육유형 */
     text-align: center;
 }
 
 .dashboard-table th:nth-child(4),
 .dashboard-table td:nth-child(4) {
-    width: 15%; /* 상태 */
+    width: 10%; /* 접수유형 */
+    text-align: center;
+}
+
+.dashboard-table th:nth-child(5),
+.dashboard-table td:nth-child(5) {
+    width: 15%; /* 교육일정 */
+    text-align: center;
+}
+
+.dashboard-table th:nth-child(6),
+.dashboard-table td:nth-child(6) {
+    width: 15%; /* 신청기간 */
+    text-align: center;
+}
+
+.dashboard-table th:nth-child(7),
+.dashboard-table td:nth-child(7) {
+    width: 10%; /* 신청수/정원 */
+    text-align: center;
+}
+
+.dashboard-table th:nth-child(8),
+.dashboard-table td:nth-child(8) {
+    width: 7%; /* 상태 */
     text-align: center;
 }
 
 .dashboard-table th {
     text-align: left;
-    padding: 0.75rem 0.5rem;
+    padding: 0.5rem 0.5rem;
     font-weight: 600;
     color: #495057;
     border-bottom: 2px solid #e9ecef;
 }
 
 .dashboard-table td {
-    padding: 0.75rem 0.5rem;
+    padding: 0.5rem 0.5rem;
     border-bottom: 1px solid #f1f3f4;
     color: #333;
 }
@@ -455,6 +546,16 @@
 .badge-info {
     background: #d1ecf1;
     color: #0c5460;
+}
+
+.badge-primary {
+    background: #cfe2ff;
+    color: #084298;
+}
+
+.badge-secondary {
+    background: #e2e3e5;
+    color: #383d41;
 }
 
 /* 테이블 액션 버튼 */

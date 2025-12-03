@@ -121,9 +121,6 @@
                                 </div>
                                 <div class="board-file-preview" id="desktopImagePreview"></div>
                             </div>
-                            @error('desktop_image')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
                         </div>
 
                         <!-- 5. 정렬 -->

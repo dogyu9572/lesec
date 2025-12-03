@@ -275,7 +275,7 @@
                     </label>
                     <div class="board-file-upload">
                         <div class="board-file-input-wrapper">
-                            <input type="file" class="board-file-input" id="attachments" name="attachments[]" multiple accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar" @if($board->isFieldRequired('attachments')) required @endif>
+                            <input type="file" class="board-file-input " id="attachments" name="attachments[]" multiple accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar" @if($board->isFieldRequired('attachments')) required @endif>
                             <div class="board-file-input-content">
                                 <i class="fas fa-cloud-upload-alt"></i>
                                 <span class="board-file-input-text">파일을 선택하거나 여기로 드래그하세요</span>

@@ -90,9 +90,16 @@ class PopupController extends Controller
             'popup_content' => 'nullable|string',
             'is_active' => 'boolean',
             'sort_order' => 'nullable|integer|min:0',
+        ], [
+            'popup_image.max' => '이미지 용량이 5MB를 초과합니다. 더 작은 이미지를 선택해주세요.',
+            'popup_image.image' => '이미지 파일만 업로드 가능합니다.',
+            'popup_image.mimes' => 'JPG, PNG, GIF 파일만 업로드 가능합니다.',
         ]);
 
         $data = $request->all();
+        
+        // 팝업 타입을 이미지로 고정
+        $data['popup_type'] = 'image';
         
         // 이미지 업로드 처리
         if ($request->hasFile('popup_image')) {
@@ -155,6 +162,10 @@ class PopupController extends Controller
             'popup_content' => 'nullable|string',
             'is_active' => 'boolean',
             'sort_order' => 'nullable|integer|min:0',
+        ], [
+            'popup_image.max' => '이미지 용량이 5MB를 초과합니다. 더 작은 이미지를 선택해주세요.',
+            'popup_image.image' => '이미지 파일만 업로드 가능합니다.',
+            'popup_image.mimes' => 'JPG, PNG, GIF 파일만 업로드 가능합니다.',
         ]);
 
         $data = $request->all();

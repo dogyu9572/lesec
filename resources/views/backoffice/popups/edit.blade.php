@@ -17,6 +17,16 @@
             </a>
         </div>
 
+        @if ($errors->any())
+            <div class="board-alert board-alert-danger">
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <div class="board-card">
             <div class="board-card-body">
                 <form action="{{ route('backoffice.popups.update', $popup) }}" method="POST" enctype="multipart/form-data">

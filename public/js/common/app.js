@@ -321,7 +321,132 @@ window.AppUtils = {
     }
 };
 
-// 페이지 로드 시 모달 시스템 초기화
+// 파일 크기 검증 유틸리티
+window.FileUploadValidator = {
+    // 파일 크기를 KB 단위로 변환하여 최대 크기 계산
+    getMaxSize: function(input) {
+        // data-max-size 속성 확인 (KB 단위)
+        if (input.dataset.maxSize) {
+            return parseInt(input.dataset.maxSize) * 1024; // KB를 바이트로 변환
+        }
+        
+        // name 속성 기반으로 기본값 설정
+        const name = input.name || '';
+        const id = input.id || '';
+        
+        // 팝업 이미지, 썸네일, 배너 이미지: 5MB
+        if (name.includes('popup_image') || name.includes('thumbnail') || name.includes('desktop_image') || name.includes('mobile_image') || 
+            id.includes('popup_image') || id.includes('thumbnail') || id.includes('desktop_image') || id.includes('mobile_image')) {
+            return 5 * 1024 * 1024;
+        }
+        
+        // 첨부파일: 10MB
+        if (name.includes('attachments') || id.includes('attachments')) {
+            return 10 * 1024 * 1024;
+        }
+        
+        // 로고: 2MB
+        if (name.includes('logo') || id.includes('logo')) {
+            return 2 * 1024 * 1024;
+        }
+        
+        // 파비콘: 1MB
+        if (name.includes('favicon') || id.includes('favicon')) {
+            return 1 * 1024 * 1024;
+        }
+        
+        // CSV 파일: 10MB
+        if (name.includes('csv') || id.includes('csv') || name.includes('roster') || id.includes('roster')) {
+            return 10 * 1024 * 1024;
+        }
+        
+        // Excel 파일: 10MB
+        if (name.includes('excel') || id.includes('excel') || name.includes('xlsx') || id.includes('xlsx')) {
+            return 10 * 1024 * 1024;
+        }
+        
+        // 기본값: 10MB
+        return 10 * 1024 * 1024;
+    },
+    
+    // 파일 크기 검증
+    validateFileSize: function(file, maxSize) {
+        if (file.size > maxSize) {
+            const maxSizeMB = (maxSize / (1024 * 1024)).toFixed(0);
+            return {
+                valid: false,
+                message: `파일 용량이 ${maxSizeMB}MB를 초과합니다. 더 작은 파일을 선택해주세요.`
+            };
+        }
+        return { valid: true };
+    },
+    
+    // 파일 크기 검증 실행
+    checkFiles: function(files, maxSize, input) {
+        if (!files || files.length === 0) return true;
+        
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const validation = this.validateFileSize(file, maxSize);
+            
+            if (!validation.valid) {
+                // 에러 메시지 표시
+                if (typeof showErrorMessage === 'function') {
+                    showErrorMessage(validation.message);
+                } else if (typeof AppUtils !== 'undefined' && AppUtils.showError) {
+                    AppUtils.showError(validation.message);
+                } else if (typeof AppUtils !== 'undefined' && AppUtils.modal && AppUtils.modal.error) {
+                    AppUtils.modal.error(validation.message);
+                } else {
+                    alert(validation.message);
+                }
+                
+                // 파일 초기화
+                if (input) {
+                    input.value = '';
+                }
+                return false;
+            }
+        }
+        return true;
+    },
+    
+    // 파일 input에 검증 이벤트 추가
+    init: function(input) {
+        const maxSize = this.getMaxSize(input);
+        const validator = this;
+        
+        input.addEventListener('change', function(e) {
+            const files = e.target.files;
+            validator.checkFiles(files, maxSize, input);
+        });
+        
+        // 드래그 앤 드롭 검증 (board-file-input-wrapper가 있는 경우)
+        const wrapper = input.closest('.board-file-input-wrapper');
+        if (wrapper) {
+            wrapper.addEventListener('drop', function(e) {
+                e.preventDefault();
+                const files = e.dataTransfer.files;
+                if (files && files.length > 0) {
+                    if (!validator.checkFiles(files, maxSize, input)) {
+                        e.stopPropagation();
+                        return false;
+                    }
+                }
+            });
+        }
+    },
+    
+    // 모든 파일 input 초기화
+    initAll: function() {
+        const fileInputs = document.querySelectorAll('input[type="file"]');
+        fileInputs.forEach(input => {
+            this.init(input);
+        });
+    }
+};
+
+// 페이지 로드 시 모달 시스템 초기화 및 파일 검증 초기화
 document.addEventListener('DOMContentLoaded', function() {
     AppUtils.modal.init();
     
@@ -331,4 +456,7 @@ document.addEventListener('DOMContentLoaded', function() {
         AppUtils.modal.success(successMessage.textContent.trim());
         successMessage.style.display = 'none';
     }
+    
+    // 모든 파일 input에 크기 검증 적용
+    FileUploadValidator.initAll();
 });

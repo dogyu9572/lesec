@@ -73,10 +73,17 @@ class BannerController extends Controller
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'use_period' => 'boolean',
             'is_active' => 'boolean',
-            'desktop_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'mobile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'desktop_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
+            'mobile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
             'video_url' => 'nullable|url',
             'sort_order' => 'nullable|integer|min:0',
+        ], [
+            'desktop_image.max' => '이미지 용량이 5MB를 초과합니다. 더 작은 이미지를 선택해주세요.',
+            'desktop_image.image' => '이미지 파일만 업로드 가능합니다.',
+            'desktop_image.mimes' => 'JPG, PNG, GIF 파일만 업로드 가능합니다.',
+            'mobile_image.max' => '이미지 용량이 5MB를 초과합니다. 더 작은 이미지를 선택해주세요.',
+            'mobile_image.image' => '이미지 파일만 업로드 가능합니다.',
+            'mobile_image.mimes' => 'JPG, PNG, GIF 파일만 업로드 가능합니다.',
         ]);
 
         $data = $request->all();
@@ -127,10 +134,17 @@ class BannerController extends Controller
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'use_period' => 'boolean',
             'is_active' => 'boolean',
-            'desktop_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'mobile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'desktop_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
+            'mobile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
             'video_url' => 'nullable|url',
             'sort_order' => 'nullable|integer|min:0',
+        ], [
+            'desktop_image.max' => '이미지 용량이 5MB를 초과합니다. 더 작은 이미지를 선택해주세요.',
+            'desktop_image.image' => '이미지 파일만 업로드 가능합니다.',
+            'desktop_image.mimes' => 'JPG, PNG, GIF 파일만 업로드 가능합니다.',
+            'mobile_image.max' => '이미지 용량이 5MB를 초과합니다. 더 작은 이미지를 선택해주세요.',
+            'mobile_image.image' => '이미지 파일만 업로드 가능합니다.',
+            'mobile_image.mimes' => 'JPG, PNG, GIF 파일만 업로드 가능합니다.',
         ]);
 
         $data = $request->all();

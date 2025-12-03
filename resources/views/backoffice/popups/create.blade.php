@@ -17,6 +17,16 @@
             </a>
         </div>
 
+        @if ($errors->any())
+            <div class="board-alert board-alert-danger">
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <div class="board-card">
             <div class="board-card-body">
                 <form action="{{ route('backoffice.popups.store') }}" method="POST" enctype="multipart/form-data">
@@ -187,61 +197,27 @@
                         </div>
                     </div>
 
+                    <!-- 이미지 업로드 섹션 -->
                     <div class="board-form-row">
                         <div class="board-form-col board-form-col-12">
                             <div class="board-form-group">
-                                <label class="board-form-label">팝업타입</label>
-                                <div class="radio-group">
-                                    <label class="radio-label">
-                                        <input type="radio" name="popup_type" value="image" @checked(old('popup_type', 'image') == 'image')>
-                                        <span class="radio-text">이미지</span>
-                                    </label>
-                                    <label class="radio-label">
-                                        <input type="radio" name="popup_type" value="html" @checked(old('popup_type') == 'html')>
-                                        <span class="radio-text">HTML</span>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 이미지 업로드 섹션 -->
-                    <div class="popup-image-section" id="popup_image_section">
-                        <div class="board-form-row">
-                            <div class="board-form-col board-form-col-12">
-                                <div class="board-form-group">
-                                    <label class="board-form-label">팝업이미지</label>
-                                    <div class="board-file-upload">
-                                        <div class="board-file-input-wrapper">
-                                            <input type="file" class="board-file-input" id="popup_image" name="popup_image" accept=".jpg,.jpeg,.png,.gif">
-                                            <div class="board-file-input-content">
-                                                <i class="fas fa-image"></i>
-                                                <span class="board-file-input-text">팝업 이미지를 선택하거나 여기로 드래그하세요</span>
-                                                <span class="board-file-input-subtext">JPG, PNG, GIF 파일만 가능 (최대 5MB)</span>
-                                            </div>
+                                <label class="board-form-label">팝업이미지</label>
+                                <div class="board-file-upload">
+                                    <div class="board-file-input-wrapper">
+                                        <input type="file" class="board-file-input" id="popup_image" name="popup_image" accept=".jpg,.jpeg,.png,.gif">
+                                        <div class="board-file-input-content">
+                                            <i class="fas fa-image"></i>
+                                            <span class="board-file-input-text">팝업 이미지를 선택하거나 여기로 드래그하세요</span>
+                                            <span class="board-file-input-subtext">JPG, PNG, GIF 파일만 가능 (최대 5MB)</span>
                                         </div>
-                                        <div class="board-file-preview" id="popupImagePreview"></div>
                                     </div>
+                                    <div class="board-file-preview" id="popupImagePreview"></div>
                                 </div>
                             </div>
                         </div>
                     </div>
-
-                    <!-- HTML 에디터 섹션 -->
-                    <div class="popup-html-section" id="popup_html_section" style="display: none;">
-                        <div class="board-form-row">
-                            <div class="board-form-col board-form-col-12">
-                                <div class="board-form-group">
-                                    <label for="popup_content" class="board-form-label">HTML 콘텐츠</label>
-                                    <textarea class="board-form-control summernote-editor @error('popup_content') is-invalid @enderror" 
-                                              id="popup_content" name="popup_content" rows="10" placeholder="HTML 콘텐츠를 입력하세요">{{ old('popup_content') }}</textarea>
-                                    @error('popup_content')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    
+                    <input type="hidden" name="popup_type" value="image">
 
                     <div class="board-form-row">
                         <div class="board-form-col board-form-col-12">

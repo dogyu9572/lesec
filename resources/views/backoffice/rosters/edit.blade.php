@@ -210,8 +210,8 @@
         <h5 class="roster-modal__title">추첨 확인</h5>
         <p class="roster-modal__body">추첨 시 당첨, 미당첨 여부가 결정됩니다. 추첨을 진행하시겠습니까?</p>
         <div class="roster-modal__actions">
-            <button type="button" id="lottery-confirm-cancel" class="btn btn-secondary" data-skip-button>취소</button>
             <button type="button" id="lottery-confirm-submit" class="btn btn-primary" data-skip-button>확인</button>
+            <button type="button" id="lottery-confirm-cancel" class="btn btn-secondary" data-skip-button>취소</button>            
         </div>
     </div>
 </div>

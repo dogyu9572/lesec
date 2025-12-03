@@ -59,6 +59,42 @@ class SchoolService
     }
 
     /**
+     * 시/도 목록 조회
+     */
+    public function getCities(): array
+    {
+        return School::query()
+            ->whereNotNull('city')
+            ->distinct()
+            ->orderBy('city')
+            ->pluck('city')
+            ->filter()
+            ->values()
+            ->toArray();
+    }
+
+    /**
+     * 시/군/구 목록 조회
+     */
+    public function getDistricts(?string $city = null): array
+    {
+        $query = School::query()
+            ->whereNotNull('district');
+
+        if ($city) {
+            $query->where('city', $city);
+        }
+
+        return $query
+            ->distinct()
+            ->orderBy('district')
+            ->pluck('district')
+            ->filter()
+            ->values()
+            ->toArray();
+    }
+
+    /**
      * 학교 등록
      */
     public function createSchool(array $data): School

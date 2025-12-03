@@ -62,8 +62,13 @@
                 <!-- 시/도 -->
                 <div class="board-form-group">
                     <label for="city" class="board-form-label">시/도</label>
-                    <input type="text" class="board-form-control @error('city') is-invalid @enderror" 
-                           id="city" name="city" value="{{ old('city', $school->city) }}">
+                    <select class="board-form-control @error('city') is-invalid @enderror" 
+                            id="city" name="city">
+                        <option value="">선택하세요</option>
+                        @foreach($cities as $cityName)
+                            <option value="{{ $cityName }}" @selected(old('city', $school->city) == $cityName)>{{ $cityName }}</option>
+                        @endforeach
+                    </select>
                     @error('city')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -72,8 +77,13 @@
                 <!-- 시/군/구 -->
                 <div class="board-form-group">
                     <label for="district" class="board-form-label">시/군/구</label>
-                    <input type="text" class="board-form-control @error('district') is-invalid @enderror" 
-                           id="district" name="district" value="{{ old('district', $school->district) }}">
+                    <select class="board-form-control @error('district') is-invalid @enderror" 
+                            id="district" name="district">
+                        <option value="">선택하세요</option>
+                        @foreach($districts as $districtName)
+                            <option value="{{ $districtName }}" @selected(old('district', $school->district) == $districtName)>{{ $districtName }}</option>
+                        @endforeach
+                    </select>
                     @error('district')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -117,5 +127,54 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const citySelect = document.getElementById('city');
+    const districtSelect = document.getElementById('district');
+
+    // 시/도 선택 시 시/군/구 목록 업데이트
+    if (citySelect && districtSelect) {
+        citySelect.addEventListener('change', function() {
+            const selectedCity = this.value;
+            
+            // 시/군/구 옵션 초기화
+            districtSelect.innerHTML = '<option value="">선택하세요</option>';
+            
+            if (selectedCity) {
+                // AJAX로 시/군/구 목록 가져오기
+                const currentDistrict = '{{ old("district", $school->district) }}';
+                fetch('{{ route("backoffice.schools.get-districts") }}?city=' + encodeURIComponent(selectedCity), {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.districts && data.districts.length > 0) {
+                        data.districts.forEach(function(district) {
+                            const option = document.createElement('option');
+                            option.value = district;
+                            option.textContent = district;
+                            // 기존 선택값 복원
+                            if (district === currentDistrict) {
+                                option.selected = true;
+                            }
+                            districtSelect.appendChild(option);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('시/군/구 목록을 가져오는 중 오류가 발생했습니다:', error);
+                });
+            }
+        });
+    }
+});
+</script>
 @endsection
 

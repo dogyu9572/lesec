@@ -63,6 +63,7 @@
 	.btn_wbb {color:#fff !important; background:#283891 !important; border-color:#283891 !important;}
 	.btn_bwb {color:#283891 !important; background:#fff !important; border-color:#283891 !important;}
 	.btn_wkk {color:#fff !important; background:#222 !important; border-color:#222 !important;}
+	.btn_wkk:disabled {color:#999 !important; background:#ddd !important; border-color:#ddd !important; cursor:not-allowed !important; opacity:0.6 !important;}
 	.btn_kwk {color:#333 !important; background:#fff !important; border-color:#333 !important;}
 	.btn_kwy {color:#333 !important; background:#fff !important; border-color:#ddd !important;}
 	.btn_gray {color:#666 !important; background:#F7F8F9 !important; border-color:#ddd !important;}

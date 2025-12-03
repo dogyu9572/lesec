@@ -11,20 +11,81 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     const lotteryBtn = document.getElementById('lottery-btn');
-    if (lotteryBtn && !lotteryBtn.disabled) {
-        lotteryBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            const modal = document.getElementById('lottery-confirm-modal');
-            if (modal) {
-                modal.style.display = 'flex';
-            }
-        });
-    }
-
     const lotteryConfirmModal = document.getElementById('lottery-confirm-modal');
     const lotteryConfirmCancel = document.getElementById('lottery-confirm-cancel');
     const lotteryConfirmSubmit = document.getElementById('lottery-confirm-submit');
 
+    // 추첨 확인 버튼 처리 함수
+    function initLotteryConfirmButton() {
+        const submitBtn = document.getElementById('lottery-confirm-submit');
+        if (!submitBtn) {
+            return;
+        }
+
+        // 기존 버튼을 클론해서 교체 (모든 이벤트 리스너 제거)
+        const newBtn = submitBtn.cloneNode(true);
+        submitBtn.parentNode.replaceChild(newBtn, submitBtn);
+
+        // onclick 직접 할당
+        newBtn.onclick = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+
+            if (!window.rosterDetailConfig || !window.rosterDetailConfig.lotteryUrl) {
+                alert('추첨 URL을 찾을 수 없습니다. 페이지를 새로고침해주세요.');
+                const modal = document.getElementById('lottery-confirm-modal');
+                if (modal) {
+                    modal.style.display = 'none';
+                }
+                return false;
+            }
+
+            const csrfToken = document.querySelector('meta[name="csrf-token"]');
+            if (!csrfToken) {
+                alert('CSRF 토큰을 찾을 수 없습니다. 페이지를 새로고침해주세요.');
+                const modal = document.getElementById('lottery-confirm-modal');
+                if (modal) {
+                    modal.style.display = 'none';
+                }
+                return false;
+            }
+
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = window.rosterDetailConfig.lotteryUrl;
+
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = '_token';
+            csrfInput.value = csrfToken.getAttribute('content');
+            form.appendChild(csrfInput);
+
+            document.body.appendChild(form);
+            form.submit();
+
+            const modal = document.getElementById('lottery-confirm-modal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+
+            return false;
+        };
+    }
+
+    // 추첨 버튼 클릭 시 모달 열기 및 확인 버튼 초기화
+    if (lotteryBtn && !lotteryBtn.disabled) {
+        lotteryBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (lotteryConfirmModal) {
+                lotteryConfirmModal.style.display = 'flex';
+                // 모달이 열릴 때 버튼 초기화
+                setTimeout(initLotteryConfirmButton, 100);
+            }
+        });
+    }
+
+    // 취소 버튼
     if (lotteryConfirmCancel) {
         lotteryConfirmCancel.addEventListener('click', function(e) {
             e.stopPropagation();
@@ -34,27 +95,12 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    if (lotteryConfirmSubmit && window.rosterDetailConfig) {
-        lotteryConfirmSubmit.addEventListener('click', function(e) {
-            e.stopPropagation();
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = window.rosterDetailConfig.lotteryUrl;
-
-            const csrfToken = document.querySelector('meta[name="csrf-token"]');
-            if (csrfToken) {
-                const csrfInput = document.createElement('input');
-                csrfInput.type = 'hidden';
-                csrfInput.name = '_token';
-                csrfInput.value = csrfToken.getAttribute('content');
-                form.appendChild(csrfInput);
-            }
-
-            document.body.appendChild(form);
-            form.submit();
-        });
+    // 초기화 (지연 실행)
+    if (lotteryConfirmSubmit) {
+        setTimeout(initLotteryConfirmButton, 500);
     }
 
+    // 모달 배경 클릭 시 닫기
     if (lotteryConfirmModal) {
         lotteryConfirmModal.addEventListener('click', function(e) {
             if (e.target === lotteryConfirmModal) {

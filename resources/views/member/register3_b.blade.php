@@ -150,18 +150,20 @@
 						<dt>시/도<span>*</span></dt>
 						<dd>
 							<div class="flex city">
-								<select name="city">
+								<select name="city" class="city_select" disabled>
 									<option value="">선택</option>
 									@if (old('city'))
 									<option value="{{ old('city') }}" selected>{{ old('city') }}</option>
 									@endif
 								</select>
-								<select name="district">
+								<input type="hidden" name="city" class="city_hidden" value="{{ old('city') }}">
+								<select name="district" class="district_select" disabled>
 									<option value="">선택</option>
 									@if (old('district'))
 									<option value="{{ old('district') }}" selected>{{ old('district') }}</option>
 									@endif
 								</select>
+								<input type="hidden" name="district" class="district_hidden" value="{{ old('district') }}">
 							</div>
 							@php
 								$regionError = $errors->first('city') ?: $errors->first('district');
@@ -320,7 +322,10 @@
 					</div>
 				</div>
 			</div>
-			<button type="button" class="btn_submit btn_wbb mt4 btn_select_school">확인</button>
+			<div class="btn_group mt4" style="display: flex; gap: 8px;">
+				<button type="button" class="btn_submit btn_wbb btn_select_school" style="flex: 1;">확인</button>
+				<button type="button" class="btn_submit btn_wkk btn_input_school" style="flex: 1;" disabled>입력</button>
+			</div>
 		</div>
 	</div>
 </div>

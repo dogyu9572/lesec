@@ -40,9 +40,13 @@ class SchoolController extends BaseController
     public function create()
     {
         $schoolLevels = $this->schoolService->getSchoolLevels();
+        $cities = $this->schoolService->getCities();
+        $districts = $this->schoolService->getDistricts();
 
         return $this->view('backoffice.schools.create', [
             'schoolLevels' => $schoolLevels,
+            'cities' => $cities,
+            'districts' => $districts,
         ]);
     }
 
@@ -63,10 +67,14 @@ class SchoolController extends BaseController
     public function edit(School $school)
     {
         $schoolLevels = $this->schoolService->getSchoolLevels();
+        $cities = $this->schoolService->getCities();
+        $districts = $this->schoolService->getDistricts($school->city);
 
         return $this->view('backoffice.schools.edit', [
             'school' => $school,
             'schoolLevels' => $schoolLevels,
+            'cities' => $cities,
+            'districts' => $districts,
         ]);
     }
 
@@ -165,6 +173,19 @@ class SchoolController extends BaseController
                 ]
             ], 500);
         }
+    }
+
+    /**
+     * 시/군/구 목록 조회 (AJAX)
+     */
+    public function getDistricts(Request $request)
+    {
+        $city = $request->input('city');
+        $districts = $this->schoolService->getDistricts($city);
+
+        return response()->json([
+            'districts' => $districts,
+        ]);
     }
 }
 

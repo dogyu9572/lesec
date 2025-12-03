@@ -187,7 +187,7 @@
 	<footer class="footer">
 		<div class="point" id="foot"></div>
 		<div class="quick main">
-			<a href="/board/faq.php" class="qna">Q&amp;A</a>
+			<a href="/board/faq" class="qna">Q&amp;A</a>
 			<button type="button" class="gotop">TOP</button>
 		</div>
 		<div class="inner">

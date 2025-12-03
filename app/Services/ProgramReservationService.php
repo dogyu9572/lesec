@@ -6,6 +6,7 @@ use App\Models\IndividualApplication;
 use App\Models\ProgramReservation;
 use App\Models\GroupApplication;
 use App\Models\Member;
+use App\Models\Schedule;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection as SupportCollection;
@@ -22,7 +23,7 @@ class ProgramReservationService
         $startOfMonth = Carbon::create($year, $month, 1)->startOfDay();
         $endOfMonth = (clone $startOfMonth)->endOfMonth();
         
-        return ProgramReservation::query()
+        $programs = ProgramReservation::query()
             ->byEducationType($educationType)
             ->byApplicationType($applicationType)
             ->active()
@@ -30,6 +31,8 @@ class ProgramReservationService
             ->whereDate('education_end_date', '>=', $startOfMonth)
             ->orderBy('education_start_date', 'asc')
             ->get();
+        
+        return $this->filterProgramsBySchedule($programs);
     }
 
     /**
@@ -37,12 +40,14 @@ class ProgramReservationService
      */
     public function getIndividualPrograms(string $educationType): Collection
     {
-        return ProgramReservation::query()
+        $programs = ProgramReservation::query()
             ->byEducationType($educationType)
             ->byApplicationType('individual')
             ->active()
             ->orderBy('created_at', 'desc')
             ->get();
+        
+        return $this->filterProgramsBySchedule($programs);
     }
 
     public function getIndividualProgramById(int $id): ?ProgramReservation
@@ -61,6 +66,52 @@ class ProgramReservationService
             ->where('application_type', 'group')
             ->active()
             ->first();
+    }
+
+    /**
+     * 일정관리 일정과 겹치는 프로그램 필터링 (사용자 페이지에서 숨김)
+     */
+    private function filterProgramsBySchedule(Collection $programs): Collection
+    {
+        if ($programs->isEmpty()) {
+            return $programs;
+        }
+
+        // disable_application=true인 일정 조회
+        $disabledSchedules = Schedule::query()
+            ->disableApplication()
+            ->get();
+
+        if ($disabledSchedules->isEmpty()) {
+            return $programs;
+        }
+
+        // 각 프로그램의 교육 기간과 일정이 겹치는지 확인
+        return $programs->filter(function (ProgramReservation $program) use ($disabledSchedules) {
+            if (!$program->education_start_date || !$program->education_end_date) {
+                return true; // 날짜가 없으면 필터링하지 않음
+            }
+
+            $programStart = Carbon::parse($program->education_start_date);
+            $programEnd = Carbon::parse($program->education_end_date);
+
+            // 일정과 겹치는지 확인
+            foreach ($disabledSchedules as $schedule) {
+                if (!$schedule->start_date || !$schedule->end_date) {
+                    continue;
+                }
+
+                $scheduleStart = Carbon::parse($schedule->start_date);
+                $scheduleEnd = Carbon::parse($schedule->end_date);
+
+                // 기간이 겹치는지 확인
+                if ($programStart->lte($scheduleEnd) && $programEnd->gte($scheduleStart)) {
+                    return false; // 겹치면 필터링 (제외)
+                }
+            }
+
+            return true; // 겹치지 않으면 포함
+        })->values();
     }
 
     /**

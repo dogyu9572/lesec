@@ -386,6 +386,8 @@
 
         // 모달 열릴 때 자동으로 학교 목록 불러오기
         this.$modal.on('popup:show', function () {
+            // 입력 버튼 초기화 (disabled)
+            self.$modal.find('.btn_input_school').prop('disabled', true);
             if (!self.schoolDataLoaded) {
                 self.fetchSchools(false);
             }
@@ -435,6 +437,11 @@
         this.$modal.on('click', '.btn_select_school', function (event) {
             event.preventDefault();
             self.confirmSchoolSelection();
+        });
+
+        this.$modal.on('click', '.btn_input_school', function (event) {
+            event.preventDefault();
+            self.inputSchoolName();
         });
 
         // 페이지네이션 클릭 이벤트
@@ -555,12 +562,18 @@
 
     MemberRegister.prototype.renderSchools = function (list) {
         var $tbody = this.$modal.find('.school_results');
+        var $inputBtn = this.$modal.find('.btn_input_school');
         $tbody.empty();
 
         if (!list.length) {
             $tbody.append('<tr class="empty"><td colspan="3">검색 결과가 없습니다.</td></tr>');
+            // 검색 결과가 없을 때 입력 버튼 활성화
+            $inputBtn.prop('disabled', false);
             return;
         }
+
+        // 검색 결과가 있을 때 입력 버튼 비활성화
+        $inputBtn.prop('disabled', true);
 
         var self = this;
         list.forEach(function (school) {
@@ -718,14 +731,19 @@
         this.$form.find('.input_school').val(school.name || '');
         this.$form.find('.input_school_id').val(school.id || '');
 
-        var $citySelect = this.$form.find('select[name="city"]');
-        var $districtSelect = this.$form.find('select[name="district"]');
+        var $citySelect = this.$form.find('select.city_select');
+        var $cityHidden = this.$form.find('input.city_hidden');
+        var $districtSelect = this.$form.find('select.district_select');
+        var $districtHidden = this.$form.find('input.district_hidden');
 
         if ($citySelect.length && school.city) {
             if (!$citySelect.find('option[value="' + school.city + '"]').length) {
                 $citySelect.append('<option value="' + school.city + '">' + school.city + '</option>');
             }
             $citySelect.val(school.city);
+            if ($cityHidden.length) {
+                $cityHidden.val(school.city);
+            }
         }
 
         if ($districtSelect.length && school.district) {
@@ -733,7 +751,55 @@
                 $districtSelect.append('<option value="' + school.district + '">' + school.district + '</option>');
             }
             $districtSelect.val(school.district);
+            if ($districtHidden.length) {
+                $districtHidden.val(school.district);
+            }
         }
+    };
+
+    MemberRegister.prototype.inputSchoolName = function () {
+        var schoolName = this.$modal.find('.search_keyword').val().trim();
+        if (!schoolName) {
+            window.alert('학교명을 입력해주세요.');
+            return;
+        }
+
+        // 검색한 학교명을 부모 페이지에 전달
+        this.$form.find('.input_school').val(schoolName);
+        this.$form.find('.input_school_id').val(''); // 학교 ID는 없으므로 빈 값
+
+        // 시/도 정보가 있으면 함께 설정
+        var city = this.$modal.find('.search_city').val();
+        var district = this.$modal.find('.search_district').val();
+
+        if (city || district) {
+            var $citySelect = this.$form.find('select.city_select');
+            var $cityHidden = this.$form.find('input.city_hidden');
+            var $districtSelect = this.$form.find('select.district_select');
+            var $districtHidden = this.$form.find('input.district_hidden');
+
+            if (city && $citySelect.length) {
+                if (!$citySelect.find('option[value="' + city + '"]').length) {
+                    $citySelect.append('<option value="' + city + '">' + city + '</option>');
+                }
+                $citySelect.val(city);
+                if ($cityHidden.length) {
+                    $cityHidden.val(city);
+                }
+            }
+
+            if (district && $districtSelect.length) {
+                if (!$districtSelect.find('option[value="' + district + '"]').length) {
+                    $districtSelect.append('<option value="' + district + '">' + district + '</option>');
+                }
+                $districtSelect.val(district);
+                if ($districtHidden.length) {
+                    $districtHidden.val(district);
+                }
+            }
+        }
+
+        this.closeModal();
     };
 
     $(function () {

@@ -392,15 +392,17 @@ Route::prefix('backoffice')->middleware(['backoffice'])->group(function () {
     ]);
 
     // 학교 관리
+    Route::get('schools/get-districts', [SchoolController::class, 'getDistricts'])
+        ->name('backoffice.schools.get-districts');
+    Route::get('schools/search', [SchoolController::class, 'search'])
+        ->name('backoffice.schools.search');
+    Route::post('schools/sync-from-api', [SchoolController::class, 'syncFromApi'])
+        ->name('backoffice.schools.sync-from-api');
     Route::resource('schools', SchoolController::class, [
         'names' => 'backoffice.schools'
     ]);
     Route::get('schools/{school}/show', [SchoolController::class, 'show'])
     ->name('backoffice.schools.show-detail');
-    Route::post('schools/sync-from-api', [SchoolController::class, 'syncFromApi'])
-        ->name('backoffice.schools.sync-from-api');
-    Route::get('schools/search', [SchoolController::class, 'search'])
-        ->name('backoffice.schools.search');
 
     // 세션 연장
     Route::post('session/extend', [App\Http\Controllers\Backoffice\SessionController::class, 'extend'])

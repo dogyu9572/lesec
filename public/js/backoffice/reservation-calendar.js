@@ -99,7 +99,7 @@
                     individualTbody.innerHTML = individual.map(function(item) {
                         const capacityText = item.is_unlimited ? '무제한' : (item.capacity ? `${item.applicant_count}/${item.capacity}` : item.applicant_count);
                         const dateFormatted = item.date ? item.date.split('-').join('.') : '';
-                        const editUrl = `/backoffice/individual-applications/${item.id}/edit`;
+                        const editUrl = `/backoffice/rosters/${item.program_reservation_id}/edit`;
                         
                         return `
                             <tr style="cursor: pointer;" onclick="window.location.href='${editUrl}'">
@@ -132,7 +132,7 @@
                     groupTbody.innerHTML = group.map(function(item) {
                         const capacityText = item.is_unlimited ? '무제한' : (item.capacity ? `${item.applicant_count}/${item.capacity}` : item.applicant_count);
                         const dateFormatted = item.date ? item.date.split('-').join('.') : '';
-                        const editUrl = `/backoffice/group-applications/${item.id}/edit`;
+                        const editUrl = `/backoffice/rosters/${item.program_reservation_id}/edit`;
                         
                         return `
                             <tr style="cursor: pointer;" onclick="window.location.href='${editUrl}'">

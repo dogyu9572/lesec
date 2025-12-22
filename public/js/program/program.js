@@ -145,6 +145,7 @@
             const $tbody = $wrap.find('.glbox.select_day .tbl tbody');
             $tbody.empty();
             selectedProgramData = null;
+            $wrap.find('.count input').val(0);
 
             $td.find('.list li').each(function () {
                 const $item = $(this);
@@ -178,9 +179,13 @@
                          data-program-name="${programName}"
                          data-education-date="${educationDate}"
                          data-education-type="${educationType}"
-                         data-education-fee="${educationFee}">
+                         data-education-fee="${educationFee}"
+                         data-status="${status}"
+                         data-applied="${applied}"
+                         data-total="${total}">
                         <td class="edu11"><label class="check solo"><input type="radio" name="select_day" data-program-id="${programId}"><i></i></label></td>
-                        <td class="edu12">${year}-${month}-${day} 09:00</td>
+						<!-- 시간 제거 주석 <td class="edu12">${year}-${month}-${day} 09:00</td> -->
+						<td class="edu12">${year}-${month}-${day}</td>
                         <td class="edu13 over_dot">${title}</td>
                         <td class="edu14">${remainText}</td>
                         <td class="edu15"><i class="state ${stateClass}">${status}</i></td>
@@ -194,9 +199,9 @@
             const $nebox = $wrap.find('.nebox');
             const scheduleHeight = $scheduleTable.outerHeight(true) - ($nebox.outerHeight(true) || 0);
 
-            if (window.innerWidth >= 1200) {
+            /*if (window.innerWidth >= 1200) {
                 $wrap.find('.select_day').css({ height: scheduleHeight, 'max-height': '' });
-            }
+            }*/
 
             const $btm = $wrap.find('.select_day .btm');
             const $day = $wrap.find('.select_day .day');
@@ -204,9 +209,9 @@
             const padding = (parseInt($top.css('padding-top'), 10) || 0) + (parseInt($top.css('padding-bottom'), 10) || 0);
             const scrollHeight = scheduleHeight - ($btm.outerHeight(true) || 0) - ($day.outerHeight(true) || 0) - padding;
 
-            if (window.innerWidth >= 1200) {
+            /*if (window.innerWidth >= 1200) {
                 $wrap.find('.select_day .scroll').css({ height: scrollHeight, 'max-height': '' });
-            }
+            }*/
         }
 
         updateMonthDisplay($wrap, currentDate);
@@ -229,10 +234,27 @@
             navigateTo(`${baseUrl}?year=${year}&month=${month}`);
         });
 
-        $wrap.find('.btn_today').on('click', function () {
+        /*$wrap.find('.btn_today').on('click', function () {
             $wrap.find('.schedule_table .table tbody td').removeClass('select');
             selectTodayIfVisible($wrap, currentDate, daysKor, updateSelectionInfo);
-        });
+        });*/
+		
+		$wrap.find('.btn_today').on('click', function () {
+			const today = new Date();
+			const todayYear = today.getFullYear();
+			const todayMonth = today.getMonth() + 1;
+
+			// 현재 화면의 년/월과 다르면 해당 달로 이동 (URL 이동)
+			if (currentDate.getFullYear() !== todayYear || (currentDate.getMonth() + 1) !== todayMonth) {
+				navigateTo(`${baseUrl}?year=${todayYear}&month=${todayMonth}`);
+				return;
+			}
+
+			// 같은 달이면 그냥 오늘 날짜 선택
+			$wrap.find('.schedule_table .table tbody td').removeClass('select');
+			selectTodayIfVisible($wrap, currentDate, daysKor, updateSelectionInfo);
+		});
+
 
         $wrap.find('.schedule_table .table tbody td').on('click', function () {
             const $cell = $(this);
@@ -244,24 +266,72 @@
             updateSelectionInfo($cell);
         });
 
+        function getInitialCount(status) {
+            if (status === '신청가능') {
+                return 10;
+            } else if (status === '잔여석 신청 가능') {
+                return 4;
+            }
+            return 0;
+        }
+
+        function getSelectedProgramInfo() {
+            const $selectedRow = $wrap.find('.glbox.select_day .tbl input[type="radio"]:checked').closest('tr');
+            if (!$selectedRow.length) {
+                return null;
+            }
+            return {
+                status: $selectedRow.data('status') || '',
+                total: parseInt($selectedRow.data('total'), 10) || 0
+            };
+        }
+
         $wrap.find('.btn.plus').on('click', function () {
+            const programInfo = getSelectedProgramInfo();
+            if (!programInfo || !programInfo.status) {
+                return;
+            }
+
             const $input = $wrap.find('.count input');
-            const value = parseInt($input.val(), 10);
-            if (value === 0) {
-                $input.val(10);
+            const currentValue = parseInt($input.val(), 10) || 0;
+            const initialCount = getInitialCount(programInfo.status);
+
+            if (currentValue === 0) {
+                $input.val(initialCount);
+            } else {
+                const newValue = currentValue + 1;
+                if (newValue <= programInfo.total) {
+                    $input.val(newValue);
+                }
             }
         });
 
         $wrap.find('.btn.minus').on('click', function () {
+            const programInfo = getSelectedProgramInfo();
+            if (!programInfo || !programInfo.status) {
+                return;
+            }
+
             const $input = $wrap.find('.count input');
-            const value = parseInt($input.val(), 10);
-            if (value === 10) {
+            const currentValue = parseInt($input.val(), 10) || 0;
+            const initialCount = getInitialCount(programInfo.status);
+
+            if (currentValue === 0) {
+                return;
+            }
+
+            if (currentValue === initialCount) {
                 $input.val(0);
+            } else {
+                const newValue = currentValue - 1;
+                if (newValue >= 0) {
+                    $input.val(newValue);
+                }
             }
         });
 
         $wrap.find('.glbox.select_day .tbl').on('change', 'input[type="radio"]', function () {
-            $wrap.find('.count input').val(10);
+            $wrap.find('.count input').val(0);
             const $row = $(this).closest('tr');
             selectedProgramData = {
                 programId: $row.data('programId'),

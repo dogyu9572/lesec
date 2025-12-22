@@ -126,11 +126,30 @@ function togglePopupTypeSections() {
 // 이미지 미리보기 기능
 function initImagePreview() {
     const fileInput = document.getElementById('popup_image');
-    const preview = document.getElementById('popupImagePreview');
+    const preview = document.getElementById('popupImagePreview');   
     
     if (fileInput && preview) {
         fileInput.addEventListener('change', function(e) {
+            const maxSize = 5 * 1024 * 1024; // 5MB
+            
+            // 파일이 선택되지 않았거나 없는 경우
+            if (!e.target.files || e.target.files.length === 0) {
+                alert('5MB 이하의 파일을 선택해주세요.');
+                this.value = '';
+                preview.innerHTML = '';
+                return;
+            }
+            
             const file = e.target.files[0];
+            
+            // 파일 크기 체크
+            if (file.size > maxSize) {
+                alert('이미지 용량이 5MB를 초과합니다.\n더 작은 이미지를 선택해주세요.');
+                this.value = '';
+                preview.innerHTML = '';
+                return;
+            }         
+            
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {

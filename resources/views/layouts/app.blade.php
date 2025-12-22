@@ -37,7 +37,7 @@
     <header class="header">
 		<div class="bg"><div class="inner"></div></div>
 		<div class="inner">
-			<a href="/" class="logo"><img src="/images/logo.svg" alt="logo"><h1>서울대학교 농생명과학공동기기원 생명·환경과학교육센터</h1></a>
+			<a href="/" class="logo"><img src="/images/logo_new.svg" alt="logo"><h1>서울대학교 농생명과학공동기기원 생명·환경과학교육센터</h1></a>
 			<a href="javascript:void(0);" class="btn_menu">
 				<p class="t"></p>
 				<p class="m"></p>

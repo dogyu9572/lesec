@@ -31,7 +31,7 @@
 						<th>신청번호</th>
 						<th>교육유형</th>
 						<th>프로그램명</th>
-						<th>교육일</th>
+						<th>참가일</th>
 						<th>결제방법</th>
 						<th>결제상태</th>
 						<th>신청상태</th>
@@ -74,13 +74,28 @@
 								-
 							@endif
 						</td>
-						<td class="appli09">
+						<!-- <td class="appli09">
 							@if($application->application_status === 'approved')
 								<a href="{{ route('mypage.application_write', $application->id) }}" class="btn btn_kwk">수정</a>
 							@else
 								<a href="{{ route('mypage.application_write', $application->id) }}" class="btn btn_wkk">입력</a>
 							@endif
+						</td> -->
+						<td class="appli09">
+
+							{{-- 승인대기: 불가 버튼만 표시 --}}
+							@if($application->application_status === 'pending')
+								<a href="javascript:void(0);" class="btn btn_gray">불가</a>
+
+							{{-- 승인완료: 수정 버튼 --}}
+							@elseif($application->application_status === 'approved')
+								<a href="{{ route('mypage.application_write', $application->id) }}" class="btn btn_wkk">입력</a>
+							@else
+								<a href="{{ route('mypage.application_write', $application->id) }}" class="btn btn_kwk">수정</a>
+							@endif
+
 						</td>
+
 						<td class="appli10">
 							@if($application->payment_status === 'cancelled')
 								<a href="javascript:void(0);" class="btn btn_gray">취소 완료</a>

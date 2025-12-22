@@ -28,6 +28,7 @@ Thumbs.db
 .local/
 .ssh/
 .npm/
+.dbclient/
 
 # 시스템 파일
 .bash_history

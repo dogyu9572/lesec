@@ -14,14 +14,33 @@
 				@endif
 				<form method="POST" action="{{ route('member.login.submit') }}" class="js-member-form">
 					@csrf
-					<input type="text" name="login_id" class="text" placeholder="아이디를 입력해주세요." value="{{ old('login_id') }}">
+					<div class="password-wrap">
+						<input type="text" name="login_id" class="text" placeholder="아이디를 입력해주세요." value="{{ old('login_id') }}">
+						<button type="button" class="btn-clear clear-password">
+							<img src="/images/icon_clear.svg" alt="삭제">
+						</button>
+					</div>
 					@error('login_id')
 						<p class="error_alert">{{ $message }}</p>
 					@enderror
-					<input type="password" name="password" class="text mt16" placeholder="비밀번호를 입력해주세요.">
+					<!-- <input type="password" name="password" class="text mt16" placeholder="비밀번호를 입력해주세요.">
+					@error('password')
+						<p class="error_alert">{{ $message }}</p>
+					@enderror -->
+					<div class="password-wrap mt16">
+						<input type="password" name="password" class="text password-input" placeholder="비밀번호를 입력해주세요.">
+						<button type="button" class="btn-eye toggle-password">
+							<img src="/images/icon_eye.svg" alt="보기">
+						</button>
+						<button type="button" class="btn-clear clear-password">
+							<img src="/images/icon_clear.svg" alt="삭제">
+						</button>
+					</div>
+
 					@error('password')
 						<p class="error_alert">{{ $message }}</p>
 					@enderror
+
 					<div class="btns">
 						<label class="check">
 							<input type="checkbox" name="remember_login_id" value="1" {{ old('remember_login_id') ? 'checked' : '' }}>
@@ -33,13 +52,14 @@
 						</div>
 					</div>
 					<button type="submit" class="btn btn_wbb">로그인</button>
+					<a href="{{ route('member.register') }}" class="btn btn_bwb">회원가입</a>
 				</form>
-				<a href="{{ route('member.register') }}" class="btn btn_bwb">회원가입</a>
 			</div>
 		</div>
 	</div>
 
 </main>
+
 @endsection
 
 @push('scripts')

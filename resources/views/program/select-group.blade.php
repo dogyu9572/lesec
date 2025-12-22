@@ -136,7 +136,7 @@
 						<strong>신청 인원수</strong>
 						<div class="flex">
 							<button class="btn minus" @if(!$canApply) disabled @endif>-</button>
-							<input type="text" value="10" readonly>
+							<input type="text" value="0" readonly>
 							<button class="btn plus" @if(!$canApply) disabled @endif>+</button>
 						</div>
 					</div>

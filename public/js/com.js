@@ -93,3 +93,25 @@ $(document).ready(function(){
 		document.documentElement.style.setProperty('--vh', `${vh}px`);
 	});
 });
+
+//비밀번호 암호화 해제
+document.addEventListener('DOMContentLoaded', function () {
+    const toggleEyeBtn = document.querySelector('.toggle-password');
+    const passwordInput = document.querySelector('.password-input');
+
+    toggleEyeBtn.addEventListener('click', function () {
+        passwordInput.type = (passwordInput.type === 'password') ? 'text' : 'password';
+    });
+
+    document.querySelectorAll('.clear-password').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            const parent = btn.closest('.password-wrap');
+            const input = parent.querySelector('input[type="text"], input[type="password"]');
+
+            if (input) {
+                input.value = '';
+                input.focus();
+            }
+        });
+    });
+});

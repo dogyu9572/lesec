@@ -159,8 +159,8 @@ class BoardTemplate extends Model
             return collect();
         }
 
-        // 선택된 그룹의 모든 하위 카테고리 재귀적으로 가져오기
-        return $this->category->allChildren()->active()->get();
+        // 선택된 그룹의 모든 하위 카테고리 재귀적으로 가져오기 (display_order로 정렬)
+        return $this->category->allChildren()->active()->orderBy('display_order', 'desc')->get();
     }
 }
 

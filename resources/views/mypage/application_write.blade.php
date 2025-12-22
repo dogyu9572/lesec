@@ -97,8 +97,16 @@
 			<div class="scroll">
 				<div class="tbl board_write board_apply_list">
 					<table>
+						<colgroup>
+							<col width="4%">
+							<col>
+							<col>
+							<col>
+							<col>
+						</colgroup>
 						<thead>
 							<tr>
+								<th>No</th>
 								<th>이름<span>*</span></th>
 								<th>학년<span>*</span></th>
 								<th>반<span>*</span></th>
@@ -108,6 +116,7 @@
 						<tbody>
 							@forelse($application->participants as $participant)
 							<tr>
+								<td>{{ $loop->iteration }}</td>
 								<td>
 									<input type="hidden" name="participants[{{ $loop->index }}][id]" value="{{ $participant->id }}">
 									<input type="text" name="participants[{{ $loop->index }}][name]" class="w100p" placeholder="이름을 입력해주세요." value="{{ $participant->name ?? '' }}" required>
@@ -132,6 +141,7 @@
 							</tr>
 							@empty
 							<tr>
+								<td>1</td>
 								<td><input type="text" name="participants[0][name]" class="w100p" placeholder="이름을 입력해주세요." required></td>
 								<td>
 									<select name="participants[0][grade]" class="w100p" required>
@@ -165,7 +175,7 @@
 					<strong>개인정보의 수집이용 목적</strong>
 					체험학습 신청, 회원관리, 수료증 발급
 					<strong>수집하려는 개인정보의 항목</strong>
-					아이디, 비밀번호, 이름, 사용자구분, 소속(지역, 학교명, 학년, 반, 생년월일, 성별), 전화/핸드폰, 이메일
+					이름, 소속(지역, 학교명, 학력선택, 학년, 반), 생년월일
 					<strong>개인정보의 보유 및 이용기간</strong>
 					1년 (1년 후 파기)
 					<strong>거부권 및 거부시의 불이익</strong>
@@ -247,7 +257,8 @@ $(document).ready(function () {
 		for (let i = 1; i <= 20; i++) {
 			classOptions += '<option value="' + i + '">' + i + '반</option>';
 		}
-		const newRow = `
+		
+		/*const newRow = `
 			<tr>
 				<td><input type="text" name="participants[${currentRows}][name]" class="w100p" placeholder="이름을 입력해주세요." required></td>
 				<td>
@@ -264,7 +275,27 @@ $(document).ready(function () {
 				</td>
 				<td><input type="text" name="participants[${currentRows}][birthday]" class="w100p" placeholder="20010101"></td>
 			</tr>
-		`;
+		`;*/
+		
+		const newRow = `
+		<tr>
+			<td>${currentRows + 1}</td>   <!-- 번호 자동 증가 -->
+			<td><input type="text" name="participants[${currentRows}][name]" class="w100p" placeholder="이름을 입력해주세요." required></td>
+			<td>
+				<select name="participants[${currentRows}][grade]" class="w100p" required>
+					<option value="">학년을 선택해주세요.</option>
+					${gradeOptions}
+				</select>
+			</td>
+			<td>
+				<select name="participants[${currentRows}][class]" class="w100p" required>
+					<option value="">반을 선택해주세요.</option>
+					${classOptions}
+				</select>
+			</td>
+			<td><input type="text" name="participants[${currentRows}][birthday]" class="w100p" placeholder="20010101"></td>
+		</tr>
+	`;
 		
 		$('.board_apply_list tbody').append(newRow);
 		updatePlaceholders();

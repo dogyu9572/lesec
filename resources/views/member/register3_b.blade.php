@@ -50,8 +50,11 @@
 					</dl>
 					<dl>
 						<dt>비밀번호<span>*</span></dt>
-						<dd>
-							<input type="password" name="password" class="text w100p" placeholder="비밀번호를 입력해주세요.">
+						<dd class="password-wrap">
+							<input type="password" name="password" class="text w100p password-input" placeholder="영문/숫자/특수문자를 포함하여 9~12자리로 입력해주세요.">
+							<button type="button" class="btn-eye toggle-password r16">
+								<img src="/images/icon_eye.svg" alt="보기">
+							</button>
 							@error('password')
 							<p class="error_alert">{{ $message }}</p>
 							@enderror
@@ -147,7 +150,7 @@
 				<div class="stit num mb0 nbd_b"><span>2</span>소속 정보 <p class="abso">* 는 필수 입력 사항입니다.</p></div>
 				<div class="inputs">
 					<dl>
-						<dt>시/도<span>*</span></dt>
+						<dt>지역<span>*</span></dt>
 						<dd>
 							<div class="flex city">
 								<select name="city" class="city_select" disabled>
@@ -189,7 +192,7 @@
 							@enderror
 						</dd>
 					</dl>
-					<dl>
+					<!-- <dl>
 						<dt>학년/반<span>*</span></dt>
 						<dd>
 							<div class="flex city">
@@ -213,7 +216,7 @@
 							<p class="error_alert">{{ $classError }}</p>
 							@endif
 						</dd>
-					</dl>
+					</dl> -->
 				</div>
 			
 				<div class="stit num mb0 nbd_b"><span>3</span>약관 동의</div>
@@ -223,7 +226,7 @@
 							<strong>개인정보의 수집이용 목적</strong>
 							체험학습 신청, 회원관리, 수료증 발급
 							<strong>수집하려는 개인정보의 항목</strong>
-							아이디, 비밀번호, 이름, 사용자구분, 소속(지역, 학교명, 학년, 반, 생년월일, 성별), 전화/핸드폰, 이메일
+							이름, 아이디, 비밀번호, 사용자구분, 생년월일, 성별, 소속(지역, 학교명, 학력선택, 학년, 반), 휴대폰번호, 이메일 주소
 							<strong>개인정보의 보유 및 이용기간</strong>
 							1년 (1년 후 파기)
 							<strong>거부권 및 거부시의 불이익</strong>

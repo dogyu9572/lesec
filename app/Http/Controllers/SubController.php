@@ -71,7 +71,9 @@ class SubController extends Controller
         ];
         $posts = $this->boardContentService->getPostPaginator($board, $filters);
         $categories = collect([
-            '신청/입금/환불',
+            //'신청/입금/환불',
+			'신청/입금',
+			'환불',
             '수료증',
             '대기자',
             '회원정보',
@@ -300,10 +302,8 @@ class SubController extends Controller
     public function no_email_collection()
     {
         $gNum = "terms"; $sNum = ""; $gName = "이메일무단수집거부"; $sName = "";
-        $board = $this->boardContentService->getBoard('privacy-policy');
-        $post = $this->boardContentService->getLatestPost($board);
 
-        return view('terms.no_email_collection', compact('gNum', 'sNum', 'gName', 'sName', 'post'));
+        return view('terms.no_email_collection', compact('gNum', 'sNum', 'gName', 'sName'));
     }
 //인쇄
 	//견적서

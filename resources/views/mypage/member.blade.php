@@ -22,7 +22,7 @@
 							<input type="text" value="{{ $member->login_id }}" readonly class="text w100p">
 						</dd>
 					</dl>
-					<dl>
+					<dl class="password-fields" style="display:none;">
 						<dt>현재 비밀번호<span>*</span></dt>
 						<dd>
 							<input type="password" name="current_password" class="text w100p" placeholder="안전한 정보 수정을 위해 현재 사용 중인 비밀번호를 입력해주세요.">
@@ -31,7 +31,7 @@
 							@enderror
 						</dd>
 					</dl>
-					<dl>
+					<dl class="password-fields" style="display:none;">
 						<dt>새 비밀번호</dt>
 						<dd>
 							<input type="password" name="password" class="text w100p now_pw" placeholder="변경할 비밀번호를 입력해주세요. (변경하지 않으려면 비워두세요)">
@@ -40,7 +40,7 @@
 							@enderror
 						</dd>
 					</dl>
-					<dl>
+					<dl class="password-fields" style="display:none;">
 						<dt>새 비밀번호 확인</dt>
 						<dd>
 							<input type="password" name="password_confirmation" class="text w100p now_pw_check" placeholder="입력한 비밀번호를 다시 한번 입력해 주세요.">
@@ -134,7 +134,7 @@
 				<div class="stit num mb0 nbd_b"><span>2</span>소속 정보 <p class="abso">* 는 필수 입력 사항입니다.</p></div>
 				<div class="inputs">
 					<dl>
-						<dt>시/도<span>*</span></dt>
+						<dt>지역<span>*</span></dt>
 						<dd>
 							<div class="flex city">
 								<select name="city">
@@ -214,7 +214,8 @@
 				</div>
 
 				<div class="btns_tac">
-					<button type="submit" class="btn_submit btn_wbb">정보 수정</button>
+					<button type="button" class="btn_submit btn_wbb js-show-password-btn">정보 수정</button>
+					<button type="submit" class="btn_submit btn_wbb js-submit-btn" style="display:none;">정보 수정</button>
 					<button type="button" class="btn btn_kwy" onclick="layerShow('pop_secession')">회원 탈퇴</button>
 				</div>
 			</form>
@@ -375,6 +376,22 @@ $(function() {
 				return false;
 			}
 		}
+	});
+});
+
+// 비밀번호 입력란 노출
+$(function(){
+	var $showBtn = $(".js-show-password-btn");
+	var $submitBtn = $(".js-submit-btn");
+	var $passwordFields = $(".password-fields");
+
+	// 정보 수정 버튼 클릭 시 비밀번호 입력란 노출
+	$showBtn.on("click", function(e){
+		e.preventDefault();
+		alert('비밀번호를 입력해야 수정이 완료됩니다.');
+		$passwordFields.slideDown(300);
+		$showBtn.hide();
+		$submitBtn.show();
 	});
 });
 

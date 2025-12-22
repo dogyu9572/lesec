@@ -56,7 +56,26 @@ document.addEventListener('DOMContentLoaded', function() {
         if (input && preview && wrapper) {
             // 파일 선택 시
             input.addEventListener('change', function(e) {
+                const maxSize = 5 * 1024 * 1024; // 5MB
+                
+                // 파일이 선택되지 않았거나 없는 경우
+                if (!e.target.files || e.target.files.length === 0) {
+                    alert('5MB 이하의 파일을 선택해주세요.');
+                    this.value = '';
+                    preview.innerHTML = '';
+                    return;
+                }
+                
                 const file = e.target.files[0];
+                
+                // 파일 크기 체크
+                if (file.size > maxSize) {
+                    alert('이미지 용량이 5MB를 초과합니다.\n더 작은 이미지를 선택해주세요.');
+                    this.value = '';
+                    preview.innerHTML = '';
+                    return;
+                }
+                
                 if (file) {
                     showImagePreview(file, preview, inputId, previewId);
                 }
@@ -77,10 +96,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 e.preventDefault();
                 wrapper.classList.remove('dragover');
                 
+                const maxSize = 5 * 1024 * 1024; // 5MB
                 const files = e.dataTransfer.files;
                 if (files.length > 0) {
                     const file = files[0];
                     if (file.type.startsWith('image/')) {
+                        // 파일 크기 체크
+                        if (file.size > maxSize) {
+                            alert('이미지 용량이 5MB를 초과합니다.\n더 작은 이미지를 선택해주세요.');
+                            return;
+                        }
                         input.files = files;
                         showImagePreview(file, preview, inputId, previewId);
                     } else {

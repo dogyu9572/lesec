@@ -45,7 +45,7 @@
 						<td>{{ $application->program_name ?? $application->reservation->program_name ?? '-' }}</td>
 					</tr>
 					<tr>
-						<th>교육일</th>
+						<th>참가일</th>
 						<td>
 							@if($application->participation_date)
 								{{ $application->participation_date->format('Y.m.d') }}

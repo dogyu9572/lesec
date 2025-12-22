@@ -15,7 +15,7 @@
 					<dd>{{ $completionContext['program_name'] !== '' ? $completionContext['program_name'] : '프로그램 정보가 아직 등록되지 않았습니다.' }}</dd>
 				</dl>
 				<dl>
-					<dt>교육일</dt>
+					<dt>참가일</dt>
 					<dd>{{ $completionContext['education_date'] }}</dd>
 				</dl>
 				<dl>

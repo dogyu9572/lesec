@@ -339,6 +339,14 @@ class ThumbnailManager {
     init() {
         // 파일 선택 이벤트
         this.thumbnailInput.addEventListener('change', (e) => {
+            // 파일이 선택되지 않았거나 없는 경우
+            if (!e.target.files || e.target.files.length === 0) {
+                alert('5MB 이하의 파일을 선택해주세요.');
+                this.thumbnailInput.value = '';
+                this.thumbnailPreview.innerHTML = '';
+                return;
+            }
+            
             const file = e.target.files[0];
             if (file) {
                 this.handleThumbnail(file);
@@ -363,7 +371,14 @@ class ThumbnailManager {
             e.stopPropagation(); // 이벤트 전파 차단 - 첨부파일 영역과 완전 분리
             this.thumbnailUpload.classList.remove('board-file-drag-over');
             
-            const file = e.dataTransfer.files[0]; // 첫 번째 파일만
+            const files = e.dataTransfer.files;
+            // 파일이 선택되지 않았거나 없는 경우
+            if (!files || files.length === 0) {
+                alert('5MB 이하의 파일을 선택해주세요.');
+                return;
+            }
+            
+            const file = files[0]; // 첫 번째 파일만
             if (file) {
                 this.handleThumbnail(file);
             }
@@ -452,6 +467,14 @@ class FileManager {
     init() {
         // 파일 선택 이벤트
         this.fileInput.addEventListener('change', (e) => {
+            // 파일이 선택되지 않았거나 없는 경우
+            if (!e.target.files || e.target.files.length === 0) {
+                alert('10MB 이하의 파일을 선택해주세요.');
+                this.fileInput.value = '';
+                this.filePreview.innerHTML = '';
+                return;
+            }
+            
             const files = Array.from(e.target.files);
             if (files.length > 0) {
                 this.replaceAllFiles(files);
@@ -476,8 +499,15 @@ class FileManager {
             e.stopPropagation(); // 이벤트 전파 차단 - 썸네일 영역과 완전 분리
             this.fileUpload.classList.remove('board-file-drag-over');
             
-            const files = Array.from(e.dataTransfer.files);
-            this.handleFiles(files);
+            const files = e.dataTransfer.files;
+            // 파일이 선택되지 않았거나 없는 경우
+            if (!files || files.length === 0) {
+                alert('10MB 이하의 파일을 선택해주세요.');
+                return;
+            }
+            
+            const fileArray = Array.from(files);
+            this.handleFiles(fileArray);
         });
     }
     

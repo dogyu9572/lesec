@@ -63,8 +63,22 @@ class ScheduleController extends BaseController
             return Carbon::parse($schedule->start_date)->timestamp;
         })->values();
 
+        // 해당 월의 모든 프로그램 조회 (개인/단체 모두)
+        $programs = \App\Models\ProgramReservation::query()
+            ->active()
+            ->whereDate('education_start_date', '<=', $endOfMonth)
+            ->whereDate('education_end_date', '>=', $startOfMonth)
+            ->orderBy('education_start_date', 'asc')
+            ->get();
+        
+        // 날짜별 그룹화
+        $programsByDate = $this->programReservationService->groupProgramsByDate($programs);
+        
+        // 교육불가 일정 조회
+        $disabledDates = $this->scheduleService->getDisabledDates($year, $month);
+
         // 캘린더 생성
-        $calendar = $this->programReservationService->generateCalendar($year, $month, []);
+        $calendar = $this->programReservationService->generateCalendar($year, $month, $programsByDate, $disabledDates);
 
         return $this->view('backoffice.schedules.index', [
             'calendar' => $calendar,
@@ -173,19 +187,51 @@ class ScheduleController extends BaseController
 
         try {
             $schedules = $this->scheduleService->getSchedulesByDate($date);
+            
+            // 해당 날짜의 프로그램 조회
+            $dateCarbon = Carbon::parse($date);
+            $programs = \App\Models\ProgramReservation::query()
+                ->active()
+                ->whereDate('education_start_date', '<=', $dateCarbon)
+                ->whereDate('education_end_date', '>=', $dateCarbon)
+                ->orderBy('education_start_date', 'asc')
+                ->get();
+
+            $schedulesData = $schedules->map(function ($schedule) {
+                return [
+                    'id' => $schedule->id,
+                    'title' => $schedule->title,
+                    'start_date' => Carbon::parse($schedule->start_date)->format('Y.m.d'),
+                    'end_date' => Carbon::parse($schedule->end_date)->format('Y.m.d'),
+                    'content' => $schedule->content ?? '',
+                    'disable_application' => $schedule->disable_application,
+                    'type' => 'schedule',
+                ];
+            })->toArray();
+
+            $programsData = $programs->map(function ($program) {
+                return [
+                    'id' => $program->id,
+                    'title' => $program->program_name,
+                    'start_date' => Carbon::parse($program->education_start_date)->format('Y.m.d'),
+                    'end_date' => Carbon::parse($program->education_end_date)->format('Y.m.d'),
+                    'content' => $program->education_type_name ?? '',
+                    'type' => 'program',
+                    'applied_count' => $program->applied_count ?? 0,
+                    'capacity' => $program->capacity ?? null,
+                    'is_unlimited_capacity' => $program->is_unlimited_capacity ?? false,
+                ];
+            })->toArray();
+
+            // 일정과 프로그램을 합쳐서 정렬
+            $allData = array_merge($schedulesData, $programsData);
+            usort($allData, function($a, $b) {
+                return strcmp($a['start_date'], $b['start_date']);
+            });
 
             return response()->json([
                 'success' => true,
-                'data' => $schedules->map(function ($schedule) {
-                    return [
-                        'id' => $schedule->id,
-                        'title' => $schedule->title,
-                        'start_date' => Carbon::parse($schedule->start_date)->format('Y.m.d'),
-                        'end_date' => Carbon::parse($schedule->end_date)->format('Y.m.d'),
-                        'content' => $schedule->content ?? '',
-                        'disable_application' => $schedule->disable_application,
-                    ];
-                })->toArray(),
+                'data' => $allData,
             ]);
         } catch (\Exception $e) {
             return response()->json([

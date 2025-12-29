@@ -57,7 +57,7 @@
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     width: 90%;
     max-width: 800px;
-    max-height: 90vh;
+    max-height: 95vh;
     overflow-y: auto;
     animation: slideUp 0.3s ease;
     z-index: 10000;
@@ -258,5 +258,56 @@
 
 body.modal-open {
     overflow: hidden;
+}
+
+/* 모달 내부 페이지네이션 스타일 */
+#popup-pagination {
+    margin-top: 20px;
+}
+
+#popup-pagination .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    list-style: none;
+    padding: 0;
+}
+
+#popup-pagination .pagination .page-item {
+    display: inline-block;
+}
+
+#popup-pagination .pagination .page-link {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #dee2e6;
+    color: #007bff;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    display: block;
+    min-width: 36px;
+    text-align: center;
+}
+
+#popup-pagination .pagination .page-link:hover {
+    background: #e9ecef;
+    border-color: #007bff;
+    color: #0056b3;
+}
+
+#popup-pagination .pagination .page-item.active .page-link {
+    background-color: #4a90e2;
+    border-color: #4a90e2;
+    color: white;
+}
+
+#popup-pagination .pagination .page-item.disabled .page-link {
+    color: #6c757d;
+    pointer-events: none;
+    background: white;
+    border-color: #dee2e6;
+    cursor: not-allowed;
 }
 

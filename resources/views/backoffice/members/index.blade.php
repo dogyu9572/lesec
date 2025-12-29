@@ -1,6 +1,6 @@
 @extends('backoffice.layouts.app')
 
-@section('title', '회원 목록')
+@section('title', '회원 정보')
 
 @section('styles')
 <link rel="stylesheet" href="{{ asset('css/common/buttons.css') }}">
@@ -37,12 +37,7 @@
         </div>
     </div>
 
-    <div class="board-card">
-        <div class="board-card-header">
-            <div class="board-page-card-title">
-                <h6>전체회원 목록</h6>
-            </div>
-        </div>
+    <div class="board-card">      
         <div class="board-card-body">
             <!-- 검색 필터 -->
             <div class="user-filter">
@@ -69,7 +64,7 @@
                             </select>
                         </div>
                         <div class="filter-group">
-                            <label for="city" class="filter-label">소속 시/도</label>
+                            <label for="city" class="filter-label">지역</label>
                             <select id="city" name="city" class="filter-select">
                                 <option value="">전체</option>
                                 <option value="제주특별자치도" @selected(request('city') == '제주특별자치도')>제주특별자치도</option>
@@ -102,14 +97,27 @@
                                     <input type="checkbox" name="sms_consent" value="1" @checked(request('sms_consent'))>
                                     SMS
                                 </label>
+                                <label>
+                                    <input type="checkbox" name="kakao_consent" value="1" @checked(request('kakao_consent'))>
+                                    카카오 알림톡
+                                </label>
                             </div>
                         </div>                      
                     </div>
                     <div class="filter-row">                       
                         <div class="filter-group">
-                            <label for="search_term" class="filter-label">검색어</label>
-                            <input type="text" id="search_term" name="search_term" class="filter-input"
-                                placeholder="이름/학교명/이메일/연락처" value="{{ request('search_term') }}">
+                            <label for="search_type" class="filter-label">검색</label>
+                            <div class="search-input-wrapper">
+                                <select id="search_type" name="search_type" class="filter-select search-type-select">
+                                    <option value="all" @selected(request('search_type', 'all') == 'all')>전체</option>
+                                    <option value="name" @selected(request('search_type') == 'name')>이름</option>
+                                    <option value="school_name" @selected(request('search_type') == 'school_name')>학교명</option>
+                                    <option value="email" @selected(request('search_type') == 'email')>이메일</option>
+                                    <option value="contact" @selected(request('search_type') == 'contact')>연락처</option>
+                                </select>
+                                <input type="text" id="search_keyword" name="search_keyword" class="filter-input search-keyword-input"
+                                    placeholder="검색어를 입력하세요" value="{{ request('search_keyword') }}">
+                            </div>
                         </div>
                         <div class="filter-group">
                             <div class="filter-buttons">
@@ -167,7 +175,7 @@
                                 <th>연락처2</th>
                                 <th>이메일주소</th>
                                 <th>가입일시</th>
-                                <th style="width: 150px;">관리</th>
+                                <th>관리</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -196,8 +204,11 @@
                                     <td>{{ $member->joined_at ? $member->joined_at->format('Y.m.d') : '-' }}</td>
                                     <td>
                                         <div class="board-btn-group">
+                                            <a href="{{ route('backoffice.members.show', $member) }}" class="btn btn-info btn-sm">
+                                                <i class="fas fa-eye"></i> 보기
+                                            </a>
                                             <a href="{{ route('backoffice.members.edit', $member) }}" class="btn btn-primary btn-sm">
-                                                <i class="fas fa-edit"></i>수정
+                                                <i class="fas fa-edit"></i> 수정
                                             </a>
                                             <button type="button" class="btn btn-danger btn-sm" onclick="withdrawMember({{ $member->id }})">
                                                 <i class="fas fa-trash"></i> 탈퇴

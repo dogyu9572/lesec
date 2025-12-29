@@ -337,10 +337,12 @@ class ProgramReservationService
         while ($day <= $daysInMonth) {
             $dateKey = sprintf('%d-%02d-%02d', $year, $month, $day);
             $isDisabled = isset($disabledDates[$dateKey]);
+            $disabledDateInfo = $isDisabled && is_array($disabledDates[$dateKey]) ? $disabledDates[$dateKey] : null;
             $week[] = [
                 'day' => $day,
                 'disabled' => $isDisabled,
                 'is_disabled_date' => $isDisabled,
+                'disabled_date_title' => $disabledDateInfo['title'] ?? null,
                 'programs' => $isDisabled ? [] : ($programsByDate[$dateKey] ?? [])
             ];
             

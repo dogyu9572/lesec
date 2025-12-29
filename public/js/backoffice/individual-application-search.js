@@ -87,10 +87,25 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // 팝업 초기화 버튼 클릭
+    const popupResetBtn = document.getElementById('popup-reset-btn');
+    if (popupResetBtn) {
+        popupResetBtn.addEventListener('click', function() {
+            // 검색 필드 초기화
+            const searchTypeElement = document.getElementById('popup_search_type');
+            const searchKeywordElement = document.getElementById('popup_search_keyword');
+            if (searchTypeElement) searchTypeElement.value = 'all';
+            if (searchKeywordElement) searchKeywordElement.value = '';
+            
+            // 전체 목록 다시 로드
+            searchMembers(1);
+        });
+    }
+
     // 회원 검색 엔터키
-    const popupSearchTerm = document.getElementById('popup_search_term');
-    if (popupSearchTerm) {
-        popupSearchTerm.addEventListener('keypress', function (e) {
+    const popupSearchKeyword = document.getElementById('popup_search_keyword');
+    if (popupSearchKeyword) {
+        popupSearchKeyword.addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 searchMembers(1);
@@ -174,6 +189,14 @@ function openMemberSearchModal() {
         selectedMember = null;
         currentMemberPage = 1;
         updateMemberConfirmButton();
+        
+        // 검색 필드 초기화
+        const searchTypeElement = document.getElementById('popup_search_type');
+        const searchKeywordElement = document.getElementById('popup_search_keyword');
+        if (searchTypeElement) searchTypeElement.value = 'all';
+        if (searchKeywordElement) searchKeywordElement.value = '';
+        
+        // 기본 검색 실행 (검색어 없이 전체 목록)
         searchMembers(1);
     }
 }
@@ -184,6 +207,26 @@ function closeMemberSearchModal() {
     if (modal) {
         modal.style.display = 'none';
         selectedMember = null;
+        
+        // 검색 필드 초기화
+        const searchTypeElement = document.getElementById('popup_search_type');
+        const searchKeywordElement = document.getElementById('popup_search_keyword');
+        if (searchTypeElement) searchTypeElement.value = 'all';
+        if (searchKeywordElement) searchKeywordElement.value = '';
+        
+        // 검색 결과 초기화
+        const memberListBody = document.getElementById('popup-member-list-body');
+        const paginationContainer = document.getElementById('popup-pagination');
+        if (memberListBody) {
+            const selectionMode = memberListBody.dataset.selectionMode || 'single';
+            const colspan = selectionMode === 'multiple' ? 6 : 5;
+            memberListBody.innerHTML = `<tr><td colspan="${colspan}" class="text-center">검색어를 입력하거나 필터를 선택해주세요.</td></tr>`;
+        }
+        if (paginationContainer) {
+            paginationContainer.innerHTML = '';
+        }
+        
+        updateMemberConfirmButton();
     }
 }
 

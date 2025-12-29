@@ -56,16 +56,27 @@ class MemberService
         if ($request->filled('sms_consent')) {
             $query->where('sms_consent', $request->sms_consent);
         }
+        if ($request->filled('kakao_consent')) {
+            $query->where('kakao_consent', $request->kakao_consent);
+        }
         
-        // 검색어 필터 (이름/학교명/이메일/연락처)
-        if ($request->filled('search_term')) {
-            $searchTerm = $request->search_term;
-            $query->where(function($q) use ($searchTerm) {
-                $q->where('name', 'like', "%{$searchTerm}%")
-                  ->orWhere('school_name', 'like', "%{$searchTerm}%")
-                  ->orWhere('email', 'like', "%{$searchTerm}%")
-                  ->orWhere('contact', 'like', "%{$searchTerm}%");
-            });
+        // 검색어 필터
+        if ($request->filled('search_keyword')) {
+            $searchType = $request->get('search_type', 'all');
+            $searchKeyword = $request->search_keyword;
+            
+            if ($searchType === 'all') {
+                // 전체 검색
+                $query->where(function($q) use ($searchKeyword) {
+                    $q->where('name', 'like', "%{$searchKeyword}%")
+                      ->orWhere('school_name', 'like', "%{$searchKeyword}%")
+                      ->orWhere('email', 'like', "%{$searchKeyword}%")
+                      ->orWhere('contact', 'like', "%{$searchKeyword}%");
+                });
+            } else {
+                // 특정 필드 검색
+                $query->where($searchType, 'like', "%{$searchKeyword}%");
+            }
         }
         
         return $query->orderBy('created_at', 'desc');
@@ -120,8 +131,9 @@ class MemberService
         $member->school_id = $data['school_id'] ?? $member->school_id;
         $member->grade = $data['grade'] ?? $member->grade;
         $member->class_number = $data['class_number'] ?? $member->class_number;
-        $member->email_consent = isset($data['email_consent']) ? $data['email_consent'] : $member->email_consent;
-        $member->sms_consent = isset($data['sms_consent']) ? $data['sms_consent'] : $member->sms_consent;
+        $member->email_consent = isset($data['email_consent']) ? (bool)$data['email_consent'] : false;
+        $member->sms_consent = isset($data['sms_consent']) ? (bool)$data['sms_consent'] : false;
+        $member->kakao_consent = isset($data['kakao_consent']) ? (bool)$data['kakao_consent'] : false;
         $member->memo = $data['memo'] ?? $member->memo;
         
         if (!empty($data['password'])) {

@@ -95,8 +95,8 @@
     border: #283891 2px solid;
 }
 .board-container .schedule_top .info li.i_possible:before {
-    background: #FFD966;
-    border: #F5C542 1px solid;
+    background: #39B54A;
+    border: none;
 }
 .board-container .schedule_top .info li.i_impossible:before {
     background: #F8B4C5;
@@ -184,9 +184,9 @@
     margin-top: 2px;
 }
 .board-container .schedule_table .table table tbody td .list li.i_possible {
-    color: #7a4d00;
-    background: #FFF3C4;
-    border: #F5C542 1px solid;
+    color: #fff;
+    background: #39B54A;
+    border: none;
 }
 .board-container .schedule_table .table table tbody td .list li.i_impossible {
     color: #7a1f2d;

@@ -92,7 +92,9 @@ class ScheduleService
             $current = (clone $rangeStart);
             while ($current->lte($rangeEnd)) {
                 $dateKey = $current->format('Y-m-d');
-                $disabledDates[$dateKey] = true;
+                $disabledDates[$dateKey] = [
+                    'title' => $schedule->title,
+                ];
                 $current->addDay();
             }
         }

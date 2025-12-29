@@ -1,6 +1,6 @@
 @extends('backoffice.layouts.app')
 
-@section('title', '카테고리 관리')
+@section('title', '코드 관리')
 
 @section('styles')
 <link rel="stylesheet" href="{{ asset('css/backoffice/categories.css') }}">
@@ -28,7 +28,7 @@
 
     <div class="board-card">
         <div class="board-card-header">
-            <h6>카테고리 관리</h6>
+            <h6>코드 관리</h6>
         </div>
         <div class="board-card-body">
             <!-- 그룹 탭 -->
@@ -49,7 +49,7 @@
                             <i class="fas fa-cog"></i> 그룹수정
                          </button>
                         <form action="{{ route('backoffice.categories.destroy', $selectedGroup) }}" method="POST" class="d-inline" 
-                              onsubmit="return confirm('정말 이 그룹을 삭제하시겠습니까?\n하위 카테고리가 있으면 삭제할 수 없습니다.');">
+                              onsubmit="return confirm('정말 이 그룹을 삭제하시겠습니까?\n하위 코드가 있으면 삭제할 수 없습니다.');">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn btn-danger btn-sm delete-category-btn">
@@ -63,7 +63,7 @@
             <div class="table-responsive">
                 <ul id="categoryList" class="menu-list">
                     @forelse($categories as $category)
-                        <!-- 1차 카테고리 -->
+                        <!-- 1차 코드 -->
                         <li class="category-menu-item category-menu-item-depth-1 collapsed" 
                             data-id="{{ $category->id }}" 
                             data-depth="1"
@@ -85,7 +85,7 @@
                                         <i class="fas fa-edit"></i> 수정
                                     </button>
                                     <form action="{{ route('backoffice.categories.destroy', $category) }}" method="POST" class="d-inline" 
-                                          onsubmit="return confirm('정말 이 카테고리를 삭제하시겠습니까?\n하위 카테고리가 있으면 삭제할 수 없습니다.');">
+                                          onsubmit="return confirm('정말 이 코드를 삭제하시겠습니까?\n하위 코드가 있으면 삭제할 수 없습니다.');">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-danger btn-sm delete-category-btn">
@@ -94,11 +94,11 @@
                                     </form>
                                 </div>
                             </div>
-                            <!-- 2차 카테고리 컨테이너 -->
+                            <!-- 2차 코드 컨테이너 -->
                             <ul class="category-children" id="children-{{ $category->id }}">
                                 @if($category->children && $category->children->count() > 0)
                                     @foreach($category->children as $child2)
-                                        <!-- 2차 카테고리 -->
+                                        <!-- 2차 코드 -->
                                         <li class="category-menu-item category-menu-item-depth-2" 
                                             data-id="{{ $child2->id }}" 
                                             data-depth="2"
@@ -118,7 +118,7 @@
                                                         <i class="fas fa-edit"></i> 수정
                                                     </button>
                                                     <form action="{{ route('backoffice.categories.destroy', $child2) }}" method="POST" class="d-inline" 
-                                                          onsubmit="return confirm('정말 이 카테고리를 삭제하시겠습니까?\n하위 카테고리가 있으면 삭제할 수 없습니다.');">
+                                                          onsubmit="return confirm('정말 이 코드를 삭제하시겠습니까?\n하위 코드가 있으면 삭제할 수 없습니다.');">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="btn btn-danger btn-sm delete-category-btn">
@@ -135,9 +135,9 @@
                     @empty
                         <li class="no-category-item">
                             @if($selectedGroupId)
-                                선택된 그룹에 하위 카테고리가 없습니다.
+                                선택된 그룹에 하위 코드가 없습니다.
                             @else
-                                등록된 카테고리가 없습니다.
+                                등록된 코드가 없습니다.
                             @endif
                         </li>
                     @endforelse
@@ -152,7 +152,7 @@
     <div class="category-modal-overlay" id="categoryModalOverlay"></div>
     <div class="category-modal-content">
         <div class="category-modal-header">
-            <h5 id="modalTitle">새 카테고리 추가</h5>
+            <h5 id="modalTitle">새 코드 추가</h5>
             <button type="button" class="category-modal-close" id="categoryModalClose">
                 <i class="fas fa-times"></i>
             </button>
@@ -168,8 +168,8 @@
                     <label for="modalDepthType" class="modal-form-label">추가할 항목 <span class="required">*</span></label>
                     <select class="modal-form-control" id="modalDepthType" name="depth_type" required>
                         <option value="0">그룹</option>
-                        <option value="1">1차 카테고리</option>
-                        <option value="2">2차 카테고리</option>
+                        <option value="1">1차 코드</option>
+                        <option value="2">2차 코드</option>
                     </select>
                 </div>
 
@@ -186,11 +186,11 @@
                     </select>
                 </div>
 
-                <!-- 1차 카테고리 선택 (2차 선택 시) -->
+                <!-- 1차 코드 선택 (2차 선택 시) -->
                 <div class="modal-form-group" id="parentCategorySelectWrapper" style="display: none;">
-                    <label for="modalParentCategoryId" class="modal-form-label">1차 카테고리 선택 <span class="required">*</span></label>
+                    <label for="modalParentCategoryId" class="modal-form-label">1차 코드 선택 <span class="required">*</span></label>
                     <select class="modal-form-control" id="modalParentCategoryId" name="parent_category_id">
-                        <option value="">1차 카테고리 선택</option>
+                        <option value="">1차 코드 선택</option>
                         <!-- JavaScript로 동적으로 채워짐 -->
                     </select>
                 </div>
@@ -234,7 +234,7 @@
 </div>
 
 <div id="orderSavedMessage" class="order-saved-msg">
-    <i class="fa fa-check-circle"></i> 카테고리 순서가 저장되었습니다.
+    <i class="fa fa-check-circle"></i> 코드 순서가 저장되었습니다.
 </div>
 
 <div id="toastMessage" class="toast-message" style="display: none;"></div>

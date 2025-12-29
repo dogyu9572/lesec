@@ -508,7 +508,7 @@
 	.schedule_table .table th:last-child,
 	.schedule_table .table td:last-child {border-right:0; color:#283891;}
 	.schedule_table .table thead th {font-size:16px; color:#333; line-height:48px;}
-.schedule_table .schedule-disabled {display:block; margin-top:6px; font-size:12px; font-weight:600; text-align:right; color:#fff; background:#DC2626; border-radius:4px; padding:2px 6px;}
+.schedule_table .schedule-disabled {display:block; margin-top:6px; font-size:12px; font-weight:600; text-align:center; color:#fff; background:#DC2626; border-radius:4px; padding:4px 8px;}
 	.schedule_table .table tbody td {position:relative; border-top:#ddd 1px solid; padding:4px; height:120px; vertical-align:top; cursor:pointer;}
 	.schedule_table .table tbody td.disabled {pointer-events:none; background:#F7F8F9;}
 	.schedule_table .table tbody td.disabled span {opacity:.6;}

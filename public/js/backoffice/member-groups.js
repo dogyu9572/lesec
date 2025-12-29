@@ -24,6 +24,21 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // 팝업 초기화 버튼 클릭
+    const popupResetBtn = document.getElementById('popup-reset-btn');
+    if (popupResetBtn) {
+        popupResetBtn.addEventListener('click', function() {
+            // 검색 필드 초기화
+            const searchTypeElement = document.getElementById('popup_search_type');
+            const searchKeywordElement = document.getElementById('popup_search_keyword');
+            if (searchTypeElement) searchTypeElement.value = 'all';
+            if (searchKeywordElement) searchKeywordElement.value = '';
+            
+            // 전체 목록 다시 로드
+            searchMembers(1);
+        });
+    }
+
     // 팝업 선택 완료 버튼 클릭
     const popupAddBtn = document.getElementById('popup-add-btn');
     if (popupAddBtn) {
@@ -61,9 +76,9 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // 검색어 입력 시 엔터키 처리
-    const popupSearchTerm = document.getElementById('popup_search_term');
-    if (popupSearchTerm) {
-        popupSearchTerm.addEventListener('keypress', function(e) {
+    const popupSearchKeyword = document.getElementById('popup_search_keyword');
+    if (popupSearchKeyword) {
+        popupSearchKeyword.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 searchMembers(1);
@@ -82,6 +97,14 @@ function openMemberSearchModal() {
         selectedMemberIds = [];
         currentPage = 1;
         updatePopupAddButton();
+        
+        // 검색 필드 초기화
+        const searchTypeElement = document.getElementById('popup_search_type');
+        const searchKeywordElement = document.getElementById('popup_search_keyword');
+        if (searchTypeElement) searchTypeElement.value = 'all';
+        if (searchKeywordElement) searchKeywordElement.value = '';
+        
+        // 기본 검색 실행 (검색어 없이 전체 목록)
         searchMembers(1);
     }
 }
@@ -95,6 +118,25 @@ function closeMemberSearchModal() {
         modal.style.display = 'none';
         selectedMemberIds = [];
         currentPage = 1;
+        
+        // 검색 필드 초기화
+        const searchTypeElement = document.getElementById('popup_search_type');
+        const searchKeywordElement = document.getElementById('popup_search_keyword');
+        if (searchTypeElement) searchTypeElement.value = 'all';
+        if (searchKeywordElement) searchKeywordElement.value = '';
+        
+        // 검색 결과 초기화
+        const memberListBody = document.getElementById('popup-member-list-body');
+        const paginationContainer = document.getElementById('popup-pagination');
+        if (memberListBody) {
+            const colspan = memberListBody.dataset.selectionMode === 'multiple' ? 6 : 5;
+            memberListBody.innerHTML = `<tr><td colspan="${colspan}" class="text-center">검색어를 입력하거나 필터를 선택해주세요.</td></tr>`;
+        }
+        if (paginationContainer) {
+            paginationContainer.innerHTML = '';
+        }
+        
+        updatePopupAddButton();
     }
 }
 
@@ -103,12 +145,17 @@ function closeMemberSearchModal() {
  */
 function searchMembers(page = 1) {
     currentPage = page;
-    const memberType = document.getElementById('popup_member_type')?.value || 'all';
-    const searchTerm = document.getElementById('popup_search_term')?.value || '';
+    const searchTypeElement = document.getElementById('popup_search_type');
+    const searchKeywordElement = document.getElementById('popup_search_keyword');
+    
+    const searchType = searchTypeElement?.value || 'all';
+    const searchKeyword = searchKeywordElement?.value?.trim() || '';
 
     const url = new URL('/backoffice/member-groups/search-members', window.location.origin);
-    url.searchParams.append('member_type', memberType);
-    url.searchParams.append('search_term', searchTerm);
+    if (searchKeyword) {
+        url.searchParams.append('search_type', searchType);
+        url.searchParams.append('search_keyword', searchKeyword);
+    }
     url.searchParams.append('exclude_grouped', 'true');
     url.searchParams.append('page', page);
     url.searchParams.append('per_page', '10');
@@ -166,10 +213,14 @@ function searchMembers(page = 1) {
  */
 function renderMemberList(members) {
     const tbody = document.getElementById('popup-member-list-body');
-    if (!tbody) return;
+    if (!tbody) {
+        return;
+    }
 
     if (!members || members.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="text-center">검색 결과가 없습니다.</td></tr>';
+        const selectionMode = tbody.dataset.selectionMode || 'multiple';
+        const colspan = selectionMode === 'multiple' ? 6 : 5;
+        tbody.innerHTML = `<tr><td colspan="${colspan}" class="text-center">검색 결과가 없습니다.</td></tr>`;
         return;
     }
 
@@ -247,40 +298,64 @@ function updatePopupAddButton() {
  */
 function renderPagination(pagination) {
     const container = document.getElementById('popup-pagination');
-    if (!container) return;
+    if (!container) {
+        return;
+    }
 
-    if (pagination.last_page <= 1) {
+    if (!pagination) {
         container.innerHTML = '';
         return;
     }
 
-    let html = '<div class="pagination">';
-    
-    // 이전 페이지
-    if (pagination.current_page > 1) {
-        html += `<a href="#" onclick="searchMembers(${pagination.current_page - 1}); return false;">&lt;</a>`;
-    } else {
-        html += '<span class="disabled">&lt;</span>';
-    }
+    const lastPage = Math.max(1, pagination.last_page ?? 1);
+    const current = Math.min(lastPage, pagination.current_page ?? currentPage ?? 1);
+    const startPage = Math.max(1, current - 2);
+    const endPage = Math.min(lastPage, current + 2);
 
-    // 페이지 번호
-    for (let i = 1; i <= pagination.last_page; i++) {
-        if (i === pagination.current_page) {
-            html += `<span class="active">${i}</span>`;
-        } else {
-            html += `<a href="#" onclick="searchMembers(${i}); return false;">${i}</a>`;
+    // 항상 페이지네이션 표시 (최소 1페이지)
+
+    let html = '<nav aria-label="페이지 네비게이션"><ul class="pagination">';
+
+    const pageItem = (page, label, disabled = false) => {
+        if (disabled || !page || page < 1) {
+            return `<li class="page-item disabled"><span class="page-link">${label}</span></li>`;
+        }
+        return `<li class="page-item"><a href="#" class="page-link" data-page="${page}">${label}</a></li>`;
+    };
+
+    html += pageItem(1, '<i class="fas fa-angle-double-left"></i>', current === 1);
+    html += pageItem(current > 1 ? current - 1 : 0, '<i class="fas fa-chevron-left"></i>', current === 1);
+
+    // 페이지 번호 표시 (최소 1페이지는 항상 표시)
+    if (lastPage === 1) {
+        // 1페이지만 있을 때는 현재 페이지만 표시
+        html += `<li class="page-item active"><span class="page-link">1</span></li>`;
+    } else {
+        for (let i = startPage; i <= endPage; i++) {
+            if (i === current) {
+                html += `<li class="page-item active"><span class="page-link">${i}</span></li>`;
+            } else {
+                html += pageItem(i, i);
+            }
         }
     }
 
-    // 다음 페이지
-    if (pagination.current_page < pagination.last_page) {
-        html += `<a href="#" onclick="searchMembers(${pagination.current_page + 1}); return false;">&gt;</a>`;
-    } else {
-        html += '<span class="disabled">&gt;</span>';
-    }
+    html += pageItem(current < lastPage ? current + 1 : 0, '<i class="fas fa-chevron-right"></i>', current === lastPage);
+    html += pageItem(lastPage, '<i class="fas fa-angle-double-right"></i>', current === lastPage);
 
-    html += '</div>';
+    html += '</ul></nav>';
     container.innerHTML = html;
+
+    container.querySelectorAll('a[data-page]').forEach((link) => {
+        link.addEventListener('click', function (event) {
+            event.preventDefault();
+            const targetPage = Number(this.dataset.page);
+            if (!targetPage || targetPage === currentPage) {
+                return;
+            }
+            searchMembers(targetPage);
+        });
+    });
 }
 
 /**

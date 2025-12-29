@@ -233,21 +233,32 @@
             }
 
             if (schedules.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="text-center" style="padding: 40px;">등록된 일정이 없습니다.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center" style="padding: 40px;">등록된 일정이 없습니다.</td></tr>';
                 return;
             }
 
             let html = '';
-            schedules.forEach(function(schedule, index) {
-                const content = schedule.content && schedule.content.length > 20 
-                    ? schedule.content.substring(0, 20) + '...' 
-                    : (schedule.content || '');
+            schedules.forEach(function(item, index) {
+                const content = item.content && item.content.length > 20 
+                    ? item.content.substring(0, 20) + '...' 
+                    : (item.content || '');
+                
+                // 프로그램인 경우 추가 정보 표시
+                let titleDisplay = item.title;
+                if (item.type === 'program') {
+                    if (item.is_unlimited_capacity) {
+                        titleDisplay += ' <span style="color: #39B54A;">(제한없음)</span>';
+                    } else if (item.capacity) {
+                        const remaining = item.capacity - (item.applied_count || 0);
+                        titleDisplay += ` <span style="color: #39B54A;">(${item.applied_count || 0}/${item.capacity})</span>`;
+                    }
+                }
                 
                 html += '<tr>';
                 html += `<td>${schedules.length - index}</td>`;
-                html += `<td>${schedule.title}</td>`;
-                html += `<td>${schedule.start_date}</td>`;
-                html += `<td>${schedule.end_date}</td>`;
+                html += `<td>${titleDisplay}</td>`;
+                html += `<td>${item.start_date}</td>`;
+                html += `<td>${item.end_date}</td>`;
                 html += `<td>${content}</td>`;
                 html += '</tr>';
             });

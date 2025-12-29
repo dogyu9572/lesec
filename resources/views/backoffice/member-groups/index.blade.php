@@ -33,12 +33,7 @@
         </div>
     </div>
 
-    <div class="board-card">
-        <div class="board-card-header">
-            <div class="board-page-card-title">
-                <h6>회원 그룹 목록</h6>
-            </div>
-        </div>
+    <div class="board-card">       
         <div class="board-card-body">
             <!-- 검색 필터 -->
             <div class="user-filter">
@@ -86,8 +81,15 @@
                             @endforeach
                             <label for="per_page" class="per-page-label">목록 개수:</label>
                             <select id="per_page" name="per_page" class="per-page-select" onchange="this.form.submit()">
+                                <option value="10" @selected(request('per_page', 20) == 10)>10개</option>
                                 <option value="20" @selected(request('per_page', 20) == 20)>20개</option>
+                                <option value="30" @selected(request('per_page') == 30)>30개</option>
+                                <option value="40" @selected(request('per_page') == 40)>40개</option>
                                 <option value="50" @selected(request('per_page') == 50)>50개</option>
+                                <option value="60" @selected(request('per_page') == 60)>60개</option>
+                                <option value="70" @selected(request('per_page') == 70)>70개</option>
+                                <option value="80" @selected(request('per_page') == 80)>80개</option>
+                                <option value="90" @selected(request('per_page') == 90)>90개</option>
                                 <option value="100" @selected(request('per_page') == 100)>100개</option>
                             </select>
                         </form>

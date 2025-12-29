@@ -171,19 +171,20 @@ class MemberGroupService
     {
         $query = Member::query();
         
-        // 회원구분 필터
-        if ($request->filled('member_type') && $request->member_type !== 'all') {
-            $query->where('member_type', $request->member_type);
-        }
-        
-        // 검색어 (이름, ID, 학교명, 이메일)
-        if ($request->filled('search_term')) {
-            $searchTerm = $request->search_term;
-            $query->where(function($q) use ($searchTerm) {
-                $q->where('name', 'like', "%{$searchTerm}%")
-                  ->orWhere('login_id', 'like', "%{$searchTerm}%")
-                  ->orWhere('school_name', 'like', "%{$searchTerm}%")
-                  ->orWhere('email', 'like', "%{$searchTerm}%");
+        // 검색어 필터 (search_type + search_keyword)
+        $searchKeyword = $request->input('search_keyword', '');
+        if (!empty($searchKeyword)) {
+            $searchType = $request->input('search_type', 'all');
+            
+            $query->where(function($q) use ($searchType, $searchKeyword) {
+                if ($searchType === 'all') {
+                    $q->where('name', 'like', "%{$searchKeyword}%")
+                      ->orWhere('login_id', 'like', "%{$searchKeyword}%")
+                      ->orWhere('school_name', 'like', "%{$searchKeyword}%")
+                      ->orWhere('email', 'like', "%{$searchKeyword}%");
+                } else {
+                    $q->where($searchType, 'like', "%{$searchKeyword}%");
+                }
             });
         }
         

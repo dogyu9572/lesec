@@ -64,12 +64,14 @@ class ReservationCalendarService
         while ($day <= $daysInMonth) {
             $dateKey = sprintf('%04d-%02d-%02d', $year, $month, $day);
             $isDisabledDate = isset($disabledDates[$dateKey]);
+            $disabledDateInfo = $isDisabledDate && is_array($disabledDates[$dateKey]) ? $disabledDates[$dateKey] : null;
             $summary = $reservationsByDate[$dateKey]['summary'] ?? $summaryDefaults;
 
             $week[] = [
                 'day' => $day,
                 'disabled' => $isDisabledDate,
                 'is_disabled_date' => $isDisabledDate,
+                'disabled_date_title' => $disabledDateInfo['title'] ?? null,
                 'reservation_summary' => $summary,
             ];
 

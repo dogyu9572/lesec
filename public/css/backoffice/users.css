@@ -313,6 +313,11 @@
     grid-template-columns: repeat(2, 1fr);
 }
 
+/* 3컬럼 그리드 스타일 */
+.form-grid.grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
 /* 프로그램 섹션 스타일 (members 페이지용) */
 .program-section {
     margin-bottom: 30px;
@@ -334,4 +339,22 @@
 .admin-form-container .board-table th,
 .admin-card-body .board-table th {
     border-bottom: 1px solid #e9ecef;
+}
+
+/* 검색 입력 필드 스타일 */
+.search-input-wrapper {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    width: 100%;
+}
+
+.search-type-select {
+    min-width: 120px;
+    flex-shrink: 0;
+}
+
+.search-keyword-input {
+    flex: 1;
+    min-width: 300px;
 }

@@ -393,20 +393,24 @@ class MailSmsService
     {
         $query = Member::query()->orderByDesc('created_at');
 
-        if ($request->filled('member_type') && $request->member_type !== 'all') {
-            $query->where('member_type', $request->member_type);
-        }
-
         if ($request->filled('member_group_id')) {
             $query->where('member_group_id', $request->member_group_id);
         }
 
-        if ($request->filled('search_term')) {
-            $term = $request->search_term;
-            $query->where(function ($q) use ($term) {
-                $q->where('name', 'like', "%{$term}%")
-                  ->orWhere('login_id', 'like', "%{$term}%")
-                  ->orWhere('email', 'like', "%{$term}%");
+        // 검색어 필터 (search_type + search_keyword)
+        $searchKeyword = trim($request->input('search_keyword', ''));
+        if (!empty($searchKeyword)) {
+            $searchType = $request->input('search_type', 'all');
+            
+            $query->where(function ($q) use ($searchType, $searchKeyword) {
+                if ($searchType === 'all') {
+                    $q->where('name', 'like', "%{$searchKeyword}%")
+                      ->orWhere('login_id', 'like', "%{$searchKeyword}%")
+                      ->orWhere('school_name', 'like', "%{$searchKeyword}%")
+                      ->orWhere('email', 'like', "%{$searchKeyword}%");
+                } else {
+                    $q->where($searchType, 'like', "%{$searchKeyword}%");
+                }
             });
         }
 

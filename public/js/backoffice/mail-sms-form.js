@@ -4,8 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchBtn = document.getElementById('popup-search-btn');
     const confirmBtn = document.getElementById('popup-add-btn');
     const selectAllCheckbox = document.getElementById('popup-select-all');
-    const memberTypeSelect = document.getElementById('popup_member_type');
-    const searchInput = document.getElementById('popup_search_term');
+    const searchTypeSelect = document.getElementById('popup_search_type');
+    const searchInput = document.getElementById('popup_search_keyword');
     const memberGroupSelect = document.getElementById('member_group_id');
     const memberListBody = document.getElementById('popup-member-list-body');
     const paginationContainer = document.getElementById('popup-pagination');
@@ -48,10 +48,15 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     function openMemberSearchModal() {
         modal.style.display = 'flex';
-        if (!memberListBody.dataset.initialized) {
-            searchMembers(1);
-            memberListBody.dataset.initialized = 'true';
-        }
+        
+        // 검색 필드 초기화
+        if (searchTypeSelect) searchTypeSelect.value = 'all';
+        if (searchInput) searchInput.value = '';
+        
+        clearModalSelection();
+        
+        // 기본 검색 실행 (검색어 없이 전체 목록)
+        searchMembers(1);
     }
 
     /**
@@ -59,6 +64,19 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     function closeMemberSearchModal() {
         modal.style.display = 'none';
+        
+        // 검색 필드 초기화
+        if (searchTypeSelect) searchTypeSelect.value = 'all';
+        if (searchInput) searchInput.value = '';
+        
+        // 검색 결과 초기화
+        const selectionMode = modal.dataset.selectionMode || 'multiple';
+        const colspan = selectionMode === 'multiple' ? 6 : 5;
+        memberListBody.innerHTML = `<tr><td colspan="${colspan}" class="text-center">검색어를 입력하거나 필터를 선택해주세요.</td></tr>`;
+        if (paginationContainer) {
+            paginationContainer.innerHTML = '';
+        }
+        
         clearModalSelection();
     }
 
@@ -320,12 +338,12 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     function searchMembers(page = 1) {
         const params = new URLSearchParams();
-        const memberType = memberTypeSelect?.value || 'all';
+        const searchType = searchTypeSelect?.value || 'all';
         const keyword = searchInput?.value || '';
         const groupId = memberGroupSelect?.value || '';
 
-        params.append('member_type', memberType);
-        params.append('search_term', keyword);
+        params.append('search_type', searchType);
+        params.append('search_keyword', keyword);
         if (groupId) {
             params.append('member_group_id', groupId);
         }
@@ -518,6 +536,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (searchBtn) {
         searchBtn.addEventListener('click', () => searchMembers(1));
+    }
+
+    // 팝업 초기화 버튼 클릭
+    const popupResetBtn = document.getElementById('popup-reset-btn');
+    if (popupResetBtn) {
+        popupResetBtn.addEventListener('click', function() {
+            // 검색 필드 초기화
+            if (searchTypeSelect) searchTypeSelect.value = 'all';
+            if (searchInput) searchInput.value = '';
+            
+            // 전체 목록 다시 로드
+            searchMembers(1);
+        });
     }
 
     if (confirmBtn) {

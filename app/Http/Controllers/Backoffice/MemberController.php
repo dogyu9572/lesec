@@ -64,12 +64,34 @@ class MemberController extends BaseController
     }
 
     /**
+     * Display the specified resource.
+     */
+    public function show(Member $member)
+    {
+        $memberGroups = MemberGroup::active()->ordered()->get();
+        return view('backoffice.members.show', compact('member', 'memberGroups'));
+    }
+
+    /**
      * Show the form for editing the specified resource.
      */
     public function edit(Member $member)
     {
         $memberGroups = MemberGroup::active()->ordered()->get();
-        return view('backoffice.members.edit', compact('member', 'memberGroups'));
+        
+        // 개인 신청 내역
+        $individualApplications = \App\Models\IndividualApplication::where('member_id', $member->id)
+            ->with('reservation')
+            ->orderBy('applied_at', 'desc')
+            ->get();
+        
+        // 단체 신청 내역
+        $groupApplications = \App\Models\GroupApplication::where('member_id', $member->id)
+            ->with('reservation')
+            ->orderBy('applied_at', 'desc')
+            ->get();
+        
+        return view('backoffice.members.edit', compact('member', 'memberGroups', 'individualApplications', 'groupApplications'));
     }
 
     /**
@@ -78,7 +100,7 @@ class MemberController extends BaseController
     public function update(Request $request, Member $member)
     {
         $request->validate([
-            'password' => 'nullable|min:4|confirmed',
+            'password' => 'nullable|min:4',
             'member_type' => 'required|in:teacher,student',
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:members,email,' . $member->id,

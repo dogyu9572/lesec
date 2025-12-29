@@ -23,7 +23,23 @@ class StoreAdminRequest extends FormRequest
             'login_id' => 'nullable|string|max:255|unique:users,login_id',
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:8|confirmed',
+            'password' => [
+                'required',
+                'string',
+                'min:10',
+                'confirmed',
+                function ($attribute, $value, $fail) {
+                    $types = 0;
+                    if (preg_match('/[a-z]/', $value)) $types++;
+                    if (preg_match('/[A-Z]/', $value)) $types++;
+                    if (preg_match('/\d/', $value)) $types++;
+                    if (preg_match('/[@$!%*?&#]/', $value)) $types++;
+                    
+                    if ($types < 2) {
+                        $fail('비밀번호는 영문 대소문자, 숫자, 특수문자 중 2종류 이상 조합하여 10자리 이상으로 입력해주세요.');
+                    }
+                },
+            ],
             'department' => 'nullable|string|max:255',
             'position' => 'nullable|string|max:255',
             'contact' => 'nullable|string|max:50',

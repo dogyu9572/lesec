@@ -29,9 +29,6 @@
     <div class="row">
         <div class="col-12">
             <div class="admin-card">
-                <div class="admin-card-header">
-                    <h6>기본 정보</h6>
-                </div>
                 <div class="admin-card-body">
                     <form id="adminForm" action="{{ route('backoffice.admins.update', $admin) }}" method="POST">
                         @csrf
@@ -57,8 +54,8 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="name">성명</label>
-                    <input type="text" id="name" name="name" value="{{ old('name', $admin->name) }}" required placeholder="성명을 입력하세요">
+                    <label for="name">이름</label>
+                    <input type="text" id="name" name="name" value="{{ old('name', $admin->name) }}" required placeholder="이름을 입력하세요">
                 </div>
                 
                 <div class="form-group">
@@ -78,11 +75,11 @@
             <div class="radio-group">
                 <label class="radio-label">
                     <input type="radio" name="is_active" value="1" @checked(old('is_active', $admin->is_active ? '1' : '0') == '1')>
-                    <span>사용</span>
+                    <span>Y</span>
                 </label>
                 <label class="radio-label">
                     <input type="radio" name="is_active" value="0" @checked(old('is_active', $admin->is_active ? '1' : '0') == '0')>
-                    <span>미사용</span>
+                    <span>N</span>
                 </label>
             </div>
         </div>
@@ -98,7 +95,7 @@
             @else
                 <div class="form-grid">
                     <div class="form-group">
-                        <label for="admin_group_id">권한 그룹</label>
+                        <label for="admin_group_id">관리자 그룹명</label>
                         <select id="admin_group_id" name="admin_group_id" required>
                             <option value="">그룹을 선택하세요</option>
                             @foreach($groups as $group)

@@ -71,34 +71,26 @@
 
                 <div class="form-section">
                     <h3>메뉴 접근 권한</h3>
-                    <div class="permissions-container">
+                    <div class="permission-simple-list">
                         @foreach($menus as $menu)
-                            <div class="permission-category">
-                                <div class="permission-category-header">
-                                    <h4>{{ $menu->name }}</h4>
-                                    <label class="permission-item parent-menu">
-                                        <input type="checkbox" name="permissions[{{ $menu->id }}]" value="1" @checked(in_array($menu->id, $groupPermissions))>
-                                        <span>{{ $menu->name }} 메뉴</span>
-                                    </label>
-                                </div>
+                            <div class="permission-simple-item">
+                                <label class="permission-main-menu">
+                                    <input type="checkbox" name="permissions[{{ $menu->id }}]" value="1" @checked(in_array($menu->id, $groupPermissions))>
+                                    <span>{{ $menu->name }} 메뉴</span>
+                                </label>
                                 @if($menu->children->count() > 0)
-                                    <div class="permission-items">
+                                    <span class="permission-separator">-</span>
+                                    <div class="permission-sub-menus">
                                         @foreach($menu->children as $child)
-                                            <label class="permission-item child-menu">
+                                            <label class="permission-sub-menu">
                                                 <input type="checkbox" name="permissions[{{ $child->id }}]" value="1" @checked(in_array($child->id, $groupPermissions))>
                                                 <span>{{ $child->name }}</span>
-                                            </label>
+                                            </label>                                           
                                         @endforeach
                                     </div>
                                 @endif
                             </div>
                         @endforeach
-                    </div>
-                    <div class="permission-notice">
-                        <small class="text-muted">
-                            <i class="fas fa-info-circle"></i>
-                            그룹의 메뉴 접근 권한을 수정할 수 있습니다.
-                        </small>
                     </div>
                 </div>
 

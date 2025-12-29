@@ -4,12 +4,12 @@
 
 document.addEventListener('DOMContentLoaded', function() {
     // 부모 메뉴 체크박스 이벤트 리스너
-    const parentCheckboxes = document.querySelectorAll('.permission-item.parent-menu input[type="checkbox"]');
+    const parentCheckboxes = document.querySelectorAll('.permission-main-menu input[type="checkbox"]');
     
     parentCheckboxes.forEach(function(parentCheckbox) {
         parentCheckbox.addEventListener('change', function() {
-            const category = this.closest('.permission-category');
-            const childCheckboxes = category.querySelectorAll('.permission-item.child-menu input[type="checkbox"]');
+            const item = this.closest('.permission-simple-item');
+            const childCheckboxes = item.querySelectorAll('.permission-sub-menu input[type="checkbox"]');
             
             // 부모가 체크되면 모든 자식도 체크
             childCheckboxes.forEach(function(childCheckbox) {
@@ -19,14 +19,14 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // 자식 메뉴 체크박스 이벤트 리스너
-    const childCheckboxes = document.querySelectorAll('.permission-item.child-menu input[type="checkbox"]');
+    const childCheckboxes = document.querySelectorAll('.permission-sub-menu input[type="checkbox"]');
     
     childCheckboxes.forEach(function(childCheckbox) {
         childCheckbox.addEventListener('change', function() {
-            const category = this.closest('.permission-category');
-            const parentCheckbox = category.querySelector('.permission-item.parent-menu input[type="checkbox"]');
-            const allChildCheckboxes = category.querySelectorAll('.permission-item.child-menu input[type="checkbox"]');
-            const checkedChildCheckboxes = category.querySelectorAll('.permission-item.child-menu input[type="checkbox"]:checked');
+            const item = this.closest('.permission-simple-item');
+            const parentCheckbox = item.querySelector('.permission-main-menu input[type="checkbox"]');
+            const allChildCheckboxes = item.querySelectorAll('.permission-sub-menu input[type="checkbox"]');
+            const checkedChildCheckboxes = item.querySelectorAll('.permission-sub-menu input[type="checkbox"]:checked');
             
             // 자식 중 하나라도 체크되면 부모도 체크
             if (checkedChildCheckboxes.length > 0) {
@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (selectAllBtn) {
         selectAllBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            const allCheckboxes = document.querySelectorAll('.permission-item input[type="checkbox"]');
+            const allCheckboxes = document.querySelectorAll('.permission-main-menu input[type="checkbox"], .permission-sub-menu input[type="checkbox"]');
             allCheckboxes.forEach(function(checkbox) {
                 checkbox.checked = true;
             });
@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (deselectAllBtn) {
         deselectAllBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            const allCheckboxes = document.querySelectorAll('.permission-item input[type="checkbox"]');
+            const allCheckboxes = document.querySelectorAll('.permission-main-menu input[type="checkbox"], .permission-sub-menu input[type="checkbox"]');
             allCheckboxes.forEach(function(checkbox) {
                 checkbox.checked = false;
             });

@@ -25,8 +25,9 @@ function initBulkActions() {
     const selectAllCheckbox = document.getElementById('select-all');
     const adminCheckboxes = document.querySelectorAll('.admin-checkbox');
     const bulkDeleteBtn = document.getElementById('bulk-delete-btn');
+    const bulkDeleteBtnHeader = document.getElementById('bulk-delete-btn-header');
 
-    if (!selectAllCheckbox || !bulkDeleteBtn) return;
+    if (!selectAllCheckbox) return;
 
     // 전체 선택/해제
     selectAllCheckbox.addEventListener('change', function() {
@@ -44,28 +45,52 @@ function initBulkActions() {
         });
     });
 
-    // 일괄 삭제 버튼 클릭
-    bulkDeleteBtn.addEventListener('click', function() {
-        const selectedAdmins = Array.from(adminCheckboxes)
-            .filter(checkbox => checkbox.checked)
-            .map(checkbox => checkbox.value);
+    // 일괄 삭제 버튼 클릭 (상단 헤더 버튼)
+    if (bulkDeleteBtn) {
+        bulkDeleteBtn.addEventListener('click', function() {
+            const selectedAdmins = Array.from(adminCheckboxes)
+                .filter(checkbox => checkbox.checked)
+                .map(checkbox => checkbox.value);
 
-        if (selectedAdmins.length === 0) {
-            alert('삭제할 관리자를 선택해주세요.');
-            return;
-        }
+            if (selectedAdmins.length === 0) {
+                alert('삭제할 관리자를 선택해주세요.');
+                return;
+            }
 
-        if (confirm(`선택한 ${selectedAdmins.length}명의 관리자를 삭제하시겠습니까?`)) {
-            bulkDeleteAdmins(selectedAdmins);
-        }
-    });
+            if (confirm(`선택한 ${selectedAdmins.length}명의 관리자를 삭제하시겠습니까?`)) {
+                bulkDeleteAdmins(selectedAdmins);
+            }
+        });
+    }
+
+    // 일괄 삭제 버튼 클릭 (목록 옆 버튼)
+    if (bulkDeleteBtnHeader) {
+        bulkDeleteBtnHeader.addEventListener('click', function() {
+            const selectedAdmins = Array.from(adminCheckboxes)
+                .filter(checkbox => checkbox.checked)
+                .map(checkbox => checkbox.value);
+
+            if (selectedAdmins.length === 0) {
+                alert('삭제할 관리자를 선택해주세요.');
+                return;
+            }
+
+            if (confirm(`선택한 ${selectedAdmins.length}명의 관리자를 삭제하시겠습니까?`)) {
+                bulkDeleteAdmins(selectedAdmins);
+            }
+        });
+    }
 
     // 초기 버튼 상태 설정 (disabled 상태에서도 색상 유지)
     updateBulkDeleteButton();
     
     // 초기 로드 시 버튼 disabled 상태 확인
-    if (adminCheckboxes.length === 0 || Array.from(adminCheckboxes).filter(cb => cb.checked).length === 0) {
-        bulkDeleteBtn.disabled = true;
+    const checkedCount = Array.from(adminCheckboxes).filter(cb => cb.checked).length;
+    if (bulkDeleteBtn) {
+        bulkDeleteBtn.disabled = checkedCount === 0;
+    }
+    if (bulkDeleteBtnHeader) {
+        bulkDeleteBtnHeader.disabled = checkedCount === 0;
     }
 }
 
@@ -84,6 +109,7 @@ function updateSelectAllCheckbox() {
 // 일괄 삭제 버튼 상태 업데이트
 function updateBulkDeleteButton() {
     const bulkDeleteBtn = document.getElementById('bulk-delete-btn');
+    const bulkDeleteBtnHeader = document.getElementById('bulk-delete-btn-header');
     const checkedCount = Array.from(document.querySelectorAll('.admin-checkbox'))
         .filter(checkbox => checkbox.checked).length;
 
@@ -94,6 +120,10 @@ function updateBulkDeleteButton() {
         } else {
             bulkDeleteBtn.innerHTML = `<i class="fas fa-trash"></i> 선택 삭제`;
         }
+    }
+    
+    if (bulkDeleteBtnHeader) {
+        bulkDeleteBtnHeader.disabled = checkedCount === 0;
     }
 }
 

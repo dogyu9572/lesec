@@ -138,15 +138,19 @@
     box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
 
-.date-range {
+.search-input-wrapper {
     display: flex;
-    align-items: center;
     gap: 0.5rem;
+    align-items: center;
 }
 
-.date-separator {
-    color: #6c757d;
-    font-weight: 500;
+.search-type-select {
+    min-width: 100px;
+    flex-shrink: 0;
+}
+
+.search-keyword-input {
+    flex: 1;
 }
 
 .filter-buttons {
@@ -183,6 +187,12 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
+}
+
+.list-controls .btn {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+    white-space: nowrap;
 }
 
 .per-page-form {
@@ -241,27 +251,17 @@
 }
 
 .admins-page .board-table th:nth-child(1),
-.admins-page .board-table td:nth-child(1) { width: 50px; }
+.admins-page .board-table td:nth-child(1) { width: 40px; }
 .admins-page .board-table th:nth-child(2),
-.admins-page .board-table td:nth-child(2) { width: 60px; }
+.admins-page .board-table td:nth-child(2) { width: 50px; }
 .admins-page .board-table th:nth-child(3),
 .admins-page .board-table td:nth-child(3) { width: 120px; }
 .admins-page .board-table th:nth-child(4),
-.admins-page .board-table td:nth-child(4) { width: 100px; }
+.admins-page .board-table td:nth-child(4) { width: 120px; }
 .admins-page .board-table th:nth-child(5),
 .admins-page .board-table td:nth-child(5) { width: 100px; }
 .admins-page .board-table th:nth-child(6),
-.admins-page .board-table td:nth-child(6) { width: 100px; }
-.admins-page .board-table th:nth-child(7),
-.admins-page .board-table td:nth-child(7) { width: 200px; }
-.admins-page .board-table th:nth-child(8),
-.admins-page .board-table td:nth-child(8) { width: 120px; }
-.admins-page .board-table th:nth-child(9),
-.admins-page .board-table td:nth-child(9) { width: 100px; }
-.admins-page .board-table th:nth-child(10),
-.admins-page .board-table td:nth-child(10) { width: 100px; }
-.admins-page .board-table th:nth-child(11),
-.admins-page .board-table td:nth-child(11) { width: 250px; }
+.admins-page .board-table td:nth-child(6) { width: 180px; }
 
 /* 역할 배지 */
 .role-badge {
@@ -424,6 +424,24 @@
     color: #6c757d;
 }
 
+.password-policy-info {
+    margin-top: 8px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    border-left: 4px solid #17a2b8;
+}
+
+.password-policy-info small {
+    display: block;
+    line-height: 1.6;
+    color: #6c757d;
+}
+
+.password-policy-info small:first-child {
+    margin-bottom: 5px;
+}
+
 /* 라디오 버튼 그룹 */
 .radio-group {
     display: flex;
@@ -445,6 +463,219 @@
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
+}
+
+/* 심플 권한 리스트 */
+.permission-simple-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.permission-simple-item {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.permission-simple-item:last-child {
+    border-bottom: none;
+}
+
+.permission-simple-item:hover {
+    background-color: transparent;
+}
+
+.permission-main-menu {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-weight: 500;
+    color: #333;
+    font-size: 14px;
+}
+
+.permission-main-menu input[type="checkbox"] {
+    margin-right: 8px;
+    cursor: pointer;
+}
+
+.permission-separator {
+    color: #adb5bd;
+    margin: 0 6px;
+}
+
+.permission-sub-menus {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.permission-sub-menu {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 13px;
+    color: #6c757d;
+}
+
+.permission-sub-menu:hover {
+    color: #495057;
+}
+
+.permission-sub-menu input[type="checkbox"] {
+    margin-right: 5px;
+    cursor: pointer;
+}
+
+.permission-comma {
+    color: #adb5bd;
+}
+
+/* 권한 레이아웃 - 왼쪽/오른쪽 분할 */
+.permission-layout-section {
+    padding: 25px;
+}
+
+.permission-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 30px;
+    align-items: start;
+}
+
+.permission-left-panel {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    position: sticky;
+    top: 20px;
+}
+
+.permission-left-panel h3 {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.permission-menu-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.permission-menu-item {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.permission-menu-item:hover {
+    background-color: #e9ecef;
+}
+
+.permission-menu-item input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+.permission-menu-item span {
+    font-size: 14px;
+    color: #555;
+}
+
+.permission-right-panel {
+    background: white;
+}
+
+.permission-right-panel h3 {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.permission-matrix-wrapper {
+    overflow-x: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+}
+
+.permission-matrix-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    min-width: 800px;
+}
+
+.permission-matrix-table thead {
+    background-color: #f8f9fa;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.permission-matrix-table th {
+    padding: 10px 8px;
+    text-align: center;
+    font-weight: 600;
+    color: #333;
+    border: 1px solid #dee2e6;
+    white-space: nowrap;
+    font-size: 12px;
+}
+
+.permission-matrix-table th:first-child {
+    position: sticky;
+    left: 0;
+    background-color: #f8f9fa;
+    z-index: 11;
+    min-width: 120px;
+}
+
+.permission-category-name {
+    background-color: #e3f2fd;
+    font-weight: 600;
+    color: #1976d2;
+    padding: 12px 10px;
+    text-align: left;
+    position: sticky;
+    left: 0;
+    z-index: 9;
+    border: 1px solid #dee2e6;
+    white-space: nowrap;
+}
+
+.permission-cell {
+    padding: 8px;
+    text-align: center;
+    border: 1px solid #dee2e6;
+    min-width: 80px;
+}
+
+.permission-cell input[type="checkbox"] {
+    cursor: pointer;
+    transform: scale(1.2);
+}
+
+.permission-na {
+    color: #ccc;
+    font-size: 12px;
+}
+
+.permission-matrix-table tbody tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+.permission-matrix-table tbody tr:hover {
+    background-color: #e3f2fd;
 }
 
 .permission-category {
@@ -736,6 +967,15 @@
     
     .permissions-container {
         grid-template-columns: 1fr;
+    }
+    
+    .permission-layout {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .permission-left-panel {
+        position: static;
     }
 }
 

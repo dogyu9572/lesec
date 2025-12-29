@@ -1,6 +1,6 @@
 @extends('backoffice.layouts.app')
 
-@section('title', '관리자 권한 그룹 관리')
+@section('title', '권한 관리')
 
 @section('styles')
 <link rel="stylesheet" href="{{ asset('css/common/buttons.css') }}">
@@ -11,7 +11,7 @@
 <div class="board-container admins-page">
     <div class="board-header">
         <a href="{{ route('backoffice.admin-groups.create') }}" class="btn btn-success">
-            <i class="fas fa-plus"></i> 새 권한 그룹 추가
+            <i class="fas fa-plus"></i> 등록
         </a>
     </div>
 
@@ -42,15 +42,7 @@
                             <label for="name" class="filter-label">그룹명</label>
                             <input type="text" id="name" name="name" class="filter-input"
                                 placeholder="그룹명을 입력하세요" value="{{ request('name') }}">
-                        </div>
-                        <div class="filter-group">
-                            <label for="is_active" class="filter-label">상태</label>
-                            <select id="is_active" name="is_active" class="filter-select">
-                                <option value="">전체</option>
-                                <option value="1" @selected(request('is_active') == '1')>활성화</option>
-                                <option value="0" @selected(request('is_active') == '0')>비활성화</option>
-                            </select>
-                        </div>
+                        </div>                      
                         <div class="filter-group">
                             <div class="filter-buttons">
                                 <button type="submit" class="btn btn-primary">
@@ -92,11 +84,9 @@
                             <tr>
                                 <th>번호</th>
                                 <th>그룹명</th>
-                                <th>설명</th>
                                 <th>사용 관리자 수</th>
-                                <th>상태</th>
                                 <th>등록일</th>
-                                <th>관리</th>
+                                <th>관리중인 메뉴</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -104,13 +94,7 @@
                                 <tr>
                                     <td>{{ $groups->total() - ($groups->currentPage() - 1) * $groups->perPage() - $loop->index }}</td>
                                     <td>{{ $group->name }}</td>
-                                    <td>{{ $group->description ?: '-' }}</td>
                                     <td>{{ $group->users->count() }}명</td>
-                                    <td>
-                                        <span class="status-badge {{ $group->is_active ? 'status-active' : 'status-inactive' }}">
-                                            {{ $group->is_active ? '활성화' : '비활성화' }}
-                                        </span>
-                                    </td>
                                     <td>{{ $group->created_at->format('Y-m-d') }}</td>
                                     <td>
                                         <div class="board-btn-group">

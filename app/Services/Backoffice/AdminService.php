@@ -25,14 +25,22 @@ class AdminService
     {
         $query = User::whereIn('role', ['super_admin', 'admin']);
         
-        // 이름 검색
-        if ($request->filled('name')) {
-            $query->where('name', 'like', '%' . $request->name . '%');
-        }
-        
-        // 이메일 검색
-        if ($request->filled('email')) {
-            $query->where('email', 'like', '%' . $request->email . '%');
+        // 통합 검색 (이름 또는 아이디)
+        if ($request->filled('search_keyword')) {
+            $searchType = $request->get('search_type', 'all');
+            $searchKeyword = $request->search_keyword;
+            
+            if ($searchType === 'name') {
+                $query->where('name', 'like', '%' . $searchKeyword . '%');
+            } elseif ($searchType === 'login_id') {
+                $query->where('login_id', 'like', '%' . $searchKeyword . '%');
+            } else {
+                // 전체 검색: 이름 또는 아이디
+                $query->where(function($q) use ($searchKeyword) {
+                    $q->where('name', 'like', '%' . $searchKeyword . '%')
+                      ->orWhere('login_id', 'like', '%' . $searchKeyword . '%');
+                });
+            }
         }
         
         // 권한 필터
@@ -43,14 +51,6 @@ class AdminService
         // 상태 필터
         if ($request->filled('is_active')) {
             $query->where('is_active', $request->is_active);
-        }
-        
-        // 등록일 필터
-        if ($request->filled('created_from')) {
-            $query->whereDate('created_at', '>=', $request->created_from);
-        }
-        if ($request->filled('created_to')) {
-            $query->whereDate('created_at', '<=', $request->created_to);
         }
         
         // 목록 개수 설정

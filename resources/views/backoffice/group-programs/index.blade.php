@@ -86,7 +86,6 @@
                             <select id="search_type" name="search_type" class="filter-select">
                                 <option value="">전체</option>
                                 <option value="program_name" @selected(request('search_type') == 'program_name')>프로그램명</option>
-                                <option value="author" @selected(request('search_type') == 'author')>작성자</option>
                             </select>
                         </div>
                         <div class="filter-group">

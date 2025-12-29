@@ -22,8 +22,28 @@
                 </li>
             @endif
 
-            {{-- 이전 페이지 링크 --}}
-            @if ($paginator->onFirstPage())
+            {{-- 10단위 블록 계산 --}}
+            @php
+                $currentPage = $paginator->currentPage();
+                $lastPage = $paginator->lastPage();
+                
+                // 현재 페이지가 속한 블록의 시작 페이지 계산 (10단위)
+                // 예: 페이지 15 → 블록 시작 11, 페이지 3 → 블록 시작 1
+                $blockStart = floor(($currentPage - 1) / 10) * 10 + 1;
+                
+                // 블록의 끝 페이지 계산 (최대 10개, 마지막 페이지 초과하지 않음)
+                $blockEnd = min($blockStart + 9, $lastPage);
+                
+                // 이전 블록의 첫 페이지
+                $prevBlockStart = max(1, $blockStart - 10);
+                
+                // 다음 블록의 첫 페이지
+                $nextBlockStart = $blockStart + 10;
+                $hasNextBlock = $nextBlockStart <= $lastPage;
+            @endphp
+
+            {{-- 이전 블록 링크 --}}
+            @if ($blockStart <= 1)
                 <li class="page-item disabled">
                     <span class="page-link">
                         <i class="fas fa-chevron-left"></i>
@@ -31,14 +51,14 @@
                 </li>
             @else
                 <li class="page-item">
-                    <a class="page-link" href="{{ $pageQuery($paginator->currentPage() - 1) }}" rel="prev" title="이전 페이지">
+                    <a class="page-link" href="{{ $pageQuery($prevBlockStart) }}" rel="prev" title="이전 블록">
                         <i class="fas fa-chevron-left"></i>
                     </a>
                 </li>
             @endif
 
-            {{-- 페이지 번호들 --}}
-            @foreach ($paginator->getUrlRange(1, $paginator->lastPage()) as $page => $url)
+            {{-- 페이지 번호들 (10단위 블록 고정) --}}
+            @for ($page = $blockStart; $page <= $blockEnd; $page++)
                 @if ($page == $paginator->currentPage())
                     <li class="page-item active">
                         <span class="page-link">{{ $page }}</span>
@@ -48,12 +68,12 @@
                         <a class="page-link" href="{{ $pageQuery($page) }}">{{ $page }}</a>
                     </li>
                 @endif
-            @endforeach
+            @endfor
 
-            {{-- 다음 페이지 링크 --}}
-            @if ($paginator->hasMorePages())
+            {{-- 다음 블록 링크 --}}
+            @if ($hasNextBlock)
                 <li class="page-item">
-                    <a class="page-link" href="{{ $pageQuery($paginator->currentPage() + 1) }}" rel="next" title="다음 페이지">
+                    <a class="page-link" href="{{ $pageQuery($nextBlockStart) }}" rel="next" title="다음 블록">
                         <i class="fas fa-chevron-right"></i>
                     </a>
                 </li>

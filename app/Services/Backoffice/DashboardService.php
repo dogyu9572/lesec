@@ -8,21 +8,41 @@ use App\Models\ProgramReservation;
 use App\Models\GroupApplication;
 use App\Models\IndividualApplication;
 use Illuminate\Support\Facades\DB;
+use App\Services\Backoffice\ReservationCalendarService;
 
 class DashboardService
 {
+    protected ReservationCalendarService $reservationCalendarService;
+
+    public function __construct(ReservationCalendarService $reservationCalendarService)
+    {
+        $this->reservationCalendarService = $reservationCalendarService;
+    }
+
     /**
      * 대시보드 전체 데이터 가져오기
      */
     public function getDashboardData(): array
     {
+        $year = (int) now()->year;
+        $month = (int) now()->month;
+
+        // 월별 예약 내역 조회
+        $reservationsByDate = $this->reservationCalendarService->getMonthlyReservations($year, $month);
+
+        // 캘린더 생성
+        $calendar = $this->reservationCalendarService->generateCalendar($year, $month, $reservationsByDate);
+
         return [
             'programStats' => $this->getProgramStats(),
             'applicationStats' => $this->getApplicationStats(),
-            'recentPrograms' => $this->getRecentPrograms(),
             'recentGroupApplications' => $this->getRecentApplications('group'),
             'recentIndividualApplications' => $this->getRecentApplications('individual'),
             'visitorStats' => $this->getVisitorStats(),
+            'calendar' => $calendar,
+            'reservationsByDate' => $reservationsByDate,
+            'year' => $year,
+            'month' => $month,
         ];
     }
 

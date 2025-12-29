@@ -1,6 +1,6 @@
 @extends('backoffice.layouts.app')
 
-@section('title', '개인 프로그램 관리')
+@section('title', '개인 프로그램 목록')
 
 @section('styles')
 <link rel="stylesheet" href="{{ asset('css/common/buttons.css') }}">
@@ -30,12 +30,7 @@
         </div>
     </div>
 
-    <div class="board-card">
-        <div class="board-card-header">
-            <div class="board-page-card-title">
-                <h6>개인 프로그램 목록</h6>
-            </div>
-        </div>
+    <div class="board-card">       
         <div class="board-card-body">
             <!-- 검색 필터 -->
             <div class="user-filter">
@@ -51,7 +46,7 @@
                             </select>
                         </div>
                         <div class="filter-group">
-                            <label for="reception_type" class="filter-label">접수유형</label>
+                            <label for="reception_type" class="filter-label">신청유형</label>
                             <select id="reception_type" name="reception_type" class="filter-select">
                                 <option value="">전체</option>
                                 @foreach($receptionTypes as $key => $name)
@@ -60,12 +55,12 @@
                             </select>
                         </div>
                         <div class="filter-group">
-                            <label for="education_start_date" class="filter-label">교육일정 시작</label>
+                            <label for="education_start_date" class="filter-label">참가일 시작</label>
                             <input type="date" id="education_start_date" name="education_start_date" class="filter-input"
                                 value="{{ request('education_start_date') }}">
                         </div>
                         <div class="filter-group">
-                            <label for="education_end_date" class="filter-label">교육일정 종료</label>
+                            <label for="education_end_date" class="filter-label">참가일 종료</label>
                             <input type="date" id="education_end_date" name="education_end_date" class="filter-input"
                                 value="{{ request('education_end_date') }}">
                         </div>
@@ -85,8 +80,7 @@
                             <label for="search_type" class="filter-label">검색 구분</label>
                             <select id="search_type" name="search_type" class="filter-select">
                                 <option value="">전체</option>
-                                <option value="program_name" @selected(request('search_type') == 'program_name')>프로그램명</option>
-                                <option value="author" @selected(request('search_type') == 'author')>작성자</option>
+                                <option value="program_name" @selected(request('search_type') == 'program_name')>프로그램명</option>                               
                             </select>
                         </div>
                         <div class="filter-group">
@@ -137,7 +131,7 @@
                                 <th>교육유형</th>
                                 <th>프로그램명</th>
                                 <th>접수유형</th>
-                                <th>교육일정</th>
+                                <th>참가일</th>
                                 <th>신청기간</th>
                                 <th>정원</th>
                                 <th>결제수단</th>

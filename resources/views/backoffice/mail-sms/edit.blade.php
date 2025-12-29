@@ -46,6 +46,7 @@
         </div>
     @endif
 
+
     <div class="row">
         <div class="col-12">
             <div class="admin-card">
@@ -107,7 +108,22 @@
                                     <div class="text-muted small" id="memberSelectionStatus" style="margin-top: 6px;">
                                         회원 그룹을 선택하거나 검색 버튼을 통해 발송 대상을 지정해 주세요.
                                     </div>
-                                    <div class="table-responsive" id="selectedMembersWrapper" style="margin-top: 10px;">
+                                    <div class="recipients-accordion" style="margin-top: 10px;">
+                                        <div class="accordion-header" onclick="toggleRecipientsAccordion()">
+                                            <span>수신자 목록</span>
+                                            <span class="recipient-count">({{ $message->recipients()->count() }}명)</span>
+                                            <i class="fas fa-chevron-down accordion-icon"></i>
+                                        </div>
+                                        <div class="accordion-content" id="recipientsContent" style="display: none;">
+                                            <div id="recipientsTableContainer" style="margin-top: 15px;">
+                                                <div class="text-center" style="padding: 40px;">
+                                                    <i class="fas fa-spinner fa-spin"></i> 로딩 중...
+                                                </div>
+                                            </div>
+                                            <div id="recipientsPagination" style="margin-top: 15px;"></div>
+                                        </div>
+                                    </div>
+                                    <div class="table-responsive" id="selectedMembersWrapper" style="margin-top: 10px; display: none;">
                                         <table class="board-table">
                                             <thead>
                                                 <tr>
@@ -192,8 +208,173 @@
     window.mailSmsFormConfig = {
         searchUrl: "{{ route('backoffice.mail-sms.search-members') }}",
         csrfToken: "{{ csrf_token() }}",
-        groupMembersUrlTemplate: "{{ route('backoffice.mail-sms.member-groups.members', ['memberGroup' => '__GROUP_ID__']) }}"
+        groupMembersUrlTemplate: "{{ route('backoffice.mail-sms.member-groups.members', ['memberGroup' => '__GROUP_ID__']) }}",
+        recipientsUrl: "{{ route('backoffice.mail-sms.recipients', $message) }}",
+        deleteRecipientUrl: "{{ route('backoffice.mail-sms.recipients.delete', ['mailSmsMessage' => $message, 'recipient' => '__RECIPIENT_ID__']) }}"
     };
+
+    let recipientsLoaded = false;
+    let currentRecipientsPage = 1;
+
+    function toggleRecipientsAccordion() {
+        const content = document.getElementById('recipientsContent');
+        const icon = document.querySelector('.accordion-icon');
+        
+        if (content.style.display === 'none') {
+            content.style.display = 'block';
+            if (icon) {
+                icon.style.transform = 'rotate(180deg)';
+            }
+            
+            if (!recipientsLoaded) {
+                loadRecipients(1);
+            }
+        } else {
+            content.style.display = 'none';
+            if (icon) {
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+    }
+
+    function loadRecipients(page) {
+        const container = document.getElementById('recipientsTableContainer');
+        const paginationContainer = document.getElementById('recipientsPagination');
+        
+        if (!container) return;
+
+        container.innerHTML = '<div class="text-center" style="padding: 40px;"><i class="fas fa-spinner fa-spin"></i> 로딩 중...</div>';
+        paginationContainer.innerHTML = '';
+
+        const url = window.mailSmsFormConfig.recipientsUrl + '?page=' + page;
+        
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            recipientsLoaded = true;
+            currentRecipientsPage = page;
+            renderRecipientsTable(data.recipients);
+            renderRecipientsPagination(data.pagination);
+        })
+        .catch(error => {
+            console.error('Error loading recipients:', error);
+            container.innerHTML = '<div class="text-center text-danger" style="padding: 40px;">수신자 목록을 불러오는 중 오류가 발생했습니다.</div>';
+        });
+    }
+
+    function renderRecipientsTable(recipients) {
+        const container = document.getElementById('recipientsTableContainer');
+        
+        if (!recipients || recipients.length === 0) {
+            container.innerHTML = '<div class="text-center" style="padding: 40px;">등록된 수신자가 없습니다.</div>';
+            return;
+        }
+
+        let html = '<div class="table-responsive"><table class="board-table"><thead><tr>';
+        html += '<th>이름</th>';
+        html += '<th>이메일</th>';
+        html += '<th>연락처</th>';
+        html += '<th style="width: 90px;">관리</th>';
+        html += '</tr></thead><tbody>';
+
+        recipients.forEach(recipient => {
+            html += '<tr data-recipient-id="' + recipient.id + '">';
+            html += '<td>' + (recipient.member_name || '-') + '</td>';
+            html += '<td>' + (recipient.member_email || '-') + '</td>';
+            html += '<td>' + (recipient.member_contact || '-') + '</td>';
+            html += '<td>';
+            html += '<button type="button" class="btn btn-danger btn-sm delete-recipient-btn" data-recipient-id="' + recipient.id + '" onclick="deleteRecipient(' + recipient.id + ')">';
+            html += '<i class="fas fa-trash"></i> 삭제';
+            html += '</button>';
+            html += '</td>';
+            html += '</tr>';
+        });
+
+        html += '</tbody></table></div>';
+        container.innerHTML = html;
+    }
+
+    function deleteRecipient(recipientId) {
+        if (!confirm('정말 이 수신자를 삭제하시겠습니까?')) {
+            return;
+        }
+
+        const url = window.mailSmsFormConfig.deleteRecipientUrl.replace('__RECIPIENT_ID__', recipientId);
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+        fetch(url, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('수신자가 삭제되었습니다.');
+                loadRecipients(currentRecipientsPage);
+            } else {
+                alert('삭제 중 오류가 발생했습니다: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting recipient:', error);
+            alert('삭제 중 오류가 발생했습니다.');
+        });
+    }
+
+    function renderRecipientsPagination(pagination) {
+        const container = document.getElementById('recipientsPagination');
+        
+        if (!pagination || pagination.last_page <= 1) {
+            container.innerHTML = '';
+            return;
+        }
+
+        const current = pagination.current_page;
+        const lastPage = pagination.last_page;
+        const startPage = Math.max(1, current - 2);
+        const endPage = Math.min(lastPage, current + 2);
+
+        let html = '<nav aria-label="페이지 네비게이션"><ul class="pagination">';
+
+        // 첫 페이지
+        html += '<li class="page-item' + (current === 1 ? ' disabled' : '') + '">';
+        html += '<a class="page-link" href="#" data-page="1" onclick="event.preventDefault(); loadRecipients(1); return false;">';
+        html += '<i class="fas fa-angle-double-left"></i></a></li>';
+
+        // 이전 페이지
+        html += '<li class="page-item' + (current === 1 ? ' disabled' : '') + '">';
+        html += '<a class="page-link" href="#" data-page="' + (current > 1 ? current - 1 : 1) + '" onclick="event.preventDefault(); loadRecipients(' + (current > 1 ? current - 1 : 1) + '); return false;">';
+        html += '<i class="fas fa-chevron-left"></i></a></li>';
+
+        // 페이지 번호
+        for (let i = startPage; i <= endPage; i++) {
+            html += '<li class="page-item' + (i === current ? ' active' : '') + '">';
+            html += '<a class="page-link" href="#" data-page="' + i + '" onclick="event.preventDefault(); loadRecipients(' + i + '); return false;">' + i + '</a></li>';
+        }
+
+        // 다음 페이지
+        html += '<li class="page-item' + (current === lastPage ? ' disabled' : '') + '">';
+        html += '<a class="page-link" href="#" data-page="' + (current < lastPage ? current + 1 : lastPage) + '" onclick="event.preventDefault(); loadRecipients(' + (current < lastPage ? current + 1 : lastPage) + '); return false;">';
+        html += '<i class="fas fa-chevron-right"></i></a></li>';
+
+        // 마지막 페이지
+        html += '<li class="page-item' + (current === lastPage ? ' disabled' : '') + '">';
+        html += '<a class="page-link" href="#" data-page="' + lastPage + '" onclick="event.preventDefault(); loadRecipients(' + lastPage + '); return false;">';
+        html += '<i class="fas fa-angle-double-right"></i></a></li>';
+
+        html += '</ul></nav>';
+        container.innerHTML = html;
+    }
 </script>
 <script src="{{ asset('js/backoffice/mail-sms-form.js') }}"></script>
 @endsection

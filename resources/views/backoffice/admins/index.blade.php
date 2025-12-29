@@ -93,10 +93,10 @@
                                 <option value="100" @selected(request('per_page') == 100)>100</option>
                             </select>
                         </form>
-                        <button type="button" id="bulk-delete-btn-header" class="btn btn-danger">
+                        <button type="button" id="bulk-delete-btn-header" class="btn btn-danger btn-sm">
                             <i class="fas fa-trash"></i> 선택 삭제
                         </button>
-                        <a href="{{ route('backoffice.admins.create') }}" class="btn btn-success">
+                        <a href="{{ route('backoffice.admins.create') }}" class="btn btn-success btn-sm">
                             <i class="fas fa-plus"></i> 등록
                         </a>
                     </div>

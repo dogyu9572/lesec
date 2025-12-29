@@ -133,10 +133,6 @@ class MailSmsService
      */
     public function updateMessage(MailSmsMessage $message, array $data): MailSmsMessage
     {
-        if ($message->status !== MailSmsMessage::STATUS_PREPARED) {
-            throw new InvalidArgumentException('발송 대기 상태에서만 수정할 수 있습니다.');
-        }
-
         return DB::transaction(function () use ($message, $data) {
             $message->update([
                 'message_type' => $data['message_type'],
@@ -156,6 +152,23 @@ class MailSmsService
     /**
      * 메일/SMS 삭제
      */
+    /**
+     * 일괄 삭제
+     */
+    public function bulkDelete(array $messageIds): int
+    {
+        $deletedCount = 0;
+        
+        foreach ($messageIds as $messageId) {
+            $message = MailSmsMessage::find($messageId);
+            if ($message && $this->deleteMessage($message)) {
+                $deletedCount++;
+            }
+        }
+        
+        return $deletedCount;
+    }
+
     public function deleteMessage(MailSmsMessage $message): bool
     {
         return DB::transaction(function () use ($message) {
@@ -335,6 +348,27 @@ class MailSmsService
     }
 
     /**
+     * 수신자 목록 페이징 조회
+     */
+    public function getRecipientsPaginated(MailSmsMessage $message, Request $request): LengthAwarePaginator
+    {
+        $query = $message->recipients()->orderBy('member_name');
+
+        if ($request->filled('keyword')) {
+            $keyword = $request->keyword;
+            $query->where(function ($q) use ($keyword) {
+                $q->where('member_name', 'like', "%{$keyword}%")
+                  ->orWhere('member_email', 'like', "%{$keyword}%")
+                  ->orWhere('member_contact', 'like', "%{$keyword}%");
+            });
+        }
+
+        $perPage = (int) $request->input('per_page', 20);
+
+        return $query->paginate($perPage)->withQueryString();
+    }
+
+    /**
      * 발송 로그 조회
      */
     public function getLogs(MailSmsMessage $message, Request $request, ?int $sendSequence = null): LengthAwarePaginator
@@ -475,6 +509,22 @@ class MailSmsService
         ])->toArray();
 
         MailSmsMessageMember::insert($insertRows);
+    }
+
+    /**
+     * 수신자 삭제
+     */
+    public function deleteRecipient(MailSmsMessage $message, int $recipientId): bool
+    {
+        return DB::transaction(function () use ($message, $recipientId) {
+            $recipient = $message->recipients()->where('id', $recipientId)->first();
+            
+            if (!$recipient) {
+                throw new InvalidArgumentException('수신자를 찾을 수 없습니다.');
+            }
+
+            return $recipient->delete();
+        });
     }
 }
 

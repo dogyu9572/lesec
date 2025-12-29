@@ -421,37 +421,49 @@ document.addEventListener('DOMContentLoaded', () => {
      * 페이지네이션 렌더링
      */
     function renderPagination(pagination) {
-        const lastPage = pagination.last_page || 1;
-        const currentPage = pagination.current_page || 1;
+        if (!paginationContainer) {
+            return;
+        }
 
-        if (lastPage <= 1) {
+        if (!pagination) {
             paginationContainer.innerHTML = '';
             return;
         }
 
-        let html = '<div class="pagination">';
+        const lastPage = Math.max(1, pagination.last_page ?? 1);
+        const current = Math.min(lastPage, pagination.current_page ?? 1);
+        const startPage = Math.max(1, current - 2);
+        const endPage = Math.min(lastPage, current + 2);
 
-        if (currentPage > 1) {
-            html += `<a href="#" data-page="${currentPage - 1}">&lt;</a>`;
+        let html = '<nav aria-label="페이지 네비게이션"><ul class="pagination">';
+
+        const pageItem = (page, label, disabled = false) => {
+            if (disabled || !page || page < 1) {
+                return `<li class="page-item disabled"><span class="page-link">${label}</span></li>`;
+            }
+            return `<li class="page-item"><a href="#" class="page-link" data-page="${page}">${label}</a></li>`;
+        };
+
+        html += pageItem(1, '<i class="fas fa-angle-double-left"></i>', current === 1);
+        html += pageItem(current > 1 ? current - 1 : 0, '<i class="fas fa-chevron-left"></i>', current === 1);
+
+        // 페이지 번호 표시 (최소 1페이지는 항상 표시)
+        if (lastPage === 1) {
+            html += `<li class="page-item active"><span class="page-link">1</span></li>`;
         } else {
-            html += '<span class="disabled">&lt;</span>';
-        }
-
-        for (let page = 1; page <= lastPage; page += 1) {
-            if (page === currentPage) {
-                html += `<span class="active">${page}</span>`;
-            } else {
-                html += `<a href="#" data-page="${page}">${page}</a>`;
+            for (let i = startPage; i <= endPage; i++) {
+                if (i === current) {
+                    html += `<li class="page-item active"><span class="page-link">${i}</span></li>`;
+                } else {
+                    html += pageItem(i, i);
+                }
             }
         }
 
-        if (currentPage < lastPage) {
-            html += `<a href="#" data-page="${currentPage + 1}">&gt;</a>`;
-        } else {
-            html += '<span class="disabled">&gt;</span>';
-        }
+        html += pageItem(current < lastPage ? current + 1 : 0, '<i class="fas fa-chevron-right"></i>', current === lastPage);
+        html += pageItem(lastPage, '<i class="fas fa-angle-double-right"></i>', current === lastPage);
 
-        html += '</div>';
+        html += '</ul></nav>';
         paginationContainer.innerHTML = html;
 
         paginationContainer.querySelectorAll('a[data-page]').forEach((link) => {

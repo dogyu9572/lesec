@@ -8,6 +8,109 @@
 
 /* 헤더 버튼 그룹 - backoffice-common.css의 board-page-header 스타일 사용 */
 
+/* 수신자 목록 아코디언 스타일 */
+.recipients-accordion {
+    margin-top: 20px;
+}
+
+.recipients-accordion .accordion-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.recipients-accordion .accordion-header:hover {
+    background-color: #e9ecef;
+}
+
+.recipients-accordion .accordion-header span:first-child {
+    font-weight: 600;
+    color: #333;
+}
+
+.recipients-accordion .recipient-count {
+    color: #6c757d;
+    font-size: 14px;
+    margin-left: 8px;
+}
+
+.recipients-accordion .accordion-icon {
+    transition: transform 0.3s ease;
+    color: #6c757d;
+}
+
+.recipients-accordion .accordion-content {
+    margin-top: 10px;
+    padding: 15px;
+    border: 1px solid #dee2e6;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    background-color: #fff;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.recipients-accordion .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin: 15px 0;
+}
+
+.recipients-accordion .pagination .page-item {
+    list-style: none;
+}
+
+.recipients-accordion .pagination .page-link {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #dee2e6;
+    color: #007bff;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    display: inline-block;
+    min-width: 36px;
+    text-align: center;
+}
+
+.recipients-accordion .pagination .page-link:hover {
+    background: #e9ecef;
+    border-color: #007bff;
+    color: #0056b3;
+}
+
+.recipients-accordion .pagination .page-item.active .page-link {
+    background-color: #4a90e2;
+    border-color: #4a90e2;
+    color: white;
+}
+
+.recipients-accordion .pagination .page-item.disabled .page-link {
+    color: #6c757d;
+    cursor: not-allowed;
+    background: white;
+    border-color: #dee2e6;
+    opacity: 0.6;
+}
+
 /* disabled 상태에서도 버튼 색상 유지 */
 .board-page-buttons .btn:disabled,
 .board-page-buttons button.btn:disabled {

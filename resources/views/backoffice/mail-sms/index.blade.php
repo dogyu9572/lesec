@@ -17,20 +17,7 @@
         <div class="alert alert-danger">{{ session('error') }}</div>
     @endif
 
-    <div class="board-page-header">
-        <div class="board-page-buttons">
-            <a href="{{ route('backoffice.mail-sms.create') }}" class="btn btn-success">
-                <i class="fas fa-plus"></i> 신규 등록
-            </a>
-        </div>
-    </div>
-
-    <div class="board-card">
-        <div class="board-card-header">
-            <div class="board-page-card-title">
-                <h6>메일/SMS 관리</h6>
-            </div>
-        </div>
+    <div class="board-card">        
         <div class="board-card-body">
             <div class="user-filter">
                 <form method="GET" action="{{ route('backoffice.mail-sms.index') }}" class="filter-form">
@@ -90,6 +77,14 @@
                             <option value="100" @selected(request('per_page') == 100)>100개</option>
                         </select>
                     </form>
+                    @if($messages->count() > 0)
+                        <button type="button" id="bulk-delete-btn-header" class="btn btn-danger btn-sm">
+                            <i class="fas fa-trash"></i> 선택 삭제
+                        </button>
+                    @endif
+                    <a href="{{ route('backoffice.mail-sms.create') }}" class="btn btn-success btn-sm">
+                        <i class="fas fa-plus"></i> 등록
+                    </a>
                 </div>
             </div>
 
@@ -98,6 +93,9 @@
                     <table class="board-table">
                         <thead>
                             <tr>
+                                <th class="w5 board-checkbox-column">
+                                    <input type="checkbox" id="select-all" class="form-check-input">
+                                </th>
                                 <th>No</th>
                                 <th>구분</th>
                                 <th>제목</th>
@@ -109,6 +107,9 @@
                         <tbody>
                             @foreach($messages as $index => $message)
                                 <tr>
+                                    <td>
+                                        <input type="checkbox" name="selected_messages[]" value="{{ $message->id }}" class="form-check-input message-checkbox">
+                                    </td>
                                     <td>{{ $messages->total() - ($messages->currentPage() - 1) * $messages->perPage() - $index }}</td>
                                     <td>{{ $message->message_type_label }}</td>
                                     <td>{{ $message->title }}</td>
@@ -135,12 +136,35 @@
                 </div>
                 <x-pagination :paginator="$messages" />
             @else
-                <div class="no-data">
-                    <p>등록된 발송 정보가 없습니다.</p>
+                <div class="table-responsive">
+                    <table class="board-table">
+                        <thead>
+                            <tr>
+                                <th class="w5 board-checkbox-column">
+                                    <input type="checkbox" id="select-all" class="form-check-input" disabled>
+                                </th>
+                                <th>No</th>
+                                <th>구분</th>
+                                <th>제목</th>
+                                <th>작성자</th>
+                                <th>작성일</th>
+                                <th style="width: 160px;">관리</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="7" class="text-center">등록된 발송 정보가 없습니다.</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             @endif
         </div>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script src="{{ asset('js/backoffice/mail-sms-index.js') }}"></script>
 @endsection
 

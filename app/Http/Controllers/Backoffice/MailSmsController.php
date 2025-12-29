@@ -55,7 +55,20 @@ class MailSmsController extends BaseController
         $data = $request->validated();
         $data['writer_id'] = auth()->id();
 
-        $this->mailSmsService->createMessage($data);
+        $message = $this->mailSmsService->createMessage($data);
+
+        // 발송 요청이 있으면 등록 후 발송
+        if ($request->has('send') && $request->input('send') == '1') {
+            try {
+                $this->mailSmsService->requestSend($message);
+                return redirect()->route('backoffice.mail-sms.index')
+                    ->with('success', '발송 정보가 등록되고 발송이 완료되었습니다.');
+            } catch (\Exception $e) {
+                return redirect()->route('backoffice.mail-sms.index')
+                    ->with('success', '발송 정보가 등록되었습니다.')
+                    ->with('error', '발송 중 오류가 발생했습니다: ' . $e->getMessage());
+            }
+        }
 
         return redirect()->route('backoffice.mail-sms.index')
             ->with('success', '발송 정보가 등록되었습니다.');
@@ -127,6 +140,34 @@ class MailSmsController extends BaseController
     }
 
     /**
+     * 일괄 삭제
+     */
+    public function bulkDestroy(Request $request): JsonResponse
+    {
+        $request->validate([
+            'message_ids' => 'required|array',
+            'message_ids.*' => 'integer|exists:mail_sms_messages,id'
+        ]);
+
+        $messageIds = $request->input('message_ids');
+        
+        try {
+            $deletedCount = $this->mailSmsService->bulkDelete($messageIds);
+
+            return response()->json([
+                'success' => true,
+                'message' => $deletedCount . '개의 발송 정보가 삭제되었습니다.',
+                'deleted_count' => $deletedCount
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => '삭제 중 오류가 발생했습니다: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * 발송 요청
      */
     public function send(MailSmsMessage $mailSmsMessage): RedirectResponse
@@ -175,6 +216,44 @@ class MailSmsController extends BaseController
                 'total' => $members->total(),
             ],
         ]);
+    }
+
+    /**
+     * 수신자 목록 조회 (페이징)
+     */
+    public function getRecipients(Request $request, MailSmsMessage $mailSmsMessage): JsonResponse
+    {
+        $recipients = $this->mailSmsService->getRecipientsPaginated($mailSmsMessage, $request);
+
+        return response()->json([
+            'recipients' => $recipients->items(),
+            'pagination' => [
+                'current_page' => $recipients->currentPage(),
+                'last_page' => $recipients->lastPage(),
+                'per_page' => $recipients->perPage(),
+                'total' => $recipients->total(),
+            ],
+        ]);
+    }
+
+    /**
+     * 수신자 삭제
+     */
+    public function deleteRecipient(MailSmsMessage $mailSmsMessage, int $recipient): JsonResponse
+    {
+        try {
+            $this->mailSmsService->deleteRecipient($mailSmsMessage, $recipient);
+
+            return response()->json([
+                'success' => true,
+                'message' => '수신자가 삭제되었습니다.',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => '삭제 중 오류가 발생했습니다: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**

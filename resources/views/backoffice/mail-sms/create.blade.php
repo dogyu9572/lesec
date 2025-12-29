@@ -16,6 +16,17 @@
         data-member-group-url="{{ route('backoffice.mail-sms.member-groups.members', ['memberGroup' => '__GROUP_ID__']) }}"
         data-csrf-token="{{ csrf_token() }}"></div>
     <div class="form-header">
+        <form action="{{ route('backoffice.mail-sms.store') }}" method="POST" id="sendForm" style="display: inline-block; margin-right: 10px;">
+            @csrf
+            <input type="hidden" name="send" value="1">
+            <input type="hidden" name="message_type" id="send_message_type">
+            <input type="hidden" name="member_group_id" id="send_member_group_id">
+            <input type="hidden" name="title" id="send_title">
+            <input type="hidden" name="content" id="send_content">
+            <button type="submit" class="btn btn-primary btn-sm" onclick="return prepareAndSend(event);">
+                <i class="fas fa-paper-plane"></i> <span class="btn-text">발송</span>
+            </button>
+        </form>
         <a href="{{ route('backoffice.mail-sms.index') }}" class="btn btn-secondary btn-sm">
             <i class="fas fa-arrow-left"></i> <span class="btn-text">목록으로</span>
         </a>
@@ -39,10 +50,7 @@
 
     <div class="row">
         <div class="col-12">
-            <div class="admin-card">
-                <div class="admin-card-header">
-                    <h6>메일/SMS 관리</h6>
-                </div>
+            <div class="admin-card">             
                 <div class="admin-card-body">
                     @php
                         $message = null;
@@ -55,7 +63,7 @@
 
                         <div class="program-section">
                             <div class="section-title">기본 정보</div>
-                            <div class="form-grid grid-2">
+                            <div class="form-grid" style="display: flex; flex-direction: column; gap: 15px;">
                                 <div>
                                     <label>구분 <span class="text-danger">*</span></label>
                                     <div class="radio-group">
@@ -87,7 +95,7 @@
                                         회원 그룹을 선택하면 해당 그룹의 전체 회원이 자동으로 선택되며, 개별 검색은 사용할 수 없습니다.
                                     </p>
                                 </div>
-                                <div class="form-group grid-span-2">
+                                <div class="form-group">
                                     <label>회원 <span class="text-danger">*</span></label>
                                     <div class="school-search-wrapper">
                                         <input type="text" id="selected_members_display" value="{{ $selectedMembers->pluck('member_name')->join(', ') }}" readonly placeholder="회원을 선택해주세요">
@@ -135,19 +143,23 @@
                                         <p class="text-danger">{{ $message }}</p>
                                     @enderror
                                 </div>
-                                <div class="form-group grid-span-2">
+                                <div class="form-group">
                                     <label for="title">제목 <span class="text-danger">*</span></label>
                                     <input type="text" id="title" name="title" value="{{ old('title', '') }}" maxlength="255">
                                     @error('title')
                                         <p class="text-danger">{{ $message }}</p>
                                     @enderror
                                 </div>
-                                <div class="form-group grid-span-2">
+                                <div class="form-group">
                                     <label for="content">내용 <span class="text-danger">*</span></label>
                                     <textarea id="content" name="content" rows="10">{{ old('content', '') }}</textarea>
                                     @error('content')
                                         <p class="text-danger">{{ $message }}</p>
                                     @enderror
+                                </div>
+                                <div class="form-group">
+                                    <label>작성일</label>
+                                    <input type="text" value="{{ now()->format('Y-m-d') }}" readonly style="background-color: #f5f5f5; cursor: not-allowed;">
                                 </div>
                             </div>
                         </div>
@@ -177,6 +189,62 @@
         csrfToken: "{{ csrf_token() }}",
         groupMembersUrlTemplate: "{{ route('backoffice.mail-sms.member-groups.members', ['memberGroup' => '__GROUP_ID__']) }}"
     };
+
+    function prepareAndSend(event) {
+        if (!confirm('등록과 동시에 발송하시겠습니까?')) {
+            event.preventDefault();
+            return false;
+        }
+
+        const form = document.getElementById('mailSmsForm');
+        const sendForm = document.getElementById('sendForm');
+
+        // 폼 유효성 검사
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            event.preventDefault();
+            return false;
+        }
+
+        // 발송 폼에 데이터 복사
+        const messageType = form.querySelector('input[name="message_type"]:checked');
+        if (messageType) {
+            sendForm.querySelector('#send_message_type').value = messageType.value;
+        }
+
+        const memberGroupId = form.querySelector('#member_group_id');
+        if (memberGroupId) {
+            sendForm.querySelector('#send_member_group_id').value = memberGroupId.value;
+        }
+
+        const memberIds = Array.from(form.querySelectorAll('input[name="member_ids[]"]'))
+            .map(input => input.value)
+            .filter(id => id);
+
+        const title = form.querySelector('#title');
+        if (title) {
+            sendForm.querySelector('#send_title').value = title.value;
+        }
+
+        const content = form.querySelector('#content');
+        if (content) {
+            sendForm.querySelector('#send_content').value = content.value;
+        }
+
+        // member_ids를 배열로 전송하기 위해 각각의 hidden input 생성
+        const existingMemberIds = sendForm.querySelectorAll('input[name="member_ids[]"]');
+        existingMemberIds.forEach(input => input.remove());
+
+        memberIds.forEach(memberId => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'member_ids[]';
+            input.value = memberId;
+            sendForm.appendChild(input);
+        });
+
+        return true;
+    }
 </script>
 <script src="{{ asset('js/backoffice/mail-sms-form.js') }}"></script>
 @endsection

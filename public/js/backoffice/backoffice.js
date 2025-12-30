@@ -17,27 +17,88 @@ document.addEventListener('DOMContentLoaded', function() {
     // 화면 크기에 따라 사이드바 토글 버튼 표시 여부 설정
     function toggleSidebarButtonVisibility() {
         if (window.innerWidth <= 768) {
-            sidebarToggle.style.display = 'block';
+            if (sidebarToggle) {
+                sidebarToggle.style.display = 'flex';
+            }
+            // 모바일에서는 사이드바를 기본적으로 숨김
+            if (sidebar) {
+                sidebar.classList.remove('active');
+            }
+            if (backdrop) {
+                backdrop.style.display = 'none';
+            }
+            if (body) {
+                body.classList.remove('sidebar-open');
+            }
         } else {
-            sidebarToggle.style.display = 'none';
+            if (sidebarToggle) {
+                sidebarToggle.style.display = 'none';
+            }
+            // 데스크톱에서는 사이드바를 항상 표시
+            if (sidebar) {
+                sidebar.classList.remove('active');
+                sidebar.style.cssText = ''; // 인라인 스타일 제거
+            }
+            if (backdrop) {
+                backdrop.style.display = 'none';
+            }
+            if (body) {
+                body.classList.remove('sidebar-open');
+            }
         }
     }
 
     // 초기 로드 시 실행
     toggleSidebarButtonVisibility();
     
-    // 모바일에서 사이드바 초기 상태 설정
-    if (sidebar && window.innerWidth <= 768) {
-        sidebar.classList.remove('active');
-    }
-    
     // 백드롭 초기화
     if (backdrop) {
         backdrop.style.display = 'none';
     }
 
-    // 윈도우 크기 변경 시 실행
-    window.addEventListener('resize', toggleSidebarButtonVisibility);
+    // 윈도우 크기 변경 시 실행 (debounce 적용)
+    let resizeTimer;
+    function handleResize() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function() {
+            toggleSidebarButtonVisibility();
+            
+            // 추가 리사이즈 처리
+            if (window.innerWidth > 768) {
+                // 데스크톱 크기로 변경 시 사이드바 닫기 및 스타일 초기화
+                if (sidebar && sidebar.classList.contains('active')) {
+                    closeSidebar();
+                }
+                if (sidebar) {
+                    sidebar.style.cssText = ''; // 인라인 스타일 제거
+                }
+            } else {
+                // 모바일 크기로 변경 시 사이드바 숨기기
+                if (sidebar) {
+                    sidebar.classList.remove('active');
+                    sidebar.style.cssText = `
+                        position: fixed !important;
+                        left: 0 !important;
+                        width: 260px !important;
+                        height: 100vh !important;
+                        min-height: 200vh !important;
+                        background-color: #343a40 !important;
+                        z-index: 9999 !important;
+                        transform: translateX(-100%) !important;
+                        transition: transform 0.3s ease !important;
+                    `;
+                }
+                if (backdrop) {
+                    backdrop.style.display = 'none';
+                }
+                if (body) {
+                    body.classList.remove('sidebar-open');
+                }
+            }
+        }, 100);
+    }
+    
+    window.addEventListener('resize', handleResize);
 
     if (sidebarToggle && sidebar && backdrop) {
         // FastClick 적용 (모바일 터치 딜레이 제거)
@@ -60,47 +121,46 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // 윈도우 리사이즈 시 모바일 메뉴 상태 관리
-    window.addEventListener('resize', function() {
-        if (window.innerWidth > 768 && sidebar.classList.contains('active')) {
-            closeSidebar();
-        }
-    });
 
     // 사이드바 토글 함수
     function toggleSidebar(e) {
-        if (e && e.type !== 'touchstart') {
+        if (e) {
             e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        // 모바일에서만 작동
+        if (window.innerWidth > 768) {
+            return;
         }
         
         const isActive = sidebar.classList.contains('active');
         
         if (isActive) {
             // 사이드바 닫기
-            sidebar.classList.remove('active');
-            backdrop.classList.remove('active');
-            body.classList.remove('sidebar-open');
-            backdrop.style.display = 'none';
+            closeSidebar();
         } else {
             // 사이드바 열기
             sidebar.classList.add('active');
-            backdrop.classList.add('active');
-            body.classList.add('sidebar-open');
-            backdrop.style.display = 'block';
-            // 모바일에서만 사이드바 표시
-            if (window.innerWidth <= 768) {
-                sidebar.style.cssText = `
-                    position: fixed !important;
-                    left: 0 !important;
-                    width: 260px !important;
-                    height: 100vh !important;
-                    min-height: 200vh !important;
-                    background-color: #343a40 !important;
-                    z-index: 9999 !important;
-                    transform: translateX(0) !important;
-                    transition: transform 0.3s ease-out !important;
-                `;
+            if (backdrop) {
+                backdrop.classList.add('active');
+                backdrop.style.display = 'block';
             }
+            if (body) {
+                body.classList.add('sidebar-open');
+            }
+            // 모바일에서 사이드바 표시
+            sidebar.style.cssText = `
+                position: fixed !important;
+                left: 0 !important;
+                width: 260px !important;
+                height: 100vh !important;
+                min-height: 200vh !important;
+                background-color: #343a40 !important;
+                z-index: 9999 !important;
+                transform: translateX(0) !important;
+                transition: transform 0.3s ease-out !important;
+            `;
         }
     }
 

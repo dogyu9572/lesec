@@ -64,14 +64,18 @@
 							@endif
 						</td>
 						<td class="appli08">
-							@if($application->draw_result === 'pending')
-								<div class="statebox wait">대기중</div>
-							@elseif($application->draw_result === 'win')
-								<div class="statebox complet">당첨</div>
-							@elseif($application->draw_result === 'waitlist')
-								<div class="statebox wait">대기중</div>
-							@elseif($application->draw_result === 'fail')
-								<div class="statebox">미당첨</div>
+							@if($application->reception_type === 'lottery')
+								@if($application->draw_result === 'pending')
+									<div class="statebox wait">대기중</div>
+								@elseif($application->draw_result === 'win')
+									<div class="statebox complet">당첨</div>
+								@elseif($application->draw_result === 'waitlist')
+									<div class="statebox wait">대기중</div>
+								@elseif($application->draw_result === 'fail')
+									<div class="statebox">미당첨</div>
+								@else
+									-
+								@endif
 							@else
 								-
 							@endif

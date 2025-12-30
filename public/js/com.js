@@ -99,9 +99,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const toggleEyeBtn = document.querySelector('.toggle-password');
     const passwordInput = document.querySelector('.password-input');
 
-    toggleEyeBtn.addEventListener('click', function () {
-        passwordInput.type = (passwordInput.type === 'password') ? 'text' : 'password';
-    });
+    if (toggleEyeBtn && passwordInput) {
+        toggleEyeBtn.addEventListener('click', function () {
+            passwordInput.type = (passwordInput.type === 'password') ? 'text' : 'password';
+        });
+    }
 
     document.querySelectorAll('.clear-password').forEach(function (btn) {
         btn.addEventListener('click', function () {

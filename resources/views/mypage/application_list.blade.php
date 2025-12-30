@@ -68,8 +68,6 @@
 								<div class="statebox wait">승인대기</div>
 							@elseif($application->application_status === 'approved')
 								<div class="statebox complet">승인완료</div>
-							@elseif($application->application_status === 'cancelled')
-								<div class="statebox">취소/반려</div>
 							@else
 								-
 							@endif
@@ -83,10 +81,12 @@
 						</td> -->
 						<td class="appli09">
 
-							{{-- 승인대기: 불가 버튼만 표시 --}}
-							@if($application->application_status === 'pending')
+							{{-- 신청 취소 상태: 불가 --}}
+							@if($application->payment_status === 'cancelled')
 								<a href="javascript:void(0);" class="btn btn_gray">불가</a>
-
+							{{-- 승인대기: 불가 버튼만 표시 --}}
+							@elseif($application->application_status === 'pending')
+								<a href="javascript:void(0);" class="btn btn_gray">불가</a>
 							{{-- 승인완료: 수정 버튼 --}}
 							@elseif($application->application_status === 'approved')
 								<a href="{{ route('mypage.application_write', $application->id) }}" class="btn btn_wkk">입력</a>
@@ -99,6 +99,8 @@
 						<td class="appli10">
 							@if($application->payment_status === 'cancelled')
 								<a href="javascript:void(0);" class="btn btn_gray">취소 완료</a>
+							@elseif($application->application_status === 'approved')
+								<a href="javascript:void(0);" class="btn btn_gray btn_impossible">불가</a>
 							@else
 								<form method="POST" action="{{ route('mypage.application_cancel', $application->id) }}" style="display: inline;" onsubmit="return confirm('정말 신청을 취소하시겠습니까?');">
 									@csrf

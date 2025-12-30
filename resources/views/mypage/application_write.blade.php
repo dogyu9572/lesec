@@ -89,7 +89,7 @@
 			<div class="abso_btns">
 				<a href="{{ route('mypage.application_write.sample', $application->id) }}" class="btn btn_kwy">샘플파일 받기</a>
 				<label for="csv_upload" class="btn btn_kwy" style="cursor: pointer; margin-left: 5px;">일괄 업로드</label>
-				<input type="file" id="csv_upload" name="csv_file" accept=".csv" style="display: none;">
+				<input type="file" id="csv_upload" name="csv_file" accept=".csv,.xlsx,.xls" style="display: none;">
 				<button type="button" class="btn btn_wkk btn_add">추가</button>
 			</div>
 		</div>
@@ -103,6 +103,7 @@
 							<col>
 							<col>
 							<col>
+							<col width="8%">
 						</colgroup>
 						<thead>
 							<tr>
@@ -111,6 +112,7 @@
 								<th>학년<span>*</span></th>
 								<th>반<span>*</span></th>
 								<th>생년월일</th>
+								<th>삭제</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -138,6 +140,9 @@
 									</select>
 								</td>
 								<td><input type="text" name="participants[{{ $loop->index }}][birthday]" class="w100p" placeholder="20010101" value="{{ $participant->birthday ? $participant->birthday->format('Ymd') : '' }}"></td>
+								<td>
+									<button type="button" class="btn btn_gray btn_delete_participant" style="width: 100%; padding: 5px;">삭제</button>
+								</td>
 							</tr>
 							@empty
 							<tr>
@@ -160,6 +165,9 @@
 									</select>
 								</td>
 								<td><input type="text" name="participants[0][birthday]" class="w100p" placeholder="20010101"></td>
+								<td>
+									<button type="button" class="btn btn_gray btn_delete_participant" style="width: 100%; padding: 5px;">삭제</button>
+								</td>
 							</tr>
 							@endforelse
 						</tbody>
@@ -294,12 +302,39 @@ $(document).ready(function () {
 				</select>
 			</td>
 			<td><input type="text" name="participants[${currentRows}][birthday]" class="w100p" placeholder="20010101"></td>
+			<td>
+				<button type="button" class="btn btn_gray btn_delete_participant" style="width: 100%; padding: 5px;">삭제</button>
+			</td>
 		</tr>
 	`;
 		
 		$('.board_apply_list tbody').append(newRow);
 		updatePlaceholders();
+		updateRowNumbers();
 	});
+
+	// 삭제 버튼 클릭 이벤트 (이벤트 위임 사용)
+	$(document).on('click', '.btn_delete_participant', function() {
+		if (confirm('정말 삭제하시겠습니까?')) {
+			$(this).closest('tr').remove();
+			updateRowNumbers();
+		}
+	});
+
+	// 행 번호 업데이트 함수
+	function updateRowNumbers() {
+		$('.board_apply_list tbody tr').each(function(index) {
+			$(this).find('td:first').text(index + 1);
+			// name 속성 인덱스도 업데이트
+			const rowIndex = index;
+			$(this).find('input, select').each(function() {
+				const name = $(this).attr('name');
+				if (name) {
+					$(this).attr('name', name.replace(/participants\[\d+\]/, `participants[${rowIndex}]`));
+				}
+			});
+		});
+	}
 
 	$('#csv_upload').on('change', function() {
 		if (this.files && this.files[0]) {

@@ -103,10 +103,25 @@ class BoardContentService
             return null;
         }
 
-        $attachments = $this->decodeAttachments($post->attachments);
-        $attachment = $attachments[$attachmentIndex] ?? null;
+        if (empty($post->attachments)) {
+            return null;
+        }
 
-        if (!$attachment || empty($attachment['path'])) {
+        $attachments = $this->decodeAttachments($post->attachments);
+        
+        if (empty($attachments)) {
+            return null;
+        }
+
+        $attachmentsArray = array_values($attachments);
+        
+        if ($attachmentIndex < 0 || $attachmentIndex >= count($attachmentsArray)) {
+            return null;
+        }
+
+        $attachment = $attachmentsArray[$attachmentIndex];
+
+        if (!is_array($attachment) || empty($attachment['path'])) {
             return null;
         }
 

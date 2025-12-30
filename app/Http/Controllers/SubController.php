@@ -136,7 +136,7 @@ class SubController extends Controller
             'nextPost' => $detail['next'],
         ]);
     }
-    public function downloadBoardAttachment(string $boardType, int $postId, int $attachmentIndex)
+    public function downloadBoardAttachment(string|int $postId, string|int $attachmentIndex, string $boardType = 'notice')
     {
         $slug = $this->resolveBoardSlug($boardType);
 
@@ -144,14 +144,21 @@ class SubController extends Controller
             abort(404, '요청하신 첨부파일을 찾을 수 없습니다.');
         }
 
-        $board = $this->boardContentService->getBoard($slug);
-        $response = $this->boardContentService->downloadAttachment($board, $postId, $attachmentIndex);
+        $postId = (int)$postId;
+        $attachmentIndex = (int)$attachmentIndex;
 
-        if (!$response) {
-            abort(404, '요청하신 첨부파일을 찾을 수 없습니다.');
+        try {
+            $board = $this->boardContentService->getBoard($slug);
+            $response = $this->boardContentService->downloadAttachment($board, $postId, $attachmentIndex);
+
+            if (!$response) {
+                abort(404, '요청하신 첨부파일을 찾을 수 없습니다.');
+            }
+
+            return $response;
+        } catch (\Exception $e) {
+            abort(404, '첨부파일 다운로드 중 오류가 발생했습니다.');
         }
-
-        return $response;
     }
 //마이페이지
 	//신청내역 - 단체목록

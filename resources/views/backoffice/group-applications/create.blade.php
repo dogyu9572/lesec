@@ -51,9 +51,6 @@
     <div class="row">
         <div class="col-12">
             <div class="admin-card">
-                <div class="admin-card-header">
-                    <h6>단체 신청 내역 등록</h6>
-                </div>
                 <div class="admin-card-body">
                     <div id="application-search-config"
                          data-member-search-url="{{ route('backoffice.group-applications.search-members') }}"

@@ -15,10 +15,7 @@
     </div>
 
     <div class="board-card">
-        <div class="board-card-header">
-            <h6>{{ $pageTitle }}</h6>
-        </div>
-        <div class="board-card-body">
+<div class="board-card-body">
             <form action="{{ route('backoffice.admin-menus.store') }}" method="POST">
                 @csrf
 

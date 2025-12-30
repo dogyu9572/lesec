@@ -24,10 +24,7 @@
     </div>
 
     <div class="board-card">
-        <div class="board-card-header">
-            <h6>발송 정보</h6>
-        </div>
-        <div class="board-card-body">
+<div class="board-card-body">
             <table class="detail-table">
                 <tbody>
                     <tr>
@@ -68,10 +65,7 @@
     </div>
 
     <div class="board-card">
-        <div class="board-card-header">
-            <h6>상세 발송 내역</h6>
-        </div>
-        <div class="board-card-body">
+<div class="board-card-body">
             <form method="GET" action="{{ route('backoffice.mail-sms.show', $message) }}" class="filter-form">
                 <div class="filter-row">
                     <div class="filter-group">

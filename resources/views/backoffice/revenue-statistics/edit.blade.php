@@ -30,9 +30,6 @@
     <div class="row">
         <div class="col-12">
             <div class="admin-card">
-                <div class="admin-card-header">
-                    <h6>수익 통계(상세)</h6>
-                </div>
                 <div class="admin-card-body">
                     <form id="revenueStatisticsForm" action="{{ route('backoffice.revenue-statistics.update', $statistics) }}" method="POST">
                         @csrf

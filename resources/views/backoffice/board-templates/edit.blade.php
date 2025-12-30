@@ -15,8 +15,7 @@
     </div>
 
     <div class="board-card">
-        <div class="board-card-header">
-            <h6>템플릿 정보 수정</h6>
+        <div class="board-card-header">           
             @if($isInUse)
                 <span class="badge badge-warning">사용 중인 템플릿</span>
             @endif

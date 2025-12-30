@@ -30,9 +30,6 @@
     <div class="row">
         <div class="col-12">
             <div class="admin-card">
-                <div class="admin-card-header">
-                    <h6>회원 그룹 정보</h6>
-                </div>
                 <div class="admin-card-body">
                     <form id="memberGroupForm" action="{{ route('backoffice.member-groups.update', $group) }}" method="POST">
                         @csrf

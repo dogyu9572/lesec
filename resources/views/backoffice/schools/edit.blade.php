@@ -26,10 +26,7 @@
     </div>
 
     <div class="board-card">
-        <div class="board-card-header">
-            <h6>학교 수정</h6>
-        </div>
-        <div class="board-card-body">
+<div class="board-card-body">
             <form action="{{ route('backoffice.schools.update', $school) }}" method="POST">
                 @csrf
                 @method('PUT')

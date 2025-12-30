@@ -23,12 +23,7 @@
         </div>
 
         <div class="board-card">
-            <div class="board-card-header">
-                <div class="board-page-card-title">
-                    <h6>인사말</h6>
-                </div>
-            </div>
-            <div class="board-card-body">
+    <div class="board-card-body">
                 <div class="board-post-header">
                     <div class="board-post-title">
                         <h3>{{ $post->title }}</h3>

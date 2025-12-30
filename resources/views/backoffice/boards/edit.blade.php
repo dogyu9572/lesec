@@ -27,10 +27,7 @@
     <div class="row">
         <div class="col-12">
             <div class="board-card">
-                <div class="board-card-header">
-                    <h6>정보 수정</h6>
-                </div>
-                <div class="board-card-body">
+        <div class="board-card-body">
                     <!-- 템플릿 정보 표시 -->
                     @if($board->template)
                         <div class="board-template-info">

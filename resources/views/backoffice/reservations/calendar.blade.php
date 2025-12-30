@@ -9,12 +9,7 @@
 @section('content')
 <div class="board-container">
     <div class="board-card">
-        <div class="board-card-header">
-            <div class="board-page-card-title">
-                <h6>예약 캘린더</h6>
-            </div>
-        </div>
-        <div class="board-card-body">
+<div class="board-card-body">
             <div class="schedule_wrap">
                 <!-- 왼쪽: 캘린더 -->
                 <div class="schedule_table">

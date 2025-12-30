@@ -9,10 +9,11 @@
 
 
 @section('content')
-<div class="admin-form-container">
-    <div class="form-header">      
+<div class="admin-form-container">   
+
+    <div class="board-header">
         <a href="{{ route('backoffice.admins.index') }}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> <span class="btn-text">목록으로</span>
+            <i class="fas fa-arrow-left"></i> 목록으로
         </a>
     </div>
 

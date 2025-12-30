@@ -30,11 +30,6 @@
     @endif
 
     <div class="board-card">
-        <div class="board-card-header">
-            <div class="board-page-card-title">
-                <h6>새 권한 그룹 추가</h6>
-            </div>
-        </div>
         <div class="board-card-body">
             <form id="adminGroupForm" action="{{ route('backoffice.admin-groups.store') }}" method="POST">
                 @csrf

@@ -50,7 +50,7 @@
 
     <div class="row">
         <div class="col-12">
-            <div class="admin-card">             
+            <div class="admin-card">
                 <div class="admin-card-body">
                     @php
                         $message = null;

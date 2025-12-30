@@ -20,11 +20,6 @@
     </div>
 
     <div class="board-card">
-        <div class="board-card-header">
-            <div class="board-page-card-title">
-                <h6>{{ $group->name }} - 권한 설정</h6>
-            </div>
-        </div>
         <div class="board-card-body">
             <form id="permissionForm" action="{{ route('backoffice.admin-groups.permissions.update', $group) }}" method="POST">
                 @csrf

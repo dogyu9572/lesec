@@ -26,10 +26,7 @@
     </div>
 
     <div class="board-card">
-        <div class="board-card-header">
-            <h6>학교 등록</h6>
-        </div>
-        <div class="board-card-body">
+<div class="board-card-body">
             <form action="{{ route('backoffice.schools.store') }}" method="POST">
                 @csrf
 

@@ -28,10 +28,7 @@
     @endif
 
     <div class="board-card">
-        <div class="board-card-header">
-            <h6>스킨 목록</h6>
-        </div>
-        <div class="board-card-body">
+<div class="board-card-body">
             @if ($skins->isEmpty())
                 <div class="no-data">
                     <p>등록된 스킨이 없습니다.</p>

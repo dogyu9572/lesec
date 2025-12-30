@@ -16,10 +16,7 @@
     </div>
 
     <div class="board-card">
-        <div class="board-card-header">
-            <h6>학교 상세 정보</h6>
-        </div>
-        <div class="board-card-body">
+<div class="board-card-body">
             <div class="program-section">
                 <div class="section-title">기본 정보</div>
                 <div class="form-grid grid-2">

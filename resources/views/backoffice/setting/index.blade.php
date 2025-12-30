@@ -23,10 +23,7 @@
 
 <div class="board-container">
     <div class="board-card">
-        <div class="board-card-header">
-            <h6>기본 설정</h6>
-        </div>
-        <div class="board-card-body">
+<div class="board-card-body">
                     @if(session('success'))
                         <div class="alert alert-success hidden-alert">
                             {{ session('success') }}

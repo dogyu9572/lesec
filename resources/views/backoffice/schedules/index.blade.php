@@ -23,12 +23,6 @@
     @endif
 
     <div class="board-card">
-        <div class="board-card-header">
-            <div class="board-page-card-title">
-                <h6>일정관리</h6>
-                <button type="button" class="btn btn-success" id="btn-register">등록</button>
-            </div>
-        </div>
         <div class="board-card-body">
             <div class="schedule_wrap">
                 <!-- 왼쪽: 캘린더 -->

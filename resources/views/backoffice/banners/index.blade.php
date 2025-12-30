@@ -34,12 +34,7 @@
     </div>
 
     <div class="board-card">
-        <div class="board-card-header">
-            <div class="board-page-card-title">
-                <h6>배너 관리</h6>               
-            </div>
-        </div>
-        <div class="board-card-body">
+<div class="board-card-body">
             <!-- 검색 필터 -->
             <div class="banner-filter">
                 <form method="GET" action="{{ route('backoffice.banners.index') }}" class="filter-form">

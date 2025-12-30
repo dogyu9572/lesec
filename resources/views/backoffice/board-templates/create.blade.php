@@ -15,10 +15,7 @@
     </div>
 
     <div class="board-card">
-        <div class="board-card-header">
-            <h6>템플릿 정보 입력</h6>
-        </div>
-        <div class="board-card-body">
+<div class="board-card-body">
             @if ($errors->any())
                 <div class="board-alert board-alert-danger">
                     <ul>

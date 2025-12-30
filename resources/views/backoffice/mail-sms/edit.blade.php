@@ -50,9 +50,6 @@
     <div class="row">
         <div class="col-12">
             <div class="admin-card">
-                <div class="admin-card-header">
-                    <h6>메일/SMS 관리</h6>
-                </div>
                 <div class="admin-card-body">
                     @php
                         $currentType = old('message_type', $message->message_type ?? array_key_first($messageTypes));

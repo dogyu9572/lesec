@@ -49,9 +49,6 @@
     <div class="row">
         <div class="col-12">
             <div class="admin-card">
-                <div class="admin-card-header">
-                    <h6>단체 신청 내역 관리</h6>
-                </div>
                 <div class="admin-card-body">
                     <form method="POST" action="{{ route('backoffice.group-applications.update', $applicationId ?? 0) }}">
                         @csrf

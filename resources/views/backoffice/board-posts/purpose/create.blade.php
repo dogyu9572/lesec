@@ -17,9 +17,6 @@
     </div>
 
     <div class="board-card">
-        <div class="board-card-header">
-            <h6>게시글 작성</h6>
-        </div>
         <div class="board-card-body">
             @if ($errors->any())
                 <div class="board-alert board-alert-danger">

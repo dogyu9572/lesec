@@ -26,9 +26,6 @@
     <div class="row">
         <div class="col-12">
             <div class="admin-card">
-                <div class="admin-card-header">
-                    <h6>기본 정보</h6>
-                </div>
                 <div class="admin-card-body">
                     <div class="detail-grid">
                         <div class="detail-item">
@@ -116,9 +113,6 @@
     <div class="row">
         <div class="col-12">
             <div class="admin-card">
-                <div class="admin-card-header">
-                    <h6>수신 동의</h6>
-                </div>
                 <div class="admin-card-body">
                     <div class="detail-grid">
                         <div class="detail-item">
@@ -150,9 +144,6 @@
     <div class="row">
         <div class="col-12">
             <div class="admin-card">
-                <div class="admin-card-header">
-                    <h6>기타 정보</h6>
-                </div>
                 <div class="admin-card-body">
                     <div class="detail-grid">
                         <div class="detail-item">

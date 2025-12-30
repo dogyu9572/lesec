@@ -55,9 +55,6 @@
     <div class="row">
         <div class="col-12">
             <div class="admin-card">
-                <div class="admin-card-header">
-                    <h6>개인 신청 내역 등록</h6>
-                </div>
                 <div class="admin-card-body">
                     <form method="POST" action="{{ route('backoffice.individual-applications.store') }}">
                         @csrf

@@ -30,9 +30,6 @@
     <div class="row">
         <div class="col-12">
             <div class="admin-card">
-                <div class="admin-card-header">
-                    <h6>회원 정보</h6>
-                </div>
                 <div class="admin-card-body">
                     <form id="memberForm" action="{{ route('backoffice.members.store') }}" method="POST">
                         @csrf

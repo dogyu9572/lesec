@@ -15,10 +15,7 @@
     </div>
 
     <div class="board-card">
-        <div class="board-card-header">
-            <h6>{{ $pageTitle }}</h6>
-        </div>
-        <div class="board-card-body">
+<div class="board-card-body">
             @if ($errors->any())
                 <div class="board-alert board-alert-danger">
                     <ul>
@@ -110,10 +107,7 @@
 
     <!-- 스킨 정보 -->
     <div class="board-card">
-        <div class="board-card-header">
-            <h6>스킨 정보</h6>
-        </div>
-        <div class="board-card-body">
+<div class="board-card-body">
             <div class="board-timestamps">
                 <p><strong>생성일:</strong> {{ $boardSkin->created_at->format('Y-m-d H:i:s') }}</p>
                 <p><strong>수정일:</strong> {{ $boardSkin->updated_at->format('Y-m-d H:i:s') }}</p>

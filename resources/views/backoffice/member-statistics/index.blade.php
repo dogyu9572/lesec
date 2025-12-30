@@ -9,12 +9,6 @@
 @section('content')
 <div class="member-stats-page board-container">
     <div class="board-card">
-        <div class="board-card-header">
-            <div class="board-page-card-title">
-                <h6>회원 통계</h6>
-                <span class="board-page-count">Total : {{ number_format($total_members) }}명</span>
-            </div>
-        </div>
         <div class="board-card-body">
             <div class="member-stats-section">
                 <div class="section-header">

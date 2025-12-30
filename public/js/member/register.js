@@ -24,6 +24,8 @@
         this.bindInputChange();
         this.showServerInlineErrors();
         this.focusServerErrorField();
+        // 페이지 로드 시 중복 확인 상태 복원
+        this.restoreDuplicateCheckStatus();
         // 페이지 로드 시 학교 데이터 미리 불러오기
         this.preloadSchools();
     };
@@ -296,6 +298,59 @@
                 $error.show();
             }
         });
+    };
+
+    /**
+     * 페이지 로드 시 중복 확인 완료 상태 복원
+     */
+    MemberRegister.prototype.restoreDuplicateCheckStatus = function () {
+        var self = this;
+
+        // 아이디 중복 확인 상태 복원
+        var loginIdVerified = this.$form.find('[name="login_id_verified"]').val();
+        if (loginIdVerified === '1') {
+            var $loginIdWrapper = this.$form.find('[name="login_id"]').closest('dd');
+            var $loginIdInput = this.$form.find('[name="login_id"]');
+            var loginIdValue = $loginIdInput.val();
+            
+            if (loginIdValue && loginIdValue.trim() !== '') {
+                // 중복 확인 관련 에러 메시지 제거
+                $loginIdWrapper.find('.error_alert').each(function () {
+                    var errorText = $(this).text();
+                    if (errorText.indexOf('중복 확인') !== -1) {
+                        $(this).remove();
+                    }
+                });
+                
+                // 성공 메시지 표시
+                if (!$loginIdWrapper.find('.success_alert').length) {
+                    $loginIdWrapper.append('<p class="success_alert c_green">사용 가능한 아이디 입니다.</p>');
+                }
+            }
+        }
+
+        // 연락처 중복 확인 상태 복원
+        var contactVerified = this.$form.find('[name="contact_verified"]').val();
+        if (contactVerified === '1') {
+            var $contactWrapper = this.$form.find('[name="student_contact"]').closest('dd');
+            var $contactInput = this.$form.find('[name="student_contact"]');
+            var contactValue = $contactInput.val();
+            
+            if (contactValue && contactValue.trim() !== '') {
+                // 중복 확인 관련 에러 메시지 제거
+                $contactWrapper.find('.error_alert').each(function () {
+                    var errorText = $(this).text();
+                    if (errorText.indexOf('중복 확인') !== -1) {
+                        $(this).remove();
+                    }
+                });
+                
+                // 성공 메시지 표시
+                if (!$contactWrapper.find('.success_alert').length) {
+                    $contactWrapper.append('<p class="success_alert c_green">사용 가능한 연락처 입니다.</p>');
+                }
+            }
+        }
     };
 
     MemberRegister.prototype.getErrorFieldSelector = function (field) {

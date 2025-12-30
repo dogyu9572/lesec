@@ -17,6 +17,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 
 class GroupApplicationService
 {
@@ -372,56 +375,148 @@ class GroupApplicationService
 
     public function downloadRosterSample(): StreamedResponse
     {
-        $filename = 'group_roster_sample.csv';
+        if (!class_exists(\PhpOffice\PhpSpreadsheet\IOFactory::class)) {
+            throw new InvalidArgumentException('엑셀 파일 처리를 위해 PhpSpreadsheet가 필요합니다.');
+        }
+
+        $filename = 'group_roster_sample.xlsx';
         $headers = ['이름', '학년', '반', '생년월일(YYYYMMDD)'];
         $sampleRows = [
             ['홍길동', '1', '1', '20010101'],
             ['김철수', '2', '3', '20020202'],
         ];
 
-        return $this->downloadCsvSample($filename, $headers, $sampleRows);
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // 헤더 작성
+        $columnIndex = 1;
+        foreach ($headers as $header) {
+            $columnLetter = Coordinate::stringFromColumnIndex($columnIndex);
+            $sheet->setCellValue($columnLetter . '1', $header);
+            $columnIndex++;
+        }
+
+        // 헤더 스타일 설정
+        $sheet->getStyle('A1:D1')->getFont()->setBold(true);
+
+        // 샘플 데이터 작성
+        $rowIndex = 2;
+        foreach ($sampleRows as $row) {
+            $columnIndex = 1;
+            foreach ($row as $cellValue) {
+                $columnLetter = Coordinate::stringFromColumnIndex($columnIndex);
+                $cellAddress = $columnLetter . $rowIndex;
+                $sheet->setCellValue($cellAddress, $cellValue);
+                $columnIndex++;
+            }
+            $rowIndex++;
+        }
+
+        // 컬럼 너비 자동 조정
+        foreach (range('A', 'D') as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        return response()->streamDownload(function () use ($spreadsheet) {
+            $writer = new Xlsx($spreadsheet);
+            $writer->save('php://output');
+        }, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
     }
 
     public function uploadRoster(int $applicationId, UploadedFile $file): int
     {
         $application = GroupApplication::query()->findOrFail($applicationId);
-        $handle = fopen($file->getRealPath(), 'r');
-        // header skip
-        fgetcsv($handle);
+        $extension = strtolower($file->getClientOriginalExtension());
+        $filePath = $file->getRealPath();
+
         $rows = 0;
-        while (($data = fgetcsv($handle)) !== false) {
-            $name = trim($data[0] ?? '');
-            $grade = trim($data[1] ?? '');
-            $class = trim($data[2] ?? '');
-            $birthdayRaw = trim($data[3] ?? '');
-            if ($name === '' || $grade === '' || $class === '') {
-                continue;
+
+        if ($extension === 'csv') {
+            // CSV 파일 처리
+            $handle = fopen($filePath, 'r');
+            if (!$handle) {
+                throw new InvalidArgumentException('파일을 읽을 수 없습니다.');
             }
-            $birthday = null;
-            $digits = preg_replace('/[^0-9]/', '', $birthdayRaw);
-            if (strlen($digits) === 8 && ctype_digit($digits)) {
-                try {
-                    $birthday = Carbon::createFromFormat('Ymd', $digits)->format('Y-m-d');
-                } catch (\Throwable $e) {
-                    $birthday = null;
+
+            // UTF-8 BOM 제거
+            $bom = fread($handle, 3);
+            if ($bom !== chr(0xEF).chr(0xBB).chr(0xBF)) {
+                rewind($handle);
+            }
+
+            // header skip
+            fgetcsv($handle);
+            
+            while (($data = fgetcsv($handle)) !== false) {
+                $rows += $this->processRosterRow($application->id, $data);
+            }
+            fclose($handle);
+        } elseif (in_array($extension, ['xlsx', 'xls'])) {
+            // 엑셀 파일 처리
+            if (!class_exists(\PhpOffice\PhpSpreadsheet\IOFactory::class)) {
+                throw new InvalidArgumentException('엑셀 파일 처리를 위해 PhpSpreadsheet가 필요합니다.');
+            }
+
+            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($filePath);
+            $worksheet = $spreadsheet->getActiveSheet();
+            $excelRows = $worksheet->toArray();
+
+            // 헤더 제거
+            array_shift($excelRows);
+
+            foreach ($excelRows as $row) {
+                if (empty(array_filter($row))) {
+                    continue;
                 }
+                $rows += $this->processRosterRow($application->id, $row);
             }
-            GroupApplicationParticipant::create([
-                'group_application_id' => $application->id,
-                'name' => $name,
-                'grade' => (int) $grade,
-                'class' => $class,
-                'birthday' => $birthday,
-            ]);
-            $rows++;
+        } else {
+            throw new InvalidArgumentException('지원하지 않는 파일 형식입니다. CSV 또는 엑셀 파일을 사용해주세요.');
         }
-        fclose($handle);
 
         $count = GroupApplicationParticipant::where('group_application_id', $application->id)->count();
         $application->applicant_count = $count;
         $application->save();
 
         return $rows;
+    }
+
+    /**
+     * 명단 행 데이터 처리
+     */
+    private function processRosterRow(int $applicationId, array $data): int
+    {
+        $name = trim($data[0] ?? '');
+        $grade = trim($data[1] ?? '');
+        $class = trim($data[2] ?? '');
+        $birthdayRaw = trim($data[3] ?? '');
+
+        if ($name === '' || $grade === '' || $class === '') {
+            return 0;
+        }
+
+        $birthday = null;
+        $digits = preg_replace('/[^0-9]/', '', $birthdayRaw);
+        if (strlen($digits) === 8 && ctype_digit($digits)) {
+            try {
+                $birthday = Carbon::createFromFormat('Ymd', $digits)->format('Y-m-d');
+            } catch (\Throwable $e) {
+                $birthday = null;
+            }
+        }
+
+        GroupApplicationParticipant::create([
+            'group_application_id' => $applicationId,
+            'name' => $name,
+            'grade' => (int) $grade,
+            'class' => $class,
+            'birthday' => $birthday,
+        ]);
+
+        return 1;
     }
 
     public function storeParticipant(int $applicationId, array $data): void

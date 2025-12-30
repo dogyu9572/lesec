@@ -244,6 +244,12 @@ class ProgramReservation extends Model
 
     public function getAppliedCountDisplayAttribute(): int
     {
+        // 개인 프로그램인 경우 실제 신청 레코드 수를 반환
+        if ($this->application_type === 'individual') {
+            return $this->applications()->count();
+        }
+        
+        // 단체 프로그램은 기존 로직 유지
         return max(0, $this->applied_count ?? 0);
     }
 

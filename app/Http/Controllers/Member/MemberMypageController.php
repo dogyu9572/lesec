@@ -11,6 +11,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Response;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 
 class MemberMypageController extends Controller
 {
@@ -294,7 +297,7 @@ class MemberMypageController extends Controller
     }
 
     /**
-     * CSV 샘플 파일 다운로드
+     * 엑셀 샘플 파일 다운로드
      */
     public function groupApplicationWriteSample($id)
     {
@@ -309,33 +312,59 @@ class MemberMypageController extends Controller
             ->where('member_id', $member->id)
             ->firstOrFail();
 
-        $csvData = [];
-        $csvData[] = ['이름', '학년', '반', '생년월일'];
-        $csvData[] = ['홍길동', '1', '1', '20010101'];
-        $csvData[] = ['김철수', '2', '3', '20020202'];
+        if (!class_exists(\PhpOffice\PhpSpreadsheet\IOFactory::class)) {
+            throw new \InvalidArgumentException('엑셀 파일 처리를 위해 PhpSpreadsheet가 필요합니다.');
+        }
 
-        $filename = '명단_샘플_' . date('Ymd') . '.csv';
-        
-        $headers = [
-            'Content-Type' => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        $filename = '명단_샘플_' . date('Ymd') . '.xlsx';
+        $headers = ['이름', '학년', '반', '생년월일(YYYYMMDD)'];
+        $sampleRows = [
+            ['홍길동', '1', '1', '20010101'],
+            ['김철수', '2', '3', '20020202'],
         ];
 
-        $callback = function() use ($csvData) {
-            $file = fopen('php://output', 'w');
-            // BOM 추가 (한글 깨짐 방지)
-            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
-            foreach ($csvData as $row) {
-                fputcsv($file, $row);
-            }
-            fclose($file);
-        };
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
 
-        return Response::stream($callback, 200, $headers);
+        // 헤더 작성
+        $columnIndex = 1;
+        foreach ($headers as $header) {
+            $columnLetter = Coordinate::stringFromColumnIndex($columnIndex);
+            $sheet->setCellValue($columnLetter . '1', $header);
+            $columnIndex++;
+        }
+
+        // 헤더 스타일 설정
+        $sheet->getStyle('A1:D1')->getFont()->setBold(true);
+
+        // 샘플 데이터 작성
+        $rowIndex = 2;
+        foreach ($sampleRows as $row) {
+            $columnIndex = 1;
+            foreach ($row as $cellValue) {
+                $columnLetter = Coordinate::stringFromColumnIndex($columnIndex);
+                $cellAddress = $columnLetter . $rowIndex;
+                $sheet->setCellValue($cellAddress, $cellValue);
+                $columnIndex++;
+            }
+            $rowIndex++;
+        }
+
+        // 컬럼 너비 자동 조정
+        foreach (range('A', 'D') as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        return response()->streamDownload(function () use ($spreadsheet) {
+            $writer = new Xlsx($spreadsheet);
+            $writer->save('php://output');
+        }, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
     }
 
     /**
-     * CSV 일괄 업로드
+     * 엑셀/CSV 일괄 업로드
      */
     public function groupApplicationWriteUpload(Request $request, $id)
     {
@@ -350,58 +379,70 @@ class MemberMypageController extends Controller
             ->firstOrFail();
 
         $request->validate([
-            'csv_file' => 'required|file|mimes:csv,txt|max:2048',
+            'csv_file' => 'required|file|mimes:csv,txt,xlsx,xls|max:2048',
         ]);
 
         DB::beginTransaction();
         try {
             $file = $request->file('csv_file');
-            $handle = fopen($file->getRealPath(), 'r');
-            
-            // 첫 번째 줄(헤더) 건너뛰기
-            $header = fgetcsv($handle);
+            $extension = strtolower($file->getClientOriginalExtension());
+            $filePath = $file->getRealPath();
             
             $participants = [];
-            $lineNumber = 1;
             
-            while (($data = fgetcsv($handle)) !== false) {
-                $lineNumber++;
+            if ($extension === 'csv') {
+                // CSV 파일 처리
+                $handle = fopen($filePath, 'r');
+                if (!$handle) {
+                    throw new \Exception('파일을 읽을 수 없습니다.');
+                }
+
+                // UTF-8 BOM 제거
+                $bom = fread($handle, 3);
+                if ($bom !== chr(0xEF).chr(0xBB).chr(0xBF)) {
+                    rewind($handle);
+                }
                 
-                if (count($data) < 3) {
-                    continue;
-                }
+                // 첫 번째 줄(헤더) 건너뛰기
+                fgetcsv($handle);
+                
+                while (($data = fgetcsv($handle)) !== false) {
+                    if (count($data) < 3) {
+                        continue;
+                    }
 
-                $name = trim($data[0] ?? '');
-                $grade = trim($data[1] ?? '');
-                $class = trim($data[2] ?? '');
-                $birthday = trim($data[3] ?? '');
-
-                if (empty($name) || empty($grade) || empty($class)) {
-                    continue;
-                }
-
-                $birthdayDate = null;
-                if (!empty($birthday)) {
-                    $birthdayStr = preg_replace('/[^0-9]/', '', $birthday);
-                    if (strlen($birthdayStr) === 8 && is_numeric($birthdayStr)) {
-                        try {
-                            $birthdayDate = \Carbon\Carbon::createFromFormat('Ymd', $birthdayStr)->format('Y-m-d');
-                        } catch (\Exception $e) {
-                            $birthdayDate = null;
-                        }
+                    $participant = $this->processParticipantRow($application->id, $data);
+                    if ($participant) {
+                        $participants[] = $participant;
                     }
                 }
+                
+                fclose($handle);
+            } elseif (in_array($extension, ['xlsx', 'xls'])) {
+                // 엑셀 파일 처리
+                if (!class_exists(\PhpOffice\PhpSpreadsheet\IOFactory::class)) {
+                    throw new \Exception('엑셀 파일 처리를 위해 PhpSpreadsheet가 필요합니다.');
+                }
 
-                $participants[] = [
-                    'group_application_id' => $application->id,
-                    'name' => $name,
-                    'grade' => (int)$grade,
-                    'class' => $class,
-                    'birthday' => $birthdayDate,
-                ];
+                $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($filePath);
+                $worksheet = $spreadsheet->getActiveSheet();
+                $excelRows = $worksheet->toArray();
+
+                // 헤더 제거
+                array_shift($excelRows);
+
+                foreach ($excelRows as $row) {
+                    if (empty(array_filter($row))) {
+                        continue;
+                    }
+                    $participant = $this->processParticipantRow($application->id, $row);
+                    if ($participant) {
+                        $participants[] = $participant;
+                    }
+                }
+            } else {
+                throw new \Exception('지원하지 않는 파일 형식입니다.');
             }
-            
-            fclose($handle);
 
             if (empty($participants)) {
                 DB::rollBack();
@@ -428,9 +469,44 @@ class MemberMypageController extends Controller
             DB::rollBack();
             return response()->json([
                 'success' => false,
-                'message' => 'CSV 파일 처리 중 오류가 발생했습니다: ' . $e->getMessage(),
+                'message' => '파일 처리 중 오류가 발생했습니다: ' . $e->getMessage(),
             ], 500);
         }
+    }
+
+    /**
+     * 명단 행 데이터 처리
+     */
+    private function processParticipantRow(int $applicationId, array $data): ?array
+    {
+        $name = trim($data[0] ?? '');
+        $grade = trim($data[1] ?? '');
+        $class = trim($data[2] ?? '');
+        $birthday = trim($data[3] ?? '');
+
+        if (empty($name) || empty($grade) || empty($class)) {
+            return null;
+        }
+
+        $birthdayDate = null;
+        if (!empty($birthday)) {
+            $birthdayStr = preg_replace('/[^0-9]/', '', $birthday);
+            if (strlen($birthdayStr) === 8 && is_numeric($birthdayStr)) {
+                try {
+                    $birthdayDate = \Carbon\Carbon::createFromFormat('Ymd', $birthdayStr)->format('Y-m-d');
+                } catch (\Exception $e) {
+                    $birthdayDate = null;
+                }
+            }
+        }
+
+        return [
+            'group_application_id' => $applicationId,
+            'name' => $name,
+            'grade' => (int)$grade,
+            'class' => $class,
+            'birthday' => $birthdayDate,
+        ];
     }
 
     /**

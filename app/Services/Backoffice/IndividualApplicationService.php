@@ -14,6 +14,10 @@ use Carbon\Carbon;
 use InvalidArgumentException;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 
 class IndividualApplicationService
 {
@@ -71,18 +75,20 @@ class IndividualApplicationService
         }
 
         // 검색어 (신청자명/학교명/프로그램명/신청번호)
-        if ($request->filled('search_keyword') && $request->filled('search_type')) {
+        if ($request->filled('search_keyword')) {
             $keyword = $request->search_keyword;
-            if ($request->search_type === 'applicant_name') {
+            $searchType = $request->input('search_type', '');
+            
+            if ($searchType === 'applicant_name') {
                 $query->where('applicant_name', 'like', "%{$keyword}%");
-            } elseif ($request->search_type === 'school_name') {
+            } elseif ($searchType === 'school_name') {
                 $query->where('applicant_school_name', 'like', "%{$keyword}%");
-            } elseif ($request->search_type === 'program_name') {
+            } elseif ($searchType === 'program_name') {
                 $query->where('program_name', 'like', "%{$keyword}%");
-            } elseif ($request->search_type === 'application_number') {
+            } elseif ($searchType === 'application_number') {
                 $query->where('application_number', 'like', "%{$keyword}%");
             } else {
-                // 전체 검색
+                // 전체 검색 (search_type이 비어있거나 'all'인 경우)
                 $query->where(function ($q) use ($keyword) {
                     $q->where('applicant_name', 'like', "%{$keyword}%")
                       ->orWhere('applicant_school_name', 'like', "%{$keyword}%")
@@ -379,12 +385,16 @@ class IndividualApplicationService
     }
 
     /**
-     * 샘플 CSV 파일 다운로드
+     * 샘플 엑셀 파일 다운로드
      * 네이버 폼 일괄 업로드용 (신청유형/교육유형/프로그램명/신청일시 제외)
      */
     public function downloadSample(): StreamedResponse
     {
-        $filename = 'individual_application_sample.csv';
+        if (!class_exists(\PhpOffice\PhpSpreadsheet\IOFactory::class)) {
+            throw new InvalidArgumentException('엑셀 파일 처리를 위해 PhpSpreadsheet가 필요합니다.');
+        }
+
+        $filename = 'individual_application_sample.xlsx';
         $headers = [
             '참가일',
             '참가비',
@@ -396,7 +406,8 @@ class IndividualApplicationService
             '연락처1',
             '연락처2',
             '결제상태',
-            '추첨결과'
+            '추첨결과',
+            '회원ID'
         ];
         $sampleRows = [
             [
@@ -410,7 +421,8 @@ class IndividualApplicationService
                 '01012345678',
                 '01098765432',
                 '미입금',
-                '대기중'
+                '대기중',
+                ''
             ],
             [
                 '2025-01-20',
@@ -423,11 +435,56 @@ class IndividualApplicationService
                 '01011112222',
                 '01033334444',
                 '입금완료',
-                '대기중'
+                '대기중',
+                ''
             ],
         ];
 
-        return $this->downloadCsvSample($filename, $headers, $sampleRows);
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // 헤더 작성
+        $columnIndex = 1;
+        foreach ($headers as $header) {
+            $columnLetter = Coordinate::stringFromColumnIndex($columnIndex);
+            $sheet->setCellValue($columnLetter . '1', $header);
+            $columnIndex++;
+        }
+
+        // 헤더 스타일 설정
+        $sheet->getStyle('A1:L1')->getFont()->setBold(true);
+
+        // 샘플 데이터 작성
+        $rowIndex = 2;
+        foreach ($sampleRows as $row) {
+            $columnIndex = 1;
+            foreach ($row as $cellValue) {
+                $columnLetter = Coordinate::stringFromColumnIndex($columnIndex);
+                $cellAddress = $columnLetter . $rowIndex;
+                
+                // 연락처1, 연락처2, 회원ID 컬럼은 텍스트 형식으로 설정 (숫자 앞 0 유지)
+                if ($columnIndex === 8 || $columnIndex === 9 || $columnIndex === 12) {
+                    $sheet->setCellValueExplicit($cellAddress, $cellValue, DataType::TYPE_STRING);
+                } else {
+                    $sheet->setCellValue($cellAddress, $cellValue);
+                }
+                
+                $columnIndex++;
+            }
+            $rowIndex++;
+        }
+
+        // 컬럼 너비 자동 조정
+        foreach (range('A', 'L') as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        return response()->streamDownload(function () use ($spreadsheet) {
+            $writer = new Xlsx($spreadsheet);
+            $writer->save('php://output');
+        }, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
     }
 
     /**
@@ -540,7 +597,7 @@ class IndividualApplicationService
 
     /**
      * CSV/엑셀 행 데이터로 신청 생성
-     * 컬럼 순서: 참가일, 참가비, 결제방법, 신청자명, 학교명, 학년, 반, 연락처1, 연락처2, 결제상태, 추첨결과
+     * 컬럼 순서: 참가일, 참가비, 결제방법, 신청자명, 학교명, 학년, 반, 연락처1, 연락처2, 결제상태, 추첨결과, 회원ID(선택)
      * (신청유형/교육유형/프로그램명은 선택한 프로그램 정보 사용, 신청일시는 저장 시 현재 날짜로 자동 설정)
      */
     private function createApplicationFromRow(array $row, int $lineNumber, int $programReservationId): void
@@ -552,10 +609,11 @@ class IndividualApplicationService
         $schoolName = trim($row[4] ?? '');
         $grade = trim($row[5] ?? '');
         $class = trim($row[6] ?? '');
-        $contact = trim($row[7] ?? '');
-        $guardianContact = trim($row[8] ?? '');
+        $contact = ltrim(trim($row[7] ?? ''), "'"); // 작은따옴표 제거
+        $guardianContact = ltrim(trim($row[8] ?? ''), "'"); // 작은따옴표 제거
         $paymentStatusText = trim($row[9] ?? '');
         $drawResultText = trim($row[10] ?? '');
+        $memberIdText = ltrim(trim($row[11] ?? ''), "'"); // 작은따옴표 제거
 
         // 필수 필드 검증
         if (empty($applicantName)) {
@@ -573,9 +631,36 @@ class IndividualApplicationService
         $paymentStatus = $this->convertPaymentStatusToCode($paymentStatusText);
         $drawResult = $this->convertDrawResultToCode($drawResultText);
 
+        // 회원 ID 처리: CSV에 회원 ID가 있으면 사용, 없으면 연락처로 자동 매칭
+        $memberId = null;
+        if (!empty($memberIdText)) {
+            $memberIdText = trim($memberIdText);
+            
+            // 숫자면 member_id로 검색
+            if (is_numeric($memberIdText)) {
+                $memberId = (int) $memberIdText;
+                $member = Member::find($memberId);
+                if (!$member) {
+                    $memberId = null; // 잘못된 회원 ID는 무시
+                }
+            } else {
+                // 숫자가 아니면 login_id로 검색
+                $member = Member::where('login_id', $memberIdText)->first();
+                if ($member) {
+                    $memberId = $member->id;
+                }
+            }
+        }
+
+        // 회원 ID가 없으면 연락처로 자동 매칭
+        if (!$memberId) {
+            $memberId = $this->findMemberByContact($contact);
+        }
+
         // 데이터 정리 (선택한 프로그램 정보 사용)
         $data = [
             'program_reservation_id' => $reservation->id,
+            'member_id' => $memberId,
             'reception_type' => 'naver_form', // 네이버 폼으로 고정
             'education_type' => $reservation->education_type, // 선택한 프로그램의 교육유형 사용
             'program_name' => $reservation->program_name, // 선택한 프로그램의 프로그램명 사용
@@ -627,7 +712,7 @@ class IndividualApplicationService
 
         return IndividualApplication::create([
             'program_reservation_id' => $reservation->id,
-            'member_id' => null,
+            'member_id' => $data['member_id'] ?? null,
             'application_number' => $applicationNumber,
             'education_type' => $data['education_type'],
             'reception_type' => $data['reception_type'],
@@ -709,6 +794,29 @@ class IndividualApplicationService
     {
         $map = array_flip(IndividualApplication::DRAW_RESULT_LABELS);
         return $map[$text] ?? null;
+    }
+
+    /**
+     * 연락처로 회원 찾기
+     */
+    private function findMemberByContact(string $contact): ?int
+    {
+        if (empty($contact)) {
+            return null;
+        }
+
+        // 연락처에서 숫자만 추출
+        $digits = preg_replace('/[^0-9]/', '', $contact);
+        if (empty($digits)) {
+            return null;
+        }
+
+        // 연락처로 회원 검색 (contact 필드)
+        $member = Member::where('contact', $digits)
+            ->orWhere('contact', 'like', '%' . $digits . '%')
+            ->first();
+
+        return $member?->id;
     }
 }
 

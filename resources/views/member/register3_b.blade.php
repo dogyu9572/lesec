@@ -12,9 +12,9 @@
 				<li class="i4"><i></i><p>회원가입 완료</p></li>
 			</ol>
 		
-			@if ($errors->has('process'))
-			<p class="error_alert">{{ $errors->first('process') }}</p>
-			@endif
+		@if ($errors->has('process'))
+		<p class="error_alert">{{ $errors->first('process') }}</p>
+		@endif
 
 			<form method="POST"
 				action="{{ route('member.register3_b.submit') }}"
@@ -39,7 +39,7 @@
 									data-field="login_id"
 									data-input="[name='login_id']">중복 확인</button>
 							</div>
-							<input type="hidden" name="login_id_verified" value="0">
+							<input type="hidden" name="login_id_verified" value="{{ old('login_id_verified', '0') }}">
 							@error('login_id')
 							<p class="error_alert">{{ $message }}</p>
 							@enderror
@@ -51,7 +51,7 @@
 					<dl>
 						<dt>비밀번호<span>*</span></dt>
 						<dd class="password-wrap">
-							<input type="password" name="password" class="text w100p password-input" placeholder="영문/숫자/특수문자를 포함하여 9~12자리로 입력해주세요.">
+							<input type="password" name="password" class="text w100p password-input" value="{{ old('password') }}" placeholder="영문/숫자/특수문자를 포함하여 9~12자리로 입력해주세요.">
 							<button type="button" class="btn-eye toggle-password r16">
 								<img src="/images/icon_eye.svg" alt="보기">
 							</button>
@@ -63,7 +63,7 @@
 					<dl>
 						<dt>비밀번호 확인<span>*</span></dt>
 						<dd>
-							<input type="password" name="password_confirmation" class="text w100p" placeholder="비밀번호를 다시 입력해주세요.">
+							<input type="password" name="password_confirmation" class="text w100p" value="{{ old('password_confirmation') }}" placeholder="비밀번호를 다시 입력해주세요.">
 						</dd>
 					</dl>
 					<dl>
@@ -106,7 +106,7 @@
 									data-field="contact"
 									data-input="[name='student_contact']">중복 확인</button>
 							</div>
-							<input type="hidden" name="contact_verified" value="0">
+							<input type="hidden" name="contact_verified" value="{{ old('contact_verified', '0') }}">
 							@error('contact')
 							<p class="error_alert">{{ $message }}</p>
 							@enderror
@@ -153,14 +153,14 @@
 						<dt>지역<span>*</span></dt>
 						<dd>
 							<div class="flex city">
-								<select name="city" class="city_select" disabled>
+								<select class="city_select" disabled>
 									<option value="">선택</option>
 									@if (old('city'))
 									<option value="{{ old('city') }}" selected>{{ old('city') }}</option>
 									@endif
 								</select>
 								<input type="hidden" name="city" class="city_hidden" value="{{ old('city') }}">
-								<select name="district" class="district_select" disabled>
+								<select class="district_select" disabled>
 									<option value="">선택</option>
 									@if (old('district'))
 									<option value="{{ old('district') }}" selected>{{ old('district') }}</option>
@@ -192,7 +192,8 @@
 							@enderror
 						</dd>
 					</dl>
-					<!-- <dl>
+					@if($memberType === 'student')
+					<dl>
 						<dt>학년/반<span>*</span></dt>
 						<dd>
 							<div class="flex city">
@@ -216,7 +217,8 @@
 							<p class="error_alert">{{ $classError }}</p>
 							@endif
 						</dd>
-					</dl> -->
+					</dl>
+					@endif
 				</div>
 			
 				<div class="stit num mb0 nbd_b"><span>3</span>약관 동의</div>
@@ -235,20 +237,20 @@
 					</div>
 					<div class="check_area">
 						<label class="check"><input type="checkbox" name="privacy_agree" value="1" @checked(old('privacy_agree'))><i></i><strong>(필수)</strong>개인정보 처리방침에 동의합니다.</label>
-						@error('privacy_agree')
-						<p class="error_alert">{{ $message }}</p>
-						@enderror
 					</div>
+					@error('privacy_agree')
+					<p class="error_alert" style="margin-top: 8px; color: #dc3545;">{{ $message }}</p>
+					@enderror
 				</div>
 			
 				<div class="stit num mb0 nbd_b"><span>4</span>수신 동의</div>
 				<div class="term_area">
 					<div class="check_area">
 						<label class="check"><input type="checkbox" name="notification_agree" value="1" @checked(old('notification_agree'))><i></i><strong>(필수)</strong>이메일 / SMS / 카카오 알림톡</label>
-						@error('notification_agree')
-						<p class="error_alert">{{ $message }}</p>
-						@enderror
 					</div>
+					@error('notification_agree')
+					<p class="error_alert" style="margin-top: 8px; color: #dc3545;">{{ $message }}</p>
+					@enderror
 				</div>
 
 				<button type="submit" class="btn_submit btn_wbb">가입하기</button>

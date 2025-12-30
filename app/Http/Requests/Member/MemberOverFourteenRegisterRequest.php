@@ -102,8 +102,10 @@ class MemberOverFourteenRegisterRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        $studentContact = preg_replace('/[^0-9]/', '', (string) $this->input('student_contact'));
-        $parentContact = preg_replace('/[^0-9]/', '', (string) $this->input('parent_contact'));
+        $studentContactOriginal = (string) $this->input('student_contact');
+        $studentContact = preg_replace('/[^0-9]/', '', $studentContactOriginal);
+        $parentContactOriginal = (string) $this->input('parent_contact');
+        $parentContact = preg_replace('/[^0-9]/', '', $parentContactOriginal);
         $emailId = trim((string) $this->input('email_id'));
         $emailDomainSelected = (string) $this->input('email_domain');
         $emailDomainCustom = trim((string) $this->input('email_domain_custom'));
@@ -117,19 +119,29 @@ class MemberOverFourteenRegisterRequest extends FormRequest
             $email = trim((string) $this->input('email'));
         }
 
+        // 원본 필드 값도 유지하여 validation 실패 시 입력값이 보존되도록 함
         $this->merge([
             'login_id' => trim((string) $this->input('login_id')),
+            'password' => $this->input('password'), // 비밀번호 값 유지
+            'password_confirmation' => $this->input('password_confirmation'), // 비밀번호 확인 값 유지
             'name' => trim((string) $this->input('name')),
             'contact' => $studentContact,
-            'student_contact' => $studentContact,
-            'parent_contact' => $parentContact,
+            'student_contact' => $studentContactOriginal, // 원본 값 유지 (하이픈 포함)
+            'parent_contact' => $parentContactOriginal, // 원본 값 유지 (하이픈 포함)
             'email' => $email,
+            'email_id' => $emailId, // 원본 값 유지
+            'email_domain' => $emailDomainSelected, // 원본 값 유지
+            'email_domain_custom' => $emailDomainCustom, // 원본 값 유지
             'city' => trim((string) $this->input('city')),
             'district' => trim((string) $this->input('district')),
             'school_name' => trim((string) $this->input('school_name')),
             'school_id' => $this->filled('school_id') ? (int) $this->input('school_id') : null,
+            'grade' => $this->filled('grade') ? (int) $this->input('grade') : null,
+            'class_number' => $this->filled('class_number') ? (int) $this->input('class_number') : null,
             'privacy_agree' => $this->boolean('privacy_agree'),
             'notification_agree' => $this->boolean('notification_agree'),
+            'login_id_verified' => $this->input('login_id_verified', '0'), // 원본 값 유지
+            'contact_verified' => $this->input('contact_verified', '0'), // 원본 값 유지
         ]);
     }
 

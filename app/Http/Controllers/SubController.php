@@ -196,7 +196,25 @@ class SubController extends Controller
     public function establishment()
     {
         $gNum = "04"; $sNum = "02"; $gName = "센터소개"; $sName = "인사말";
-        return view('introduction.establishment', compact('gNum', 'sNum', 'gName', 'sName'));
+        $board = $this->boardContentService->getBoard('purpose');
+        $post = $this->boardContentService->getLatestPost($board);
+        
+        $blocks = [];
+        if ($post && $post->custom_fields) {
+            $customFields = is_string($post->custom_fields) 
+                ? json_decode($post->custom_fields, true) 
+                : $post->custom_fields;
+            if (is_array($customFields)) {
+                for ($i = 1; $i <= 4; $i++) {
+                    $blocks[] = [
+                        'title' => $customFields['block' . $i . '_title'] ?? '',
+                        'content' => $customFields['block' . $i . '_content'] ?? '',
+                    ];
+                }
+            }
+        }
+        
+        return view('introduction.establishment', compact('gNum', 'sNum', 'gName', 'sName', 'blocks'));
     }
 //위치안내
 	//오시는 길

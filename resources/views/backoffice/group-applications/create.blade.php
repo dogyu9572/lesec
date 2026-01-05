@@ -223,7 +223,7 @@
 </div>
 
 @include('backoffice.modals.school-search')
-@include('backoffice.modals.member-search', ['selectionMode' => 'single', 'formAction' => route('backoffice.member-groups.search-members')])
+@include('backoffice.modals.member-search', ['formAction' => route('backoffice.member-groups.search-members')])
 @include('backoffice.modals.program-search', [
     'mode' => 'reservation',
     'searchAction' => route('backoffice.group-applications.search-programs'),

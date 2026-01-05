@@ -179,7 +179,7 @@
     </div>
 </div>
 
-@include('backoffice.modals.member-search', ['selectionMode' => 'multiple'])
+@include('backoffice.modals.member-search')
 @endsection
 
 @section('scripts')

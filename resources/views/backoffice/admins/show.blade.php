@@ -77,7 +77,7 @@
                 </div>
                 
                 <div class="detail-item">
-                    <label>마지막 로그인</label>
+                    <label>최종 접속일</label>
                     <span>{{ $admin->last_login_at ? $admin->last_login_at->format('Y-m-d H:i:s') : '-' }}</span>
                 </div>
                 

@@ -108,7 +108,6 @@
 </div>
 
 @include('backoffice.modals.member-search', [
-    'selectionMode' => 'multiple',
     'formAction' => route('backoffice.member-groups.search-members')
 ])
 

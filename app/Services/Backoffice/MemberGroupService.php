@@ -169,7 +169,7 @@ class MemberGroupService
      */
     public function searchMembers(\Illuminate\Http\Request $request)
     {
-        $query = Member::query();
+        $query = Member::query()->select('id', 'name', 'login_id', 'email', 'school_name', 'contact');
         
         // 검색어 필터 (search_type + search_keyword)
         $searchKeyword = $request->input('search_keyword', '');
@@ -181,7 +181,8 @@ class MemberGroupService
                     $q->where('name', 'like', "%{$searchKeyword}%")
                       ->orWhere('login_id', 'like', "%{$searchKeyword}%")
                       ->orWhere('school_name', 'like', "%{$searchKeyword}%")
-                      ->orWhere('email', 'like', "%{$searchKeyword}%");
+                      ->orWhere('email', 'like', "%{$searchKeyword}%")
+                      ->orWhere('contact', 'like', "%{$searchKeyword}%");
                 } else {
                     $q->where($searchType, 'like', "%{$searchKeyword}%");
                 }

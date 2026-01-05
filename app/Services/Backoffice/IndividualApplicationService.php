@@ -300,7 +300,7 @@ class IndividualApplicationService
      */
     public function searchMembers(Request $request)
     {
-        $query = \App\Models\Member::query();
+        $query = \App\Models\Member::query()->select('id', 'name', 'login_id', 'email', 'school_name', 'contact');
 
         if ($request->filled('member_type') && $request->member_type !== 'all') {
             $query->where('member_type', $request->member_type);
@@ -311,7 +311,8 @@ class IndividualApplicationService
             $query->where(function ($q) use ($term) {
                 $q->where('name', 'like', "%{$term}%")
                   ->orWhere('login_id', 'like', "%{$term}%")
-                  ->orWhere('email', 'like', "%{$term}%");
+                  ->orWhere('email', 'like', "%{$term}%")
+                  ->orWhere('contact', 'like', "%{$term}%");
             });
         }
 

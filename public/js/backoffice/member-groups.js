@@ -218,9 +218,7 @@ function renderMemberList(members) {
     }
 
     if (!members || members.length === 0) {
-        const selectionMode = tbody.dataset.selectionMode || 'multiple';
-        const colspan = selectionMode === 'multiple' ? 6 : 5;
-        tbody.innerHTML = `<tr><td colspan="${colspan}" class="text-center">검색 결과가 없습니다.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center">검색 결과가 없습니다.</td></tr>`;
         return;
     }
 
@@ -238,6 +236,7 @@ function renderMemberList(members) {
                 <td>${member.name || '-'}</td>
                 <td>${member.school_name || '-'}</td>
                 <td>${member.email || '-'}</td>
+                <td>${member.contact || '-'}</td>
             </tr>
         `;
     });

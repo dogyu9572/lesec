@@ -55,7 +55,7 @@
                             <span>{{ $user->created_at->format('Y-m-d H:i') }}</span>
                         </div>
                         <div class="detail-item">
-                            <label>마지막 로그인</label>
+                            <label>최종 접속일</label>
                             <span>{{ $user->last_login_at ? $user->last_login_at->format('Y-m-d H:i') : '-' }}</span>
                         </div>
                         <div class="detail-item">

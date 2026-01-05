@@ -425,7 +425,7 @@ class MailSmsService
      */
     public function searchMembers(Request $request): LengthAwarePaginator
     {
-        $query = Member::query()->orderByDesc('created_at');
+        $query = Member::query()->select('id', 'name', 'login_id', 'email', 'school_name', 'contact')->orderByDesc('created_at');
 
         if ($request->filled('member_group_id')) {
             $query->where('member_group_id', $request->member_group_id);
@@ -441,7 +441,8 @@ class MailSmsService
                     $q->where('name', 'like', "%{$searchKeyword}%")
                       ->orWhere('login_id', 'like', "%{$searchKeyword}%")
                       ->orWhere('school_name', 'like', "%{$searchKeyword}%")
-                      ->orWhere('email', 'like', "%{$searchKeyword}%");
+                      ->orWhere('email', 'like', "%{$searchKeyword}%")
+                      ->orWhere('contact', 'like', "%{$searchKeyword}%");
                 } else {
                     $q->where($searchType, 'like', "%{$searchKeyword}%");
                 }

@@ -380,7 +380,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderMemberList(members) {
         if (!Array.isArray(members) || members.length === 0) {
             memberListBody.innerHTML =
-                '<tr><td colspan="6" class="text-center text-muted">검색 결과가 없습니다.</td></tr>';
+                '<tr><td colspan="7" class="text-center text-muted">검색 결과가 없습니다.</td></tr>';
             return;
         }
 
@@ -404,6 +404,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td>${member.name || '-'}</td>
                         <td>${member.school_name || '-'}</td>
                         <td>${member.email || '-'}</td>
+                        <td>${member.contact || '-'}</td>
                     </tr>
                 `;
             })

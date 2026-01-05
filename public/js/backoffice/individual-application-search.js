@@ -4,7 +4,7 @@
 
 let currentMemberPage = 1;
 let currentProgramPage = 1;
-let selectedMember = null;
+let selectedMemberIds = [];
 let selectedProgram = null;
 let memberSearchUrl = '/backoffice/individual-applications/search-members';
 let programSearchUrl = '/backoffice/individual-applications/search-programs';
@@ -31,7 +31,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const memberSearchModal = document.getElementById('member-search-modal');
     const memberSearchForm = document.getElementById('member-search-form');
     const popupSearchBtn = document.getElementById('popup-search-btn');
-    const popupMemberConfirm = document.getElementById('popup-member-confirm') || document.getElementById('popup-add-btn');
+    const popupMemberConfirm = document.getElementById('popup-add-btn');
+    const popupSelectAll = document.getElementById('popup-select-all');
     const memberSearchCancelButtons = document.querySelectorAll('.member-search-cancel');
     const memberModalClose = memberSearchModal ? memberSearchModal.querySelector('.category-modal-close') : null;
 
@@ -116,7 +117,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // 회원 선택 확인
     if (popupMemberConfirm) {
         popupMemberConfirm.addEventListener('click', function () {
-            if (selectedMember) {
+            if (selectedMemberIds.length > 0) {
                 applySelectedMember();
             }
         });
@@ -186,7 +187,7 @@ function openMemberSearchModal() {
     const modal = document.getElementById('member-search-modal');
     if (modal) {
         modal.style.display = 'flex';
-        selectedMember = null;
+        selectedMemberIds = [];
         currentMemberPage = 1;
         updateMemberConfirmButton();
         
@@ -206,7 +207,7 @@ function closeMemberSearchModal() {
     const modal = document.getElementById('member-search-modal');
     if (modal) {
         modal.style.display = 'none';
-        selectedMember = null;
+        selectedMemberIds = [];
         
         // 검색 필드 초기화
         const searchTypeElement = document.getElementById('popup_search_type');
@@ -218,9 +219,7 @@ function closeMemberSearchModal() {
         const memberListBody = document.getElementById('popup-member-list-body');
         const paginationContainer = document.getElementById('popup-pagination');
         if (memberListBody) {
-            const selectionMode = memberListBody.dataset.selectionMode || 'single';
-            const colspan = selectionMode === 'multiple' ? 6 : 5;
-            memberListBody.innerHTML = `<tr><td colspan="${colspan}" class="text-center">검색어를 입력하거나 필터를 선택해주세요.</td></tr>`;
+            memberListBody.innerHTML = `<tr><td colspan="7" class="text-center">검색어를 입력하거나 필터를 선택해주세요.</td></tr>`;
         }
         if (paginationContainer) {
             paginationContainer.innerHTML = '';
@@ -255,73 +254,58 @@ function renderMemberList(members, pagination) {
     const tbody = document.getElementById('popup-member-list-body');
     if (!tbody) return;
 
-    const selectionMode = tbody.dataset.selectionMode || 'single';
     const total = pagination ? pagination.total : members.length;
     const perPage = pagination ? pagination.per_page : members.length;
     const current = pagination ? pagination.current_page : 1;
     const baseNumber = total - ((current - 1) * perPage);
 
     if (!members || members.length === 0) {
-        const emptyCols = selectionMode === 'multiple' ? 6 : 5;
-        tbody.innerHTML = `<tr><td colspan="${emptyCols}" class="text-center">검색 결과가 없습니다.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center">검색 결과가 없습니다.</td></tr>`;
         return;
     }
 
-    if (selectionMode === 'single') {
-        tbody.innerHTML = members.map((member, index) => {
-            const memberData = encodeURIComponent(JSON.stringify(member));
-            const rowNumber = Math.max(1, baseNumber - index);
-
-            return `
-                <tr>
-                    <td>${rowNumber}</td>
-                    <td>${member.login_id || '-'}</td>
-                    <td>${member.name}</td>
-                    <td>${member.school_name || '-'}</td>
-                    <td>
-                        <button type="button" class="btn btn-primary btn-sm member-select-btn" data-member="${memberData}">
-                            선택
-                        </button>
-                    </td>
-                </tr>
-            `;
-        }).join('');
-
-        tbody.querySelectorAll('.member-select-btn').forEach((button) => {
-            button.addEventListener('click', function () {
-                selectedMember = JSON.parse(decodeURIComponent(this.dataset.member));
-                applySelectedMember();
-            });
-        });
-
-        updateMemberConfirmButton();
-        return;
-    }
-
-    const inputName = 'member_checkbox';
     tbody.innerHTML = members.map((member, index) => {
         const memberData = encodeURIComponent(JSON.stringify(member));
         const rowNumber = Math.max(1, baseNumber - index);
+        const isChecked = selectedMemberIds.includes(member.id);
 
         return `
             <tr>
                 <td>
-                    <input type="checkbox" name="${inputName}" value="${member.id}" data-member="${memberData}" class="popup-member-checkbox">
+                    <input type="checkbox" 
+                        class="popup-member-checkbox" 
+                        value="${member.id}" 
+                        data-member="${memberData}"
+                        ${isChecked ? 'checked' : ''}>
                 </td>
                 <td>${rowNumber}</td>
                 <td>${member.login_id || '-'}</td>
-                <td>${member.name}</td>
+                <td>${member.name || '-'}</td>
                 <td>${member.school_name || '-'}</td>
                 <td>${member.email || '-'}</td>
+                <td>${member.contact || '-'}</td>
             </tr>
         `;
     }).join('');
 
-    tbody.querySelectorAll(`input[name="${inputName}"]`).forEach((input) => {
-        input.addEventListener('change', function () {
-            const checkedMembers = Array.from(tbody.querySelectorAll(`input[name="${inputName}"]:checked`))
-                .map((checkbox) => JSON.parse(decodeURIComponent(checkbox.dataset.member)));
-            selectedMember = checkedMembers.length > 0 ? checkedMembers : null;
+    tbody.querySelectorAll('.popup-member-checkbox').forEach((checkbox) => {
+        checkbox.addEventListener('change', function () {
+            const memberId = parseInt(this.value);
+            if (this.checked) {
+                // 1명만 선택 가능하도록 기존 선택 해제
+                selectedMemberIds = [memberId];
+                tbody.querySelectorAll('.popup-member-checkbox').forEach(cb => {
+                    if (parseInt(cb.value) !== memberId) {
+                        cb.checked = false;
+                    }
+                });
+                const popupSelectAll = document.getElementById('popup-select-all');
+                if (popupSelectAll) {
+                    popupSelectAll.checked = false;
+                }
+            } else {
+                selectedMemberIds = selectedMemberIds.filter(id => id !== memberId);
+            }
             updateMemberConfirmButton();
         });
     });
@@ -370,7 +354,7 @@ function renderMemberPagination(pagination) {
             if (!targetPage || targetPage === currentMemberPage) {
                 return;
             }
-            selectedMember = null;
+            selectedMemberIds = [];
             updateMemberConfirmButton();
             searchMembers(targetPage);
         });
@@ -379,15 +363,24 @@ function renderMemberPagination(pagination) {
 
 // 회원 확인 버튼 상태 업데이트
 function updateMemberConfirmButton() {
-    const confirmBtn = document.getElementById('popup-member-confirm') || document.getElementById('popup-add-btn');
+    const confirmBtn = document.getElementById('popup-add-btn');
     if (confirmBtn) {
-        confirmBtn.disabled = !selectedMember;
+        confirmBtn.disabled = selectedMemberIds.length !== 1;
     }
 }
 
 // 선택한 회원 적용
 function applySelectedMember() {
-    if (!selectedMember) return;
+    if (selectedMemberIds.length === 0) return;
+
+    // 체크된 체크박스에서 회원 정보 가져오기
+    const checkedCheckbox = document.querySelector(`.popup-member-checkbox[value="${selectedMemberIds[0]}"]`);
+    if (!checkedCheckbox) return;
+
+    const memberData = checkedCheckbox.dataset.member;
+    if (!memberData) return;
+
+    const selectedMember = JSON.parse(decodeURIComponent(memberData));
 
     const nameInput = document.getElementById('applicant_name');
     if (nameInput) {

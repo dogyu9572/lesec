@@ -236,6 +236,14 @@ class MemberRegisterController extends Controller
             ], 422);
         }
 
+        // 아이디 길이 검증 (4자 이상)
+        if ($field === 'login_id' && strlen($value) < 4) {
+            return response()->json([
+                'success' => false,
+                'message' => '아이디는 최소 4자 이상 입력해주세요.',
+            ], 422);
+        }
+
         if ($field === 'email') {
             $value = $this->registerService->normalizeEmailForCheck($value);
 

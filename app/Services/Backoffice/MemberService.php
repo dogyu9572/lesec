@@ -26,6 +26,12 @@ class MemberService
     {
         $query = Member::with('memberGroup');
         
+        // 선택된 회원 ID 필터 (엑셀 다운로드용)
+        if ($request->filled('member_ids')) {
+            $memberIds = is_array($request->member_ids) ? $request->member_ids : [$request->member_ids];
+            $query->whereIn('id', $memberIds);
+        }
+        
         // 회원구분 필터
         if ($request->filled('member_type')) {
             $query->where('member_type', $request->member_type);
@@ -64,18 +70,32 @@ class MemberService
         if ($request->filled('search_keyword')) {
             $searchType = $request->get('search_type', 'all');
             $searchKeyword = $request->search_keyword;
+            $normalizedKeyword = str_replace('-', '', $searchKeyword);
             
             if ($searchType === 'all') {
                 // 전체 검색
-                $query->where(function($q) use ($searchKeyword) {
-                    $q->where('name', 'like', "%{$searchKeyword}%")
+                $query->where(function($q) use ($searchKeyword, $normalizedKeyword) {
+                    $q->where('login_id', 'like', "%{$searchKeyword}%")
+                      ->orWhere('name', 'like', "%{$searchKeyword}%")
                       ->orWhere('school_name', 'like', "%{$searchKeyword}%")
                       ->orWhere('email', 'like', "%{$searchKeyword}%")
-                      ->orWhere('contact', 'like', "%{$searchKeyword}%");
+                      ->orWhere('contact', 'like', "%{$normalizedKeyword}%")
+                      ->orWhere('city', 'like', "%{$searchKeyword}%")
+                      ->orWhere('grade', 'like', "%{$searchKeyword}%");
                 });
             } else {
                 // 특정 필드 검색
-                $query->where($searchType, 'like', "%{$searchKeyword}%");
+                if ($searchType === 'contact') {
+                    // 연락처 검색 시 하이픈 제거하여 검색 (DB에는 하이픈 없는 값으로 저장됨)
+                    $query->where('contact', 'like', "%{$normalizedKeyword}%");
+                } elseif ($searchType === 'grade') {
+                    // 학년 검색 시 숫자로 변환하여 정확한 일치 검색
+                    if (is_numeric($searchKeyword)) {
+                        $query->where('grade', (int)$searchKeyword);
+                    }
+                } else {
+                    $query->where($searchType, 'like', "%{$searchKeyword}%");
+                }
             }
         }
         

@@ -47,11 +47,13 @@ class GroupProgramService
         }
 
         // 검색어 (프로그램명/작성자)
-        if ($request->filled('search_keyword') && $request->filled('search_type')) {
+        if ($request->filled('search_keyword')) {
             $keyword = $request->search_keyword;
-            if ($request->search_type === 'program_name') {
+            $searchType = $request->input('search_type', '');
+            
+            if ($searchType === 'program_name') {
                 $query->where('program_name', 'like', "%{$keyword}%");
-            } elseif ($request->search_type === 'author') {
+            } elseif ($searchType === 'author') {
                 $query->where('author', 'like', "%{$keyword}%");
             } else {
                 // 전체 검색

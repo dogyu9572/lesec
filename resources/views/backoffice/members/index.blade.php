@@ -25,9 +25,9 @@
 
     <div class="board-page-header">
         <div class="board-page-buttons">
-            <a href="{{ route('backoffice.members.export', request()->query()) }}" class="btn btn-secondary">
+            <button type="button" id="export-btn" class="btn btn-secondary">
                 <i class="fas fa-download"></i> 엑셀 다운로드
-            </a>
+            </button>
             <button type="button" id="bulk-delete-btn" class="btn btn-danger">
                 <i class="fas fa-trash"></i> 선택 삭제
             </button>
@@ -67,8 +67,9 @@
                             <label for="city" class="filter-label">지역</label>
                             <select id="city" name="city" class="filter-select">
                                 <option value="">전체</option>
-                                <option value="제주특별자치도" @selected(request('city') == '제주특별자치도')>제주특별자치도</option>
-                                <!-- 추가 시/도 필요시 -->
+                                @foreach($cities as $city)
+                                    <option value="{{ $city }}" @selected(request('city') == $city)>{{ $city }}</option>
+                                @endforeach
                             </select>
                         </div>
                        
@@ -110,10 +111,13 @@
                             <div class="search-input-wrapper">
                                 <select id="search_type" name="search_type" class="filter-select search-type-select">
                                     <option value="all" @selected(request('search_type', 'all') == 'all')>전체</option>
+                                    <option value="login_id" @selected(request('search_type') == 'login_id')>ID</option>
                                     <option value="name" @selected(request('search_type') == 'name')>이름</option>
                                     <option value="school_name" @selected(request('search_type') == 'school_name')>학교명</option>
                                     <option value="email" @selected(request('search_type') == 'email')>이메일</option>
                                     <option value="contact" @selected(request('search_type') == 'contact')>연락처</option>
+                                    <option value="city" @selected(request('search_type') == 'city')>소속/시도</option>
+                                    <option value="grade" @selected(request('search_type') == 'grade')>학년</option>
                                 </select>
                                 <input type="text" id="search_keyword" name="search_keyword" class="filter-input search-keyword-input"
                                     placeholder="검색어를 입력하세요" value="{{ request('search_keyword') }}">
@@ -328,6 +332,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // 엑셀 다운로드 버튼
+    const exportBtn = document.getElementById('export-btn');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', function() {
+            exportSelectedMembers();
+        });
+    }
+
     // 초기 버튼 상태 설정
     updateBulkDeleteButton();
     
@@ -392,6 +404,27 @@ function bulkDeleteMembers(memberIds) {
         console.error('Error:', error);
         alert('삭제 중 오류가 발생했습니다.');
     });
+}
+
+// 선택된 회원 엑셀 다운로드
+function exportSelectedMembers() {
+    const selectedMembers = Array.from(document.querySelectorAll('.member-checkbox'))
+        .filter(checkbox => checkbox.checked)
+        .map(checkbox => checkbox.value);
+
+    if (selectedMembers.length === 0) {
+        alert('다운로드할 회원을 선택해주세요.');
+        return;
+    }
+
+    // 현재 필터 파라미터 유지하면서 선택된 회원 ID만 추가
+    const params = new URLSearchParams(window.location.search);
+    selectedMembers.forEach(id => {
+        params.append('member_ids[]', id);
+    });
+
+    // 엑셀 다운로드 URL로 이동
+    window.location.href = '{{ route("backoffice.members.export") }}?' + params.toString();
 }
 </script>
 @endsection

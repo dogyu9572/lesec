@@ -83,7 +83,7 @@
                                 
                                 <div class="form-group">
                                     <label for="password">비밀번호</label>
-                                    <input type="password" id="password" name="password">
+                                    <input type="text" id="password" name="password" value="{{ old('password') }}">
                                     <small class="form-text">비밀번호 변경 시에만 입력해주세요.</small>
                                 </div>
                                 

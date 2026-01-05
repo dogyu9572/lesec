@@ -83,6 +83,12 @@
                 return;
             }
 
+            // 아이디 길이 검증 (4자 이상)
+            if (field === 'login_id' && value.length < 4) {
+                showResult(false, '아이디는 최소 4자 이상 입력해주세요.');
+                return;
+            }
+
             $button.prop('disabled', true).text('확인중...');
 
             $.ajax({

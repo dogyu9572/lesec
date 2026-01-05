@@ -256,7 +256,7 @@
         .then(data => {
             recipientsLoaded = true;
             currentRecipientsPage = page;
-            renderRecipientsTable(data.recipients);
+            renderRecipientsTable(data.recipients, data.pagination);
             renderRecipientsPagination(data.pagination);
         })
         .catch(error => {
@@ -265,7 +265,7 @@
         });
     }
 
-    function renderRecipientsTable(recipients) {
+    function renderRecipientsTable(recipients, pagination) {
         const container = document.getElementById('recipientsTableContainer');
         
         if (!recipients || recipients.length === 0) {
@@ -274,14 +274,16 @@
         }
 
         let html = '<div class="table-responsive"><table class="board-table"><thead><tr>';
+        html += '<th>추가된 인원</th>';
         html += '<th>이름</th>';
         html += '<th>이메일</th>';
         html += '<th>연락처</th>';
         html += '<th style="width: 90px;">관리</th>';
         html += '</tr></thead><tbody>';
 
-        recipients.forEach(recipient => {
+        recipients.forEach((recipient) => {
             html += '<tr data-recipient-id="' + recipient.id + '">';
+            html += '<td>' + (recipient.sequence || '-') + '</td>';
             html += '<td>' + (recipient.member_name || '-') + '</td>';
             html += '<td>' + (recipient.member_email || '-') + '</td>';
             html += '<td>' + (recipient.member_contact || '-') + '</td>';

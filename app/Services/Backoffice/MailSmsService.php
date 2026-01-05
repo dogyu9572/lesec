@@ -352,6 +352,14 @@ class MailSmsService
      */
     public function getRecipientsPaginated(MailSmsMessage $message, Request $request): LengthAwarePaginator
     {
+        // 먼저 등록 순서(id 순서)로 전체 목록을 가져와서 순서 번호를 매김
+        $allRecipients = $message->recipients()->orderBy('id')->get();
+        $sequenceMap = [];
+        foreach ($allRecipients as $index => $recipient) {
+            $sequenceMap[$recipient->id] = $index + 1;
+        }
+
+        // 이름 순으로 정렬된 쿼리
         $query = $message->recipients()->orderBy('member_name');
 
         if ($request->filled('keyword')) {
@@ -364,8 +372,15 @@ class MailSmsService
         }
 
         $perPage = (int) $request->input('per_page', 20);
+        $paginator = $query->paginate($perPage)->withQueryString();
 
-        return $query->paginate($perPage)->withQueryString();
+        // 각 항목에 순서 번호 추가
+        $paginator->getCollection()->transform(function ($item) use ($sequenceMap) {
+            $item->sequence = $sequenceMap[$item->id] ?? null;
+            return $item;
+        });
+
+        return $paginator;
     }
 
     /**

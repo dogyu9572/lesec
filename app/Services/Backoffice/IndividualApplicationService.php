@@ -84,7 +84,9 @@ class IndividualApplicationService
             } elseif ($searchType === 'school_name') {
                 $query->where('applicant_school_name', 'like', "%{$keyword}%");
             } elseif ($searchType === 'program_name') {
-                $query->where('program_name', 'like', "%{$keyword}%");
+                $query->whereHas('reservation', function ($q) use ($keyword) {
+                    $q->where('program_name', 'like', "%{$keyword}%");
+                });
             } elseif ($searchType === 'application_number') {
                 $query->where('application_number', 'like', "%{$keyword}%");
             } else {
@@ -92,8 +94,10 @@ class IndividualApplicationService
                 $query->where(function ($q) use ($keyword) {
                     $q->where('applicant_name', 'like', "%{$keyword}%")
                       ->orWhere('applicant_school_name', 'like', "%{$keyword}%")
-                      ->orWhere('program_name', 'like', "%{$keyword}%")
-                      ->orWhere('application_number', 'like', "%{$keyword}%");
+                      ->orWhere('application_number', 'like', "%{$keyword}%")
+                      ->orWhereHas('reservation', function ($subQ) use ($keyword) {
+                          $subQ->where('program_name', 'like', "%{$keyword}%");
+                      });
                 });
             }
         }
@@ -184,9 +188,6 @@ class IndividualApplicationService
             $reservation,
             [
                 'member_id' => $data['member_id'] ?? null,
-                'participation_date' => $data['participation_date'] ?? null,
-                'program_name' => $data['program_name'] ?? $reservation->program_name,
-                'participation_fee' => $data['participation_fee'] ?? $reservation->education_fee,
                 'applicant_name' => $data['applicant_name'],
                 'applicant_school_name' => $data['applicant_school_name'] ?? null,
                 'applicant_grade' => $data['applicant_grade'] ?? null,
@@ -221,9 +222,6 @@ class IndividualApplicationService
             'payment_method',
             'program_reservation_id',
             'member_id',
-            'program_name',
-            'participation_date',
-            'participation_fee',
             'applicant_name',
             'applicant_school_name',
             'applicant_grade',
@@ -242,12 +240,6 @@ class IndividualApplicationService
             switch ($field) {
                 case 'program_reservation_id':
                 case 'member_id':
-                    $updateData[$field] = $value !== null && $value !== '' ? (int) $value : null;
-                    break;
-                case 'participation_date':
-                    $updateData[$field] = $value ? Carbon::parse($value)->format('Y-m-d') : null;
-                    break;
-                case 'participation_fee':
                     $updateData[$field] = $value !== null && $value !== '' ? (int) $value : null;
                     break;
                 case 'applicant_grade':

@@ -702,6 +702,7 @@ function applySelectedProgram() {
         programNameInput.value = selectedProgram.program_name || '';
     }
 
+    // 참가일과 참가비는 reservation 관계를 통해 가져오므로 hidden 필드가 있을 때만 설정
     const participationDateInput = document.getElementById('participation_date');
     const participationDateDisplay = document.getElementById('participation_date_display');
     if (participationDateInput) {

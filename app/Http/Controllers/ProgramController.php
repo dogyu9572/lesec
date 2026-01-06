@@ -186,6 +186,9 @@ class ProgramController extends Controller
         $filterStatusInput = $request->input('status', '');
         $allowedStatuses = ['', 'apply', 'waitlist', 'scheduled'];
         $filterStatus = in_array($filterStatusInput, $allowedStatuses, true) ? $filterStatusInput : '';
+        $filterSortInput = $request->input('sort', 'education_date');
+        $allowedSorts = ['education_date', 'application_start_date'];
+        $filterSort = in_array($filterSortInput, $allowedSorts, true) ? $filterSortInput : 'education_date';
 
         $allPrograms = $this->programReservationService->getIndividualPrograms($type);
         $programs = $this->programReservationService->filterIndividualPrograms(
@@ -232,6 +235,17 @@ class ProgramController extends Controller
             });
         }
 
+        // 정렬 적용 (내림차순: 최신 날짜가 먼저)
+        if ($filterSort === 'education_date') {
+            $programs = $programs->sortByDesc(function ($program) {
+                return $program->education_start_date ? $program->education_start_date->timestamp : 0;
+            })->values();
+        } elseif ($filterSort === 'application_start_date') {
+            $programs = $programs->sortByDesc(function ($program) {
+                return $program->application_start_date ? $program->application_start_date->timestamp : 0;
+            })->values();
+        }
+
         $gNum = "01";
         $sNum = $this->programService->getSubMenuNumber($type);
         $gName = "프로그램";
@@ -267,6 +281,7 @@ class ProgramController extends Controller
             'filterMonth' => $filterMonth,
             'filterProgram' => $filterProgram,
             'filterStatus' => $filterStatus,
+            'filterSort' => $filterSort,
             'member' => $member,
         ]);
     }

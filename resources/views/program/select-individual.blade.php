@@ -50,6 +50,10 @@
 						<option value="{{ $value }}" @selected($filterStatus === $value)>{{ $label }}</option>
 					@endforeach
 				</select>
+				<select name="sort" id="filter_sort">
+					<option value="education_date" @selected($filterSort === 'education_date')>참가일순</option>
+					<option value="application_start_date" @selected($filterSort === 'application_start_date')>신청시작일순</option>
+				</select>
 			</form>
 		</div>
 

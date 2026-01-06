@@ -195,18 +195,6 @@ class ProgramReservationService
             }
         }
 
-        $participationDateValue = $data['participation_date'] ?? null;
-        if (empty($participationDateValue)) {
-            $startDate = $reservation->education_start_date;
-            if ($startDate instanceof Carbon) {
-                $participationDateValue = $startDate->toDateString();
-            } else {
-                throw new \InvalidArgumentException('참가일 정보를 확인할 수 없습니다.');
-            }
-        }
-
-        $participationDate = Carbon::parse($participationDateValue);
-
         $memberModel = $member;
         if (!$memberModel && !empty($data['member_id'])) {
              $memberModel = Member::find($data['member_id']);
@@ -217,9 +205,11 @@ class ProgramReservationService
 
             $existingApplication = IndividualApplication::query()
                 ->where('member_id', $memberModel->id)
-                ->get(['program_name'])
+                ->with('reservation')
+                ->get()
                 ->contains(function (IndividualApplication $application) use ($programPrefix) {
-                    $existingPrefix = Str::upper(Str::substr($application->program_name, 0, 2));
+                    $programName = $application->program_name; // accessor가 reservation에서 가져옴
+                    $existingPrefix = Str::upper(Str::substr($programName, 0, 2));
                     return $existingPrefix === $programPrefix;
                 });
 
@@ -235,16 +225,13 @@ class ProgramReservationService
 
         $guardianContact = $this->normalizeContactNumber($data['guardian_contact'] ?? '');
 
-        $participationFeeValue = $data['participation_fee'] ?? $reservation->education_fee;
-        if ($participationFeeValue === '' || $participationFeeValue === null) {
-            $participationFeeValue = null;
-        } else {
-            $participationFeeValue = (int) preg_replace('/[^0-9]/', '', (string) $participationFeeValue);
-        }
+        // 프로그램 정보는 reservation 관계를 통해 가져오므로 저장하지 않음
+        // 기존 데이터 호환성을 위해 null로 저장 (accessor가 reservation에서 가져옴)
+        $programNameValue = null;
+        $participationDateValue = null;
+        $participationFeeValue = null;
 
-        $programNameValue = $data['program_name'] ?? $reservation->program_name;
-
-        return DB::transaction(function () use ($reservation, $data, $requestedCount, $applicantContact, $guardianContact, $participationDate, $memberModel, $participationFeeValue, $programNameValue) {
+        return DB::transaction(function () use ($reservation, $data, $requestedCount, $applicantContact, $guardianContact, $memberModel, $programNameValue, $participationDateValue, $participationFeeValue) {
             $application = IndividualApplication::create([
                 'program_reservation_id' => $reservation->id,
                 'member_id' => $memberModel?->id ?? $data['member_id'] ?? null,
@@ -252,7 +239,7 @@ class ProgramReservationService
                 'education_type' => $reservation->education_type,
                 'reception_type' => $reservation->reception_type ?? 'first_come',
                 'program_name' => $programNameValue,
-                'participation_date' => $participationDate,
+                'participation_date' => $participationDateValue,
                 'participation_fee' => $participationFeeValue,
                 'payment_method' => $data['payment_method'] ?? null,
                 'payment_status' => $data['payment_status'] ?? IndividualApplication::PAYMENT_STATUS_UNPAID,

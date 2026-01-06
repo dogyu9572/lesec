@@ -38,7 +38,7 @@
                             <div class="modal-form-group">
                                 <label class="modal-form-label search-button-label">버튼</label>
                                 <div style="display: flex; gap: 8px;">
-                                    <button type="button" id="popup-search-btn" class="btn btn-primary">검색</button>
+                                <button type="button" id="popup-search-btn" class="btn btn-primary">검색</button>
                                     <button type="button" id="popup-reset-btn" class="btn btn-secondary">뒤로가기</button>
                                 </div>
                             </div>
@@ -49,17 +49,17 @@
             <div class="table-responsive">
                 <table class="board-table">
                     <thead>
-                        <tr>
-                            <th style="width: 40px;">
-                                <input type="checkbox" id="popup-select-all">
-                            </th>
-                            <th>No</th>
-                            <th>ID</th>
-                            <th>이름</th>
-                            <th>학교</th>
-                            <th>이메일</th>
+                            <tr>
+                                <th style="width: 40px;">
+                                    <input type="checkbox" id="popup-select-all">
+                                </th>
+                                <th>No</th>
+                                <th>ID</th>
+                                <th>이름</th>
+                                <th>학교</th>
+                                <th>이메일</th>
                             <th>연락처</th>
-                        </tr>
+                            </tr>
                     </thead>
                     <tbody id="popup-member-list-body">
                         <tr>
@@ -70,9 +70,9 @@
             </div>
             <div id="popup-pagination" class="pagination-container"></div>
         </div>
-        <div class="category-modal-footer">
+            <div class="category-modal-footer">
             <button type="button" id="popup-add-btn" class="btn btn-primary" disabled>선택 완료</button>
-            <button type="button" class="btn btn-secondary member-search-cancel" onclick="closeMemberSearchModal()">취소</button>
-        </div>
+                <button type="button" class="btn btn-secondary member-search-cancel" onclick="closeMemberSearchModal()">취소</button>
+            </div>
     </div>
 </div>

@@ -98,12 +98,30 @@
                 } else {
                     individualTbody.innerHTML = individual.map(function(item) {
                         const capacityText = item.is_unlimited ? '무제한' : (item.capacity ? `${item.applicant_count}/${item.capacity}` : item.applicant_count);
-                        const dateFormatted = item.date ? item.date.split('-').join('.') : '';
+                        let scheduleText = '';
+                        
+                        // education_start_date와 education_end_date 우선 사용
+                        if (item.education_start_date && item.education_end_date) {
+                            const startDate = item.education_start_date.split('-').join('.');
+                            const endDate = item.education_end_date.split('-').join('.');
+                            if (startDate === endDate) {
+                                scheduleText = startDate;
+                            } else {
+                                scheduleText = `${startDate} ~ ${endDate}`;
+                            }
+                        } else if (item.education_start_date) {
+                            // 시작일만 있는 경우
+                            scheduleText = item.education_start_date.split('-').join('.');
+                        } else if (item.date) {
+                            // date 필드 사용 (fallback)
+                            scheduleText = item.date.split('-').join('.');
+                        }
+                        
                         const editUrl = `/backoffice/rosters/${item.program_reservation_id}/edit`;
                         
                         return `
                             <tr style="cursor: pointer;" onclick="window.location.href='${editUrl}'">
-                                <td>${dateFormatted}</td>
+                                <td>${scheduleText}</td>
                                 <td>${escapeHtml(item.program_name)}</td>
                                 <td>${capacityText}</td>
                             </tr>
@@ -131,12 +149,30 @@
                 } else {
                     groupTbody.innerHTML = group.map(function(item) {
                         const capacityText = item.is_unlimited ? '무제한' : (item.capacity ? `${item.applicant_count}/${item.capacity}` : item.applicant_count);
-                        const dateFormatted = item.date ? item.date.split('-').join('.') : '';
+                        let scheduleText = '';
+                        
+                        // education_start_date와 education_end_date 우선 사용
+                        if (item.education_start_date && item.education_end_date) {
+                            const startDate = item.education_start_date.split('-').join('.');
+                            const endDate = item.education_end_date.split('-').join('.');
+                            if (startDate === endDate) {
+                                scheduleText = startDate;
+                            } else {
+                                scheduleText = `${startDate} ~ ${endDate}`;
+                            }
+                        } else if (item.education_start_date) {
+                            // 시작일만 있는 경우
+                            scheduleText = item.education_start_date.split('-').join('.');
+                        } else if (item.date) {
+                            // date 필드 사용 (fallback)
+                            scheduleText = item.date.split('-').join('.');
+                        }
+                        
                         const editUrl = `/backoffice/rosters/${item.program_reservation_id}/edit`;
                         
                         return `
                             <tr style="cursor: pointer;" onclick="window.location.href='${editUrl}'">
-                                <td>${dateFormatted}</td>
+                                <td>${scheduleText}</td>
                                 <td>${escapeHtml(item.program_name)}</td>
                                 <td>${capacityText}</td>
                             </tr>

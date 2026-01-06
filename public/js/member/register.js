@@ -792,19 +792,15 @@
         this.$form.find('.input_school').val(school.name || '');
         this.$form.find('.input_school_id').val(school.id || '');
 
-        var $citySelect = this.$form.find('select.city_select');
-        var $cityHidden = this.$form.find('input.city_hidden');
-        var $districtSelect = this.$form.find('select.district_select');
-        var $districtHidden = this.$form.find('input.district_hidden');
+        // city, district select 찾기 (name 속성으로)
+        var $citySelect = this.$form.find('select[name="city"]');
+        var $districtSelect = this.$form.find('select[name="district"]');
 
         if ($citySelect.length && school.city) {
             if (!$citySelect.find('option[value="' + school.city + '"]').length) {
                 $citySelect.append('<option value="' + school.city + '">' + school.city + '</option>');
             }
             $citySelect.val(school.city);
-            if ($cityHidden.length) {
-                $cityHidden.val(school.city);
-            }
         }
 
         if ($districtSelect.length && school.district) {
@@ -812,9 +808,6 @@
                 $districtSelect.append('<option value="' + school.district + '">' + school.district + '</option>');
             }
             $districtSelect.val(school.district);
-            if ($districtHidden.length) {
-                $districtHidden.val(school.district);
-            }
         }
     };
 
@@ -834,19 +827,14 @@
         var district = this.$modal.find('.search_district').val();
 
         if (city || district) {
-            var $citySelect = this.$form.find('select.city_select');
-            var $cityHidden = this.$form.find('input.city_hidden');
-            var $districtSelect = this.$form.find('select.district_select');
-            var $districtHidden = this.$form.find('input.district_hidden');
+            var $citySelect = this.$form.find('select[name="city"]');
+            var $districtSelect = this.$form.find('select[name="district"]');
 
             if (city && $citySelect.length) {
                 if (!$citySelect.find('option[value="' + city + '"]').length) {
                     $citySelect.append('<option value="' + city + '">' + city + '</option>');
                 }
                 $citySelect.val(city);
-                if ($cityHidden.length) {
-                    $cityHidden.val(city);
-                }
             }
 
             if (district && $districtSelect.length) {
@@ -854,9 +842,6 @@
                     $districtSelect.append('<option value="' + district + '">' + district + '</option>');
                 }
                 $districtSelect.val(district);
-                if ($districtHidden.length) {
-                    $districtHidden.val(district);
-                }
             }
         }
 

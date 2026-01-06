@@ -135,8 +135,6 @@
                                 <th>신청기간</th>
                                 <th>정원</th>
                                 <th>결제수단</th>
-                                <th>작성자</th>
-                                <th>등록일</th>
                                 <th style="width: 150px;">관리</th>
                             </tr>
                         </thead>
@@ -149,14 +147,19 @@
                                     <td>{{ $program->reception_type_name ?? '-' }}</td>
                                     <td>
                                         @if($program->education_start_date && $program->education_end_date)
-                                            {{ $program->education_start_date->format('Y-m-d') }} ~ {{ $program->education_end_date->format('Y-m-d') }}
+                                            @php
+                                                $dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+                                                $startDay = $dayNames[$program->education_start_date->dayOfWeek] ?? '';
+                                                $endDay = $dayNames[$program->education_end_date->dayOfWeek] ?? '';
+                                            @endphp
+                                            {{ $program->education_start_date->format('Y-m-d') }}({{ $startDay }}) ~ {{ $program->education_end_date->format('Y-m-d') }}({{ $endDay }})
                                         @else
                                             -
                                         @endif
                                     </td>
                                     <td>
                                         @if($program->application_start_date && $program->application_end_date)
-                                            {{ $program->application_start_date->format('Y-m-d') }} ~ {{ $program->application_end_date->format('Y-m-d') }}
+                                            {{ $program->application_start_date->format('Y-m-d') }} 00:00 ~ {{ $program->application_end_date->format('Y-m-d') }} 23:59
                                         @else
                                             -
                                         @endif
@@ -175,8 +178,6 @@
                                             -
                                         @endif
                                     </td>
-                                    <td>{{ $program->author ?? '-' }}</td>
-                                    <td>{{ $program->created_at->format('Y.m.d') }}</td>
                                     <td>
                                         <div class="board-btn-group">
                                             <a href="{{ route('backoffice.group-programs.edit', $program) }}" class="btn btn-primary btn-sm">

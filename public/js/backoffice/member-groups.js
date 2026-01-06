@@ -310,7 +310,7 @@ function renderPagination(pagination) {
     const current = Math.min(lastPage, pagination.current_page ?? currentPage ?? 1);
     const startPage = Math.max(1, current - 2);
     const endPage = Math.min(lastPage, current + 2);
-
+    
     // 항상 페이지네이션 표시 (최소 1페이지)
 
     let html = '<nav aria-label="페이지 네비게이션"><ul class="pagination">';
@@ -333,10 +333,10 @@ function renderPagination(pagination) {
         for (let i = startPage; i <= endPage; i++) {
             if (i === current) {
                 html += `<li class="page-item active"><span class="page-link">${i}</span></li>`;
-            } else {
+        } else {
                 html += pageItem(i, i);
-            }
         }
+    }
     }
 
     html += pageItem(current < lastPage ? current + 1 : 0, '<i class="fas fa-chevron-right"></i>', current === lastPage);

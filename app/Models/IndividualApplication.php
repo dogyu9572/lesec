@@ -111,5 +111,38 @@ class IndividualApplication extends Model
     {
         return $this->belongsTo(Member::class, 'member_id');
     }
+
+    /**
+     * 프로그램명 접근자: reservation 관계 우선 사용
+     */
+    public function getProgramNameAttribute($value)
+    {
+        if ($this->relationLoaded('reservation') && $this->reservation) {
+            return $this->reservation->program_name;
+        }
+        return $value ?? $this->attributes['program_name'] ?? null;
+    }
+
+    /**
+     * 참가일 접근자: reservation 관계 우선 사용
+     */
+    public function getParticipationDateAttribute($value)
+    {
+        if ($this->relationLoaded('reservation') && $this->reservation && $this->reservation->education_start_date) {
+            return $this->reservation->education_start_date;
+        }
+        return $value ?? ($this->attributes['participation_date'] ?? null);
+    }
+
+    /**
+     * 참가비 접근자: reservation 관계 우선 사용
+     */
+    public function getParticipationFeeAttribute($value)
+    {
+        if ($this->relationLoaded('reservation') && $this->reservation && $this->reservation->education_fee !== null) {
+            return $this->reservation->education_fee;
+        }
+        return $value ?? ($this->attributes['participation_fee'] ?? null);
+    }
 }
 

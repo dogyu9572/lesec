@@ -14,8 +14,8 @@
     <div class="form-header">      
         <div>
             <a href="{{ route('backoffice.members.index') }}" class="btn btn-secondary btn-sm">
-                <i class="fas fa-arrow-left"></i> <span class="btn-text">목록으로</span>
-            </a>
+            <i class="fas fa-arrow-left"></i> <span class="btn-text">목록으로</span>
+        </a>
             <button type="submit" form="memberForm" class="btn btn-primary btn-sm">
                 <i class="fas fa-save"></i> <span class="btn-text">저장</span>
             </button>
@@ -303,9 +303,9 @@
                                                 </tr>
                                             @endforeach
                                         @else
-                                            <tr style="border: none;">
-                                                <td colspan="14" class="text-center" style="padding: 40px 20px; border: none !important; border-bottom: none !important;">신청 내역이 없습니다.</td>
-                                            </tr>
+                                        <tr style="border: none;">
+                                            <td colspan="14" class="text-center" style="padding: 40px 20px; border: none !important; border-bottom: none !important;">신청 내역이 없습니다.</td>
+                                        </tr>
                                         @endif
                                     </tbody>
                                 </table>

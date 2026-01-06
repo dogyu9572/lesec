@@ -46,27 +46,55 @@ class MemberMypageController extends Controller
     {
         $member = Auth::guard('member')->user();
         
-        $data = $request->validated();
+        // validation 실패 시 자동으로 리다이렉트되므로, 여기까지 오면 validation 통과
+        \Log::info('회원 정보 수정 시작', ['member_id' => $member->id]);
         
-        if (!empty($data['password'])) {
-            $data['password'] = \Illuminate\Support\Facades\Hash::make($data['password']);
-        } else {
-            unset($data['password']);
+        try {
+            $data = $request->validated();
+            
+            \Log::info('회원 정보 수정 시작', ['member_id' => $member->id, 'data_keys' => array_keys($data)]);
+            
+            if (!empty($data['password'])) {
+                $data['password'] = \Illuminate\Support\Facades\Hash::make($data['password']);
+            } else {
+                unset($data['password']);
+            }
+            
+            $notificationAgree = $data['notification_agree'] ?? false;
+            unset($data['notification_agree']);
+            
+            $data['email_consent'] = $notificationAgree;
+            $data['sms_consent'] = $notificationAgree;
+            
+            unset($data['current_password'], $data['password_confirmation']);
+            
+            \Log::info('fill 전 데이터', ['original_city' => $member->city, 'original_district' => $member->district, 'new_city' => $data['city'] ?? null, 'new_district' => $data['district'] ?? null]);
+            
+            // fill() 대신 직접 할당하여 확실히 저장
+            foreach ($data as $key => $value) {
+                if (in_array($key, $member->getFillable())) {
+                    $member->$key = $value;
+                }
+            }
+            
+            \Log::info('할당 후 변경사항', ['isDirty' => $member->isDirty(), 'dirty' => $member->getDirty()]);
+            
+            // 변경사항이 있으면 저장
+            if ($member->isDirty()) {
+                $saved = $member->save();
+                \Log::info('회원 정보 저장 완료', ['saved' => $saved]);
+            } else {
+                \Log::warning('변경된 데이터가 없어 저장하지 않음', ['data' => $data]);
+            }
+            
+            return redirect()->route('mypage.member')
+                ->with('success', '회원 정보가 수정되었습니다.');
+        } catch (\Exception $e) {
+            \Log::error('회원 정보 수정 오류', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return redirect()->route('mypage.member')
+                ->withErrors(['error' => '회원 정보 수정 중 오류가 발생했습니다: ' . $e->getMessage()])
+                ->withInput();
         }
-        
-        $notificationAgree = $data['notification_agree'] ?? false;
-        unset($data['notification_agree']);
-        
-        $data['email_consent'] = $notificationAgree;
-        $data['sms_consent'] = $notificationAgree;
-        
-        unset($data['current_password'], $data['password_confirmation']);
-        
-        $member->fill($data);
-        $member->save();
-        
-        return redirect()->route('mypage.member')
-            ->with('success', '회원 정보가 수정되었습니다.');
     }
 
     /**

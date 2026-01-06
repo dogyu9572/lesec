@@ -107,13 +107,13 @@
                                 </h6>
                                 <table>
                                     <colgroup>
-                                        <col class="w80"/>
+                                        <col style="width: 180px;"/>
                                         <col/>
                                         <col class="w100">
                                     </colgroup>
                                     <thead>
                                         <tr>
-                                            <th>일자</th>
+                                            <th>교육일정</th>
                                             <th>프로그램명</th>
                                             <th>인원/정원</th>
                                         </tr>
@@ -134,13 +134,13 @@
                                 </h6>
                                 <table>
                                     <colgroup>
-                                        <col class="w80"/>
+                                        <col style="width: 180px;"/>
                                         <col/>
                                         <col class="w100">
                                     </colgroup>
                                     <thead>
                                         <tr>
-                                            <th>일자</th>
+                                            <th>교육일정</th>
                                             <th>프로그램명</th>
                                             <th>인원/정원</th>
                                         </tr>

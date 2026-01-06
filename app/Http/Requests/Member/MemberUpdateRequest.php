@@ -27,8 +27,16 @@ class MemberUpdateRequest extends FormRequest
         $memberId = $member->id;
 
         $passwordRules = ['nullable', 'string'];
+        $passwordValue = trim((string) $this->input('password'));
+        $hasPassword = $this->filled('password') && $passwordValue !== '';
         
-        if ($this->filled('password')) {
+        \Log::info('rules() 체크', [
+            'filled_password' => $this->filled('password'),
+            'password_value_length' => strlen($passwordValue),
+            'has_password' => $hasPassword,
+        ]);
+        
+        if ($hasPassword) {
             $passwordRules = array_merge($passwordRules, [
                 'min:8',
                 'max:20',
@@ -38,7 +46,7 @@ class MemberUpdateRequest extends FormRequest
         }
 
         $rules = [
-            'current_password' => ['required'],
+            'current_password' => $hasPassword ? ['required'] : ['nullable'],
             'password' => $passwordRules,
             'contact' => ['required', 'string', 'max:50', $this->uniqueContactRule($memberId)],
             'parent_contact' => ['nullable', 'string', 'max:50'],
@@ -63,7 +71,11 @@ class MemberUpdateRequest extends FormRequest
         return [
             'current_password.required' => '현재 비밀번호를 입력해주세요.',
             'password.min' => '비밀번호는 8자 이상 입력해주세요.',
+            'password.max' => '비밀번호는 20자 이하로 입력해주세요.',
             'password.password' => '비밀번호는 영문, 숫자, 특수문자를 모두 포함해 8~20자로 입력해주세요.',
+            'password.letters' => '비밀번호는 최소 1개의 영문자를 포함해야 합니다.',
+            'password.numbers' => '비밀번호는 최소 1개의 숫자를 포함해야 합니다.',
+            'password.symbols' => '비밀번호는 최소 1개의 특수문자를 포함해야 합니다.',
             'password.confirmed' => '비밀번호 확인이 일치하지 않습니다.',
             'contact.required' => '연락처를 입력해주세요.',
             'contact.unique' => '이미 등록된 연락처입니다.',
@@ -100,13 +112,26 @@ class MemberUpdateRequest extends FormRequest
             'contact' => $contact,
             'parent_contact' => $parentContact ?: null,
             'email' => $email,
-            'city' => trim((string) $this->input('city')),
-            'district' => trim((string) $this->input('district')),
+            'city' => trim((string) $this->input('city')) ?: null,
+            'district' => trim((string) $this->input('district')) ?: null,
             'school_name' => trim((string) $this->input('school_name')),
             'school_id' => $this->filled('school_id') ? (int) $this->input('school_id') : null,
             'grade' => $this->filled('grade') ? (int) $this->input('grade') : null,
             'class_number' => $this->filled('class_number') ? (int) $this->input('class_number') : null,
             'notification_agree' => $this->boolean('notification_agree'),
+        ]);
+        
+        \Log::info('prepareForValidation 완료', [
+            'city' => $this->input('city'),
+            'district' => $this->input('district'),
+            'school_name' => $this->input('school_name'),
+            'school_id' => $this->input('school_id'),
+            'email' => $email,
+            'password' => $this->input('password') ? '***' : null, // 보안을 위해 마스킹
+            'password_confirmation' => $this->input('password_confirmation') ? '***' : null,
+            'current_password' => $this->input('current_password') ? '***' : null,
+            'has_password' => $this->filled('password'),
+            'password_length' => $this->input('password') ? strlen($this->input('password')) : 0,
         ]);
     }
 
@@ -161,10 +186,28 @@ class MemberUpdateRequest extends FormRequest
                 return;
             }
             
+            $newPassword = trim((string) $this->input('password'));
             $currentPassword = $this->input('current_password');
             
-            if (!empty($currentPassword) && !password_verify($currentPassword, $member->password)) {
-                $validator->errors()->add('current_password', '현재 비밀번호가 올바르지 않습니다.');
+            \Log::info('withValidator password 체크', [
+                'new_password_length' => strlen($newPassword),
+                'has_new_password' => !empty($newPassword),
+                'has_current_password' => !empty($currentPassword),
+            ]);
+            
+            // 비밀번호를 변경하는 경우에만 current_password 검증
+            if (!empty($newPassword)) {
+                if (empty($currentPassword)) {
+                    $validator->errors()->add('current_password', '비밀번호를 변경하려면 현재 비밀번호를 입력해주세요.');
+                    \Log::warning('회원 정보 수정 validation 실패: current_password 없음');
+                    return;
+                }
+                
+                if (!password_verify($currentPassword, $member->password)) {
+                    $validator->errors()->add('current_password', '현재 비밀번호가 올바르지 않습니다.');
+                    \Log::warning('회원 정보 수정 validation 실패: current_password 불일치');
+                    return;
+                }
             }
 
             // 학생 회원이고 연락처가 변경된 경우에만 중복 확인 필수
@@ -177,8 +220,23 @@ class MemberUpdateRequest extends FormRequest
                     $contactVerified = $this->input('contact_verified');
                     if ($contactVerified !== '1') {
                         $validator->errors()->add('contact_verified', '학생 연락처 중복 확인을 해주세요.');
+                        \Log::warning('회원 정보 수정 validation 실패: contact_verified 없음');
                     }
                 }
+            }
+            
+            // validation 에러가 있으면 로그 기록
+            if ($validator->errors()->any()) {
+                \Log::warning('회원 정보 수정 validation 실패', [
+                    'errors' => $validator->errors()->toArray(),
+                    'input' => $this->except(['current_password', 'password', 'password_confirmation']),
+                    'password_info' => [
+                        'has_password' => $this->filled('password'),
+                        'password_length' => $this->input('password') ? strlen($this->input('password')) : 0,
+                        'has_password_confirmation' => $this->filled('password_confirmation'),
+                        'has_current_password' => $this->filled('current_password'),
+                    ]
+                ]);
             }
         });
     }

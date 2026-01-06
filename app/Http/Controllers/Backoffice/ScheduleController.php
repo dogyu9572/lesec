@@ -187,7 +187,7 @@ class ScheduleController extends BaseController
 
         try {
             $schedules = $this->scheduleService->getSchedulesByDate($date);
-            
+
             // 해당 날짜의 프로그램 조회
             $dateCarbon = Carbon::parse($date);
             $programs = \App\Models\ProgramReservation::query()
@@ -198,15 +198,15 @@ class ScheduleController extends BaseController
                 ->get();
 
             $schedulesData = $schedules->map(function ($schedule) {
-                return [
-                    'id' => $schedule->id,
-                    'title' => $schedule->title,
-                    'start_date' => Carbon::parse($schedule->start_date)->format('Y.m.d'),
-                    'end_date' => Carbon::parse($schedule->end_date)->format('Y.m.d'),
-                    'content' => $schedule->content ?? '',
-                    'disable_application' => $schedule->disable_application,
+                    return [
+                        'id' => $schedule->id,
+                        'title' => $schedule->title,
+                        'start_date' => Carbon::parse($schedule->start_date)->format('Y.m.d'),
+                        'end_date' => Carbon::parse($schedule->end_date)->format('Y.m.d'),
+                        'content' => $schedule->content ?? '',
+                        'disable_application' => $schedule->disable_application,
                     'type' => 'schedule',
-                ];
+                    ];
             })->toArray();
 
             $programsData = $programs->map(function ($program) {

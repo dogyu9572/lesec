@@ -316,6 +316,17 @@ $(function() {
 	alert('{{ session('success') }}');
 	@endif
 
+	// validation 에러 알럿 표시
+	@if ($errors->any())
+	var errorMessages = [];
+	@foreach ($errors->all() as $error)
+		errorMessages.push('{{ $error }}');
+	@endforeach
+	if (errorMessages.length > 0) {
+		alert('다음 오류가 발생했습니다:\n\n' + errorMessages.join('\n'));
+	}
+	@endif
+
 	// 이메일 도메인 직접 입력 토글
 	$('.email-domain-select').on('change', function() {
 		var $customInput = $(this).closest('dd').find('.email-domain-custom');

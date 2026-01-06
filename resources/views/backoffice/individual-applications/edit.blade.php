@@ -76,7 +76,7 @@
                                     <label for="program_name">프로그램명</label>
                                     <div class="school-search-wrapper">
                                         <input type="hidden" id="program_reservation_id" name="program_reservation_id" value="{{ $application->program_reservation_id }}">
-                                        <input type="text" id="program_name" name="program_name" value="{{ $application->program_name }}" readonly>
+                                        <input type="text" id="program_name" value="{{ $application->reservation->program_name ?? '-' }}" readonly>
                                         <button type="button" id="program-search-btn" class="btn btn-secondary btn-sm">
                                             <i class="fas fa-search"></i> 검색
                                         </button>
@@ -84,13 +84,11 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="participation_date_display">참가일</label>
-                                    <input type="hidden" id="participation_date" name="participation_date" value="{{ optional($application->participation_date)->format('Y-m-d') }}">
-                                    <input type="text" id="participation_date_display" value="{{ optional($application->participation_date)->format('Y.m.d') }}" readonly>
+                                    <input type="text" id="participation_date_display" value="{{ optional($application->reservation->education_start_date)->format('Y.m.d') ?? '-' }}" readonly>
                                 </div>
                                 <div class="form-group">
                                     <label for="participation_fee_display">참가비</label>
-                                    <input type="hidden" id="participation_fee" name="participation_fee" value="{{ $application->participation_fee ?? '' }}">
-                                    <input type="text" id="participation_fee_display" value="{{ $application->participation_fee ? number_format($application->participation_fee) : '' }}" readonly>
+                                    <input type="text" id="participation_fee_display" value="{{ $application->reservation->education_fee ? number_format($application->reservation->education_fee) : '-' }}" readonly>
                                 </div>
                                 <div>
                                     <label>결제방법</label>

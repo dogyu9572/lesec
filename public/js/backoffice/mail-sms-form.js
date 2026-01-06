@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
         clearModalSelection();
         
         // 기본 검색 실행 (검색어 없이 전체 목록)
-        searchMembers(1);
+            searchMembers(1);
     }
 
     /**
@@ -455,10 +455,10 @@ document.addEventListener('DOMContentLoaded', () => {
             for (let i = startPage; i <= endPage; i++) {
                 if (i === current) {
                     html += `<li class="page-item active"><span class="page-link">${i}</span></li>`;
-                } else {
+            } else {
                     html += pageItem(i, i);
-                }
             }
+        }
         }
 
         html += pageItem(current < lastPage ? current + 1 : 0, '<i class="fas fa-chevron-right"></i>', current === lastPage);

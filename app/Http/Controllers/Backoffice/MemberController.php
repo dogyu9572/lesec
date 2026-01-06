@@ -273,8 +273,8 @@ class MemberController extends BaseController
         for ($col = 1; $col <= $headerCount; $col++) {
             $columnLetter = Coordinate::stringFromColumnIndex($col);
             $sheet->getColumnDimension($columnLetter)->setAutoSize(true);
-        }
-        
+            }
+            
         // 테두리 적용
         $lastRow = $row - 1;
         if ($lastRow > 1) {

@@ -17,6 +17,12 @@
 
 				<div class="inputs">
 					<dl>
+						<dt>회원유형</dt>
+						<dd>
+							<input type="text" value="{{ $member->member_type === 'teacher' ? '교사' : '학생회원' }}" readonly class="text w100p">
+						</dd>
+					</dl>
+					<dl>
 						<dt>아이디<span>*</span></dt>
 						<dd>
 							<input type="text" value="{{ $member->login_id }}" readonly class="text w100p">

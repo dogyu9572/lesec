@@ -120,7 +120,7 @@
                         const editUrl = `/backoffice/rosters/${item.program_reservation_id}/edit`;
                         
                         return `
-                            <tr style="cursor: pointer;" onclick="window.location.href='${editUrl}'">
+                            <tr style="cursor: pointer;" onclick="window.open('${editUrl}', '_blank')">
                                 <td>${scheduleText}</td>
                                 <td>${escapeHtml(item.program_name)}</td>
                                 <td>${capacityText}</td>
@@ -171,7 +171,7 @@
                         const editUrl = `/backoffice/rosters/${item.program_reservation_id}/edit`;
                         
                         return `
-                            <tr style="cursor: pointer;" onclick="window.location.href='${editUrl}'">
+                            <tr style="cursor: pointer;" onclick="window.open('${editUrl}', '_blank')">
                                 <td>${scheduleText}</td>
                                 <td>${escapeHtml(item.program_name)}</td>
                                 <td>${capacityText}</td>

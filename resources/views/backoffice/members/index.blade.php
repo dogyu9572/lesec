@@ -211,7 +211,7 @@
                                             <a href="{{ route('backoffice.members.show', $member) }}" class="btn btn-info btn-sm">
                                                 <i class="fas fa-eye"></i> 보기
                                             </a>
-                                            <a href="{{ route('backoffice.members.edit', $member) }}" class="btn btn-primary btn-sm">
+                                            <a href="{{ route('backoffice.members.edit', $member) }}" class="btn btn-primary btn-sm" target="_blank">
                                                 <i class="fas fa-edit"></i> 수정
                                             </a>
                                             <button type="button" class="btn btn-danger btn-sm" onclick="withdrawMember({{ $member->id }})">

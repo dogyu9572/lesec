@@ -93,9 +93,23 @@ $(".main_type_link dt button").click(function(){
             {{-- 일반팝업 (새창) --}}
             <script>
                 document.addEventListener('DOMContentLoaded', function() {
-                    const popupUrl = '{{ route("popup.show", $popup->id) }}';
-                    const popupFeatures = 'width={{ $popup->width }},height={{ $popup->height }},left={{ $popup->position_left ?? 100 }},top={{ $popup->position_top ?? 100 }},scrollbars=yes,resizable=yes,menubar=no,toolbar=no,location=no,status=no';
-                    window.open(popupUrl, 'popup_{{ $popup->id }}', popupFeatures);
+                    // 쿠키 체크 함수
+                    function getCookie(name) {
+                        const value = '; ' + document.cookie;
+                        const parts = value.split('; ' + name + '=');
+                        if (parts.length === 2) {
+                            return parts.pop().split(';').shift();
+                        }
+                        return null;
+                    }
+                    
+                    // 오늘 하루 보지 않기 쿠키 확인
+                    const cookieName = 'popup_hide_{{ $popup->id }}';
+                    if (!getCookie(cookieName)) {
+                        const popupUrl = '{{ route("popup.show", $popup->id) }}';
+                        const popupFeatures = 'width={{ $popup->width }},height={{ $popup->height }},left={{ $popup->position_left ?? 100 }},top={{ $popup->position_top ?? 100 }},scrollbars=yes,resizable=yes,menubar=no,toolbar=no,location=no,status=no';
+                        window.open(popupUrl, 'popup_{{ $popup->id }}', popupFeatures);
+                    }
                 });
             </script>
         @else

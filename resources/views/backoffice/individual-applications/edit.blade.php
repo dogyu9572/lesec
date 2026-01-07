@@ -84,7 +84,24 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="participation_date_display">참가일</label>
-                                    <input type="text" id="participation_date_display" value="{{ optional($application->reservation->education_start_date)->format('Y.m.d') ?? '-' }}" readonly>
+                                    @php
+                                        $reservation = $application->reservation;
+                                        $startDate = $reservation?->education_start_date;
+                                        $endDate = $reservation?->education_end_date;
+                                        $dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+                                        $dateDisplay = '-';
+                                        if ($startDate) {
+                                            if ($endDate && $startDate->format('Y-m-d') !== $endDate->format('Y-m-d')) {
+                                                $startDayName = $dayNames[$startDate->dayOfWeek];
+                                                $endDayName = $dayNames[$endDate->dayOfWeek];
+                                                $dateDisplay = $startDate->format('Y.m.d') . '(' . $startDayName . ') ~ ' . $endDate->format('Y.m.d') . '(' . $endDayName . ')';
+                                            } else {
+                                                $dayName = $dayNames[$startDate->dayOfWeek];
+                                                $dateDisplay = $startDate->format('Y.m.d') . '(' . $dayName . ')';
+                                            }
+                                        }
+                                    @endphp
+                                    <input type="text" id="participation_date_display" value="{{ $dateDisplay }}" readonly>
                                 </div>
                                 <div class="form-group">
                                     <label for="participation_fee_display">참가비</label>

@@ -123,7 +123,14 @@ class GroupApplication extends Model
 
     public function getParticipationDateFormattedAttribute(): ?string
     {
-        return $this->participation_date?->format('Y.m.d');
+        if (!$this->participation_date) {
+            return null;
+        }
+        
+        $dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+        $dayName = $dayNames[$this->participation_date->dayOfWeek];
+        
+        return $this->participation_date->format('Y.m.d') . '(' . $dayName . ')';
     }
 
     public function getAppliedAtFormattedAttribute(): ?string

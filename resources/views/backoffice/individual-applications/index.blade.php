@@ -185,7 +185,35 @@
                                     <td>{{ $application->payment_method ? ($paymentMethods[$application->payment_method] ?? $application->payment_method) : '-' }}</td>
                                     <td>{{ $application->payment_status_label }}</td>
                                     <td>{{ $application->participation_fee ? number_format($application->participation_fee) : '-' }}</td>
-                                    <td>{{ optional($application->participation_date)->format('Y.m.d') ?? '-' }}</td>
+                                    <td>
+                                        @php
+                                            $reservation = $application->reservation;
+                                            $startDate = $reservation?->education_start_date;
+                                            $endDate = $reservation?->education_end_date;
+                                            $dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+                                        @endphp
+                                        @if($startDate)
+                                            @if($endDate && $startDate->format('Y-m-d') !== $endDate->format('Y-m-d'))
+                                                @php
+                                                    $startDayName = $dayNames[$startDate->dayOfWeek];
+                                                    $endDayName = $dayNames[$endDate->dayOfWeek];
+                                                @endphp
+                                                {{ $startDate->format('Y.m.d') }}({{ $startDayName }}) ~ {{ $endDate->format('Y.m.d') }}({{ $endDayName }})
+                                            @else
+                                                @php
+                                                    $dayName = $dayNames[$startDate->dayOfWeek];
+                                                @endphp
+                                                {{ $startDate->format('Y.m.d') }}({{ $dayName }})
+                                            @endif
+                                        @elseif($application->participation_date)
+                                            @php
+                                                $dayName = $dayNames[$application->participation_date->dayOfWeek];
+                                            @endphp
+                                            {{ $application->participation_date->format('Y.m.d') }}({{ $dayName }})
+                                        @else
+                                            -
+                                        @endif
+                                    </td>
                                     <td>{{ optional($application->applied_at)->format('Y.m.d H:i') ?? '-' }}</td>
                                     <td>
                                         <div class="board-btn-group">

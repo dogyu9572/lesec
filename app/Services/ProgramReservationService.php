@@ -225,11 +225,11 @@ class ProgramReservationService
 
         $guardianContact = $this->normalizeContactNumber($data['guardian_contact'] ?? '');
 
-        // 프로그램 정보는 reservation 관계를 통해 가져오므로 저장하지 않음
-        // 기존 데이터 호환성을 위해 null로 저장 (accessor가 reservation에서 가져옴)
-        $programNameValue = null;
-        $participationDateValue = null;
-        $participationFeeValue = null;
+        // 데이터베이스 제약 조건을 위해 reservation에서 값을 가져와서 저장
+        // accessor가 reservation 관계를 우선 사용하므로, 저장된 값은 fallback으로만 사용됨
+        $programNameValue = $reservation->program_name;
+        $participationDateValue = $reservation->education_start_date;
+        $participationFeeValue = $reservation->education_fee;
 
         return DB::transaction(function () use ($reservation, $data, $requestedCount, $applicantContact, $guardianContact, $memberModel, $programNameValue, $participationDateValue, $participationFeeValue) {
             $application = IndividualApplication::create([

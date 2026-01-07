@@ -144,7 +144,7 @@ class RosterService
                 'education_type' => $program->education_type,
                 'program_name' => $program->program_name,
                 'participation_date' => $program->education_start_date instanceof Carbon ? $program->education_start_date->format('Y-m-d') : null,
-                'participation_date_formatted' => $this->formatParticipationDate($program->education_start_date),
+                'participation_date_formatted' => $this->formatParticipationDate($program->education_start_date, $program->education_end_date),
                 'capacity' => $program->capacity,
                 'is_unlimited_capacity' => $program->is_unlimited_capacity ?? false,
                 'applicant_count' => $applicantCount,
@@ -165,7 +165,7 @@ class RosterService
                 'education_type' => $program->education_type,
                 'program_name' => $program->program_name,
                 'participation_date' => $program->education_start_date instanceof Carbon ? $program->education_start_date->format('Y-m-d') : null,
-                'participation_date_formatted' => $this->formatParticipationDate($program->education_start_date),
+                'participation_date_formatted' => $this->formatParticipationDate($program->education_start_date, $program->education_end_date),
                 'capacity' => $program->capacity,
                 'is_unlimited_capacity' => $program->is_unlimited_capacity ?? false,
                 'applicant_count' => $applicantCount,
@@ -178,24 +178,40 @@ class RosterService
     }
 
     /**
-     * 참가일 포맷팅 (요일 포함)
+     * 참가일 포맷팅 (요일 포함, 시작일~종료일)
      */
-    private function formatParticipationDate($date): ?string
+    private function formatParticipationDate($startDate, $endDate = null): ?string
     {
-        if (!$date) {
+        if (!$startDate) {
             return null;
         }
 
-        if ($date instanceof Carbon) {
-            $carbon = $date;
+        if ($startDate instanceof Carbon) {
+            $startCarbon = $startDate;
         } else {
-            $carbon = Carbon::parse($date);
+            $startCarbon = Carbon::parse($startDate);
         }
 
         $days = ['일', '월', '화', '수', '목', '금', '토'];
-        $dayOfWeek = $days[$carbon->dayOfWeek] ?? '';
+        $startDayOfWeek = $days[$startCarbon->dayOfWeek] ?? '';
+        $startFormatted = $startCarbon->format('Y.m.d') . '(' . $startDayOfWeek . ')';
 
-        return $carbon->format('Y.m.d') . '(' . $dayOfWeek . ')';
+        // 종료일이 있고 시작일과 다르면 범위로 표시
+        if ($endDate) {
+            if ($endDate instanceof Carbon) {
+                $endCarbon = $endDate;
+            } else {
+                $endCarbon = Carbon::parse($endDate);
+            }
+
+            if ($startCarbon->format('Y-m-d') !== $endCarbon->format('Y-m-d')) {
+                $endDayOfWeek = $days[$endCarbon->dayOfWeek] ?? '';
+                $endFormatted = $endCarbon->format('Y.m.d') . '(' . $endDayOfWeek . ')';
+                return $startFormatted . ' ~ ' . $endFormatted;
+            }
+        }
+
+        return $startFormatted;
     }
 
     /**
@@ -231,7 +247,7 @@ class RosterService
             'education_type' => $reservation->education_type,
             'program_name' => $reservation->program_name,
             'participation_date' => $reservation->education_start_date,
-            'participation_date_formatted' => $this->formatParticipationDate($reservation->education_start_date),
+            'participation_date_formatted' => $this->formatParticipationDate($reservation->education_start_date, $reservation->education_end_date),
             'capacity' => $reservation->capacity,
             'is_unlimited_capacity' => $reservation->is_unlimited_capacity ?? false,
             'applied_count' => 0,

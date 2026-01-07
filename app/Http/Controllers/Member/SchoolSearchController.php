@@ -65,6 +65,7 @@ class SchoolSearchController extends Controller
                 'count' => $schools->total(),
                 'current_page' => $schools->currentPage(),
                 'last_page' => $schools->lastPage(),
+                'per_page' => $schools->perPage(),
             ],
             'filters' => [
                 'cities' => $cities,

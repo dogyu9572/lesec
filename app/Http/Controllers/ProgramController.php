@@ -604,17 +604,41 @@ class ProgramController extends Controller
 
     private function buildIndividualCompletionContext(IndividualApplication $application): array
     {
-        $participationTimestamp = $application->participation_date
-            ? strtotime((string) $application->participation_date)
-            : false;
-
         $appliedTimestamp = $application->applied_at
             ? strtotime((string) $application->applied_at)
             : false;
+
+        // 참가일: reservation 관계에서 시작일과 종료일 가져오기
+        $educationDate = '교육일이 지정되지 않았습니다.';
+        if ($application->reservation) {
+            $startDate = $application->reservation->education_start_date;
+            $endDate = $application->reservation->education_end_date;
+            
+            if ($startDate) {
+                $days = ['일', '월', '화', '수', '목', '금', '토'];
+                $startTimestamp = strtotime((string) $startDate);
+                $startDayName = $days[(int) date('w', $startTimestamp)] ?? '';
+                $startFormatted = date('Y.m.d', $startTimestamp) . '(' . $startDayName . ')';
+                
+                if ($endDate && $startDate->format('Y-m-d') !== $endDate->format('Y-m-d')) {
+                    $endTimestamp = strtotime((string) $endDate);
+                    $endDayName = $days[(int) date('w', $endTimestamp)] ?? '';
+                    $endFormatted = date('Y.m.d', $endTimestamp) . '(' . $endDayName . ')';
+                    $educationDate = $startFormatted . ' ~ ' . $endFormatted;
+                } else {
+                    $educationDate = $startFormatted;
+                }
+            }
+        } elseif ($application->participation_date) {
+            $participationTimestamp = strtotime((string) $application->participation_date);
+            $days = ['일', '월', '화', '수', '목', '금', '토'];
+            $dayName = $days[(int) date('w', $participationTimestamp)] ?? '';
+            $educationDate = date('Y.m.d', $participationTimestamp) . '(' . $dayName . ')';
+        }
  
         return [
             'program_name' => $application->program_name ?? '',
-            'education_date' => $participationTimestamp ? date('Y.m.d', $participationTimestamp) : '교육일이 지정되지 않았습니다.',
+            'education_date' => $educationDate,
             'application_number' => $application->application_number,
             'applicant_name' => $application->applicant_name,
             'applicant_phone' => $this->formatContactNumber($application->applicant_contact),

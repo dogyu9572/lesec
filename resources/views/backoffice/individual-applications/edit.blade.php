@@ -43,94 +43,11 @@
                     <form method="POST" action="{{ route('backoffice.individual-applications.update', $application) }}">
                         @csrf
                         @method('PUT')
-
-                        <div class="program-section">
-                            <div class="section-title">프로그램 정보</div>
-                            <div class="form-grid grid-2">
-                                <div class="form-group">
-                                    <label for="reception_type">신청유형</label>
-                                    <select id="reception_type" name="reception_type" required>
-                                        @foreach($receptionTypes as $key => $name)
-                                            <option value="{{ $key }}" @selected($application->reception_type == $key)>{{ $name }}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('reception_type')
-                                        <div class="invalid-feedback d-block">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                <div>
-                                    <label>교육유형</label>
-                                    <div class="radio-group">
-                                        @foreach($educationTypes as $key => $name)
-                                            <label class="radio-label">
-                                                <input type="radio" name="education_type" value="{{ $key }}" @checked($application->education_type == $key) required>
-                                                <span>{{ $name }}</span>
-                                            </label>
-                                        @endforeach
-                                    </div>
-                                    @error('education_type')
-                                        <div class="invalid-feedback d-block">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                <div class="form-group grid-span-2">
-                                    <label for="program_name">프로그램명</label>
-                                    <div class="school-search-wrapper">
-                                        <input type="hidden" id="program_reservation_id" name="program_reservation_id" value="{{ $application->program_reservation_id }}">
-                                        <input type="text" id="program_name" value="{{ $application->reservation->program_name ?? '-' }}" readonly>
-                                        <button type="button" id="program-search-btn" class="btn btn-secondary btn-sm">
-                                            <i class="fas fa-search"></i> 검색
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="participation_date_display">참가일</label>
-                                    @php
-                                        $reservation = $application->reservation;
-                                        $startDate = $reservation?->education_start_date;
-                                        $endDate = $reservation?->education_end_date;
-                                        $dayNames = ['일', '월', '화', '수', '목', '금', '토'];
-                                        $dateDisplay = '-';
-                                        if ($startDate) {
-                                            if ($endDate && $startDate->format('Y-m-d') !== $endDate->format('Y-m-d')) {
-                                                $startDayName = $dayNames[$startDate->dayOfWeek];
-                                                $endDayName = $dayNames[$endDate->dayOfWeek];
-                                                $dateDisplay = $startDate->format('Y.m.d') . '(' . $startDayName . ') ~ ' . $endDate->format('Y.m.d') . '(' . $endDayName . ')';
-                                            } else {
-                                                $dayName = $dayNames[$startDate->dayOfWeek];
-                                                $dateDisplay = $startDate->format('Y.m.d') . '(' . $dayName . ')';
-                                            }
-                                        }
-                                    @endphp
-                                    <input type="text" id="participation_date_display" value="{{ $dateDisplay }}" readonly>
-                                </div>
-                                <div class="form-group">
-                                    <label for="participation_fee_display">참가비</label>
-                                    <input type="text" id="participation_fee_display" value="{{ $application->reservation->education_fee ? number_format($application->reservation->education_fee) : '-' }}" readonly>
-                                </div>
-                                <div>
-                                    <label>결제방법</label>
-                                    <div class="radio-group">
-                                        @foreach($paymentMethods as $key => $name)
-                                            <label class="radio-label">
-                                                <input type="radio" name="payment_method" value="{{ $key }}" @checked($application->payment_method == $key)>
-                                                <span>{{ $name }}</span>
-                                            </label>
-                                        @endforeach
-                                    </div>
-                                    @error('payment_method')
-                                        <div class="invalid-feedback d-block">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-                        </div>
+                       
 
                         <div class="program-section">
                             <div class="section-title">신청 정보</div>
                             <div class="form-grid grid-2">
-                                <div class="form-group">
-                                    <label for="application_number">신청번호</label>
-                                    <input type="text" id="application_number" value="{{ $application->application_number }}" readonly>
-                                </div>
                                 <div class="form-group">
                                     <label for="draw_result_select">추첨결과</label>
                                     <input type="hidden" id="draw_result" name="draw_result" value="{{ $drawResultValue }}">

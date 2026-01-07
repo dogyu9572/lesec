@@ -88,10 +88,6 @@
     </div>
 </div>
 
-@include('backoffice.modals.member-search', [
-    'formAction' => route('backoffice.member-groups.search-members')
-])
-
 @endsection
 @section('scripts')
 <script src="{{ asset('js/backoffice/member-groups.js') }}"></script>

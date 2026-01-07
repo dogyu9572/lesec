@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const modal = document.getElementById('member-search-modal');
     const openBtn = document.getElementById('openMemberSearchBtn');
     const searchBtn = document.getElementById('popup-search-btn');
     const confirmBtn = document.getElementById('popup-add-btn');
@@ -13,7 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectedMembersDisplay = document.getElementById('selected_members_display');
     const memberSelectionStatus = document.getElementById('memberSelectionStatus');
 
-    if (!modal || !openBtn || !memberListBody || !selectedMembersBody) {
+    // 팝업 방식으로 변경되어 memberListBody는 팝업 내부에 있으므로 부모창에서는 체크하지 않음
+    if (!openBtn || !selectedMembersBody) {
         return;
     }
 
@@ -44,52 +44,49 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * 모달 열기
+     * 회원 검색 팝업 열기
      */
     function openMemberSearchModal() {
-        modal.style.display = 'flex';
-        
-        // 검색 필드 초기화
-        if (searchTypeSelect) searchTypeSelect.value = 'all';
-        if (searchInput) searchInput.value = '';
-        
-        clearModalSelection();
-        
-        // 기본 검색 실행 (검색어 없이 전체 목록)
-            searchMembers(1);
+        const url = '/backoffice/popup-windows/member-search?selection_mode=multiple';
+        const width = window.innerWidth <= 768 ? '100%' : '1000';
+        const height = window.innerHeight <= 768 ? '100%' : '700';
+        window.open(url, 'memberSearch', `width=${width},height=${height},left=100,top=100,scrollbars=yes,resizable=yes`);
     }
 
     /**
-     * 모달 닫기
+     * 팝업에서 선택한 회원을 받아서 추가
+     * individual-applications/create와 동일한 방식으로 단일 회원 선택 지원
+     * 여러 명 선택 시 배열로 받아서 처리
      */
-    function closeMemberSearchModal() {
-        modal.style.display = 'none';
-        
-        // 검색 필드 초기화
-        if (searchTypeSelect) searchTypeSelect.value = 'all';
-        if (searchInput) searchInput.value = '';
-        
-        // 검색 결과 초기화
-        const selectionMode = modal.dataset.selectionMode || 'multiple';
-        const colspan = selectionMode === 'multiple' ? 6 : 5;
-        memberListBody.innerHTML = `<tr><td colspan="${colspan}" class="text-center">검색어를 입력하거나 필터를 선택해주세요.</td></tr>`;
-        if (paginationContainer) {
-            paginationContainer.innerHTML = '';
+    window.applySelectedMember = function(selectedMember) {
+        if (!selectedMember) {
+            return;
         }
+
+        // 배열로 전달된 경우 (여러 명 선택)
+        const selectedMembers = Array.isArray(selectedMember) ? selectedMember : [selectedMember];
         
-        clearModalSelection();
-    }
+        if (selectedMembers.length === 0) {
+            return;
+        }
+
+        addMembersToSelection(selectedMembers, { removable: true });
+    };
 
     window.openMemberSearchModal = openMemberSearchModal;
-    window.closeMemberSearchModal = closeMemberSearchModal;
 
     /**
-     * 모달 체크박스 상태 초기화
+     * 모달 체크박스 상태 초기화 (팝업 방식으로 변경되어 사용하지 않음)
      */
     function clearModalSelection() {
-        selectAllCheckbox.checked = false;
-        const checkboxes = memberListBody.querySelectorAll('.popup-member-checkbox');
-        checkboxes.forEach((checkbox) => (checkbox.checked = false));
+        // 팝업 내부에서 처리되므로 부모창에서는 불필요
+        if (selectAllCheckbox) {
+            selectAllCheckbox.checked = false;
+        }
+        if (memberListBody) {
+            const checkboxes = memberListBody.querySelectorAll('.popup-member-checkbox');
+            checkboxes.forEach((checkbox) => (checkbox.checked = false));
+        }
         toggleConfirmButton();
     }
 
@@ -477,9 +474,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * 선택 회원 추가
+     * 선택 회원 추가 (팝업 내부에서 처리되므로 부모창에서는 불필요)
      */
     function addSelectedMembers() {
+        if (!memberListBody) {
+            return;
+        }
         const checkboxes = memberListBody.querySelectorAll('.popup-member-checkbox:checked');
         if (!checkboxes.length) {
             alert('추가할 회원을 선택해 주세요.');
@@ -521,19 +521,20 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     /**
-     * 확인 버튼 상태 제어
+     * 확인 버튼 상태 제어 (팝업 내부에서 처리되므로 부모창에서는 불필요)
      */
     function toggleConfirmButton() {
-        const hasSelection = memberListBody.querySelectorAll('.popup-member-checkbox:checked').length > 0;
-        if (confirmBtn) {
+        // 팝업 내부에서 처리되므로 부모창에서는 불필요
+        if (memberListBody && confirmBtn) {
+            const hasSelection = memberListBody.querySelectorAll('.popup-member-checkbox:checked').length > 0;
             confirmBtn.disabled = !hasSelection;
         }
     }
 
     /**
-     * 전체 선택 제어
+     * 전체 선택 제어 (팝업 내부에서 처리되므로 부모창에서는 불필요)
      */
-    if (selectAllCheckbox) {
+    if (selectAllCheckbox && memberListBody) {
         selectAllCheckbox.addEventListener('change', (event) => {
             const isChecked = event.target.checked;
             memberListBody.querySelectorAll('.popup-member-checkbox:not(:disabled)').forEach((checkbox) => {
@@ -547,13 +548,15 @@ document.addEventListener('DOMContentLoaded', () => {
         openBtn.addEventListener('click', () => openMemberSearchModal());
     }
 
-    if (searchBtn) {
+    // 팝업 내부에서 처리되므로 부모창에서는 불필요
+    if (searchBtn && memberListBody) {
         searchBtn.addEventListener('click', () => searchMembers(1));
     }
 
+    // 팝업 내부에서 처리되므로 부모창에서는 불필요
     // 팝업 초기화 버튼 클릭
     const popupResetBtn = document.getElementById('popup-reset-btn');
-    if (popupResetBtn) {
+    if (popupResetBtn && memberListBody) {
         popupResetBtn.addEventListener('click', function() {
             // 검색 필드 초기화
             if (searchTypeSelect) searchTypeSelect.value = 'all';
@@ -564,7 +567,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (confirmBtn) {
+    if (confirmBtn && memberListBody) {
         confirmBtn.addEventListener('click', addSelectedMembers);
     }
 

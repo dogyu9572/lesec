@@ -107,10 +107,6 @@
     </div>
 </div>
 
-@include('backoffice.modals.member-search', [
-    'formAction' => route('backoffice.member-groups.search-members')
-])
-
 @endsection
 @section('scripts')
 <script>

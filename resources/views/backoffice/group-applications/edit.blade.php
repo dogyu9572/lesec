@@ -113,16 +113,6 @@
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label for="applicant_name">신청자명</label>
-                                    <div class="school-search-wrapper">
-                                        <input type="text" id="applicant_name" name="applicant_name" value="{{ data_get($application, 'applicant_name') }}" readonly>
-                                        <input type="hidden" id="member_id" name="member_id" value="{{ data_get($application, 'member_id') }}">
-                                        <button type="button" id="member-search-btn" class="btn btn-secondary btn-sm">
-                                            <i class="fas fa-search"></i> 회원 검색
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="form-group">
                                     <label for="applicant_contact">연락처</label>
                                     <input type="text" id="applicant_contact" name="applicant_contact" value="{{ data_get($application, 'applicant_contact') }}">
                                 </div>

@@ -144,19 +144,6 @@
                                     @enderror
                                 </div>
                                 <div class="form-group">
-                                    <label for="applicant_name">신청자명</label>
-                                    <div class="school-search-wrapper">
-                                        <input type="text" id="applicant_name" name="applicant_name" value="{{ old('applicant_name') }}" readonly>
-                                        <input type="hidden" id="member_id" name="member_id" value="{{ old('member_id') }}">
-                                        <button type="button" id="member-search-btn" class="btn btn-secondary btn-sm">
-                                            <i class="fas fa-search"></i> 회원 검색
-                                        </button>
-                                    </div>
-                                    @error('applicant_name')
-                                        <div class="invalid-feedback d-block">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                <div class="form-group">
                                     <label for="applicant_contact">연락처</label>
                                     <input type="text" id="applicant_contact" name="applicant_contact" value="{{ old('applicant_contact') }}">
                                     @error('applicant_contact')

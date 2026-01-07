@@ -179,7 +179,6 @@
     </div>
 </div>
 
-@include('backoffice.modals.member-search')
 @endsection
 
 @section('scripts')

@@ -3,6 +3,140 @@
 let currentPage = 1;
 let selectedMemberIds = [];
 
+/**
+ * 팝업에서 선택한 회원을 받아서 그룹에 추가
+ * individual-applications/create와 동일한 방식으로 단일 회원 선택 지원
+ * 여러 명 선택 시 배열로 받아서 처리
+ */
+window.applySelectedMember = function(selectedMember) {
+    if (!selectedMember) {
+        return;
+    }
+
+    // 배열로 전달된 경우 (여러 명 선택)
+    const selectedMembers = Array.isArray(selectedMember) ? selectedMember : [selectedMember];
+    
+    if (selectedMembers.length === 0) {
+        return;
+    }
+
+    const currentGroupId = typeof groupId !== 'undefined' ? groupId : null;
+    
+    // create 페이지인 경우 (groupId가 없음) - 테이블에 직접 추가
+    if (!currentGroupId) {
+        const memberListBody = document.getElementById('member-list-body');
+        if (!memberListBody) {
+            alert('회원 목록을 찾을 수 없습니다.');
+            return;
+        }
+
+        // 기존 "등록된 회원이 없습니다" 메시지 제거
+        const emptyRow = memberListBody.querySelector('tr[style*="border: none"]');
+        if (emptyRow) {
+            emptyRow.remove();
+        }
+
+        // 선택한 회원들을 테이블에 추가
+        selectedMembers.forEach((member, index) => {
+            const existingRow = memberListBody.querySelector(`tr[data-member-id="${member.id}"]`);
+            if (existingRow) {
+                return; // 이미 추가된 회원은 건너뛰기
+            }
+
+            const row = document.createElement('tr');
+            row.dataset.memberId = member.id;
+            const rowNumber = memberListBody.querySelectorAll('tr[data-member-id]').length + 1;
+            
+            row.innerHTML = `
+                <td>${rowNumber}</td>
+                <td>${member.name || '-'}</td>
+                <td>${member.contact || '-'}</td>
+                <td>${member.parent_contact || '-'}</td>
+                <td>${member.email || '-'}</td>
+                <td>-</td>
+                <td>
+                    <button type="button" class="btn btn-danger btn-sm remove-member-btn" data-member-id="${member.id}">
+                        <i class="fas fa-trash"></i> 삭제
+                    </button>
+                </td>
+            `;
+
+            // hidden input 추가 (폼 제출 시 사용)
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'member_ids[]';
+            hiddenInput.value = member.id;
+            row.appendChild(hiddenInput);
+
+            memberListBody.appendChild(row);
+        });
+
+        // 삭제 버튼 이벤트 리스너 추가
+        memberListBody.querySelectorAll('.remove-member-btn').forEach(btn => {
+            if (!btn.hasAttribute('data-listener-added')) {
+                btn.setAttribute('data-listener-added', 'true');
+                btn.addEventListener('click', function() {
+                    const memberId = parseInt(this.getAttribute('data-member-id'));
+                    const row = memberListBody.querySelector(`tr[data-member-id="${memberId}"]`);
+                    if (row) {
+                        row.remove();
+                    }
+                    // 회원이 없으면 빈 메시지 표시
+                    if (memberListBody.querySelectorAll('tr[data-member-id]').length === 0) {
+                        memberListBody.innerHTML = '<tr style="border: none;"><td colspan="7" class="text-center" style="padding: 40px 20px; border: none !important; border-bottom: none !important;">등록된 회원이 없습니다.</td></tr>';
+                    } else {
+                        // 번호 재정렬
+                        memberListBody.querySelectorAll('tr[data-member-id]').forEach((row, index) => {
+                            row.querySelector('td:first-child').textContent = index + 1;
+                        });
+                    }
+                });
+            }
+        });
+
+        // 번호 재정렬
+        memberListBody.querySelectorAll('tr[data-member-id]').forEach((row, index) => {
+            row.querySelector('td:first-child').textContent = index + 1;
+        });
+
+        return;
+    }
+
+    // edit 페이지인 경우 - API를 통해 그룹에 추가
+    const memberIds = selectedMembers.map(member => member.id).filter(id => id);
+    if (memberIds.length === 0) {
+        return;
+    }
+
+    const formData = new FormData();
+    memberIds.forEach(id => formData.append('member_ids[]', id));
+
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    const url = `/backoffice/member-groups/${currentGroupId}/add-members`;
+
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': csrfToken,
+            'Accept': 'application/json',
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('회원 추가 중 오류가 발생했습니다: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('회원 추가 중 오류가 발생했습니다.');
+    });
+};
+
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof groupId === 'undefined') {
         window.groupId = null;
@@ -88,57 +222,15 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 /**
- * 회원 검색 모달 열기
+ * 회원 검색 팝업 열기
  */
 function openMemberSearchModal() {
-    const modal = document.getElementById('member-search-modal');
-    if (modal) {
-        modal.style.display = 'flex';
-        selectedMemberIds = [];
-        currentPage = 1;
-        updatePopupAddButton();
-        
-        // 검색 필드 초기화
-        const searchTypeElement = document.getElementById('popup_search_type');
-        const searchKeywordElement = document.getElementById('popup_search_keyword');
-        if (searchTypeElement) searchTypeElement.value = 'all';
-        if (searchKeywordElement) searchKeywordElement.value = '';
-        
-        // 기본 검색 실행 (검색어 없이 전체 목록)
-        searchMembers(1);
-    }
+    const url = '/backoffice/popup-windows/member-search?selection_mode=multiple';
+    const width = window.innerWidth <= 768 ? '100%' : '1000';
+    const height = window.innerHeight <= 768 ? '100%' : '700';
+    window.open(url, 'memberSearch', `width=${width},height=${height},left=100,top=100,scrollbars=yes,resizable=yes`);
 }
 
-/**
- * 회원 검색 모달 닫기
- */
-function closeMemberSearchModal() {
-    const modal = document.getElementById('member-search-modal');
-    if (modal) {
-        modal.style.display = 'none';
-        selectedMemberIds = [];
-        currentPage = 1;
-        
-        // 검색 필드 초기화
-        const searchTypeElement = document.getElementById('popup_search_type');
-        const searchKeywordElement = document.getElementById('popup_search_keyword');
-        if (searchTypeElement) searchTypeElement.value = 'all';
-        if (searchKeywordElement) searchKeywordElement.value = '';
-        
-        // 검색 결과 초기화
-        const memberListBody = document.getElementById('popup-member-list-body');
-        const paginationContainer = document.getElementById('popup-pagination');
-        if (memberListBody) {
-            const colspan = memberListBody.dataset.selectionMode === 'multiple' ? 6 : 5;
-            memberListBody.innerHTML = `<tr><td colspan="${colspan}" class="text-center">검색어를 입력하거나 필터를 선택해주세요.</td></tr>`;
-        }
-        if (paginationContainer) {
-            paginationContainer.innerHTML = '';
-        }
-        
-        updatePopupAddButton();
-    }
-}
 
 /**
  * 회원 검색

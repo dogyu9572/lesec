@@ -144,6 +144,14 @@ class SchoolController extends BaseController
     }
 
     /**
+     * 학교 검색 팝업 페이지
+     */
+    public function popupSchoolSearch()
+    {
+        return $this->view('backoffice.popups.school-search');
+    }
+
+    /**
      * 학교 검색 (AJAX, 회원 정보 편집용)
      */
     public function search(Request $request)

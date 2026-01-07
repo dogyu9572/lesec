@@ -123,13 +123,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // 회원 모달 닫기
-    if (memberSearchCancelButtons.length) {
-        memberSearchCancelButtons.forEach(btn => btn.addEventListener('click', closeMemberSearchModal));
-    }
-    if (memberModalClose) {
-        memberModalClose.addEventListener('click', closeMemberSearchModal);
-    }
+    // 회원 모달 닫기는 팝업 방식으로 변경되어 제거됨
 
     // 프로그램 검색 모달 열기
     if (programSearchBtn) {
@@ -173,61 +167,79 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // 프로그램 모달 닫기
-    programSearchCancel.forEach(btn => btn.addEventListener('click', closeProgramSearchModal));
-    if (programModalClose) {
-        programModalClose.addEventListener('click', closeProgramSearchModal);
-    }
+    // 프로그램 모달 닫기는 팝업 방식으로 변경되어 제거됨
 
     updateProgramDirectInputState();
 });
 
-// 회원 검색 모달 열기
+// 회원 검색 팝업 열기
 function openMemberSearchModal() {
-    const modal = document.getElementById('member-search-modal');
-    if (modal) {
-        modal.style.display = 'flex';
-        selectedMemberIds = [];
-        currentMemberPage = 1;
-        updateMemberConfirmButton();
-        
-        // 검색 필드 초기화
-        const searchTypeElement = document.getElementById('popup_search_type');
-        const searchKeywordElement = document.getElementById('popup_search_keyword');
-        if (searchTypeElement) searchTypeElement.value = 'all';
-        if (searchKeywordElement) searchKeywordElement.value = '';
-        
-        // 기본 검색 실행 (검색어 없이 전체 목록)
-        searchMembers(1);
-    }
+    // 팝업 URL
+    const url = '/backoffice/popup-windows/member-search';
+    const width = window.innerWidth <= 768 ? '100%' : '1000';
+    const height = window.innerHeight <= 768 ? '100%' : '700';
+    window.open(url, 'memberSearch', `width=${width},height=${height},left=100,top=100,scrollbars=yes,resizable=yes`);
 }
 
-// 회원 검색 모달 닫기
-function closeMemberSearchModal() {
-    const modal = document.getElementById('member-search-modal');
-    if (modal) {
-        modal.style.display = 'none';
-        selectedMemberIds = [];
-        
-        // 검색 필드 초기화
-        const searchTypeElement = document.getElementById('popup_search_type');
-        const searchKeywordElement = document.getElementById('popup_search_keyword');
-        if (searchTypeElement) searchTypeElement.value = 'all';
-        if (searchKeywordElement) searchKeywordElement.value = '';
-        
-        // 검색 결과 초기화
-        const memberListBody = document.getElementById('popup-member-list-body');
-        const paginationContainer = document.getElementById('popup-pagination');
-        if (memberListBody) {
-            memberListBody.innerHTML = `<tr><td colspan="7" class="text-center">검색어를 입력하거나 필터를 선택해주세요.</td></tr>`;
-        }
-        if (paginationContainer) {
-            paginationContainer.innerHTML = '';
-        }
-        
-        updateMemberConfirmButton();
+// 부모창에서 호출되는 함수 (팝업에서 선택한 회원 데이터를 받음)
+window.applySelectedMember = function(selectedMember) {
+    if (!selectedMember) {
+        return;
     }
-}
+
+    const nameInput = document.getElementById('applicant_name');
+    if (nameInput) {
+        nameInput.value = selectedMember.name || '';
+    }
+
+    const memberIdInput = document.getElementById('member_id');
+    if (memberIdInput) {
+        memberIdInput.value = selectedMember.id || '';
+    }
+
+    const schoolNameInput = document.getElementById('school_name');
+    if (schoolNameInput) {
+        schoolNameInput.value = selectedMember.school_name || '';
+    }
+
+    const schoolLevelInput = document.getElementById('school_level');
+    if (schoolLevelInput) {
+        schoolLevelInput.value = selectedMember.school_level_label || selectedMember.school_level || '';
+    }
+
+    const schoolIdInput = document.getElementById('school_id');
+    if (schoolIdInput) {
+        schoolIdInput.value = selectedMember.school_id || '';
+    }
+
+    const gradeHidden = document.getElementById('applicant_grade');
+    const gradeDisplay = document.getElementById('applicant_grade_display');
+    if (gradeHidden) {
+        gradeHidden.value = selectedMember.grade || '';
+    }
+    if (gradeDisplay) {
+        gradeDisplay.value = selectedMember.grade ? `${selectedMember.grade}학년` : '';
+    }
+
+    const classHidden = document.getElementById('applicant_class');
+    const classDisplay = document.getElementById('applicant_class_display');
+    if (classHidden) {
+        classHidden.value = selectedMember.class_number || '';
+    }
+    if (classDisplay) {
+        classDisplay.value = selectedMember.class_number ? `${selectedMember.class_number}반` : '';
+    }
+
+    const contactInput = document.getElementById('applicant_contact');
+    if (contactInput) {
+        contactInput.value = selectedMember.contact || '';
+    }
+
+    const guardianInput = document.getElementById('guardian_contact');
+    if (guardianInput) {
+        guardianInput.value = selectedMember.parent_contact || '';
+    }
+};
 
 // 회원 검색
 function searchMembers(page) {
@@ -369,113 +381,75 @@ function updateMemberConfirmButton() {
     }
 }
 
-// 선택한 회원 적용
-function applySelectedMember() {
-    if (selectedMemberIds.length === 0) return;
+// applySelectedMember은 팝업에서 window.opener를 통해 호출되므로 이 함수는 제거
 
-    // 체크된 체크박스에서 회원 정보 가져오기
-    const checkedCheckbox = document.querySelector(`.popup-member-checkbox[value="${selectedMemberIds[0]}"]`);
-    if (!checkedCheckbox) return;
-
-    const memberData = checkedCheckbox.dataset.member;
-    if (!memberData) return;
-
-    const selectedMember = JSON.parse(decodeURIComponent(memberData));
-
-    const nameInput = document.getElementById('applicant_name');
-    if (nameInput) {
-        nameInput.value = selectedMember.name || '';
-    }
-
-    const memberIdInput = document.getElementById('member_id');
-    if (memberIdInput) {
-        memberIdInput.value = selectedMember.id || '';
-    }
-
-    const schoolNameInput = document.getElementById('school_name');
-    if (schoolNameInput) {
-        schoolNameInput.value = selectedMember.school_name || '';
-    }
-
-    const schoolLevelInput = document.getElementById('school_level');
-    if (schoolLevelInput) {
-        schoolLevelInput.value = selectedMember.school_level_label || selectedMember.school_level || '';
-    }
-
-    const schoolIdInput = document.getElementById('school_id');
-    if (schoolIdInput) {
-        schoolIdInput.value = selectedMember.school_id || '';
-    }
-
-    const gradeHidden = document.getElementById('applicant_grade');
-    const gradeDisplay = document.getElementById('applicant_grade_display');
-    if (gradeHidden) {
-        gradeHidden.value = selectedMember.grade || '';
-    }
-    if (gradeDisplay) {
-        gradeDisplay.value = selectedMember.grade ? `${selectedMember.grade}학년` : '';
-    }
-
-    const classHidden = document.getElementById('applicant_class');
-    const classDisplay = document.getElementById('applicant_class_display');
-    if (classHidden) {
-        classHidden.value = selectedMember.class_number || '';
-    }
-    if (classDisplay) {
-        classDisplay.value = selectedMember.class_number ? `${selectedMember.class_number}반` : '';
-    }
-
-    const contactInput = document.getElementById('applicant_contact');
-    if (contactInput) {
-        contactInput.value = selectedMember.contact || '';
-    }
-
-    const guardianInput = document.getElementById('guardian_contact');
-    if (guardianInput) {
-        guardianInput.value = selectedMember.parent_contact || '';
-    }
-
-    closeMemberSearchModal();
-}
-
-// 프로그램 검색 모달 열기
+// 프로그램 검색 팝업 열기
 function openProgramSearchModal() {
+    // 모달에서 mode와 searchAction 가져오기
     const modal = document.getElementById('program-search-modal');
-    if (modal) {
-        const modalContent = modal.querySelector('.category-modal-content');
-        if (modalContent) {
-            modalContent.scrollTop = 0;
-        }
-
-        const closeButton = modal.querySelector('.category-modal-close');
-        if (closeButton && !closeButton.querySelector('i')) {
-            const icon = document.createElement('i');
-            icon.className = 'fas fa-times';
-            closeButton.appendChild(icon);
-        }
-
-        const directInput = document.getElementById('popup_direct_program_name');
-        if (directInput) {
-            directInput.value = '';
-        }
-
-        modal.style.display = 'flex';
-        selectedProgram = null;
-        currentProgramPage = 1;
-        updateProgramConfirmButton();
-        updateProgramDirectInputState();
-        searchPrograms(1);
-    }
+    const mode = modal?.dataset.programSearchMode || 'reservation';
+    const searchAction = modal?.dataset.programSearchUrl || '/backoffice/individual-applications/search-programs';
+    
+    // 팝업 URL
+    const url = `/backoffice/popup-windows/program-search?mode=${mode}&search_action=${encodeURIComponent(searchAction)}`;
+    const width = window.innerWidth <= 768 ? '100%' : '1000';
+    const height = window.innerHeight <= 768 ? '100%' : '700';
+    window.open(url, 'programSearch', `width=${width},height=${height},left=100,top=100,scrollbars=yes,resizable=yes`);
 }
 
-// 프로그램 검색 모달 닫기
-function closeProgramSearchModal() {
-    const modal = document.getElementById('program-search-modal');
-    if (modal) {
-        modal.style.display = 'none';
-        selectedProgram = null;
+// 부모창에서 호출되는 함수 (팝업에서 선택한 프로그램 데이터를 받음)
+window.applySelectedProgram = function(selectedProgram) {
+    if (!selectedProgram) {
+        return;
     }
-}
+
+    const programIdInput = document.getElementById('program_reservation_id');
+    if (programIdInput) {
+        programIdInput.value = selectedProgram.id || '';
+    }
+
+    const programNameInput = document.getElementById('program_name');
+    if (programNameInput) {
+        programNameInput.value = selectedProgram.program_name || selectedProgram.name || '';
+    }
+
+    // 참가일과 참가비는 reservation 관계를 통해 가져오므로 hidden 필드가 있을 때만 설정
+    const participationDateInput = document.getElementById('participation_date');
+    const participationDateDisplay = document.getElementById('participation_date_display');
+    if (participationDateInput) {
+        participationDateInput.value = selectedProgram.education_start_date || '';
+    }
+    if (participationDateDisplay) {
+        participationDateDisplay.value = selectedProgram.education_start_date
+            ? selectedProgram.education_start_date.replace(/-/g, '.')
+            : '';
+    }
+
+    const participationFeeInput = document.getElementById('participation_fee');
+    if (participationFeeInput) {
+        participationFeeInput.value = typeof selectedProgram.education_fee !== 'undefined' && selectedProgram.education_fee !== null
+            ? selectedProgram.education_fee
+            : '';
+    }
+
+    const participationFeeDisplay = document.getElementById('participation_fee_display');
+    if (participationFeeDisplay) {
+        participationFeeDisplay.value = typeof selectedProgram.education_fee !== 'undefined' && selectedProgram.education_fee !== null
+            ? Number(selectedProgram.education_fee).toLocaleString()
+            : '';
+    }
+
+    const educationRadio = document.querySelector(`input[name="education_type"][value="${selectedProgram.education_type}"]`);
+    if (educationRadio) {
+        educationRadio.checked = true;
+    }
+
+    if (Array.isArray(selectedProgram.payment_methods)) {
+        document.querySelectorAll('input[name="payment_methods[]"]').forEach((checkbox) => {
+            checkbox.checked = selectedProgram.payment_methods.includes(checkbox.value);
+        });
+    }
+};
 
 // 프로그램 검색
 function searchPrograms(page) {
@@ -688,59 +662,7 @@ function applyProgramDirectInput() {
     closeProgramSearchModal();
 }
 
-// 선택한 프로그램 적용
-function applySelectedProgram() {
-    if (!selectedProgram) return;
-
-    const programIdInput = document.getElementById('program_reservation_id');
-    if (programIdInput) {
-        programIdInput.value = selectedProgram.id || '';
-    }
-
-    const programNameInput = document.getElementById('program_name');
-    if (programNameInput) {
-        programNameInput.value = selectedProgram.program_name || '';
-    }
-
-    // 참가일과 참가비는 reservation 관계를 통해 가져오므로 hidden 필드가 있을 때만 설정
-    const participationDateInput = document.getElementById('participation_date');
-    const participationDateDisplay = document.getElementById('participation_date_display');
-    if (participationDateInput) {
-        participationDateInput.value = selectedProgram.education_start_date || '';
-    }
-    if (participationDateDisplay) {
-        participationDateDisplay.value = selectedProgram.education_start_date
-            ? selectedProgram.education_start_date.replace(/-/g, '.')
-            : '';
-    }
-
-    const participationFeeInput = document.getElementById('participation_fee');
-    if (participationFeeInput) {
-        participationFeeInput.value = typeof selectedProgram.education_fee !== 'undefined' && selectedProgram.education_fee !== null
-            ? selectedProgram.education_fee
-            : '';
-    }
-
-    const participationFeeDisplay = document.getElementById('participation_fee_display');
-    if (participationFeeDisplay) {
-        participationFeeDisplay.value = typeof selectedProgram.education_fee !== 'undefined' && selectedProgram.education_fee !== null
-            ? Number(selectedProgram.education_fee).toLocaleString()
-            : '';
-    }
-
-    const educationRadio = document.querySelector(`input[name="education_type"][value="${selectedProgram.education_type}"]`);
-    if (educationRadio) {
-        educationRadio.checked = true;
-    }
-
-    if (Array.isArray(selectedProgram.payment_methods)) {
-        document.querySelectorAll('input[name="payment_methods[]"]').forEach((checkbox) => {
-            checkbox.checked = selectedProgram.payment_methods.includes(checkbox.value);
-        });
-    }
-
-    closeProgramSearchModal();
-}
+// applySelectedProgram은 팝업에서 window.opener를 통해 호출되므로 이 함수는 제거
 
 function focusElementWithoutScroll(element, containerSelector) {
     if (!element) {

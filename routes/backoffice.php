@@ -394,6 +394,13 @@ Route::prefix('backoffice')->middleware(['backoffice'])->group(function () {
         'names' => 'backoffice.schedules'
     ]);
 
+    // 팝업 창 (모달 대체)
+    Route::prefix('popup-windows')->name('backoffice.popup-windows.')->group(function () {
+        Route::get('/school-search', [SchoolController::class, 'popupSchoolSearch'])->name('school-search');
+        Route::get('/member-search', [MemberController::class, 'popupMemberSearch'])->name('member-search');
+        Route::get('/program-search', [IndividualProgramController::class, 'popupProgramSearch'])->name('program-search');
+    });
+
     // 학교 관리
     Route::get('schools/get-districts', [SchoolController::class, 'getDistricts'])
         ->name('backoffice.schools.get-districts');

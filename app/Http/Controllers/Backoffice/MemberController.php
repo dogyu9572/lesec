@@ -26,6 +26,17 @@ class MemberController extends BaseController
     }
 
     /**
+     * 회원 검색 팝업 페이지
+     */
+    public function popupMemberSearch(Request $request)
+    {
+        $formAction = $request->get('form_action');
+        return $this->view('backoffice.popups.member-search', [
+            'formAction' => $formAction,
+        ]);
+    }
+
+    /**
      * Display a listing of the resource.
      */
     public function index(Request $request)

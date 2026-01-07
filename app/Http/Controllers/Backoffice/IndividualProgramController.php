@@ -100,6 +100,27 @@ class IndividualProgramController extends BaseController
     }
 
     /**
+     * 프로그램 검색 팝업 페이지
+     */
+    public function popupProgramSearch(Request $request)
+    {
+        $searchAction = $request->get('search_action', '');
+        $mode = $request->get('mode', 'reservation');
+        $educationTypes = $this->individualProgramService->getEducationTypes();
+        
+        return $this->view('backoffice.popups.program-search', [
+            'searchAction' => $searchAction,
+            'mode' => $mode,
+            'educationTypes' => $educationTypes,
+            'modalTitle' => '프로그램명 검색',
+            'showDirectInputNotice' => $mode === 'name',
+            'confirmButtonLabel' => '확인',
+            'programInputId' => 'program_name',
+            'showFooter' => $mode === 'reservation',
+        ]);
+    }
+
+    /**
      * 프로그램명 검색 (모달용)
      */
     public function searchPrograms(Request $request)

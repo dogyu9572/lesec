@@ -192,6 +192,8 @@ Route::prefix('member')->name('member.')->group(function () {
 	Route::post('/register3_b', [MemberRegisterController::class, 'registerOverFourteen'])->name('register3_b.submit');
 	Route::get('/register4', [MemberRegisterController::class, 'showComplete'])->name('register4');
 	Route::post('/check-duplicate', [MemberRegisterController::class, 'checkDuplicate'])->name('register.check.duplicate');
+	Route::post('/sms-verification/send', [MemberRegisterController::class, 'sendSmsVerification'])->name('sms.verification.send');
+	Route::post('/sms-verification/verify', [MemberRegisterController::class, 'verifySmsCode'])->name('sms.verification.verify');
 	Route::get('/schools/search', [SchoolSearchController::class, 'search'])->name('schools.search');
 
 	// 아이디 / 비밀번호 찾기

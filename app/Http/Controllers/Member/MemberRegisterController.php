@@ -12,14 +12,20 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Services\Member\MemberRegisterService;
+use App\Services\Member\PhoneVerificationService;
+use App\Http\Requests\Member\SendSmsVerificationRequest;
+use App\Http\Requests\Member\VerifySmsCodeRequest;
 
 class MemberRegisterController extends Controller
 {
     private const REGISTRATION_SESSION_KEY = 'member_registration';
     private const COMPLETED_SESSION_KEY = 'member_registration_completed';
+    private const SMS_VERIFICATION_SESSION_KEY = 'sms_verification_completed';
 
-    public function __construct(private readonly MemberRegisterService $registerService)
-    {
+    public function __construct(
+        private readonly MemberRegisterService $registerService,
+        private readonly PhoneVerificationService $phoneVerificationService
+    ) {
     }
 
     /**
@@ -117,12 +123,16 @@ class MemberRegisterController extends Controller
             'age_group' => 'over14',
         ]);
 
+        // 매번 새로운 인증 필요 - 이전 인증 정보 초기화
+        $request->session()->forget(self::SMS_VERIFICATION_SESSION_KEY);
+        $smsVerified = false;
+
         $gNum = '00';
         $sNum = '02';
         $gName = '회원가입';
         $sName = '회원가입';
 
-        return view('member.register2_b', compact('gNum', 'sNum', 'gName', 'sName', 'memberType'));
+        return view('member.register2_b', compact('gNum', 'sNum', 'gName', 'sName', 'memberType', 'smsVerified'));
     }
 
     /**
@@ -177,6 +187,13 @@ class MemberRegisterController extends Controller
                 ->withErrors(['process' => '회원가입 절차를 처음부터 다시 진행해주세요.']);
         }
 
+        // SMS 인증 완료 여부 확인
+        if (!$request->session()->has(self::SMS_VERIFICATION_SESSION_KEY)) {
+            return redirect()
+                ->route('member.register2_b')
+                ->withErrors(['process' => '본인 인증을 완료해주세요.']);
+        }
+
         $gNum = '00';
         $sNum = '02';
         $gName = '회원가입';
@@ -198,6 +215,13 @@ class MemberRegisterController extends Controller
                 ->withErrors(['process' => '회원가입 절차를 처음부터 다시 진행해주세요.']);
         }
 
+        // SMS 인증 완료 여부 재확인 (회원가입 제출 시에만 확인)
+        if (!$request->session()->has(self::SMS_VERIFICATION_SESSION_KEY)) {
+            return redirect()
+                ->route('member.register2_b')
+                ->withErrors(['process' => '본인 인증을 완료해주세요.']);
+        }
+
         $member = $this->createMemberRecord(
             $request->validated(),
             $request,
@@ -209,6 +233,9 @@ class MemberRegisterController extends Controller
         );
 
         $this->finalizeRegistration($request, $member);
+
+        // 회원가입 완료 후 인증 세션 제거
+        $request->session()->forget(self::SMS_VERIFICATION_SESSION_KEY);
 
         return redirect()->route('member.register4');
     }
@@ -467,6 +494,62 @@ class MemberRegisterController extends Controller
         $normalized = $id . '@' . $domain;
 
         return filter_var($normalized, FILTER_VALIDATE_EMAIL) ? $normalized : null;
+    }
+
+    /**
+     * SMS 인증번호 발송
+     */
+    public function sendSmsVerification(SendSmsVerificationRequest $request): \Illuminate\Http\JsonResponse
+    {
+        $phone = $request->input('phone');
+        $sessionId = $request->session()->getId();
+        $purpose = 'register';
+
+        $result = $this->phoneVerificationService->sendVerificationCode($phone, $purpose, $sessionId);
+
+        if ($result['success']) {
+            return response()->json([
+                'success' => true,
+                'message' => $result['message'],
+                'expires_at' => $result['expires_at'] ?? null,
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => $result['message'] ?? '인증번호 발송에 실패했습니다.',
+        ], 422);
+    }
+
+    /**
+     * SMS 인증번호 검증
+     */
+    public function verifySmsCode(VerifySmsCodeRequest $request): \Illuminate\Http\JsonResponse
+    {
+        $phone = $request->input('phone');
+        $code = $request->input('code');
+        $sessionId = $request->session()->getId();
+        $purpose = 'register';
+
+        $result = $this->phoneVerificationService->verifyCode($phone, $code, $purpose, $sessionId);
+
+        if ($result['success']) {
+            // 세션에 인증 완료 정보 저장
+            $request->session()->put(self::SMS_VERIFICATION_SESSION_KEY, [
+                'phone' => $phone,
+                'verified_at' => now(),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => $result['message'],
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => $result['message'] ?? '인증번호가 일치하지 않습니다.',
+        ], 422);
     }
 }
 

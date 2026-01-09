@@ -335,6 +335,8 @@
 	.mem_half {display:flex; gap:20px;}
 	.mem_half > * {position:relative; width:calc(50% - 10px); background:#F7F8F9; border-radius:12px;}
 	.mem_half > *:after {content:""; position:absolute; top:0; left:0; width:100%; height:100%; border-radius:inherit; border:#283891 2px solid; opacity:0; transition:.2s linear;}
+	.mem_half_center {justify-content:center;}
+	.mem_half_center > * {width:auto; max-width:500px; min-width:300px;}
 	.join_type p {position:relative; font-size:22px; color:#222; font-weight:600; line-height:1.55; padding:32px 20px 16px; margin-bottom:32px; text-align:center;}
 	.join_type p:after {content:""; position:absolute; bottom:0; left:50%; width:40px; height:1px; background:#ddd; transform:translateX(-50%);}
 	.join_type i {display:block; width:100%; height:160px; background:no-repeat 50% 50% / contain;}
@@ -354,6 +356,20 @@
 	.phone_certification strong {display:block; font-size:22px; color:#222; font-weight:600; margin-bottom:8px;}
 	.phone_certification p {font-size:17px; color:#333; line-height:1.65;}
 	.phone_certification .btn {display:block; font-size:17px; font-weight:600; line-height:52px; height:52px; width:160px; margin:32px auto 0;}
+	
+	/* SMS 인증 폼 스타일 */
+	.sms-verification-form {margin-top:32px; text-align:left;}
+	.verification-input-group {margin-bottom:24px;}
+	.verification-label {display:block; font-size:16px; font-weight:600; color:#222; margin-bottom:8px;}
+	.verification-input-group .flex.inbtn {display:flex !important; gap:8px; align-items:center !important; margin:0; padding:0;}
+	.verification-input-group input {flex:1; height:52px !important; padding:0 12px !important; border:1px solid #ddd; border-radius:4px; font-size:16px; box-sizing:border-box !important; margin:0 !important; vertical-align:middle; line-height:normal;}
+	.verification-input-group .btn {white-space:nowrap; flex-shrink:0; height:52px !important; padding:0 20px !important; line-height:1 !important; display:flex !important; align-items:center !important; justify-content:center !important; box-sizing:border-box !important; margin:0 !important; vertical-align:middle;}
+	.verification-info {margin-top:8px;}
+	.verification-success {color:#28a745; font-size:16px; font-weight:600; margin-bottom:16px; display:flex; align-items:center; gap:8px; justify-content:center;}
+	.verification-success i {font-size:20px;}
+	.verification-complete {margin-top:24px; text-align:center;}
+	.btn-link {background:none; border:none; cursor:pointer; text-decoration:underline; padding:0; font-size:13px;}
+	.btn-link:hover {text-decoration:none;}
 
 	.join_wrap .inputs {padding-top:20px; border-top:#222 1px solid;}
 	.join_wrap .inputs dl {display:flex; align-items:flex-start; line-height:52px; padding:12px 0;}

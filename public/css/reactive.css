@@ -595,6 +595,7 @@
 
 	.mem_half {gap:10px;}
 	.mem_half > * {width:calc(50% - 5px); border-radius:10px;}
+	.mem_half_center > * {max-width:100%; min-width:auto; width:100%;}
 	.join_type p {font-size:18px; padding:20px 16px 12px; margin-bottom:20px;}
 	.join_type p:after {width:30px;}
 	.join_type i {height:120px;}
@@ -610,6 +611,10 @@
 	.phone_certification strong {font-size:18px; margin-bottom:6px;}
 	.phone_certification p {font-size:13px;}
 	.phone_certification .btn {font-size:13px; line-height:40px; height:40px; width:120px; margin-top:20px;}
+	.verification-input-group {margin-bottom:20px;}
+	.verification-label {font-size:14px; margin-bottom:6px;}
+	.verification-input-group input {height:42px; font-size:14px; padding:0 10px;}
+	.verification-input-group .btn {height:42px; padding:0 16px; font-size:13px; line-height:42px;}
 
 	.join_wrap .inputs {padding-top:10px;}
 	.join_wrap .inputs dl {line-height:22px; padding:8px 0; flex-direction:column; gap:8px;}

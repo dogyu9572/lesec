@@ -98,7 +98,7 @@
             <h3>권한 설정</h3>
             <div class="form-grid">
                 <div class="form-group">
-                    <label for="admin_group_id">관리자 그룹명</label>
+                    <label for="admin_group_id">권한 그룹</label>
                     <select id="admin_group_id" name="admin_group_id" required>
                         <option value="">그룹을 선택하세요</option>
                         @foreach($groups as $group)

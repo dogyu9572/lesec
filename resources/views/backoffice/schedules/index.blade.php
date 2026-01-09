@@ -22,6 +22,14 @@
         </div>
     @endif
 
+    <div class="board-page-header">
+        <div class="board-page-buttons">
+            <button type="button" id="btn-register" class="btn btn-success">
+                <i class="fas fa-plus"></i> 신규등록
+            </button>
+        </div>
+    </div>
+
     <div class="board-card">
         <div class="board-card-body">
             <div class="schedule_wrap">

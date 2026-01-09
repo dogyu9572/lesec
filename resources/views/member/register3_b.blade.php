@@ -50,11 +50,13 @@
 					</dl>
 					<dl>
 						<dt>비밀번호<span>*</span></dt>
-						<dd class="password-wrap">
-							<input type="password" name="password" class="text w100p password-input" value="{{ old('password') }}" placeholder="영문/숫자/특수문자를 포함하여 9~12자리로 입력해주세요.">
-							<button type="button" class="btn-eye toggle-password r16">
-								<img src="/images/icon_eye.svg" alt="보기">
-							</button>
+						<dd>
+							<div class="password-wrap">
+								<input type="password" name="password" class="text w100p password-input" value="{{ old('password') }}" placeholder="영문/숫자/특수문자를 포함하여 9~12자리로 입력해주세요.">
+								<button type="button" class="btn-eye toggle-password r16">
+									<img src="/images/icon_eye.svg" alt="보기">
+								</button>
+							</div>
 							@error('password')
 							<p class="error_alert">{{ $message }}</p>
 							@enderror

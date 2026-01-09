@@ -44,6 +44,7 @@ class MemberRegisterService
                 'profile_image' => null,
                 'email_consent' => $notificationAgreed,
                 'sms_consent' => $notificationAgreed,
+                'kakao_consent' => $notificationAgreed,
                 'memo' => null,
                 'is_active' => true,
                 'joined_at' => now(),

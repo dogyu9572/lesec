@@ -81,10 +81,7 @@
 <body>
     <div class="popup-container">
         <div class="popup-header">
-            <h5>@yield('popup-title', '팝업')</h5>
-            <button type="button" class="popup-close-btn" onclick="window.close()" title="닫기">
-                <i class="fas fa-times"></i>
-            </button>
+            <h5>@yield('popup-title', '팝업')</h5>           
         </div>
         <div class="popup-body">
             @yield('content')

@@ -50,6 +50,7 @@ return new class extends Migration
             // 수신 동의
             $table->boolean('email_consent')->default(false)->comment('이메일 수신 동의');
             $table->boolean('sms_consent')->default(false)->comment('SMS 수신 동의');
+            $table->boolean('kakao_consent')->default(false)->comment('카카오 알림톡 수신 동의');
             
             // 메모
             $table->text('memo')->nullable()->comment('메모');

@@ -39,8 +39,10 @@ document.addEventListener('DOMContentLoaded', function () {
     if (popupResetBtn) {
         popupResetBtn.addEventListener('click', function() {
             // 검색 필드 초기화
+            const memberTypeElement = document.getElementById('popup_member_type');
             const searchTypeElement = document.getElementById('popup_search_type');
             const searchKeywordElement = document.getElementById('popup_search_keyword');
+            if (memberTypeElement) memberTypeElement.value = '';
             if (searchTypeElement) searchTypeElement.value = 'all';
             if (searchKeywordElement) searchKeywordElement.value = '';
             

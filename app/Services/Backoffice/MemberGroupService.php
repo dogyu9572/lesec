@@ -5,6 +5,7 @@ namespace App\Services\Backoffice;
 use App\Models\MemberGroup;
 use App\Models\Member;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Log;
 
 class MemberGroupService
 {
@@ -115,20 +116,53 @@ class MemberGroupService
      */
     public function addMembersToGroup(int $groupId, array $memberIds): int
     {
+        Log::info('=== addMembersToGroup 호출 ===', [
+            'group_id' => $groupId,
+            'member_ids' => $memberIds,
+            'member_ids_count' => count($memberIds),
+        ]);
+
         $group = MemberGroup::findOrFail($groupId);
         $addedCount = 0;
         
         foreach ($memberIds as $memberId) {
             $member = Member::find($memberId);
+            
+            Log::info('회원 조회', [
+                'member_id' => $memberId,
+                'member_found' => $member !== null,
+                'current_group_id' => $member ? $member->member_group_id : null,
+            ]);
+            
             if ($member && !$member->member_group_id) {
                 $member->member_group_id = $groupId;
                 if ($member->save()) {
                     $addedCount++;
+                    Log::info('회원 추가 성공', [
+                        'member_id' => $memberId,
+                        'group_id' => $groupId,
+                    ]);
+                } else {
+                    Log::error('회원 저장 실패', [
+                        'member_id' => $memberId,
+                        'group_id' => $groupId,
+                    ]);
                 }
+            } else {
+                Log::warning('회원 추가 스킵', [
+                    'member_id' => $memberId,
+                    'reason' => $member ? '이미 그룹에 속함 (member_group_id: ' . $member->member_group_id . ')' : '회원을 찾을 수 없음',
+                ]);
             }
         }
         
         $this->updateMemberCount($group);
+        
+        Log::info('=== addMembersToGroup 완료 ===', [
+            'group_id' => $groupId,
+            'added_count' => $addedCount,
+            'requested_count' => count($memberIds),
+        ]);
         
         return $addedCount;
     }
@@ -170,6 +204,12 @@ class MemberGroupService
     public function searchMembers(\Illuminate\Http\Request $request)
     {
         $query = Member::query()->select('id', 'name', 'login_id', 'email', 'school_name', 'contact');
+        
+        // 회원구분 필터
+        $memberType = $request->input('member_type');
+        if (!empty($memberType) && in_array($memberType, ['teacher', 'student'])) {
+            $query->where('member_type', $memberType);
+        }
         
         // 검색어 필터 (search_type + search_keyword)
         $searchKeyword = $request->input('search_keyword', '');

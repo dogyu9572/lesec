@@ -237,6 +237,19 @@
                                             
                                             // 개인 신청 내역 추가
                                             foreach ($individualApplications as $app) {
+                                                // 참가일 범위 계산 (시작일~종료일)
+                                                $startDate = $app->reservation?->education_start_date ?? null;
+                                                $endDate = $app->reservation?->education_end_date ?? null;
+                                                if ($startDate && $endDate) {
+                                                    $participationDate = $startDate->format('Y.m.d') . ' ~ ' . $endDate->format('Y.m.d');
+                                                } elseif ($startDate) {
+                                                    $participationDate = $startDate->format('Y.m.d') . ' ~';
+                                                } elseif ($endDate) {
+                                                    $participationDate = '~ ' . $endDate->format('Y.m.d');
+                                                } else {
+                                                    $participationDate = '-';
+                                                }
+                                                
                                                 $allApplications->push([
                                                     'type' => 'individual',
                                                     'id' => $app->id,
@@ -250,7 +263,7 @@
                                                     'reception_status' => $app->reception_type_label,
                                                     'payment_method' => $app->payment_method ? (\App\Models\GroupApplication::PAYMENT_METHOD_LABELS[$app->payment_method] ?? $app->payment_method) : '-',
                                                     'participation_fee' => $app->participation_fee ?? 0,
-                                                    'participation_date' => $app->participation_date ? $app->participation_date->format('Y.m.d') : '-',
+                                                    'participation_date' => $participationDate,
                                                     'applied_at' => $app->applied_at ? $app->applied_at->format('Y.m.d H:i') : '-',
                                                     'attendance' => '-',
                                                 ]);
@@ -258,6 +271,19 @@
                                             
                                             // 단체 신청 내역 추가
                                             foreach ($groupApplications as $app) {
+                                                // 참가일 범위 계산 (시작일~종료일)
+                                                $startDate = $app->reservation?->education_start_date ?? null;
+                                                $endDate = $app->reservation?->education_end_date ?? null;
+                                                if ($startDate && $endDate) {
+                                                    $participationDate = $startDate->format('Y.m.d') . ' ~ ' . $endDate->format('Y.m.d');
+                                                } elseif ($startDate) {
+                                                    $participationDate = $startDate->format('Y.m.d') . ' ~';
+                                                } elseif ($endDate) {
+                                                    $participationDate = '~ ' . $endDate->format('Y.m.d');
+                                                } else {
+                                                    $participationDate = '-';
+                                                }
+                                                
                                                 $allApplications->push([
                                                     'type' => 'group',
                                                     'id' => $app->id,
@@ -271,7 +297,7 @@
                                                     'reception_status' => $app->reception_status_label,
                                                     'payment_method' => $app->payment_method_label,
                                                     'participation_fee' => $app->participation_fee ?? 0,
-                                                    'participation_date' => $app->participation_date_formatted ?? '-',
+                                                    'participation_date' => $participationDate,
                                                     'applied_at' => $app->applied_at_formatted ?? '-',
                                                     'attendance' => '-',
                                                 ]);

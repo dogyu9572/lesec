@@ -105,7 +105,10 @@
                         <button type="button" id="lottery-btn" class="btn btn-primary" data-skip-button @if(empty($lotteryStatus) || !$lotteryStatus['is_pending']) disabled @endif>
                             <i class="fas fa-random"></i> {{ (isset($lotteryStatus) && $lotteryStatus['is_pending']) ? '추첨' : '추첨 완료' }}
                         </button>
-                    @endif           
+                        @endif
+                        <button type="button" id="member-search-btn" class="btn btn-success" data-skip-button style="margin-left: auto;">
+                            <i class="fas fa-user-plus"></i> 회원 검색
+                        </button>
                     </div>
                 </div>
 
@@ -136,14 +139,20 @@
                                         <th>학년</th>
                                         <th>반</th>
                                         <th>생년월일</th>
+                                        <th class="roster-table-actions">관리</th>
                                     @endif
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($rosterList as $index => $item)
                                     <tr data-row-index="{{ $index }}"
-                                        @if($program['application_type'] === 'individual' && isset($item['draw_result']))
-                                            data-draw-result="{{ $item['draw_result'] }}"
+                                        @if($program['application_type'] === 'individual')
+                                            data-application-id="{{ $item['id'] }}"
+                                            @if(isset($item['draw_result']))
+                                                data-draw-result="{{ $item['draw_result'] }}"
+                                            @endif
+                                        @else
+                                            data-participant-id="{{ $item['id'] }}"
                                         @endif>
                                         <td><input type="checkbox" class="roster-checkbox" value="{{ $item['id'] }}"></td>
                                         <td>{{ $rosterList->count() - $index }}</td>
@@ -161,9 +170,14 @@
                                             @endif
                                             <td>{{ $item['applied_at_formatted'] ?? '-' }}</td>
                                             <td class="roster-table-actions">
-                                                <a href="{{ route('backoffice.individual-applications.edit', $item['id']) }}" class="btn btn-primary btn-sm">
-                                                    보기
-                                                </a>
+                                                <div style="display: flex; gap: 4px; align-items: center;">
+                                                    <a href="{{ route('backoffice.individual-applications.edit', $item['id']) }}" class="btn btn-primary btn-sm">
+                                                        보기
+                                                    </a>
+                                                    <button type="button" class="btn btn-danger btn-sm remove-roster-member-btn" data-application-id="{{ $item['id'] }}" data-member-id="{{ $item['raw']->member_id ?? '' }}" data-skip-button>
+                                                       </i> 삭제
+                                                    </button>
+                                                </div>
                                             </td>
                                         @else
                                             <td>{{ $item['name'] ?? '-' }}</td>
@@ -171,6 +185,11 @@
                                             <td>{{ $item['grade'] ?? '-' }}</td>
                                             <td>{{ $item['class'] ?? '-' }}</td>
                                             <td>{{ $item['birthday_formatted'] ?? '-' }}</td>
+                                            <td class="roster-table-actions">
+                                                <button type="button" class="btn btn-danger btn-sm remove-roster-member-btn" data-participant-id="{{ $item['id'] }}" data-skip-button>
+                                                    <i class="fas fa-trash"></i> 삭제
+                                                </button>
+                                            </td>
                                         @endif
                                     </tr>
                                 @endforeach
@@ -299,21 +318,19 @@
 @endsection
 
 @section('scripts')
-<script src="{{ asset('js/backoffice/roster-detail.js') }}"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const reservationId = {{ $program['id'] }};
-        const lotteryUrl = '{{ route('backoffice.rosters.lottery', ['reservation' => $program['id']]) }}';
-        const smsEmailUrl = '{{ route('backoffice.rosters.send-sms-email', ['reservation' => $program['id']]) }}';
-        const downloadUrl = '{{ route('backoffice.rosters.download', ['reservation' => $program['id']]) }}';
-
-        window.rosterDetailConfig = {
-            reservationId,
-            lotteryUrl,
-            smsEmailUrl,
-            downloadUrl,
-        };
-    });
+    // JS 파일 로드 전에 config 설정 (순서 중요!)
+    window.rosterDetailConfig = {
+        reservationId: {{ $program['id'] }},
+        lotteryUrl: '{{ route('backoffice.rosters.lottery', ['reservation' => $program['id']]) }}',
+        smsEmailUrl: '{{ route('backoffice.rosters.send-sms-email', ['reservation' => $program['id']]) }}',
+        downloadUrl: '{{ route('backoffice.rosters.download', ['reservation' => $program['id']]) }}',
+        storeMembersUrl: '{{ route('backoffice.rosters.store-members', ['reservation' => $program['id']]) }}',
+        removeMembersUrl: '{{ route('backoffice.rosters.remove-members', ['reservation' => $program['id']]) }}',
+        applicationType: '{{ $program['application_type'] }}',
+        receptionType: '{{ $program['reception_type'] ?? '' }}',
+    };
 </script>
+<script src="{{ asset('js/backoffice/roster-detail.js') }}?v={{ time() }}"></script>
 @endsection
 

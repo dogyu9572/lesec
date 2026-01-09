@@ -1,6 +1,6 @@
 @extends('backoffice.layouts.app')
 
-@section('title', '회원 정보')
+@section('title', '전체 회원 목록')
 
 @section('styles')
 <link rel="stylesheet" href="{{ asset('css/common/buttons.css') }}">

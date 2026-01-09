@@ -76,17 +76,11 @@
                         </div>
                     </div>
                     <div class="filter-row">
+                        <input type="hidden" name="search_type" value="program_name">
                         <div class="filter-group">
-                            <label for="search_type" class="filter-label">검색 구분</label>
-                            <select id="search_type" name="search_type" class="filter-select">
-                                <option value="">전체</option>
-                                <option value="program_name" @selected(request('search_type') == 'program_name')>프로그램명</option>                               
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label for="search_keyword" class="filter-label">검색어</label>
+                            <label for="search_keyword" class="filter-label">프로그램명</label>
                             <input type="text" id="search_keyword" name="search_keyword" class="filter-input"
-                                placeholder="검색어를 입력하세요" value="{{ request('search_keyword') }}">
+                                placeholder="프로그램명을 입력하세요" value="{{ request('search_keyword') }}">
                         </div>
                         <div class="filter-group">
                             <div class="filter-buttons">

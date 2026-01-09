@@ -37,6 +37,7 @@ class Member extends Authenticatable
         'profile_image',
         'email_consent',
         'sms_consent',
+        'kakao_consent',
         'memo',
         'is_active',
         'joined_at',
@@ -64,6 +65,7 @@ class Member extends Authenticatable
         'is_active' => 'boolean',
         'email_consent' => 'boolean',
         'sms_consent' => 'boolean',
+        'kakao_consent' => 'boolean',
         'grade' => 'integer',
         'class_number' => 'integer',
     ];

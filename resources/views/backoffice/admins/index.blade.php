@@ -46,15 +46,7 @@
                                 <option value="super_admin" @selected(request('role') == 'super_admin')>슈퍼관리자</option>
                                 <option value="admin" @selected(request('role') == 'admin')>관리자</option>
                             </select>
-                        </div>
-                        <div class="filter-group">
-                            <label for="is_active" class="filter-label">상태</label>
-                            <select id="is_active" name="is_active" class="filter-select">
-                                <option value="">전체</option>
-                                <option value="1" @selected(request('is_active') == '1')>활성화</option>
-                                <option value="0" @selected(request('is_active') == '0')>비활성화</option>
-                            </select>
-                        </div>
+                        </div>                        
                         <div class="filter-group">
                             <div class="filter-buttons">
                                 <button type="submit" class="btn btn-primary">
@@ -105,7 +97,7 @@
                                 </th>
                                 <th>번호</th>
                                 <th>아이디</th>
-                                <th>성명</th>
+                                <th>이름</th>
                                 <th>권한</th>
                                 <th>관리</th>
                             </tr>

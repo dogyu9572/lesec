@@ -1,6 +1,6 @@
 @extends('backoffice.layouts.app')
 
-@section('title', '단체 프로그램 관리')
+@section('title', '단체 프로그램 목록')
 
 @section('styles')
 <link rel="stylesheet" href="{{ asset('css/common/buttons.css') }}">
@@ -81,6 +81,7 @@
                             <select id="search_type" name="search_type" class="filter-select">
                                 <option value="">전체</option>
                                 <option value="program_name" @selected(request('search_type') == 'program_name')>프로그램명</option>
+                                <option value="author" @selected(request('search_type') == 'author')>작성자</option>
                             </select>
                         </div>
                         <div class="filter-group">

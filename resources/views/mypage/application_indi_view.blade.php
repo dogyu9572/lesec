@@ -47,16 +47,19 @@
 					<tr>
 						<th>참가일</th>
 						<td>
-							@if($application->participation_date)
-								{{ $application->participation_date->format('Y.m.d') }}
-								@php
-									$dayNames = ['일', '월', '화', '수', '목', '금', '토'];
-									$dayName = $dayNames[$application->participation_date->dayOfWeek];
-								@endphp
-								({{ $dayName }})
-							@else
-								-
-							@endif
+							@php
+								$startDate = $application->reservation?->education_start_date ?? null;
+								$endDate = $application->reservation?->education_end_date ?? null;
+								if ($startDate && $endDate) {
+									echo $startDate->format('Y.m.d') . ' ~ ' . $endDate->format('Y.m.d');
+								} elseif ($startDate) {
+									echo $startDate->format('Y.m.d') . ' ~';
+								} elseif ($endDate) {
+									echo '~ ' . $endDate->format('Y.m.d');
+								} else {
+									echo '-';
+								}
+							@endphp
 						</td>
 					</tr>
 					<tr>

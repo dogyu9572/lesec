@@ -212,7 +212,7 @@
 				<div class="stit num mb0 nbd_b"><span>3</span>수신 동의</div>
 				<div class="term_area">
 					<div class="check_area">
-						<label class="check"><input type="checkbox" name="notification_agree" value="1" @checked(old('notification_agree', $member->email_consent || $member->sms_consent))><i></i><strong>(선택)</strong>이메일 / SMS / 카카오 알림톡</label>
+						<label class="check"><input type="checkbox" name="notification_agree" value="1" @checked(old('notification_agree', $member->email_consent || $member->sms_consent || $member->kakao_consent))><i></i><strong>(선택)</strong>이메일 / SMS / 카카오 알림톡</label>
 						@error('notification_agree')
 						<p class="error_alert">{{ $message }}</p>
 						@enderror

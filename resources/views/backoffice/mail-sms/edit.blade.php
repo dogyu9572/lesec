@@ -62,7 +62,7 @@
 
                         <div class="program-section">
                             <div class="section-title">기본 정보</div>
-                            <div class="form-grid grid-2">
+                            <div class="form-grid" style="display: flex; flex-direction: column; gap: 15px;">
                                 <div>
                                     <label>구분 <span class="text-danger">*</span></label>
                                     <div class="radio-group">
@@ -94,7 +94,7 @@
                                         회원 그룹을 선택하면 해당 그룹의 전체 회원이 자동으로 선택되며, 개별 검색은 사용할 수 없습니다.
                                     </p>
                                 </div>
-                                <div class="form-group grid-span-2">
+                                <div class="form-group">
                                     <label>회원 <span class="text-danger">*</span></label>
                                     <div class="school-search-wrapper">
                                         <input type="text" id="selected_members_display" value="{{ $selectedMembers->pluck('member_name')->join(', ') }}" readonly placeholder="회원을 선택해주세요">
@@ -157,14 +157,14 @@
                                         <p class="text-danger">{{ $message }}</p>
                                     @enderror
                                 </div>
-                                <div class="form-group grid-span-2">
+                                <div class="form-group">
                                     <label for="title">제목 <span class="text-danger">*</span></label>
                                     <input type="text" id="title" name="title" value="{{ old('title', $message->title ?? '') }}" maxlength="255">
                                     @error('title')
                                         <p class="text-danger">{{ $message }}</p>
                                     @enderror
                                 </div>
-                                <div class="form-group grid-span-2">
+                                <div class="form-group">
                                     <label for="content">내용 <span class="text-danger">*</span></label>
                                     <textarea id="content" name="content" rows="10">{{ old('content', $message->content ?? '') }}</textarea>
                                     @error('content')
@@ -175,9 +175,15 @@
                         </div>
 
                         <div class="form-actions">
+                            <form action="{{ route('backoffice.mail-sms.send', $message) }}" method="POST" style="display: inline-block;">
+                                @csrf
+                                <button type="submit" class="btn btn-primary" onclick="return confirm('정말 발송하시겠습니까?');">
+                                    <i class="fas fa-paper-plane"></i> 발송
+                                </button>
+                            </form>
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-save"></i> 저장
-                            </button>
+                            </button>                            
                             <a href="{{ route('backoffice.mail-sms.index') }}" class="btn btn-secondary">
                                 <i class="fas fa-times"></i> 취소
                             </a>

@@ -31,8 +31,20 @@ class MemberController extends BaseController
     public function popupMemberSearch(Request $request)
     {
         $formAction = $request->get('form_action');
+        $groupName = null;
+        
+        // 그룹 ID가 전달된 경우 그룹 이름 조회
+        $groupId = $request->get('group_id');
+        if ($groupId) {
+            $memberGroup = \App\Models\MemberGroup::find($groupId);
+            if ($memberGroup) {
+                $groupName = $memberGroup->name;
+            }
+        }
+        
         return $this->view('backoffice.popups.member-search', [
             'formAction' => $formAction,
+            'groupName' => $groupName,
         ]);
     }
 

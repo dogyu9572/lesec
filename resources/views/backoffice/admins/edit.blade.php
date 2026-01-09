@@ -68,6 +68,16 @@
                     <label for="email">이메일</label>
                     <input type="email" id="email" name="email" value="{{ old('email', $admin->email) }}" required placeholder="이메일을 입력하세요">
                 </div>
+                
+                <div class="form-group">
+                    <label>등록일</label>
+                    <input type="text" value="{{ $admin->created_at ? $admin->created_at->format('Y.m.d H:i') : '-' }}" readonly style="background-color: #f5f5f5; cursor: not-allowed;">
+                </div>
+                
+                <div class="form-group">
+                    <label>최종 접속일</label>
+                    <input type="text" value="{{ $admin->last_login_at ? $admin->last_login_at->format('Y.m.d H:i') : '-' }}" readonly style="background-color: #f5f5f5; cursor: not-allowed;">
+                </div>
             </div>
         </div>
 
@@ -96,7 +106,7 @@
             @else
                 <div class="form-grid">
                     <div class="form-group">
-                        <label for="admin_group_id">관리자 그룹명</label>
+                        <label for="admin_group_id">권한 그룹</label>
                         <select id="admin_group_id" name="admin_group_id" required>
                             <option value="">그룹을 선택하세요</option>
                             @foreach($groups as $group)

@@ -26,94 +26,99 @@
                 <div class="program-section">
                     <div class="section-title">개인 프로그램</div>
 
-                    <!-- 교육유형 -->
-                <div class="board-form-group">
-                    <label class="board-form-label">교육유형 <span class="required">*</span></label>
-                    <div class="board-radio-group">
-                        @foreach($educationTypes as $key => $name)
-                            <div class="board-radio-item">
-                                <input type="radio" id="education_type_{{ $key }}" name="education_type" value="{{ $key }}" 
-                                       class="board-radio-input" @checked(old('education_type', $program->education_type) == $key) required>
-                                <label for="education_type_{{ $key }}">{{ $name }}</label>
-                            </div>
-                        @endforeach
-                    </div>
-                    @error('education_type')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
-
-                <!-- 신청유형 -->
-                <div class="board-form-group">
-                    <label for="reception_type" class="board-form-label">신청유형 <span class="required">*</span></label>
-                    <select class="board-form-control @error('reception_type') is-invalid @enderror" 
-                            id="reception_type" name="reception_type" required>
-                        <option value="">선택하세요</option>
-                        @foreach($receptionTypes as $key => $name)
-                            <option value="{{ $key }}" @selected(old('reception_type', $program->reception_type) == $key)>{{ $name }}</option>
-                        @endforeach
-                    </select>
-                    @error('reception_type')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
-
-                <!-- 프로그램명 -->
-                <div class="board-form-group">
-                    <label for="program_name" class="board-form-label">프로그램명 <span class="required">*</span></label>
+                    <!-- 교육유형, 신청유형, 프로그램명 -->
                     <div class="board-form-row">
-                        <div class="board-form-col board-form-col-6">
-                            <input type="text" class="board-form-control @error('program_name') is-invalid @enderror" 
-                                   id="program_name" name="program_name" value="{{ old('program_name', $program->program_name) }}" required>
-                            @error('program_name')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                        <div class="board-form-col board-form-col-4">
+                            <div class="board-form-group">
+                                <label class="board-form-label">교육유형 <span class="required">*</span></label>
+                                <div class="board-radio-group">
+                                    @foreach($educationTypes as $key => $name)
+                                        <div class="board-radio-item">
+                                            <input type="radio" id="education_type_{{ $key }}" name="education_type" value="{{ $key }}" 
+                                                   class="board-radio-input" @checked(old('education_type', $program->education_type) == $key) required>
+                                            <label for="education_type_{{ $key }}">{{ $name }}</label>
+                                        </div>
+                                    @endforeach
+                                </div>
+                                @error('education_type')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
                         </div>
-                        <div class="board-form-col board-form-col-6">
-                            <button type="button" class="btn btn-secondary" id="searchProgramBtn">
-                                <i class="fas fa-search"></i> 검색
-                            </button>
+                        <div class="board-form-col board-form-col-4">
+                            <div class="board-form-group">
+                                <label for="reception_type" class="board-form-label">신청유형 <span class="required">*</span></label>
+                                <select class="board-form-control @error('reception_type') is-invalid @enderror" 
+                                        id="reception_type" name="reception_type" required>
+                                    <option value="">선택하세요</option>
+                                    @foreach($receptionTypes as $key => $name)
+                                        <option value="{{ $key }}" @selected(old('reception_type', $program->reception_type) == $key)>{{ $name }}</option>
+                                    @endforeach
+                                </select>
+                                @error('reception_type')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="board-form-col board-form-col-4">
+                            <div class="board-form-group">
+                                <label for="program_name" class="board-form-label">프로그램명 <span class="required">*</span></label>
+                                <div class="board-form-row">
+                                    <div class="board-form-col" style="flex: 1;">
+                                        <input type="text" class="board-form-control @error('program_name') is-invalid @enderror" 
+                                               id="program_name" name="program_name" value="{{ old('program_name', $program->program_name) }}" required>
+                                        @error('program_name')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="board-form-col" style="flex: 0 0 auto; margin-left: 8px;">
+                                        <button type="button" class="btn btn-secondary" id="searchProgramBtn" style="white-space: nowrap;">
+                                            <i class="fas fa-search"></i> 검색
+                                        </button>
+                                    </div>
+                                </div>
+                                <small class="board-form-text">프로그램명 검색 버튼을 클릭하면 기존 프로그램명을 검색할 수 있습니다.</small>
+                            </div>
                         </div>
                     </div>
-                    <small class="board-form-text">프로그램명 검색 버튼을 클릭하면 기존 프로그램명을 검색할 수 있습니다.</small>
-                </div>
 
-                <!-- 교육일정 -->
-                <div class="board-form-group">
-                    <div class="board-checkbox-item">
-                        <input type="checkbox"
-                               id="is_single_day"
-                               name="is_single_day"
-                               value="1"
-                               class="board-checkbox-input"
-                               @checked(old('is_single_day', ($program->education_start_date && $program->education_end_date && $program->education_start_date->equalTo($program->education_end_date)) || ($program->education_start_date && !$program->education_end_date)))>
-                        <label for="is_single_day">하루만 진행</label>
-                    </div>
-                    <small class="board-form-text">체크 시 종료일은 시작일과 동일하게 설정됩니다.</small>
-                </div>
-
-                <div class="board-form-row">
-                    <div class="board-form-col board-form-col-6">
-                        <div class="board-form-group">
-                            <label for="education_start_date" class="board-form-label">참가일정 시작일 <span class="required">*</span></label>
-                            <input type="date" class="board-form-control @error('education_start_date') is-invalid @enderror" 
-                                   id="education_start_date" name="education_start_date" value="{{ old('education_start_date', $program->education_start_date ? $program->education_start_date->format('Y-m-d') : '') }}" required>
-                            @error('education_start_date')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                    <!-- 하루만 진행, 참가일정 시작일, 참가일정 종료일 -->
+                    <div class="board-form-row">
+                        <div class="board-form-col board-form-col-4">
+                            <div class="board-form-group">
+                                <div class="board-checkbox-item">
+                                    <input type="checkbox"
+                                           id="is_single_day"
+                                           name="is_single_day"
+                                           value="1"
+                                           class="board-checkbox-input"
+                                           @checked(old('is_single_day', ($program->education_start_date && $program->education_end_date && $program->education_start_date->equalTo($program->education_end_date)) || ($program->education_start_date && !$program->education_end_date)))>
+                                    <label for="is_single_day">하루만 진행</label>
+                                </div>
+                                <small class="board-form-text">체크 시 종료일은 시작일과 동일하게 설정됩니다.</small>
+                            </div>
+                        </div>
+                        <div class="board-form-col board-form-col-4">
+                            <div class="board-form-group">
+                                <label for="education_start_date" class="board-form-label">참가일정 시작일 <span class="required">*</span></label>
+                                <input type="date" class="board-form-control @error('education_start_date') is-invalid @enderror" 
+                                       id="education_start_date" name="education_start_date" value="{{ old('education_start_date', $program->education_start_date ? $program->education_start_date->format('Y-m-d') : '') }}" required>
+                                @error('education_start_date')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="board-form-col board-form-col-4">
+                            <div class="board-form-group">
+                                <label for="education_end_date" class="board-form-label">참가일정 종료일 <span class="required">*</span></label>
+                                <input type="date" class="board-form-control @error('education_end_date') is-invalid @enderror" 
+                                       id="education_end_date" name="education_end_date" value="{{ old('education_end_date', $program->education_end_date ? $program->education_end_date->format('Y-m-d') : '') }}" required>
+                                @error('education_end_date')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
                         </div>
                     </div>
-                    <div class="board-form-col board-form-col-6">
-                        <div class="board-form-group">
-                            <label for="education_end_date" class="board-form-label">참가일정 종료일 <span class="required">*</span></label>
-                            <input type="date" class="board-form-control @error('education_end_date') is-invalid @enderror" 
-                                   id="education_end_date" name="education_end_date" value="{{ old('education_end_date', $program->education_end_date ? $program->education_end_date->format('Y-m-d') : '') }}" required>
-                            @error('education_end_date')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-                </div>
 
                 <!-- 결제수단 -->
                 <div class="board-form-group">
@@ -161,77 +166,82 @@
                 <div class="program-section">
                     <div class="section-title">접수정보</div>
 
-                <!-- 신청기간 -->
-                <div class="board-form-row">
-                    <div class="board-form-col board-form-col-6">
-                        <div class="board-form-group">
-                            <label for="application_start_date" class="board-form-label">신청 시작일 <span class="required">*</span></label>
-                            <input type="date" class="board-form-control @error('application_start_date') is-invalid @enderror" 
-                                   id="application_start_date" name="application_start_date" value="{{ old('application_start_date', $program->application_start_date ? $program->application_start_date->format('Y-m-d') : '') }}" required>
-                            @error('application_start_date')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-                    <div class="board-form-col board-form-col-6">
-                        <div class="board-form-group">
-                            <label for="application_end_date" class="board-form-label">신청 종료일 <span class="required">*</span></label>
-                            <input type="date" class="board-form-control @error('application_end_date') is-invalid @enderror" 
-                                   id="application_end_date" name="application_end_date" value="{{ old('application_end_date', $program->application_end_date ? $program->application_end_date->format('Y-m-d') : '') }}" required>
-                            @error('application_end_date')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 신청정원 -->
-                <div class="board-form-group">
-                    <label for="capacity" class="board-form-label">신청 정원</label>
+                    <!-- 신청기간, 신청 정원, 교육비 -->
                     <div class="board-form-row">
-                        <div class="board-form-col board-form-col-6">
-                            <input type="number" class="board-form-control @error('capacity') is-invalid @enderror" 
-                                   id="capacity" name="capacity" value="{{ old('capacity', $program->capacity) }}" min="1" 
-                                   @if(old('is_unlimited_capacity', $program->is_unlimited_capacity) || old('reception_type', $program->reception_type) == 'lottery') disabled @endif>
-                            @error('capacity')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                        <div class="board-form-col board-form-col-4">
+                            <div class="board-form-group">
+                                <label for="application_start_date" class="board-form-label">신청 기간 <span class="required">*</span></label>
+                                <input type="date" class="board-form-control @error('application_start_date') is-invalid @enderror" 
+                                       id="application_start_date" name="application_start_date" value="{{ old('application_start_date', $program->application_start_date ? $program->application_start_date->format('Y-m-d') : '') }}" required>
+                                @error('application_start_date')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
                         </div>
-                        <div class="board-form-col board-form-col-6">
-                            <div class="board-checkbox-item">
-                                <input type="checkbox" id="is_unlimited_capacity" name="is_unlimited_capacity" value="1" 
-                                       class="board-checkbox-input" @checked(old('is_unlimited_capacity', $program->is_unlimited_capacity)) 
-                                       @if(old('reception_type', $program->reception_type) == 'lottery') disabled @endif>
-                                <label for="is_unlimited_capacity">제한없음</label>
+                        <div class="board-form-col board-form-col-4">
+                            <div class="board-form-group">
+                                <label for="application_end_date" class="board-form-label">신청 종료일 <span class="required">*</span></label>
+                                <input type="date" class="board-form-control @error('application_end_date') is-invalid @enderror" 
+                                       id="application_end_date" name="application_end_date" value="{{ old('application_end_date', $program->application_end_date ? $program->application_end_date->format('Y-m-d') : '') }}" required>
+                                @error('application_end_date')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="board-form-col board-form-col-4">
+                            <div class="board-form-group">
+                                <label for="capacity" class="board-form-label">신청 정원</label>
+                                <div class="board-form-row">
+                                    <div class="board-form-col" style="flex: 1;">
+                                        <input type="number" class="board-form-control @error('capacity') is-invalid @enderror" 
+                                               id="capacity" name="capacity" value="{{ old('capacity', $program->capacity) }}" min="1" 
+                                               @if(old('is_unlimited_capacity', $program->is_unlimited_capacity) || old('reception_type', $program->reception_type) == 'lottery') disabled @endif>
+                                        @error('capacity')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="board-form-col" style="flex: 0 0 auto; margin-left: 8px;">
+                                        <div class="board-checkbox-item">
+                                            <input type="checkbox" id="is_unlimited_capacity" name="is_unlimited_capacity" value="1" 
+                                                   class="board-checkbox-input" @checked(old('is_unlimited_capacity', $program->is_unlimited_capacity)) 
+                                                   @if(old('reception_type', $program->reception_type) == 'lottery') disabled @endif>
+                                            <label for="is_unlimited_capacity">제한없음</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <small class="board-form-text">신청유형이 '추첨'인 경우 제한없음을 사용할 수 없습니다.</small>
                             </div>
                         </div>
                     </div>
-                    <small class="board-form-text">신청유형이 '추첨'인 경우 제한없음을 사용할 수 없습니다.</small>
-                </div>
 
-                <!-- 교육비 -->
-                <div class="board-form-group">
-                    <label for="education_fee" class="board-form-label">참가비</label>
+                    <!-- 교육비 -->
                     <div class="board-form-row">
-                        <div class="board-form-col board-form-col-6">
-                            <input type="number" class="board-form-control @error('education_fee') is-invalid @enderror" 
-                                   id="education_fee" name="education_fee" value="{{ old('education_fee') !== null ? (int) old('education_fee') : ($program->education_fee !== null ? (int) $program->education_fee : '') }}" min="0" step="1"
-                                   @if(old('is_free', $program->is_free)) disabled @endif
-                                   style="display: inline-block; width: calc(100% - 50px);">
-                            <span style="display: inline-block; margin-left: 10px; line-height: 38px;">원</span>
-                            @error('education_fee')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                        <div class="board-form-col board-form-col-4">
+                            <div class="board-form-group">
+                                <label for="education_fee" class="board-form-label">교육비</label>
+                                <div style="display: flex; align-items: center;">
+                                    <input type="number" class="board-form-control @error('education_fee') is-invalid @enderror" 
+                                           id="education_fee" name="education_fee" value="{{ old('education_fee') !== null ? (int) old('education_fee') : ($program->education_fee !== null ? (int) $program->education_fee : '') }}" min="0" step="1"
+                                           @if(old('is_free', $program->is_free)) disabled @endif
+                                           style="flex: 1;">
+                                    <span style="margin-left: 10px; white-space: nowrap;">원</span>
+                                </div>
+                                @error('education_fee')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
                         </div>
-                        <div class="board-form-col board-form-col-6">
-                            <div class="board-checkbox-item">
-                                <input type="checkbox" id="is_free" name="is_free" value="1" 
-                                       class="board-checkbox-input" @checked(old('is_free', $program->is_free))>
-                                <label for="is_free">무료</label>
+                        <div class="board-form-col board-form-col-4">
+                            <div class="board-form-group">
+                                <label class="board-form-label" style="opacity: 0;">&nbsp;</label>
+                                <div class="board-checkbox-item">
+                                    <input type="checkbox" id="is_free" name="is_free" value="1" 
+                                           class="board-checkbox-input" @checked(old('is_free', $program->is_free))>
+                                    <label for="is_free">무료</label>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
                 </div>
 
                 <div class="board-form-actions">

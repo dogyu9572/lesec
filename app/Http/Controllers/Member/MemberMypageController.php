@@ -65,6 +65,7 @@ class MemberMypageController extends Controller
             
             $data['email_consent'] = $notificationAgree;
             $data['sms_consent'] = $notificationAgree;
+            $data['kakao_consent'] = $notificationAgree;
             
             unset($data['current_password'], $data['password_confirmation']);
             

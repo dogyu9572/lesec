@@ -257,6 +257,8 @@ Route::prefix('backoffice')->middleware(['backoffice'])->group(function () {
         ->name('backoffice.member-groups.bulk-destroy');
     Route::get('member-groups/search-members', [MemberGroupController::class, 'searchMembers'])
         ->name('backoffice.member-groups.search-members');
+    Route::post('member-groups/validate-members', [MemberGroupController::class, 'validateMembers'])
+        ->name('backoffice.member-groups.validate-members');
     Route::post('member-groups/{member_group}/add-members', [MemberGroupController::class, 'addMembers'])
         ->name('backoffice.member-groups.add-members');
     Route::post('member-groups/{member_group}/remove-member', [MemberGroupController::class, 'removeMember'])
@@ -375,10 +377,13 @@ Route::prefix('backoffice')->middleware(['backoffice'])->group(function () {
     Route::prefix('rosters')->name('backoffice.rosters.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Backoffice\RosterController::class, 'index'])->name('index');
         Route::post('/download-list', [\App\Http\Controllers\Backoffice\RosterController::class, 'downloadList'])->name('download-list');
-        Route::get('/{reservation}/edit', [\App\Http\Controllers\Backoffice\RosterController::class, 'edit'])->name('edit');
+        // 구체적인 라우트를 먼저 정의 (라우트 순서 중요)
+        Route::post('/{reservation}/store-members', [\App\Http\Controllers\Backoffice\RosterController::class, 'storeMembers'])->name('store-members');
+        Route::delete('/{reservation}/remove-members', [\App\Http\Controllers\Backoffice\RosterController::class, 'removeMembers'])->name('remove-members');
         Route::post('/{reservation}/lottery', [\App\Http\Controllers\Backoffice\RosterController::class, 'lottery'])->name('lottery');
         Route::post('/{reservation}/send-sms-email', [\App\Http\Controllers\Backoffice\RosterController::class, 'sendSmsEmail'])->name('send-sms-email');
         Route::post('/{reservation}/download', [\App\Http\Controllers\Backoffice\RosterController::class, 'download'])->name('download');
+        Route::get('/{reservation}/edit', [\App\Http\Controllers\Backoffice\RosterController::class, 'edit'])->name('edit');
     });
 
     // 예약 캘린더

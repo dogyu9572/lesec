@@ -165,9 +165,12 @@
                         </div>
 
                         <div class="form-actions">
+                            <button type="button" class="btn btn-primary" onclick="return prepareAndSend(event);">
+                                <i class="fas fa-paper-plane"></i> 발송
+                            </button>
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-save"></i> 저장
-                            </button>
+                            </button>                           
                             <a href="{{ route('backoffice.mail-sms.index') }}" class="btn btn-secondary">
                                 <i class="fas fa-times"></i> 취소
                             </a>
@@ -241,6 +244,13 @@
             input.value = memberId;
             sendForm.appendChild(input);
         });
+
+        // 하단 발송 버튼 클릭 시 sendForm 직접 제출
+        if (event && event.target && !event.target.closest('#sendForm')) {
+            event.preventDefault();
+            sendForm.submit();
+            return false;
+        }
 
         return true;
     }

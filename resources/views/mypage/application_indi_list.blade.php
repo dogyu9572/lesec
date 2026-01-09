@@ -49,7 +49,21 @@
 								{{ $application->program_name ?? $application->reservation->program_name ?? '-' }}
 							</a>
 						</td>
-						<td class="appli05">{{ optional($application->participation_date)->format('Y.m.d') ?? '-' }}</td>
+						<td class="appli05">
+							@php
+								$startDate = $application->reservation?->education_start_date ?? null;
+								$endDate = $application->reservation?->education_end_date ?? null;
+								if ($startDate && $endDate) {
+									echo $startDate->format('Y.m.d') . ' ~ ' . $endDate->format('Y.m.d');
+								} elseif ($startDate) {
+									echo $startDate->format('Y.m.d') . ' ~';
+								} elseif ($endDate) {
+									echo '~ ' . $endDate->format('Y.m.d');
+								} else {
+									echo '-';
+								}
+							@endphp
+						</td>
 						<td class="appli07">
 							@if($application->payment_status === 'unpaid')
 								<strong class="c_red">미입금</strong>

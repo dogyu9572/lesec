@@ -14,14 +14,52 @@ document.addEventListener('DOMContentLoaded', function() {
     const backdrop = document.getElementById('backdrop');
     const body = document.body;
 
-    // 화면 크기에 따라 사이드바 토글 버튼 표시 여부 설정
-    function toggleSidebarButtonVisibility() {
-        if (window.innerWidth <= 768) {
-            if (sidebarToggle) {
-                sidebarToggle.style.display = 'flex';
+    // 사이드바 실제 표시 상태 확인 함수
+    function isSidebarVisible() {
+        if (!sidebar) return false;
+        
+        // CSS computed style 확인
+        const computedStyle = window.getComputedStyle(sidebar);
+        const transform = computedStyle.transform;
+        const position = computedStyle.position;
+        
+        // position: fixed이고 transform: translateX(-100%)이면 숨겨진 상태
+        if (position === 'fixed') {
+            // transform이 matrix 형식일 수도 있으므로 둘 다 확인
+            if (transform.includes('translateX(-100%)') || 
+                (transform.includes('matrix') && transform.includes('-1, 0'))) {
+                return false;
             }
-            // 모바일에서는 사이드바를 기본적으로 숨김
-            if (sidebar) {
+        }
+        
+        // getBoundingClientRect로 실제 위치 확인
+        const rect = sidebar.getBoundingClientRect();
+        // 사이드바가 화면 왼쪽 밖에 있으면 숨겨진 상태
+        if (rect.left < -100) {
+            return false;
+        }
+        
+        // 그 외에는 보이는 상태
+        return true;
+    }
+
+    // 사이드바 상태에 따라 토글 버튼 표시 여부 설정
+    function toggleSidebarButtonVisibility() {
+        if (!sidebarToggle || !sidebar) return;
+        
+        // 사이드바 실제 표시 상태 확인
+        const sidebarVisible = isSidebarVisible();
+        
+        // 사이드바가 숨겨진 상태일 때만 햄버거 메뉴 표시
+        if (!sidebarVisible) {
+            sidebarToggle.style.display = 'flex';
+        } else {
+            sidebarToggle.style.display = 'none';
+        }
+        
+        // 모바일에서는 사이드바를 기본적으로 숨김
+        if (window.innerWidth <= 768) {
+            if (sidebar && !sidebar.classList.contains('active')) {
                 sidebar.classList.remove('active');
             }
             if (backdrop) {
@@ -31,11 +69,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 body.classList.remove('sidebar-open');
             }
         } else {
-            if (sidebarToggle) {
-                sidebarToggle.style.display = 'none';
-            }
             // 데스크톱에서는 사이드바를 항상 표시
-            if (sidebar) {
+            if (sidebar && !sidebarVisible) {
                 sidebar.classList.remove('active');
                 sidebar.style.cssText = ''; // 인라인 스타일 제거
             }
@@ -61,8 +96,6 @@ document.addEventListener('DOMContentLoaded', function() {
     function handleResize() {
         clearTimeout(resizeTimer);
         resizeTimer = setTimeout(function() {
-            toggleSidebarButtonVisibility();
-            
             // 추가 리사이즈 처리
             if (window.innerWidth > 768) {
                 // 데스크톱 크기로 변경 시 사이드바 닫기 및 스타일 초기화
@@ -95,6 +128,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     body.classList.remove('sidebar-open');
                 }
             }
+            
+            // CSS transition 완료 대기 후 사이드바 실제 상태 확인 및 햄버거 메뉴 표시 결정
+            setTimeout(function() {
+                toggleSidebarButtonVisibility();
+            }, 300);
         }, 100);
     }
     
@@ -162,6 +200,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 transition: transform 0.3s ease-out !important;
             `;
         }
+        
+        // 사이드바 상태 변경 후 햄버거 메뉴 상태 업데이트
+        setTimeout(function() {
+            toggleSidebarButtonVisibility();
+        }, 300);
     }
 
     // 사이드바 닫기 함수
@@ -170,9 +213,13 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
         }
         sidebar.classList.remove('active');
-        backdrop.classList.remove('active');
-        body.classList.remove('sidebar-open');
-        backdrop.style.display = 'none';
+        if (backdrop) {
+            backdrop.classList.remove('active');
+            backdrop.style.display = 'none';
+        }
+        if (body) {
+            body.classList.remove('sidebar-open');
+        }
         // 모바일에서만 사이드바 숨기기
         if (window.innerWidth <= 768) {
             sidebar.style.cssText = `
@@ -187,6 +234,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 transition: transform 0.3s ease-in !important;
             `;
         }
+        
+        // 사이드바가 닫힌 후 햄버거 메뉴 상태 업데이트
+        setTimeout(function() {
+            toggleSidebarButtonVisibility();
+        }, 300);
     }
 
     // 테이블 반응형 처리 (모바일에서 테이블 헤더 라벨 추가)

@@ -442,6 +442,12 @@ class MailSmsService
     {
         $query = Member::query()->select('id', 'name', 'login_id', 'email', 'school_name', 'contact')->orderByDesc('created_at');
 
+        // 회원구분 필터
+        $memberType = $request->input('member_type');
+        if (!empty($memberType) && in_array($memberType, ['teacher', 'student'])) {
+            $query->where('member_type', $memberType);
+        }
+
         if ($request->filled('member_group_id')) {
             $query->where('member_group_id', $request->member_group_id);
         }

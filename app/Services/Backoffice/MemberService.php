@@ -126,6 +126,7 @@ class MemberService
             'class_number' => $data['class_number'] ?? null,
             'email_consent' => $data['email_consent'] ?? false,
             'sms_consent' => $data['sms_consent'] ?? false,
+            'kakao_consent' => $data['kakao_consent'] ?? false,
             'joined_at' => now(),
         ];
         

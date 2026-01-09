@@ -1,6 +1,6 @@
 @extends('backoffice.layouts.popup')
 
-@section('popup-title', '회원 검색')
+@section('popup-title', isset($groupName) && $groupName ? "그룹명 - {$groupName}" : '회원 검색')
 
 @section('content')
 @php
@@ -9,6 +9,16 @@
 <div class="member-search-filter">
     <form id="member-search-form" @if($formAction) action="{{ $formAction }}" method="GET" @endif data-member-search-url="{{ $formAction ?? route('backoffice.member-groups.search-members') }}">
         <div class="modal-form-row">
+            <div class="modal-form-col">
+                <div class="modal-form-group">
+                    <label for="popup_member_type" class="modal-form-label">회원구분</label>
+                    <select id="popup_member_type" name="member_type" class="modal-form-control">
+                        <option value="">전체</option>
+                        <option value="teacher">교사</option>
+                        <option value="student">학생</option>
+                    </select>
+                </div>
+            </div>
             <div class="modal-form-col">
                 <div class="modal-form-group">
                     <label for="popup_search_type" class="modal-form-label">검색</label>

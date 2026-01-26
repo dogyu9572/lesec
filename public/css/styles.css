@@ -36,7 +36,7 @@
 	.footer .info {display:flex; align-items:flex-start; gap:48px;}
 	.footer .info .logo {width:65px; aspect-ratio:65/68; background:url('/images/flogo_new.svg') no-repeat 50% 50% / contain;}
 	.footer .info .txt {width:calc(100% - 312px); display:flex; flex-direction:column; align-items:flex-start;}
-	.footer .info .contact {display:flex; gap:24px; background:#ffffff1a; border-radius:4px; padding:0 24px; margin-bottom:12px;}
+	.footer .info .contact {display:flex; gap:24px; background:#ffffff1a; border-radius:4px; padding:0 24px 0 0; margin-bottom:12px;}
 	.footer .info .contact li {display:flex; gap:16px; font-size:18px; color:#fff; line-height:40px;}
 	.footer .info .address {display:flex; flex-wrap:wrap; gap:8px 16px;}
 	.footer .info .address li {font-size:16px; color:#ffffff80; display:flex; gap:8px;}
@@ -146,7 +146,7 @@
 	.board_list thead th:first-child:before {border-radius:8px 0 0 8px;}
 	.board_list thead th:last-child:before {border-radius:0 8px 8px 0;}
 	.board_list tbody td {color:#222; line-height:30px; padding:21px 12px; border-bottom:#E0E3EE 1px solid;}
-	.board_list tbody .tal a {display:block; max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+	.board_list tbody a {display:block; max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
 	.board_list .btn {display:inline-block; font-size:14px; font-weight:600; line-height:28px; height:30px; padding:0 12px; overflow:hidden; vertical-align:middle;}
 	.board_list .notice .num i {display:block; width:28px; height:28px; margin:0 auto; background:url('/images/icon_notice.svg') no-repeat 50% 50% / contain;}
 	.statebox {display:inline-block; font-size:15px; font-weight:600; line-height:30px; height:30px; width:64px; text-align:center; border-radius:4px;}

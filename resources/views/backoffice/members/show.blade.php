@@ -30,9 +30,7 @@
                     <div class="detail-grid">
                         <div class="detail-item">
                             <label>회원구분</label>
-                            <span class="badge {{ $member->member_type === 'teacher' ? 'badge-primary' : 'badge-info' }}">
-                                {{ $member->member_type === 'teacher' ? '교사' : '학생' }}
-                            </span>
+                            <span>{{ $member->member_type === 'teacher' ? '교사' : '학생' }}</span>
                         </div>
                         <div class="detail-item">
                             <label>회원그룹</label>
@@ -75,12 +73,14 @@
                             <span>{{ $member->emergency_contact_relation ?? '-' }}</span>
                         </div>
                         <div class="detail-item">
-                            <label>소속 시/도</label>
-                            <span>{{ $member->city ?? '-' }}</span>
-                        </div>
-                        <div class="detail-item">
-                            <label>소속 시/군/구</label>
-                            <span>{{ $member->district ?? '-' }}</span>
+                            <label>지역</label>
+                            @php
+                                $cityValue = $member->city ?? '';
+                                $districtValue = $member->district ?? '';
+                                $cityDisplay = is_string($cityValue) && trim($cityValue) !== '' ? $cityValue : '선택';
+                                $districtDisplay = is_string($districtValue) && trim($districtValue) !== '' ? $districtValue : '선택';
+                            @endphp
+                            <span>{{ $cityDisplay }} / {{ $districtDisplay }}</span>
                         </div>
                         <div class="detail-item">
                             <label>소속학교</label>
@@ -96,14 +96,6 @@
                             <span>{{ $member->class_number ?? '-' }}</span>
                         </div>
                         @endif
-                        <div class="detail-item">
-                            <label>주소</label>
-                            <span>{{ $member->address ?? '-' }}</span>
-                        </div>
-                        <div class="detail-item">
-                            <label>우편번호</label>
-                            <span>{{ $member->zipcode ?? '-' }}</span>
-                        </div>
                     </div>
                 </div>
             </div>

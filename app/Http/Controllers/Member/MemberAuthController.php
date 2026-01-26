@@ -9,9 +9,7 @@ use App\Services\Member\MemberAuthService;
 
 class MemberAuthController extends Controller
 {
-    public function __construct(private readonly MemberAuthService $authService)
-    {
-    }
+    public function __construct(private readonly MemberAuthService $authService) {}
     /**
      * 로그인 페이지 표시
      */
@@ -21,6 +19,16 @@ class MemberAuthController extends Controller
         $sNum = '01';
         $gName = '로그인';
         $sName = '로그인';
+
+        // 로그인 성공 후 돌아갈 URL 설정 (오픈 리다이렉트 방지: 상대 경로만 허용)
+        $redirect = request()->query('redirect');
+        if (is_string($redirect) && $redirect !== '') {
+            $redirect = trim($redirect);
+            // "/path?query" 형태만 허용
+            if (str_starts_with($redirect, '/')) {
+                request()->session()->put('url.intended', $redirect);
+            }
+        }
 
         return view('member.login', compact('gNum', 'sNum', 'gName', 'sName'));
     }
@@ -62,4 +70,3 @@ class MemberAuthController extends Controller
             ->with('status', '로그아웃되었습니다.');
     }
 }
-

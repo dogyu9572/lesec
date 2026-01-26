@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Carbon;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
@@ -23,7 +24,7 @@ class MemberMypageController extends Controller
     public function show()
     {
         $member = Auth::guard('member')->user();
-        
+
         if (!$member) {
             return redirect()->route('member.login')
                 ->withErrors(['auth' => '로그인이 필요합니다.']);
@@ -33,9 +34,9 @@ class MemberMypageController extends Controller
         $sNum = "01";
         $gName = "마이페이지";
         $sName = "회원정보";
-        
+
         $emailParts = $this->parseEmail($member->email);
-        
+
         return view('mypage.member', compact('gNum', 'sNum', 'gName', 'sName', 'member', 'emailParts'));
     }
 
@@ -45,41 +46,41 @@ class MemberMypageController extends Controller
     public function update(MemberUpdateRequest $request)
     {
         $member = Auth::guard('member')->user();
-        
+
         // validation 실패 시 자동으로 리다이렉트되므로, 여기까지 오면 validation 통과
         \Log::info('회원 정보 수정 시작', ['member_id' => $member->id]);
-        
+
         try {
             $data = $request->validated();
-            
+
             \Log::info('회원 정보 수정 시작', ['member_id' => $member->id, 'data_keys' => array_keys($data)]);
-            
+
             if (!empty($data['password'])) {
                 $data['password'] = \Illuminate\Support\Facades\Hash::make($data['password']);
             } else {
                 unset($data['password']);
             }
-            
+
             $notificationAgree = $data['notification_agree'] ?? false;
             unset($data['notification_agree']);
-            
+
             $data['email_consent'] = $notificationAgree;
             $data['sms_consent'] = $notificationAgree;
             $data['kakao_consent'] = $notificationAgree;
-            
+
             unset($data['current_password'], $data['password_confirmation']);
-            
+
             \Log::info('fill 전 데이터', ['original_city' => $member->city, 'original_district' => $member->district, 'new_city' => $data['city'] ?? null, 'new_district' => $data['district'] ?? null]);
-            
+
             // fill() 대신 직접 할당하여 확실히 저장
             foreach ($data as $key => $value) {
                 if (in_array($key, $member->getFillable())) {
                     $member->$key = $value;
                 }
             }
-            
+
             \Log::info('할당 후 변경사항', ['isDirty' => $member->isDirty(), 'dirty' => $member->getDirty()]);
-            
+
             // 변경사항이 있으면 저장
             if ($member->isDirty()) {
                 $saved = $member->save();
@@ -87,7 +88,7 @@ class MemberMypageController extends Controller
             } else {
                 \Log::warning('변경된 데이터가 없어 저장하지 않음', ['data' => $data]);
             }
-            
+
             return redirect()->route('mypage.member')
                 ->with('success', '회원 정보가 수정되었습니다.');
         } catch (\Exception $e) {
@@ -99,12 +100,50 @@ class MemberMypageController extends Controller
     }
 
     /**
+     * 회원 탈퇴 처리 (DB 물리 삭제)
+     */
+    public function secession(Request $request)
+    {
+        $member = Auth::guard('member')->user();
+
+        if (!$member) {
+            return redirect()->route('member.login')
+                ->withErrors(['auth' => '로그인이 필요합니다.']);
+        }
+
+        $request->validate([
+            'secession_agree' => ['accepted'],
+        ], [
+            'secession_agree.accepted' => '탈퇴 동의에 체크해주세요.',
+        ]);
+
+        try {
+            DB::transaction(function () use ($member) {
+                // Member 모델은 SoftDeletes가 아니므로 delete()는 물리 삭제입니다.
+                $member->delete();
+            });
+        } catch (\Exception $e) {
+            \Log::error('회원 탈퇴(삭제) 오류', ['error' => $e->getMessage(), 'member_id' => $member->id ?? null]);
+            return redirect()->route('mypage.member')
+                ->withErrors(['error' => '회원 탈퇴 처리 중 오류가 발생했습니다.']);
+        }
+
+        Auth::guard('member')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()
+            ->route('member.login')
+            ->with('status', '회원 탈퇴가 완료되었습니다.');
+    }
+
+    /**
      * 단체 신청내역 목록
      */
     public function groupApplicationList()
     {
         $member = Auth::guard('member')->user();
-        
+
         if (!$member) {
             return redirect()->route('member.login')
                 ->withErrors(['auth' => '로그인이 필요합니다.']);
@@ -129,7 +168,7 @@ class MemberMypageController extends Controller
     public function individualApplicationList()
     {
         $member = Auth::guard('member')->user();
-        
+
         if (!$member) {
             return redirect()->route('member.login')
                 ->withErrors(['auth' => '로그인이 필요합니다.']);
@@ -154,7 +193,7 @@ class MemberMypageController extends Controller
     public function individualApplicationShow($id)
     {
         $member = Auth::guard('member')->user();
-        
+
         if (!$member) {
             return redirect()->route('member.login')
                 ->withErrors(['auth' => '로그인이 필요합니다.']);
@@ -179,7 +218,7 @@ class MemberMypageController extends Controller
     public function groupApplicationShow($id)
     {
         $member = Auth::guard('member')->user();
-        
+
         if (!$member) {
             return redirect()->route('member.login')
                 ->withErrors(['auth' => '로그인이 필요합니다.']);
@@ -204,7 +243,7 @@ class MemberMypageController extends Controller
     public function groupApplicationWrite($id)
     {
         $member = Auth::guard('member')->user();
-        
+
         if (!$member) {
             return redirect()->route('member.login')
                 ->withErrors(['auth' => '로그인이 필요합니다.']);
@@ -229,7 +268,7 @@ class MemberMypageController extends Controller
     public function groupApplicationWriteUpdate(Request $request, $id)
     {
         $member = Auth::guard('member')->user();
-        
+
         if (!$member) {
             return redirect()->route('member.login')
                 ->withErrors(['auth' => '로그인이 필요합니다.']);
@@ -287,7 +326,7 @@ class MemberMypageController extends Controller
                     $participant = GroupApplicationParticipant::where('id', $participantData['id'])
                         ->where('group_application_id', $application->id)
                         ->first();
-                    
+
                     if ($participant) {
                         $participant->update([
                             'name' => $participantData['name'],
@@ -331,7 +370,7 @@ class MemberMypageController extends Controller
     public function groupApplicationWriteSample($id)
     {
         $member = Auth::guard('member')->user();
-        
+
         if (!$member) {
             return redirect()->route('member.login')
                 ->withErrors(['auth' => '로그인이 필요합니다.']);
@@ -398,7 +437,7 @@ class MemberMypageController extends Controller
     public function groupApplicationWriteUpload(Request $request, $id)
     {
         $member = Auth::guard('member')->user();
-        
+
         if (!$member) {
             return response()->json(['success' => false, 'message' => '로그인이 필요합니다.'], 401);
         }
@@ -416,9 +455,9 @@ class MemberMypageController extends Controller
             $file = $request->file('csv_file');
             $extension = strtolower($file->getClientOriginalExtension());
             $filePath = $file->getRealPath();
-            
+
             $participants = [];
-            
+
             if ($extension === 'csv') {
                 // CSV 파일 처리
                 $handle = fopen($filePath, 'r');
@@ -428,13 +467,13 @@ class MemberMypageController extends Controller
 
                 // UTF-8 BOM 제거
                 $bom = fread($handle, 3);
-                if ($bom !== chr(0xEF).chr(0xBB).chr(0xBF)) {
+                if ($bom !== chr(0xEF) . chr(0xBB) . chr(0xBF)) {
                     rewind($handle);
                 }
-                
+
                 // 첫 번째 줄(헤더) 건너뛰기
                 fgetcsv($handle);
-                
+
                 while (($data = fgetcsv($handle)) !== false) {
                     if (count($data) < 3) {
                         continue;
@@ -445,7 +484,7 @@ class MemberMypageController extends Controller
                         $participants[] = $participant;
                     }
                 }
-                
+
                 fclose($handle);
             } elseif (in_array($extension, ['xlsx', 'xls'])) {
                 // 엑셀 파일 처리
@@ -544,7 +583,7 @@ class MemberMypageController extends Controller
     public function cancelIndividualApplication($id)
     {
         $member = Auth::guard('member')->user();
-        
+
         if (!$member) {
             return redirect()->route('member.login')
                 ->withErrors(['auth' => '로그인이 필요합니다.']);
@@ -585,7 +624,7 @@ class MemberMypageController extends Controller
     public function cancelGroupApplication($id)
     {
         $member = Auth::guard('member')->user();
-        
+
         if (!$member) {
             return redirect()->route('member.login')
                 ->withErrors(['auth' => '로그인이 필요합니다.']);
@@ -621,7 +660,10 @@ class MemberMypageController extends Controller
      */
     public function printEstimate(Request $request)
     {
-        $gNum = "print"; $sNum = ""; $gName = "견적서"; $sName = "";
+        $gNum = "print";
+        $sNum = "";
+        $gName = "견적서";
+        $sName = "";
 
         $estimates = [];
 
@@ -724,14 +766,14 @@ class MemberMypageController extends Controller
         }
 
         $parts = explode('@', $email, 2);
-        
+
         if (count($parts) !== 2) {
             return ['id' => $email, 'domain' => '', 'is_custom' => true];
         }
 
         $emailId = $parts[0];
         $emailDomain = $parts[1];
-        
+
         $commonDomains = ['naver.com', 'gmail.com', 'daum.net', 'nate.com'];
         $isCustom = !in_array($emailDomain, $commonDomains, true);
 
@@ -743,4 +785,3 @@ class MemberMypageController extends Controller
         ];
     }
 }
-

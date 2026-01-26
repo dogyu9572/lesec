@@ -45,11 +45,11 @@ Route::prefix('backoffice')->name('backoffice.')->group(function () {
 // =============================================================================
 
 Route::prefix('backoffice')->middleware(['backoffice'])->group(function () {
-    
+
     // 대시보드
     Route::get('/', [App\Http\Controllers\Backoffice\DashboardController::class, 'index'])
         ->name('backoffice.dashboard');
-    
+
     // 대시보드 API
     Route::get('/api/statistics', [App\Http\Controllers\Backoffice\DashboardController::class, 'statistics'])
         ->name('backoffice.api.statistics');
@@ -66,7 +66,7 @@ Route::prefix('backoffice')->middleware(['backoffice'])->group(function () {
     // 메뉴 순서 업데이트
     Route::post('admin-menus/update-order', [AdminMenuController::class, 'updateOrder'])
         ->name('backoffice.admin-menus.update-order');
-    
+
     // 메뉴 부모 업데이트 (드래그로 메뉴 이동)
     Route::post('admin-menus/update-parent', [AdminMenuController::class, 'updateParent'])
         ->name('backoffice.admin-menus.update-parent');
@@ -121,16 +121,16 @@ Route::prefix('backoffice')->middleware(['backoffice'])->group(function () {
         ->name('backoffice.user-access-logs');
     Route::get('admin-access-logs', [LogController::class, 'adminAccessLogs'])
         ->name('backoffice.admin-access-logs');
-    
+
     // 통계 관리
     Route::get('member-statistics', [\App\Http\Controllers\Backoffice\MemberStatisticsController::class, 'index'])
         ->name('backoffice.member-statistics');
-    
+
     Route::get('access-statistics', [AccessStatisticsController::class, 'index'])
         ->name('backoffice.access-statistics');
     Route::get('access-statistics/get-statistics', [AccessStatisticsController::class, 'getStatistics'])
         ->name('backoffice.access-statistics.get-statistics');
-    
+
     // 수익 통계 관리
     Route::post('revenue-statistics/bulk-destroy', [RevenueStatisticsController::class, 'bulkDestroy'])
         ->name('backoffice.revenue-statistics.bulk-destroy');
@@ -139,7 +139,7 @@ Route::prefix('backoffice')->middleware(['backoffice'])->group(function () {
     Route::resource('revenue-statistics', RevenueStatisticsController::class, [
         'names' => 'backoffice.revenue-statistics'
     ]);
-    
+
     // 레거시 라우트 제거 (직접 접근)
 
     // 관리자 계정 관리
@@ -287,6 +287,7 @@ Route::prefix('backoffice')->middleware(['backoffice'])->group(function () {
             ->name('member-groups.members');
         Route::get('/search/members', [MailSmsController::class, 'searchMembers'])->name('search-members');
         Route::get('/{mailSmsMessage}/recipients', [MailSmsController::class, 'getRecipients'])->name('recipients');
+        Route::post('/{mailSmsMessage}/recipients/sync', [MailSmsController::class, 'syncRecipients'])->name('recipients.sync');
         Route::delete('/{mailSmsMessage}/recipients/{recipient}', [MailSmsController::class, 'deleteRecipient'])->name('recipients.delete');
         Route::get('/{mailSmsMessage}/edit', [MailSmsController::class, 'edit'])->name('edit');
         Route::put('/{mailSmsMessage}', [MailSmsController::class, 'update'])->name('update');
@@ -377,6 +378,7 @@ Route::prefix('backoffice')->middleware(['backoffice'])->group(function () {
     Route::prefix('rosters')->name('backoffice.rosters.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Backoffice\RosterController::class, 'index'])->name('index');
         Route::post('/download-list', [\App\Http\Controllers\Backoffice\RosterController::class, 'downloadList'])->name('download-list');
+        Route::post('/send-sms', [\App\Http\Controllers\Backoffice\RosterController::class, 'sendSms'])->name('send-sms');
         // 구체적인 라우트를 먼저 정의 (라우트 순서 중요)
         Route::post('/{reservation}/store-members', [\App\Http\Controllers\Backoffice\RosterController::class, 'storeMembers'])->name('store-members');
         Route::delete('/{reservation}/remove-members', [\App\Http\Controllers\Backoffice\RosterController::class, 'removeMembers'])->name('remove-members');
@@ -404,6 +406,7 @@ Route::prefix('backoffice')->middleware(['backoffice'])->group(function () {
         Route::get('/school-search', [SchoolController::class, 'popupSchoolSearch'])->name('school-search');
         Route::get('/member-search', [MemberController::class, 'popupMemberSearch'])->name('member-search');
         Route::get('/program-search', [IndividualProgramController::class, 'popupProgramSearch'])->name('program-search');
+        Route::get('/sms-email', [RosterController::class, 'popupSmsEmail'])->name('sms-email');
     });
 
     // 학교 관리
@@ -417,7 +420,7 @@ Route::prefix('backoffice')->middleware(['backoffice'])->group(function () {
         'names' => 'backoffice.schools'
     ]);
     Route::get('schools/{school}/show', [SchoolController::class, 'show'])
-    ->name('backoffice.schools.show-detail');
+        ->name('backoffice.schools.show-detail');
 
     // 세션 연장
     Route::post('session/extend', [App\Http\Controllers\Backoffice\SessionController::class, 'extend'])

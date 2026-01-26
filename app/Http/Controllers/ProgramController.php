@@ -26,7 +26,7 @@ class ProgramController extends Controller
     protected $programService;
     protected $programReservationService;
     protected ScheduleService $scheduleService;
-    
+
     public function __construct(
         ProgramService $programService,
         ProgramReservationService $programReservationService,
@@ -36,7 +36,7 @@ class ProgramController extends Controller
         $this->programReservationService = $programReservationService;
         $this->scheduleService = $scheduleService;
     }
-    
+
     /**
      * 유형 선택 페이지
      */
@@ -44,14 +44,14 @@ class ProgramController extends Controller
     {
         $member = Auth::guard('member')->user();
         $program = $this->programService->getProgramByType($type);
-        $gNum = "01"; 
+        $gNum = "01";
         $sNum = $this->programService->getSubMenuNumber($type);
-        $gName = "프로그램"; 
+        $gName = "프로그램";
         $sName = $this->programService->getTypeName($type);
-        
+
         return view('program.show', compact('program', 'gNum', 'sNum', 'gName', 'sName', 'type', 'member'));
     }
-    
+
     /**
      * 단체 신청 페이지
      */
@@ -69,7 +69,7 @@ class ProgramController extends Controller
         if ($member && $member instanceof Member && $member->member_type === 'teacher') {
             $schoolLevel = $member->school?->school_level;
             $programLevel = str_starts_with($type, 'middle') ? 'middle' : (str_starts_with($type, 'high') ? 'high' : null);
-            
+
             if ($schoolLevel && $programLevel && $schoolLevel !== $programLevel) {
                 $levelName = $schoolLevel === 'middle' ? '중등' : '고등';
                 return redirect()
@@ -79,16 +79,16 @@ class ProgramController extends Controller
         }
 
         $program = $this->programService->getProgramByType($type);
-        $gNum = "01"; 
+        $gNum = "01";
         $sNum = $this->programService->getSubMenuNumber($type);
-        $gName = "프로그램"; 
+        $gName = "프로그램";
         $sName = $this->programService->getTypeName($type);
         $programService = $this->programService;
         $periodSummary = $this->formatProgramPeriod($program);
-        
+
         return view('program.apply-group', compact('program', 'gNum', 'sNum', 'gName', 'sName', 'type', 'programService', 'periodSummary', 'member'));
     }
-    
+
     /**
      * 개인 신청 페이지
      */
@@ -96,13 +96,13 @@ class ProgramController extends Controller
     {
         $member = Auth::guard('member')->user();
         $program = $this->programService->getProgramByType($type);
-        $gNum = "01"; 
+        $gNum = "01";
         $sNum = $this->programService->getSubMenuNumber($type);
-        $gName = "프로그램"; 
+        $gName = "프로그램";
         $sName = $this->programService->getTypeName($type);
         $programService = $this->programService;
         $periodSummary = $this->formatProgramPeriod($program);
-        
+
         return view('program.apply-individual', compact('program', 'gNum', 'sNum', 'gName', 'sName', 'type', 'programService', 'periodSummary', 'member'));
     }
 
@@ -123,7 +123,7 @@ class ProgramController extends Controller
         if ($member && $member instanceof Member && $member->member_type === 'teacher') {
             $schoolLevel = $member->school?->school_level;
             $programLevel = str_starts_with($type, 'middle') ? 'middle' : (str_starts_with($type, 'high') ? 'high' : null);
-            
+
             if ($schoolLevel && $programLevel && $schoolLevel !== $programLevel) {
                 $levelName = $schoolLevel === 'middle' ? '중등' : '고등';
                 return redirect()
@@ -134,23 +134,23 @@ class ProgramController extends Controller
 
         $year = $request->input('year', now()->year);
         $month = $request->input('month', now()->month);
-        
+
         // 프로그램 조회
         $programs = $this->programReservationService->getProgramsByMonth($type, 'group', $year, $month);
-        
+
         // 날짜별 그룹화
         $programsByDate = $this->programReservationService->groupProgramsByDate($programs);
-        
+
         $disabledDates = $this->scheduleService->getDisabledDates($year, $month);
         // 캘린더 생성
         $calendar = $this->programReservationService->generateCalendar($year, $month, $programsByDate, $disabledDates);
-        
+
         // 페이지 정보
         $gNum = "01";
         $sNum = $this->programService->getSubMenuNumber($type);
         $gName = "프로그램";
         $sName = $this->programService->getTypeName($type);
-        
+
         return view('program.select-group', compact('gNum', 'sNum', 'gName', 'sName', 'programs', 'programsByDate', 'calendar', 'year', 'month', 'type'));
     }
 
@@ -171,7 +171,7 @@ class ProgramController extends Controller
         if ($member && $member instanceof Member && $member->member_type === 'student') {
             $schoolLevel = $member->school?->school_level;
             $programLevel = str_starts_with($type, 'middle') ? 'middle' : (str_starts_with($type, 'high') ? 'high' : null);
-            
+
             if ($schoolLevel && $programLevel && $schoolLevel !== $programLevel) {
                 $levelName = $schoolLevel === 'middle' ? '중등' : '고등';
                 return redirect()
@@ -252,7 +252,7 @@ class ProgramController extends Controller
         $sName = $this->programService->getTypeName($type);
 
         $totalCount = $programs->count();
-        
+
         // 페이지네이션 적용
         $perPage = 10;
         $currentPage = $request->get('page', 1);
@@ -319,7 +319,7 @@ class ProgramController extends Controller
         if ($member->member_type === 'student') {
             $schoolLevel = $member->school?->school_level;
             $programLevel = str_starts_with($type, 'middle') ? 'middle' : (str_starts_with($type, 'high') ? 'high' : null);
-            
+
             if ($schoolLevel && $programLevel && $schoolLevel !== $programLevel) {
                 $levelName = $schoolLevel === 'middle' ? '중등' : '고등';
                 return back()
@@ -430,10 +430,7 @@ class ProgramController extends Controller
             ], 400);
         }
 
-        $paymentMethod = null;
-        if (is_array($reservation->payment_methods) && count($reservation->payment_methods) > 0) {
-            $paymentMethod = $reservation->payment_methods[0];
-        }
+        // 결제방법은 교사가 신청 후(마이페이지) 선택하도록 기본값을 설정하지 않음
 
         try {
             $application = $this->programReservationService->createGroupApplication(
@@ -447,7 +444,7 @@ class ProgramController extends Controller
                     'applicant_contact' => $memberContact,
                     'school_name' => $member->school_name,
                     'school_level' => $member->school?->school_level ?? null,
-                    'payment_method' => $paymentMethod,
+                    'payment_method' => null,
                     'payment_status' => 'unpaid',
                     'application_status' => 'pending',
                     'reception_status' => 'application',
@@ -613,13 +610,13 @@ class ProgramController extends Controller
         if ($application->reservation) {
             $startDate = $application->reservation->education_start_date;
             $endDate = $application->reservation->education_end_date;
-            
+
             if ($startDate) {
                 $days = ['일', '월', '화', '수', '목', '금', '토'];
                 $startTimestamp = strtotime((string) $startDate);
                 $startDayName = $days[(int) date('w', $startTimestamp)] ?? '';
                 $startFormatted = date('Y.m.d', $startTimestamp) . '(' . $startDayName . ')';
-                
+
                 if ($endDate && $startDate->format('Y-m-d') !== $endDate->format('Y-m-d')) {
                     $endTimestamp = strtotime((string) $endDate);
                     $endDayName = $days[(int) date('w', $endTimestamp)] ?? '';
@@ -635,7 +632,7 @@ class ProgramController extends Controller
             $dayName = $days[(int) date('w', $participationTimestamp)] ?? '';
             $educationDate = date('Y.m.d', $participationTimestamp) . '(' . $dayName . ')';
         }
- 
+
         return [
             'program_name' => $application->program_name ?? '',
             'education_date' => $educationDate,

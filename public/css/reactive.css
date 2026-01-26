@@ -86,7 +86,7 @@
 	.main_board .list a:hover {color:#283891; border-bottom-color:#283891;}
 /* sub */
 	.board_top .board_tab a:hover {color:#fff; background:#222; border-color:#222;}
-	.board_list tbody .tal a:hover {font-weight:600; text-decoration:underline;}
+	.board_list tbody a:hover {font-weight:600; text-decoration:underline;}
 	.board_bottom .paging a:hover {text-decoration:underline;}
 	.mem_half > *:hover {background:#fff;}
 	.mem_half > *:hover:after {opacity:1;}
@@ -166,7 +166,7 @@
 /* 게시판 목록 */
 	.board_list thead th {font-size:15px; line-height:26px; padding:20px 10px;}
 	.board_list tbody td {line-height:28px; padding:18px 6px;}
-	.board_list tbody .tal a {font-size:16px; color:#222; font-weight:600;}
+	.board_list tbody a {font-size:16px; color:#222; font-weight:600;}
 	.statebox,
 	.statebox_tb {font-size:15px; line-height:30px; height:30px; width:64px; text-align:center; border-radius:4px;}
 	.statebox_tb.raffle {color:#fff; background:#283891;}

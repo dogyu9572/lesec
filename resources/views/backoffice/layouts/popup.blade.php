@@ -81,7 +81,7 @@
 <body>
     <div class="popup-container">
         <div class="popup-header">
-            <h5>@yield('popup-title', '팝업')</h5>           
+            <h5>@yield('popup-title', '팝업')</h5>
         </div>
         <div class="popup-body">
             @yield('content')

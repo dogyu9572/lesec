@@ -145,15 +145,17 @@
 						@if($canApply)
 							<button type="button" class="btn_apply" data-layer-open="pop_approval">신청하기</button>
 						@else
-							<button type="button" class="btn_apply disabled" disabled>
-								@if($isGuest)
-									로그인 필요
-								@elseif($isStudent)
-									교사만 신청 가능
-								@else
-									신청 불가
-								@endif
-							</button>
+							@if($isGuest)
+								<a href="{{ route('member.login', ['redirect' => request()->getRequestUri()]) }}" class="btn_apply">로그인 필요</a>
+							@else
+								<button type="button" class="btn_apply disabled" disabled>
+									@if($isStudent)
+										교사만 신청 가능
+									@else
+										신청 불가
+									@endif
+								</button>
+							@endif
 						@endif
 					</div>
 				</div>

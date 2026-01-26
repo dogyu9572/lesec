@@ -150,7 +150,9 @@
 
                 <!-- 신청정원 -->
                 <div class="board-form-group">
-                    <label for="capacity" class="board-form-label">신청정원</label>
+                    <label for="capacity" class="board-form-label">신청정원 
+                        <span style="margin-left: 10px; font-weight: normal; color: #666;">(현재 신청인원: {{ number_format($totalApplicantCount ?? 0) }}명)</span>
+                    </label>
                     <div class="board-form-row">
                         <div class="board-form-col board-form-col-6">
                             <input type="number" class="board-form-control @error('capacity') is-invalid @enderror" 

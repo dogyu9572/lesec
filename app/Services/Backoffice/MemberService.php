@@ -44,7 +44,18 @@ class MemberService
         
         // 소속 시/도 필터
         if ($request->filled('city')) {
-            $query->where('city', $request->city);
+            $city = trim((string) $request->city);
+
+            // 지역 값이 없으면 "기타"로 취급
+            if ($city === '기타') {
+                $query->where(function ($q) {
+                    $q->whereNull('city')
+                        ->orWhere('city', '')
+                        ->orWhere('city', '외국학교');
+                });
+            } else {
+                $query->where('city', $city);
+            }
         }
         
         // 가입일 필터
@@ -69,7 +80,7 @@ class MemberService
         // 검색어 필터
         if ($request->filled('search_keyword')) {
             $searchType = $request->get('search_type', 'all');
-            $searchKeyword = $request->search_keyword;
+            $searchKeyword = trim((string) $request->search_keyword);
             $normalizedKeyword = str_replace('-', '', $searchKeyword);
             
             if ($searchType === 'all') {
@@ -82,6 +93,13 @@ class MemberService
                       ->orWhere('contact', 'like', "%{$normalizedKeyword}%")
                       ->orWhere('city', 'like', "%{$searchKeyword}%")
                       ->orWhere('grade', 'like', "%{$searchKeyword}%");
+
+                    // "기타" 검색 시: 지역 미입력(또는 외국학교)도 포함
+                    if ($searchKeyword === '기타') {
+                        $q->orWhereNull('city')
+                          ->orWhere('city', '')
+                          ->orWhere('city', '외국학교');
+                    }
                 });
             } else {
                 // 특정 필드 검색
@@ -92,6 +110,17 @@ class MemberService
                     // 학년 검색 시 숫자로 변환하여 정확한 일치 검색
                     if (is_numeric($searchKeyword)) {
                         $query->where('grade', (int)$searchKeyword);
+                    }
+                } elseif ($searchType === 'city') {
+                    // 지역(시/도) 검색: "기타"는 지역 미입력(또는 외국학교)로 처리
+                    if ($searchKeyword === '기타') {
+                        $query->where(function ($q) {
+                            $q->whereNull('city')
+                              ->orWhere('city', '')
+                              ->orWhere('city', '외국학교');
+                        });
+                    } else {
+                        $query->where('city', 'like', "%{$searchKeyword}%");
                     }
                 } else {
                     $query->where($searchType, 'like', "%{$searchKeyword}%");

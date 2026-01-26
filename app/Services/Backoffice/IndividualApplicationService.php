@@ -78,7 +78,7 @@ class IndividualApplicationService
         if ($request->filled('search_keyword')) {
             $keyword = $request->search_keyword;
             $searchType = $request->input('search_type', '');
-            
+
             if ($searchType === 'applicant_name') {
                 $query->where('applicant_name', 'like', "%{$keyword}%");
             } elseif ($searchType === 'school_name') {
@@ -93,11 +93,11 @@ class IndividualApplicationService
                 // 전체 검색 (search_type이 비어있거나 'all'인 경우)
                 $query->where(function ($q) use ($keyword) {
                     $q->where('applicant_name', 'like', "%{$keyword}%")
-                      ->orWhere('applicant_school_name', 'like', "%{$keyword}%")
-                      ->orWhere('application_number', 'like', "%{$keyword}%")
-                      ->orWhereHas('reservation', function ($subQ) use ($keyword) {
-                          $subQ->where('program_name', 'like', "%{$keyword}%");
-                      });
+                        ->orWhere('applicant_school_name', 'like', "%{$keyword}%")
+                        ->orWhere('application_number', 'like', "%{$keyword}%")
+                        ->orWhereHas('reservation', function ($subQ) use ($keyword) {
+                            $subQ->where('program_name', 'like', "%{$keyword}%");
+                        });
                 });
             }
         }
@@ -292,7 +292,7 @@ class IndividualApplicationService
      */
     public function searchMembers(Request $request)
     {
-        $query = \App\Models\Member::query()->select('id', 'name', 'login_id', 'email', 'school_name', 'contact');
+        $query = \App\Models\Member::query()->select('id', 'name', 'login_id', 'email', 'school_name', 'school_id', 'contact', 'parent_contact', 'grade', 'class_number');
 
         if ($request->filled('member_type') && $request->member_type !== 'all') {
             $query->where('member_type', $request->member_type);
@@ -302,9 +302,9 @@ class IndividualApplicationService
             $term = $request->search_term;
             $query->where(function ($q) use ($term) {
                 $q->where('name', 'like', "%{$term}%")
-                  ->orWhere('login_id', 'like', "%{$term}%")
-                  ->orWhere('email', 'like', "%{$term}%")
-                  ->orWhere('contact', 'like', "%{$term}%");
+                    ->orWhere('login_id', 'like', "%{$term}%")
+                    ->orWhere('email', 'like', "%{$term}%")
+                    ->orWhere('contact', 'like', "%{$term}%");
             });
         }
 
@@ -341,17 +341,17 @@ class IndividualApplicationService
             $days = ['일', '월', '화', '수', '목', '금', '토'];
             $startDate = null;
             $endDate = null;
-            
+
             if ($program->education_start_date instanceof Carbon) {
                 $startDay = $days[$program->education_start_date->dayOfWeek] ?? '';
                 $startDate = $program->education_start_date->format('Y.m.d') . '(' . $startDay . ')';
             }
-            
+
             if ($program->education_end_date instanceof Carbon) {
                 $endDay = $days[$program->education_end_date->dayOfWeek] ?? '';
                 $endDate = $program->education_end_date->format('Y.m.d') . '(' . $endDay . ')';
             }
-            
+
             $participationSchedule = '';
             if ($startDate && $endDate) {
                 if ($program->education_start_date->equalTo($program->education_end_date)) {
@@ -364,7 +364,7 @@ class IndividualApplicationService
             } else {
                 $participationSchedule = '-';
             }
-            
+
             return [
                 'id' => $program->id,
                 'program_name' => $program->program_name,
@@ -454,14 +454,14 @@ class IndividualApplicationService
             foreach ($row as $cellValue) {
                 $columnLetter = Coordinate::stringFromColumnIndex($columnIndex);
                 $cellAddress = $columnLetter . $rowIndex;
-                
+
                 // 연락처1, 연락처2, 회원ID 컬럼은 텍스트 형식으로 설정 (숫자 앞 0 유지)
                 if ($columnIndex === 8 || $columnIndex === 9 || $columnIndex === 12) {
                     $sheet->setCellValueExplicit($cellAddress, $cellValue, DataType::TYPE_STRING);
                 } else {
                     $sheet->setCellValue($cellAddress, $cellValue);
                 }
-                
+
                 $columnIndex++;
             }
             $rowIndex++;
@@ -528,7 +528,7 @@ class IndividualApplicationService
 
         // UTF-8 BOM 제거
         $bom = fread($handle, 3);
-        if ($bom !== chr(0xEF).chr(0xBB).chr(0xBF)) {
+        if ($bom !== chr(0xEF) . chr(0xBB) . chr(0xBF)) {
             rewind($handle);
         }
 
@@ -628,7 +628,7 @@ class IndividualApplicationService
         $memberId = null;
         if (!empty($memberIdText)) {
             $memberIdText = trim($memberIdText);
-            
+
             // 숫자면 member_id로 검색
             if (is_numeric($memberIdText)) {
                 $memberId = (int) $memberIdText;
@@ -657,11 +657,11 @@ class IndividualApplicationService
             'reception_type' => 'naver_form', // 네이버 폼으로 고정
             'education_type' => $reservation->education_type, // 선택한 프로그램의 교육유형 사용
             'program_name' => $reservation->program_name, // 선택한 프로그램의 프로그램명 사용
-            'participation_date' => $participationDate 
-                ? Carbon::parse($participationDate)->format('Y-m-d') 
+            'participation_date' => $participationDate
+                ? Carbon::parse($participationDate)->format('Y-m-d')
                 : ($reservation->education_start_date ? $reservation->education_start_date->format('Y-m-d') : null),
-            'participation_fee' => $participationFee 
-                ? (int) $participationFee 
+            'participation_fee' => $participationFee
+                ? (int) $participationFee
                 : ($reservation->education_fee ?? 0),
             'payment_method' => $paymentMethod,
             'applicant_name' => $applicantName,
@@ -812,4 +812,3 @@ class IndividualApplicationService
         return $member?->id;
     }
 }
-

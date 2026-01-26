@@ -3,24 +3,35 @@
 namespace App\Http\Controllers\Backoffice;
 
 use App\Services\Backoffice\RosterService;
+use App\Services\Backoffice\SmsKakaoApiService;
 use App\Services\ProgramReservationService;
 use App\Models\ProgramReservation;
 use App\Models\Member;
 use App\Models\IndividualApplication;
 use App\Models\GroupApplication;
 use App\Models\GroupApplicationParticipant;
+use App\Models\MailSmsMessage;
+use App\Models\MailSmsMessageMember;
+use App\Models\MailSmsLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class RosterController extends BaseController
 {
     protected RosterService $rosterService;
     protected ProgramReservationService $programReservationService;
+    protected SmsKakaoApiService $smsKakaoApiService;
 
-    public function __construct(RosterService $rosterService, ProgramReservationService $programReservationService)
-    {
+    public function __construct(
+        RosterService $rosterService,
+        ProgramReservationService $programReservationService,
+        SmsKakaoApiService $smsKakaoApiService
+    ) {
         $this->rosterService = $rosterService;
         $this->programReservationService = $programReservationService;
+        $this->smsKakaoApiService = $smsKakaoApiService;
     }
 
     /**
@@ -35,6 +46,14 @@ class RosterController extends BaseController
             'rosters' => $rosters,
             'filters' => $filters,
         ]);
+    }
+
+    /**
+     * SMS/메일 발송 팝업 창
+     */
+    public function popupSmsEmail(Request $request)
+    {
+        return view('backoffice.popups.sms-email');
     }
 
     /**
@@ -73,6 +92,249 @@ class RosterController extends BaseController
     public function sendSmsEmail(ProgramReservation $reservation, Request $request)
     {
         return redirect()->back()->with('info', 'SMS/메일 발송 기능은 추후 구현 예정입니다.');
+    }
+
+    /**
+     * 명단 선택 SMS 발송
+     */
+    public function sendSms(Request $request)
+    {
+        $request->validate([
+            'reservation_ids' => 'required|array',
+            'reservation_ids.*' => 'required|integer|exists:program_reservations,id',
+            'message_type' => 'required|in:sms,email',
+            'content' => 'required|string|max:2000',
+        ]);
+
+        $reservationIds = $request->input('reservation_ids', []);
+        $messageType = $request->input('message_type');
+        $content = $request->input('content');
+
+        // EMAIL은 아직 구현하지 않음
+        if ($messageType === 'email') {
+            return response()->json([
+                'success' => false,
+                'message' => '메일 발송 기능은 준비 중입니다.',
+            ], 400);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // 명단 정보 가져오기 (제목용)
+            $reservations = ProgramReservation::whereIn('id', $reservationIds)->get();
+            $programNames = $reservations->pluck('program_name')->toArray();
+            $title = '명단 발송: ' . implode(', ', array_slice($programNames, 0, 3));
+            if (count($programNames) > 3) {
+                $title .= ' 외 ' . (count($programNames) - 3) . '개';
+            }
+
+            // MailSmsMessage 생성
+            $mailSmsMessage = MailSmsMessage::create([
+                'message_type' => MailSmsMessage::TYPE_SMS,
+                'title' => $title,
+                'content' => $content,
+                'writer_id' => auth()->id(),
+                'member_group_id' => null,
+                'status' => MailSmsMessage::STATUS_SENDING,
+                'send_requested_at' => Carbon::now(),
+                'send_started_at' => Carbon::now(),
+            ]);
+
+            // 개인 신청 회원 정보 수집 (신청 명단의 연락처 사용)
+            $individualApplications = IndividualApplication::whereIn('program_reservation_id', $reservationIds)
+                ->with('member')
+                ->where(function($q) {
+                    $q->whereNotNull('applicant_contact')
+                      ->orWhereNotNull('guardian_contact');
+                })
+                ->whereHas('member', function($q) {
+                    $q->where('sms_consent', true);
+                })
+                ->get();
+
+            $recipients = [];
+            $usedContacts = []; // 중복 체크용 (연락처 기준)
+
+            foreach ($individualApplications as $application) {
+                // 신청 명단의 연락처 사용 (applicant_contact 우선, 없으면 guardian_contact)
+                $contact = $application->applicant_contact ?? $application->guardian_contact;
+                
+                if ($contact && !in_array($contact, $usedContacts)) {
+                    $usedContacts[] = $contact;
+                    $recipients[] = [
+                        'member_id' => $application->member_id,
+                        'member_name' => $application->applicant_name ?? $application->member?->name,
+                        'member_email' => $application->member?->email,
+                        'member_contact' => $contact, // 신청 명단의 연락처 사용
+                    ];
+                }
+            }
+
+            // 단체 신청 회원 정보 수집 (신청 명단의 연락처 사용)
+            $groupApplications = GroupApplication::whereIn('program_reservation_id', $reservationIds)
+                ->whereNotNull('applicant_contact')
+                ->get();
+
+            foreach ($groupApplications as $groupApplication) {
+                $contact = $groupApplication->applicant_contact;
+                
+                // 중복 체크 (같은 연락처가 이미 있으면 스킵)
+                if ($contact && !in_array($contact, $usedContacts)) {
+                    $usedContacts[] = $contact;
+                    $recipients[] = [
+                        'member_id' => $groupApplication->member_id,
+                        'member_name' => $groupApplication->applicant_name,
+                        'member_email' => $groupApplication->member?->email,
+                        'member_contact' => $contact, // 신청 명단의 연락처 사용
+                    ];
+                }
+            }
+
+            if (empty($recipients)) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => '발송할 연락처가 없습니다. (SMS 수신동의한 회원이 없거나 연락처가 없습니다.)',
+                ], 400);
+            }
+
+            // MailSmsMessageMember 생성
+            $messageMembers = [];
+            foreach ($recipients as $recipient) {
+                $messageMembers[] = MailSmsMessageMember::create([
+                    'mail_sms_message_id' => $mailSmsMessage->id,
+                    'member_id' => $recipient['member_id'],
+                    'member_name' => $recipient['member_name'],
+                    'member_email' => $recipient['member_email'],
+                    'member_contact' => $recipient['member_contact'],
+                    'is_selected' => true,
+                ]);
+            }
+
+            // SMS 발송 및 로그 저장
+            $now = Carbon::now();
+            $sendSequence = 1;
+            $successCount = 0;
+            $failureCount = 0;
+            $logs = [];
+
+            foreach ($messageMembers as $messageMember) {
+                $phone = $messageMember->member_contact;
+                
+                if (empty($phone)) {
+                    $logs[] = [
+                        'send_sequence' => $sendSequence,
+                        'mail_sms_message_id' => $mailSmsMessage->id,
+                        'mail_sms_message_member_id' => $messageMember->id,
+                        'member_id' => $messageMember->member_id,
+                        'member_name' => $messageMember->member_name,
+                        'member_email' => $messageMember->member_email,
+                        'member_contact' => $phone,
+                        'result_status' => 'failure',
+                        'sent_at' => null,
+                        'response_code' => 'NO_PHONE',
+                        'response_message' => '전화번호가 없습니다.',
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
+                    $failureCount++;
+                    continue;
+                }
+
+                try {
+                    $result = $this->smsKakaoApiService->sendSms($phone, $content);
+                    
+                    $logs[] = [
+                        'send_sequence' => $sendSequence,
+                        'mail_sms_message_id' => $mailSmsMessage->id,
+                        'mail_sms_message_member_id' => $messageMember->id,
+                        'member_id' => $messageMember->member_id,
+                        'member_name' => $messageMember->member_name,
+                        'member_email' => $messageMember->member_email,
+                        'member_contact' => $phone,
+                        'result_status' => $result['success'] ? 'success' : 'failure',
+                        'sent_at' => $result['success'] ? $now : null,
+                        'response_code' => $result['response_code'] ?? 'UNKNOWN',
+                        'response_message' => $result['response_message'] ?? '발송 실패',
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
+
+                    if ($result['success']) {
+                        $successCount++;
+                    } else {
+                        $failureCount++;
+                    }
+                } catch (\Exception $e) {
+                    Log::error('SMS 발송 중 오류 발생', [
+                        'message_id' => $mailSmsMessage->id,
+                        'member_id' => $messageMember->member_id,
+                        'phone' => $phone,
+                        'error' => $e->getMessage(),
+                    ]);
+
+                    $logs[] = [
+                        'send_sequence' => $sendSequence,
+                        'mail_sms_message_id' => $mailSmsMessage->id,
+                        'mail_sms_message_member_id' => $messageMember->id,
+                        'member_id' => $messageMember->member_id,
+                        'member_name' => $messageMember->member_name,
+                        'member_email' => $messageMember->member_email,
+                        'member_contact' => $phone,
+                        'result_status' => 'failure',
+                        'sent_at' => null,
+                        'response_code' => 'EXCEPTION',
+                        'response_message' => '발송 중 오류가 발생했습니다: ' . $e->getMessage(),
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
+                    $failureCount++;
+                }
+            }
+
+            // MailSmsLog 일괄 저장
+            MailSmsLog::insert($logs);
+
+            // MailSmsMessage 업데이트
+            $mailSmsMessage->update([
+                'status' => MailSmsMessage::STATUS_COMPLETED,
+                'success_count' => $successCount,
+                'failure_count' => $failureCount,
+                'send_completed_at' => $now,
+                'last_error_message' => $failureCount > 0 ? "{$failureCount}건 발송 실패" : null,
+            ]);
+
+            DB::commit();
+
+            $message = "총 {$successCount}건 발송 완료";
+            if ($failureCount > 0) {
+                $message .= ", 실패 {$failureCount}건";
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'stats' => [
+                    'total' => count($recipients),
+                    'success' => $successCount,
+                    'failure' => $failureCount,
+                ],
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('SMS 발송 중 오류 발생', [
+                'reservation_ids' => $reservationIds,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'SMS 발송 중 오류가 발생했습니다: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**

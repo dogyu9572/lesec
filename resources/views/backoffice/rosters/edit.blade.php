@@ -40,6 +40,8 @@
     <div class="board-card">
 <div class="board-card-body">
             @php
+                $appliedCountDisplay = $program['applied_count'] ?? 0;
+                $inputCount = $program['input_count'] ?? 0;
                 $programInfo = [
                     '신청구분' => $program['application_type'] === 'individual' ? '개인' : '단체',
                     '신청유형' => ($program['application_type'] === 'individual' && isset($program['reception_type']))
@@ -49,7 +51,6 @@
                     '프로그램명' => $program['program_name'],
                     '참가일' => $program['participation_date_formatted'] ?? '-',
                     '정원' => $program['is_unlimited_capacity'] ? '무제한' : ($program['capacity'] ?? '-'),
-                    '신청인원' => $program['applied_count'] ?? 0,
                 ];
             @endphp
             <div class="program-section">
@@ -61,6 +62,15 @@
                             <dd>{{ $value }}</dd>
                         </div>
                     @endforeach
+                    <div class="program-info-row">
+                        <dt>신청인원</dt>
+                        <dd>
+                            @if($program['application_type'] === 'group' && isset($inputCount))
+                                <div style="margin-bottom: 5px; color: #666; font-size: 0.9em;">신청명단: {{ $inputCount }}명</div>
+                            @endif
+                            {{ $appliedCountDisplay }}
+                        </dd>
+                    </div>
                 </dl>
             </div>
 
@@ -102,8 +112,8 @@
                             <i class="fas fa-download"></i> 다운로드
                         </button>
                         @if($program['application_type'] === 'individual' && $program['reception_type'] === 'lottery')
-                        <button type="button" id="lottery-btn" class="btn btn-primary" data-skip-button @if(empty($lotteryStatus) || !$lotteryStatus['is_pending']) disabled @endif>
-                            <i class="fas fa-random"></i> {{ (isset($lotteryStatus) && $lotteryStatus['is_pending']) ? '추첨' : '추첨 완료' }}
+                        <button type="button" id="lottery-btn" class="btn btn-primary" data-skip-button>
+                            <i class="fas fa-random"></i> {{ (isset($lotteryStatus) && $lotteryStatus['is_pending']) ? '추첨' : '재추첨' }}
                         </button>
                         @endif
                         <button type="button" id="member-search-btn" class="btn btn-success" data-skip-button style="margin-left: auto;">
@@ -171,7 +181,7 @@
                                             <td>{{ $item['applied_at_formatted'] ?? '-' }}</td>
                                             <td class="roster-table-actions">
                                                 <div style="display: flex; gap: 4px; align-items: center;">
-                                                    <a href="{{ route('backoffice.individual-applications.edit', $item['id']) }}" class="btn btn-primary btn-sm">
+                                                    <a href="{{ route('backoffice.individual-applications.edit', $item['id']) }}" class="btn btn-primary btn-sm" target="_blank">
                                                         보기
                                                     </a>
                                                     <button type="button" class="btn btn-danger btn-sm remove-roster-member-btn" data-application-id="{{ $item['id'] }}" data-member-id="{{ $item['raw']->member_id ?? '' }}" data-skip-button>

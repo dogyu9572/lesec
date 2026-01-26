@@ -118,7 +118,7 @@
 						</td>
 						<td class="edu07">
 							@if($isGuest)
-								<button type="button" class="btn btn_kwk disabled" disabled>로그인 필요</button>
+								<a href="{{ route('member.login', ['redirect' => request()->getRequestUri()]) }}" class="btn btn_kwk">로그인 필요</a>
 							@elseif($isTeacher)
 								<button type="button" class="btn btn_kwk disabled" disabled>학생만 신청 가능</button>
 							@elseif($isWrongLevel)

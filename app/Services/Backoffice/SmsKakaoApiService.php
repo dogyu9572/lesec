@@ -87,7 +87,6 @@ class SmsKakaoApiService
                 'response_code' => $response->status(),
                 'response_message' => $responseBody ?: ($isSuccess ? '발송 성공' : '발송 실패'),
             ];
-
         } catch (\Exception $e) {
             Log::error('SMS 발송 API 호출 중 오류 발생', [
                 'phone' => $phone,
@@ -163,7 +162,6 @@ class SmsKakaoApiService
                 'response_code' => $response->status(),
                 'response_message' => $responseBody ?: ($isSuccess ? '발송 성공' : '발송 실패'),
             ];
-
         } catch (\Exception $e) {
             Log::error('카카오 알림톡 발송 API 호출 중 오류 발생', [
                 'phone' => $phone,
@@ -206,4 +204,3 @@ class SmsKakaoApiService
         return preg_replace('/[-\s]/', '', $phone);
     }
 }
-

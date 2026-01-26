@@ -44,6 +44,14 @@
                         @csrf
                         @method('PUT')
                        
+                        {{-- 프로그램 정보 (hidden) --}}
+                        <input type="hidden" name="reception_type" value="{{ $application->reception_type }}">
+                        <input type="hidden" name="education_type" value="{{ $application->education_type }}">
+                        <input type="hidden" name="program_name" value="{{ $application->program_name }}">
+                        <input type="hidden" name="program_reservation_id" value="{{ $application->program_reservation_id }}">
+                        <input type="hidden" name="participation_date" value="{{ $application->participation_date ? $application->participation_date->format('Y-m-d') : '' }}">
+                        <input type="hidden" name="participation_fee" value="{{ $application->participation_fee }}">
+                        <input type="hidden" name="payment_method" value="{{ $application->payment_method }}">
 
                         <div class="program-section">
                             <div class="section-title">신청 정보</div>
@@ -85,12 +93,12 @@
                                     <label>학년/반</label>
                                     <div class="grade-class-wrapper">
                                         <div class="grade-class-item">
-                                            <input type="hidden" id="applicant_grade" name="applicant_grade" value="{{ $application->applicant_grade }}">
-                                            <input type="text" id="applicant_grade_display" value="{{ $application->applicant_grade ? $application->applicant_grade . '학년' : '' }}" readonly>
+                                            <input type="hidden" id="applicant_grade" name="applicant_grade" value="{{ $application->applicant_grade ?? ($application->member->grade ?? '') }}">
+                                            <input type="text" id="applicant_grade_display" value="{{ ($application->applicant_grade ?? $application->member->grade ?? '') ? ($application->applicant_grade ?? $application->member->grade) . '학년' : '' }}" readonly>
                                         </div>
                                         <div class="grade-class-item">
-                                            <input type="hidden" id="applicant_class" name="applicant_class" value="{{ $application->applicant_class }}">
-                                            <input type="text" id="applicant_class_display" value="{{ $application->applicant_class ? $application->applicant_class . '반' : '' }}" readonly>
+                                            <input type="hidden" id="applicant_class" name="applicant_class" value="{{ $application->applicant_class ?? ($application->member->class_number ?? '') }}">
+                                            <input type="text" id="applicant_class_display" value="{{ ($application->applicant_class ?? $application->member->class_number ?? '') ? ($application->applicant_class ?? $application->member->class_number) . '반' : '' }}" readonly>
                                         </div>
                                     </div>
                                 </div>

@@ -199,7 +199,7 @@
 						<li><strong>E-mail</strong>nicemedu@snu.ac.kr</li>
 					</ul>
 					<ul class="address">
-						<li class="w100p">농생명과학공동기기원 생명•환경과학교육센터 75동 606호</li>
+						<li class="w100p">서울시 관악구 관악로 1 서울대학교 농생명과학공동기기원 75동 606호</li>
 						<li class="impt"><strong>원장</strong>김학진</li>
 						<li class="impt"><strong>고유번호</strong>119-82-10526</li>
 						<li class="copy">COPYRIGHT (C) 2025, 농생명과학공동기기원. ALL RIGHTS RESERVED.</li>

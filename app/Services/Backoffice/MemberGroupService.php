@@ -203,7 +203,7 @@ class MemberGroupService
      */
     public function searchMembers(\Illuminate\Http\Request $request)
     {
-        $query = Member::query()->select('id', 'name', 'login_id', 'email', 'school_name', 'contact');
+        $query = Member::query()->select('id', 'name', 'login_id', 'email', 'school_name', 'school_id', 'contact', 'parent_contact', 'grade', 'class_number');
         
         // 회원구분 필터
         $memberType = $request->input('member_type');

@@ -16,8 +16,7 @@ class MailSmsController extends BaseController
 {
     public function __construct(
         private readonly MailSmsService $mailSmsService
-    ) {
-    }
+    ) {}
 
     /**
      * 발송 목록
@@ -96,7 +95,7 @@ class MailSmsController extends BaseController
     {
         $mailSmsMessage->load('recipients');
         $selectedMembers = $this->selectedMembersFromOld();
-        
+
         // old input이 없으면 recipients를 사용
         if ($selectedMembers->isEmpty()) {
             $selectedMembers = $mailSmsMessage->recipients->map(function ($recipient) {
@@ -122,9 +121,23 @@ class MailSmsController extends BaseController
      */
     public function update(UpdateMailSmsMessageRequest $request, MailSmsMessage $mailSmsMessage): RedirectResponse
     {
-        $this->mailSmsService->updateMessage($mailSmsMessage, $request->validated());
+        $message = $this->mailSmsService->updateMessage($mailSmsMessage, $request->validated());
 
-        return redirect()->route('backoffice.mail-sms.index')
+        // 발송 버튼(저장 후 발송) 처리
+        if ((string) $request->input('send') === '1') {
+            try {
+                $this->mailSmsService->requestSend($message);
+
+                return redirect()
+                    ->route('backoffice.mail-sms.index')
+                    ->with('success', '저장 후 발송이 완료되었습니다.');
+            } catch (\Exception $e) {
+                return back()->with('error', '발송 중 오류가 발생했습니다: ' . $e->getMessage());
+            }
+        }
+
+        return redirect()
+            ->route('backoffice.mail-sms.index')
             ->with('success', '발송 정보가 수정되었습니다.');
     }
 
@@ -150,7 +163,7 @@ class MailSmsController extends BaseController
         ]);
 
         $messageIds = $request->input('message_ids');
-        
+
         try {
             $deletedCount = $this->mailSmsService->bulkDelete($messageIds);
 
@@ -173,7 +186,7 @@ class MailSmsController extends BaseController
     public function send(MailSmsMessage $mailSmsMessage): RedirectResponse
     {
         try {
-        $this->mailSmsService->requestSend($mailSmsMessage);
+            $this->mailSmsService->requestSend($mailSmsMessage);
 
             return redirect()
                 ->route('backoffice.mail-sms.index')
@@ -252,6 +265,38 @@ class MailSmsController extends BaseController
             return response()->json([
                 'success' => false,
                 'message' => '삭제 중 오류가 발생했습니다: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * 수신자 동기화 (편집 화면에서 팝업 선택완료 시 즉시 저장)
+     */
+    public function syncRecipients(Request $request, MailSmsMessage $mailSmsMessage): JsonResponse
+    {
+        $validated = $request->validate([
+            'member_group_id' => ['nullable', 'integer', 'exists:member_groups,id'],
+            'member_ids' => ['required', 'array', 'min:1'],
+            'member_ids.*' => ['integer', 'distinct', 'exists:members,id'],
+        ]);
+
+        try {
+            $message = $this->mailSmsService->syncRecipientsSelection(
+                $mailSmsMessage,
+                $validated['member_ids'],
+                $validated['member_group_id'] ?? null
+            );
+
+            $total = $message->recipients()->count();
+
+            return response()->json([
+                'success' => true,
+                'total' => $total,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => '수신자 저장 중 오류가 발생했습니다: ' . $e->getMessage(),
             ], 500);
         }
     }
@@ -343,8 +388,8 @@ class MailSmsController extends BaseController
     private function selectedMembersFromOld()
     {
         $oldIds = collect(session()->getOldInput('member_ids', []))
-            ->filter(fn ($id) => $id !== null && $id !== '')
-            ->map(fn ($id) => (int) $id)
+            ->filter(fn($id) => $id !== null && $id !== '')
+            ->map(fn($id) => (int) $id)
             ->unique()
             ->values();
 
@@ -365,5 +410,3 @@ class MailSmsController extends BaseController
             });
     }
 }
-
-

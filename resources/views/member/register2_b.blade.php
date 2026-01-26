@@ -16,11 +16,11 @@
 			</ol>
 		
 			<div class="stit mb0">본인 인증</div>
-			<p class="stb">본인 확인을 위해 <strong class="c_blue">휴대전화 또는 문자 인증</strong>을 선택해 진행해 주세요.<br/>안전한 회원가입을 위해 인증 완료 후 다음 단계로 이동합니다.</p>
+			<p class="stb">본인 확인을 위해 <strong class="c_blue">SMS 인증</strong>이 진행됩니다.<br/>안전한 회원가입을 위해 인증 완료 후 다음 단계로 이동합니다.</p>
 			<div class="mem_half mem_half_center">				
 				<div class="phone_certification sms" id="smsVerificationBox">
 					<strong>SMS 인증</strong>
-					<p>휴대전화 번호로 발송된 인증번호를 입력하여 <br/> 본인 확인을 진행할 수 있습니다.</p>
+					<p>인증번호 수신까지<br/>30초 정도 시간이 걸릴 수 있습니다.</p>
 					
 					<button type="button" class="btn btn_wkk" id="btnStartSmsVerification">SMS 인증하기</button>
 					

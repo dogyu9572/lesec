@@ -136,7 +136,7 @@ class RosterService
         /** @var ProgramReservation $program */
         foreach ($individualPrograms as $program) {
             $applicantCount = $individualApplicationsCount[$program->id] ?? 0;
-            
+
             $merged->push([
                 'id' => $program->id,
                 'application_type' => 'individual',
@@ -157,7 +157,7 @@ class RosterService
         /** @var ProgramReservation $program */
         foreach ($groupPrograms as $program) {
             $applicantCount = (int) ($groupApplicationsCount[$program->id] ?? 0);
-            
+
             $merged->push([
                 'id' => $program->id,
                 'application_type' => 'group',
@@ -289,9 +289,9 @@ class RosterService
                 ->with(['participants'])
                 ->get();
 
-            $totalCount = 0;
+            $participantCount = 0;
             foreach ($groupApplications as $groupApplication) {
-                $totalCount += $groupApplication->participants->count();
+                $participantCount += $groupApplication->participants->count();
                 foreach ($groupApplication->participants as $participant) {
                     $rosterList->push([
                         'id' => $participant->id,
@@ -306,7 +306,12 @@ class RosterService
                 }
             }
 
-            $programInfo['applied_count'] = $totalCount;
+            // 왼쪽(리스트 기준): 실제 명단 수, 오른쪽(DB): 신청인원 합계
+            $dbApplicantTotal = GroupApplication::where('program_reservation_id', $reservationId)
+                ->sum('applicant_count');
+
+            $programInfo['applied_count'] = $participantCount;
+            $programInfo['input_count'] = $dbApplicantTotal;
         }
 
         $lotteryStatus = null;
@@ -314,9 +319,9 @@ class RosterService
             // 추첨 대기 상태인 신청 수 확인 (null 또는 'pending')
             $pendingCount = IndividualApplication::where('program_reservation_id', $reservationId)
                 ->where('reception_type', 'lottery')
-                ->where(function($query) {
+                ->where(function ($query) {
                     $query->whereNull('draw_result')
-                          ->orWhere('draw_result', 'pending');
+                        ->orWhere('draw_result', 'pending');
                 })
                 ->count();
 
@@ -371,16 +376,12 @@ class RosterService
 
             $capacity = $capacity ?? $reservation->capacity;
 
-            // 추첨 대상 조회 (draw_result가 null 또는 'pending'인 것만)
-            $applications = IndividualApplication::where('program_reservation_id', $reservationId)
+            // 모든 추첨 신청 조회
+            $allApplications = IndividualApplication::where('program_reservation_id', $reservationId)
                 ->where('reception_type', 'lottery')
-                ->where(function($query) {
-                    $query->whereNull('draw_result')
-                          ->orWhere('draw_result', 'pending');
-                })
                 ->get();
 
-            if ($applications->isEmpty()) {
+            if ($allApplications->isEmpty()) {
                 DB::rollBack();
                 return [
                     'success' => false,
@@ -388,18 +389,13 @@ class RosterService
                 ];
             }
 
-            // 이미 추첨이 완료된 경우 체크 (모든 신청이 win 또는 fail인지 확인)
-            $totalApplications = IndividualApplication::where('program_reservation_id', $reservationId)
+            // 재추첨을 위해 모든 신청의 draw_result를 pending으로 초기화
+            IndividualApplication::where('program_reservation_id', $reservationId)
                 ->where('reception_type', 'lottery')
-                ->count();
+                ->update(['draw_result' => 'pending']);
 
-            if ($totalApplications > 0 && $applications->count() === 0) {
-                DB::rollBack();
-                return [
-                    'success' => false,
-                    'message' => '이미 추첨이 완료된 프로그램입니다.',
-                ];
-            }
+            // 추첨 대상 (이제 모두 pending 상태)
+            $applications = $allApplications;
 
             // 랜덤 추첨 (shuffle 후 정원만큼 선택)
             $shuffled = $applications->shuffle();
@@ -617,19 +613,19 @@ class RosterService
             'Expires' => '0',
         ];
 
-        $callback = function() use ($data, $selectedColumns, $columnMapping) {
+        $callback = function () use ($data, $selectedColumns, $columnMapping) {
             $file = fopen('php://output', 'w');
-            
+
             // UTF-8 BOM 추가 (한글 깨짐 방지)
-            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
-            
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
             // 헤더 작성
             $csvHeaders = [];
             foreach ($selectedColumns as $column) {
                 $csvHeaders[] = $columnMapping[$column] ?? $column;
             }
             fputcsv($file, $csvHeaders);
-            
+
             // 데이터 작성
             foreach ($data as $item) {
                 $row = [];
@@ -638,7 +634,7 @@ class RosterService
                 }
                 fputcsv($file, $row);
             }
-            
+
             fclose($file);
         };
 
@@ -703,7 +699,7 @@ class RosterService
         $downloadData = $mergedData->map(function ($item) use ($filters) {
             return [
                 'application_type' => $item['application_type'] === 'individual' ? '개인' : '단체',
-                'reception_type' => $item['application_type'] === 'individual' 
+                'reception_type' => $item['application_type'] === 'individual'
                     ? ($filters['reception_types'][$item['reception_type']] ?? '-')
                     : '-',
                 'education_type' => $filters['education_types'][$item['education_type']] ?? '-',
@@ -735,4 +731,3 @@ class RosterService
         return $this->exportToCsv($downloadData, $selectedColumns, $columnMapping, $filename);
     }
 }
-

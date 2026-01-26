@@ -145,5 +145,3 @@ class MemberUnderFourteenRegisterRequest extends FormRequest
         return $digits;
     }
 }
-
-

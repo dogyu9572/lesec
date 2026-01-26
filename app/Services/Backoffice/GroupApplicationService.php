@@ -66,13 +66,17 @@ class GroupApplicationService
                 } elseif ($searchType === 'school_name') {
                     $innerQuery->where('school_name', 'like', "%{$keyword}%");
                 } elseif ($searchType === 'program_name') {
-                    $innerQuery->where('program_name', 'like', "%{$keyword}%");
+                    $innerQuery->whereHas('reservation', function ($q) use ($keyword) {
+                        $q->where('program_name', 'like', "%{$keyword}%");
+                    });
                 } else {
                     $innerQuery
                         ->where('application_number', 'like', "%{$keyword}%")
                         ->orWhere('applicant_name', 'like', "%{$keyword}%")
                         ->orWhere('school_name', 'like', "%{$keyword}%")
-                        ->orWhere('program_name', 'like', "%{$keyword}%");
+                        ->orWhereHas('reservation', function ($q) use ($keyword) {
+                            $q->where('program_name', 'like', "%{$keyword}%");
+                        });
                 }
             });
         }
@@ -99,7 +103,7 @@ class GroupApplicationService
     public function getApplicationDetail(int $applicationId): GroupApplication
     {
         return GroupApplication::query()
-            ->with(['participants' => fn ($query) => $query->orderBy('id', 'asc')])
+            ->with(['participants' => fn($query) => $query->orderBy('id', 'asc')])
             ->findOrFail($applicationId);
     }
 
@@ -443,13 +447,13 @@ class GroupApplicationService
 
             // UTF-8 BOM 제거
             $bom = fread($handle, 3);
-            if ($bom !== chr(0xEF).chr(0xBB).chr(0xBF)) {
+            if ($bom !== chr(0xEF) . chr(0xBB) . chr(0xBF)) {
                 rewind($handle);
             }
 
             // header skip
             fgetcsv($handle);
-            
+
             while (($data = fgetcsv($handle)) !== false) {
                 $rows += $this->processRosterRow($application->id, $data);
             }
@@ -476,10 +480,6 @@ class GroupApplicationService
         } else {
             throw new InvalidArgumentException('지원하지 않는 파일 형식입니다. CSV 또는 엑셀 파일을 사용해주세요.');
         }
-
-        $count = GroupApplicationParticipant::where('group_application_id', $application->id)->count();
-        $application->applicant_count = $count;
-        $application->save();
 
         return $rows;
     }
@@ -538,9 +538,6 @@ class GroupApplicationService
             'class' => $data['class'],
             'birthday' => $birthday,
         ]);
-        $count = GroupApplicationParticipant::where('group_application_id', $application->id)->count();
-        $application->applicant_count = $count;
-        $application->save();
     }
 
     public function updateParticipant(int $applicationId, int $participantId, array $data): void
@@ -573,10 +570,6 @@ class GroupApplicationService
             ->where('group_application_id', $applicationId)
             ->firstOrFail();
         $participant->delete();
-        $application = GroupApplication::query()->findOrFail($applicationId);
-        $count = GroupApplicationParticipant::where('group_application_id', $application->id)->count();
-        $application->applicant_count = $count;
-        $application->save();
     }
     /**
      * 3월 기준 학사연도 계산
@@ -585,12 +578,12 @@ class GroupApplicationService
     {
         $now = Carbon::now();
         $year = $now->year;
-        
+
         // 3월 1일 이전이면 전년도 사용
         if ($now->month < 3) {
             $year--;
         }
-        
+
         return $year;
     }
 
@@ -624,5 +617,3 @@ class GroupApplicationService
         return $digits !== '' ? $digits : null;
     }
 }
-
-

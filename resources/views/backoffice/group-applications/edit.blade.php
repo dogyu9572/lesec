@@ -113,6 +113,16 @@
                                     </select>
                                 </div>
                                 <div class="form-group">
+                                    <label for="applicant_name">신청자명</label>
+                                    <div class="school-search-wrapper">
+                                        <input type="text" id="applicant_name" name="applicant_name" value="{{ data_get($application, 'applicant_name') }}">
+                                        <input type="hidden" id="member_id" name="member_id" value="{{ data_get($application, 'member_id') }}">
+                                        <button type="button" id="member-search-btn" class="btn btn-secondary btn-sm">
+                                            <i class="fas fa-search"></i> 회원 검색
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="form-group">
                                     <label for="applicant_contact">연락처</label>
                                     <input type="text" id="applicant_contact" name="applicant_contact" value="{{ data_get($application, 'applicant_contact') }}">
                                 </div>
@@ -132,7 +142,13 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="applicant_count">신청인원</label>
-                                    <input type="number" min="0" id="applicant_count" name="applicant_count" value="{{ data_get($application, 'applicant_count') }}">
+                                    @php
+                                        $participantsCount = count(data_get($application, 'participants', []));
+                                        $applicantCount = data_get($application, 'applicant_count', 0);
+                                    @endphp
+                                    <div style="margin-bottom: 5px; color: #666; font-size: 0.9em;">신청명단: {{ $participantsCount }}명</div>
+                                    <input type="text" id="applicant_count_display" value="{{ $applicantCount }}" readonly style="background-color: #f5f5f5;">
+                                    <input type="hidden" id="applicant_count" name="applicant_count" value="{{ $applicantCount }}">
                                 </div>
                                 <div class="form-group">
                                     <label for="applied_at">신청일시</label>
@@ -142,10 +158,12 @@
                                     <label>결제상태</label>
                                     <div class="radio-group">
                                         @foreach(data_get($formOptions, 'payment_statuses', []) as $value => $label)
-                                            <label class="radio-label">
-                                                <input type="radio" name="payment_status" value="{{ $value }}" @checked(data_get($application, 'payment_status') === $value)>
-                                                <span>{{ $label }}</span>
-                                            </label>
+                                            @if($value !== 'cancelled')
+                                                <label class="radio-label">
+                                                    <input type="radio" name="payment_status" value="{{ $value }}" @checked(data_get($application, 'payment_status') === $value)>
+                                                    <span>{{ $label }}</span>
+                                                </label>
+                                            @endif
                                         @endforeach
                                     </div>
                                 </div>

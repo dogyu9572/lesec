@@ -32,7 +32,7 @@ class MemberOverFourteenRegisterRequest extends FormRequest
                 'min:9',
                 'max:12',
                 'confirmed',
-                'regex:/^(?!.*[\x{AC00}-\x{D7AF}]).+$/u',
+                'regex:/^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).+$/',
             ],
             'name' => ['required', 'string', 'max:255'],
             'birth_date' => ['required', 'date_format:Ymd', 'before:today'],
@@ -119,11 +119,27 @@ class MemberOverFourteenRegisterRequest extends FormRequest
             $email = trim((string) $this->input('email'));
         }
 
+        // 비밀번호 값 복원 (hidden 필드에서 가져오기)
+        $password = $this->input('password');
+        if (empty($password) && $this->filled('password_temp')) {
+            $password = $this->input('password_temp');
+        }
+
+        // 비밀번호 확인 값 복원 (hidden 필드 우선 사용)
+        $passwordConfirmation = $this->input('password_confirmation');
+        if ($this->filled('password_confirmation_temp')) {
+            $passwordConfirmation = $this->input('password_confirmation_temp');
+        } elseif (empty($passwordConfirmation)) {
+            $passwordConfirmation = null;
+        }
+
         // 원본 필드 값도 유지하여 validation 실패 시 입력값이 보존되도록 함
         $this->merge([
             'login_id' => trim((string) $this->input('login_id')),
-            'password' => $this->input('password'), // 비밀번호 값 유지
-            'password_confirmation' => $this->input('password_confirmation'), // 비밀번호 확인 값 유지
+            'password' => $password, // 비밀번호 값 유지
+            'password_confirmation' => $passwordConfirmation, // 비밀번호 확인 값 유지
+            'password_temp' => $password, // hidden 필드용
+            'password_confirmation_temp' => $passwordConfirmation, // hidden 필드용
             'name' => trim((string) $this->input('name')),
             'contact' => $studentContact,
             'student_contact' => $studentContactOriginal, // 원본 값 유지 (하이픈 포함)
@@ -176,5 +192,3 @@ class MemberOverFourteenRegisterRequest extends FormRequest
         return $digits;
     }
 }
-
-

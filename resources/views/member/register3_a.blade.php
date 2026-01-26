@@ -50,10 +50,11 @@
 					<dl>
 						<dt>비밀번호<span>*</span></dt>
 						<dd class="password-wrap">
-							<input type="password" name="password" class="text w100p password-input" placeholder="영문/숫자/특수문자를 포함하여 9~12자리로 입력해주세요.">
+							<input type="password" name="password" class="text w100p password-input" value="{{ old('password') }}" placeholder="영문/숫자/특수문자를 포함하여 9~12자리로 입력해주세요.">
 							<button type="button" class="btn-eye toggle-password r16">
 								<img src="/images/icon_eye.svg" alt="보기">
 							</button>
+							<input type="hidden" name="password_temp" class="password-temp" value="{{ old('password_temp', old('password')) }}">
 							@error('password')
 							<p class="error_alert">{{ $message }}</p>
 							@enderror
@@ -62,7 +63,8 @@
 					<dl>
 						<dt>비밀번호 확인<span>*</span></dt>
 						<dd>
-							<input type="password" name="password_confirmation" class="text w100p" placeholder="비밀번호를 다시 입력해주세요.">
+							<input type="password" name="password_confirmation" class="text w100p" value="{{ old('password_confirmation') }}" placeholder="비밀번호를 다시 입력해주세요.">
+							<input type="hidden" name="password_confirmation_temp" class="password-confirmation-temp" value="{{ old('password_confirmation_temp', old('password_confirmation')) }}">
 						</dd>
 					</dl>
 					<dl>
@@ -255,7 +257,7 @@
 			<div class="scroll">
 				<div class="inputs">
 					<dl>
-						<dt>시/도</dt>
+						<dt>지역</dt>
 						<dd>
 							<div class="flex city">
 								<select class="search_city">
@@ -295,7 +297,7 @@
 						</colgroup>
 						<thead>
 							<tr>
-								<th>시/도</th>
+								<th>지역</th>
 								<th>학교명</th>
 								<th>선택</th>
 							</tr>

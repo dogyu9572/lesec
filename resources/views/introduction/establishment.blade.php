@@ -1,4 +1,12 @@
 @extends('layouts.app')
+
+@php
+    $gNum = '04';
+    $sNum = '02';
+    $gName = '센터소개';
+    $sName = '설립목적';
+@endphp
+
 @section('content')
 <main class="pb">
 

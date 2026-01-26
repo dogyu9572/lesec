@@ -118,8 +118,33 @@
                                 </div>
                                 
                                 <div class="form-group">
-                                    <label for="email">이메일</label>
-                                    <input type="email" id="email" name="email" value="{{ old('email') }}" required>
+                                    <label>이메일</label>
+                                    @php
+                                        $emailValue = old('email');
+                                        $emailParts = is_string($emailValue) && str_contains($emailValue, '@') ? explode('@', $emailValue, 2) : [old('email_id', ''), old('email_domain', '')];
+                                        $emailIdValue = $emailParts[0] ?? '';
+                                        $emailDomainValue = $emailParts[1] ?? '';
+                                        $presetDomains = ['naver.com', 'gmail.com', 'daum.net', 'nate.com'];
+                                        $selectedDomain = in_array($emailDomainValue, $presetDomains, true) ? $emailDomainValue : (trim($emailDomainValue) !== '' ? 'custom' : '');
+                                        $customDomainValue = $selectedDomain === 'custom' ? $emailDomainValue : old('email_domain_custom', '');
+                                    @endphp
+                                    <div style="display:flex; gap:8px; align-items:center;">
+                                        <input type="text" id="email_id" name="email_id" value="{{ old('email_id', $emailIdValue) }}" placeholder="이메일" required>
+                                        <span>@</span>
+                                        <select id="email_domain" name="email_domain">
+                                            <option value="">선택</option>
+                                            @foreach($presetDomains as $domain)
+                                                <option value="{{ $domain }}" @selected(old('email_domain', $selectedDomain) === $domain)>{{ $domain }}</option>
+                                            @endforeach
+                                            <option value="custom" @selected(old('email_domain', $selectedDomain) === 'custom')>직접 입력</option>
+                                        </select>
+                                    </div>
+                                    <input type="text"
+                                        id="email_domain_custom"
+                                        name="email_domain_custom"
+                                        value="{{ old('email_domain_custom', $customDomainValue) }}"
+                                        placeholder="직접 입력 시 도메인을 입력해 주세요."
+                                        style="display:none; margin-top:8px;">
                                 </div>
                                 
                                 <div class="form-group">
@@ -138,6 +163,10 @@
                                             <input type="checkbox" name="sms_consent" value="1" @checked(old('sms_consent'))>
                                             <span>SMS</span>
                                         </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" name="kakao_consent" value="1" @checked(old('kakao_consent'))>
+                                            <span>카카오 알림톡</span>
+                                        </label>
                                     </div>
                                 </div>
                             </div>
@@ -147,13 +176,23 @@
                             <div class="section-title">소속 정보</div>
                             <div class="form-grid grid-2">
                                 <div class="form-group">
-                                    <label for="city">시</label>
-                                    <input type="text" id="city" name="city" value="{{ old('city') }}">
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label for="city2">도</label>
-                                    <input type="text" id="city2" name="city2" value="{{ old('city2') }}">
+                                    <label>지역</label>
+                                    @php
+                                        $cityValue = old('city');
+                                        $districtValue = old('district');
+                                        $cityDisplay = is_string($cityValue) && trim($cityValue) !== '' ? $cityValue : '선택';
+                                        $districtDisplay = is_string($districtValue) && trim($districtValue) !== '' ? $districtValue : '선택';
+                                    @endphp
+                                    <div style="display:flex; gap:8px; align-items:center;">
+                                        <select id="city_display" disabled>
+                                            <option value="{{ $cityDisplay }}" selected>{{ $cityDisplay }}</option>
+                                        </select>
+                                        <select id="district_display" disabled>
+                                            <option value="{{ $districtDisplay }}" selected>{{ $districtDisplay }}</option>
+                                        </select>
+                                    </div>
+                                    <input type="hidden" id="city" name="city" value="{{ old('city') }}">
+                                    <input type="hidden" id="district" name="district" value="{{ old('district') }}">
                                 </div>
                                 
                                 <div class="form-group">
@@ -254,7 +293,7 @@
 
 @endsection
 @section('scripts')
-<script src="{{ asset('js/backoffice/members.js') }}"></script>
-<script src="{{ asset('js/backoffice/school-search.js') }}"></script>
+<script src="{{ asset('js/backoffice/members.js') }}?v={{ time() }}"></script>
+<script src="{{ asset('js/backoffice/school-search.js') }}?v={{ time() }}"></script>
 @endsection
 

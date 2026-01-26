@@ -4,10 +4,11 @@
     
 	<div class="inner">
 
-		<div class="btit"><strong>나의 신청내역(단체)</strong></div>
+		<div class="btit"><strong>나의 신청내역(단체)</strong><p>프로그램명 클릭시 상세정보 확인이 가능합니다.</p></div>
 		
 		<div class="board_top vab">
 			<div class="total">TOTAL<strong>{{ $applications->total() }}</strong></div>
+			<!-- <p class="mt8">프로그램명 클릭시 상세정보 확인이 가능합니다.</p> -->
 		</div>
 
 		@if($applications->count() > 0)
@@ -45,7 +46,7 @@
 						<td class="num">{{ $applications->total() - ($applications->currentPage() - 1) * $applications->perPage() - $loop->index }}</td>
 						<td class="appli02">{{ $application->application_number ?? '-' }}</td>
 						<td class="appli03">{{ $application->education_type_label }}</td>
-						<td class="appli04 tal">
+						<td class="appli04">
 							<a href="{{ route('mypage.application_view', $application->id) }}">
 								{{ $application->reservation->program_name ?? '-' }}
 							</a>

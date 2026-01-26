@@ -37,6 +37,14 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow-y: auto;
+            min-height: 0;
+        }
+        
+        /* HTML 콘텐츠일 때는 위에서 시작 */
+        .popup-body.popup-body-html {
+            align-items: flex-start;
+            padding: 20px;
         }
         
         .popup-body img {
@@ -58,6 +66,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-shrink: 0;
         }
         
         .popup-today-label {
@@ -99,7 +108,7 @@
 </head>
 <body>
     <div class="popup-container">
-        <div class="popup-body">
+        <div class="popup-body {{ $popup->popup_type === 'html' ? 'popup-body-html' : '' }}">
             @if($popup->popup_type === 'image' && $popup->popup_image)
                 @if($popup->url)
                     <a href="{{ $popup->url }}" target="{{ $popup->url_target }}">

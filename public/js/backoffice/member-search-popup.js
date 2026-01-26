@@ -301,6 +301,7 @@ function applySelectedMember() {
             // applySelectedMember 함수 확인 (단수 함수명 사용)
             await waitForParentFunction('applySelectedMember');
             
+            
             // 여러 명 선택 시 배열로 전달, 단일 선택 시 객체로 전달
             if (selectedMembers.length === 1) {
                 window.opener.applySelectedMember(selectedMembers[0]);

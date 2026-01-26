@@ -178,6 +178,7 @@
         </div>
     </div>
 </div>
+
 @endsection
 
 @section('scripts')
@@ -236,12 +237,34 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // SMS/메일 발송 버튼 (기능 없음)
+    // SMS/메일 발송 버튼
     const smsEmailBtn = document.getElementById('sms-email-btn');
+    
     if (smsEmailBtn) {
         smsEmailBtn.addEventListener('click', function() {
-            // TODO: SMS/메일 발송 기능 구현
-            alert('SMS/메일 발송 기능은 준비 중입니다.');
+            // 선택된 명단 확인
+            const selectedIds = Array.from(document.querySelectorAll('.roster-checkbox:checked'))
+                .map(function(checkbox) {
+                    return checkbox.value;
+                });
+            
+            if (selectedIds.length === 0) {
+                alert('발송할 명단을 선택해주세요.');
+                return;
+            }
+            
+            // 팝업 창 열기
+            const url = '{{ route("backoffice.popup-windows.sms-email") }}?reservation_ids=' + selectedIds.join(',');
+            const popupWindow = window.open(
+                url,
+                'smsEmailPopup',
+                'width=600,height=700,scrollbars=yes,resizable=yes'
+            );
+            
+            // 팝업 창이 차단되었는지 확인
+            if (!popupWindow || popupWindow.closed || typeof popupWindow.closed === 'undefined') {
+                alert('팝업이 차단되었습니다. 팝업 차단을 해제해주세요.');
+            }
         });
     }
 });

@@ -14,14 +14,19 @@
 				<li class="i3"><i></i><p>회원정보 입력</p></li>
 				<li class="i4"><i></i><p>회원가입 완료</p></li>
 			</ol>
+			
+			@php
+				$member_type = request('member_type');   // ★ GET 파라미터로 받기
+			@endphp
 		
 			<div class="stit mb0">본인 인증</div>
-			<p class="stb">서비스 이용을 위해 <strong class="c_blue">본인 인증</strong>이 필요합니다.<br/>만 14세 미만 회원은 보호자 동의 후 가입이 가능하며, 만 14세 이상 회원은 본인 명의 휴대전화 및 문자로 인증을 진행합니다.</p>
-			<div class="mem_half years_type">
+			<p class="stb">서비스 이용을 위해 <strong class="c_blue">본인 인증</strong>이 필요합니다.<br/>
+			@if($member_type !== 'teacher')
+				만 14세 미만 회원은 보호자 동의 후 가입이 가능하며, 만 14세 이상 회원은 본인 명의 휴대전화 및 문자로 인증을 진행합니다.
+			@endif
+			</p>
+			<div class="mem_half years_type {{ $member_type === 'teacher' ? 'mem_half_center' : '' }}">
 				<!-- <a href="{{ route('member.register2_a') }}" class="btn01"><span class="tt">만 14세 미만 회원</span><p>만 14세 미안 회원은 개인정보보호법에 따라 <br/><strong>법정대리인(보호자)의 동의</strong>가 필요합니다.</p></a> -->
-				@php
-					$member_type = request('member_type');   // ★ GET 파라미터로 받기
-				@endphp
 
 				{{-- 만 14세 미만 회원: teacher가 아닐 때만 표시 --}}
 				@if($member_type !== 'teacher')

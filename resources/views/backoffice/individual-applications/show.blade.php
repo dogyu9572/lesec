@@ -138,18 +138,24 @@
                                     <label>학년/반</label>
                                     <div class="grade-class-wrapper">
                                         <div class="grade-class-item">
+                                            @php
+                                                $grade = $application->applicant_grade ?? $application->member->grade ?? null;
+                                            @endphp
                                             <select id="applicant_grade" name="applicant_grade" disabled>
                                                 <option value="">학년</option>
                                                 @for($i = 1; $i <= 3; $i++)
-                                                    <option value="{{ $i }}" @selected($application->applicant_grade == $i)>{{ $i }}학년</option>
+                                                    <option value="{{ $i }}" @selected($grade == $i)>{{ $i }}학년</option>
                                                 @endfor
                                             </select>
                                         </div>
                                         <div class="grade-class-item">
+                                            @php
+                                                $class = $application->applicant_class ?? $application->member->class_number ?? null;
+                                            @endphp
                                             <select id="applicant_class" name="applicant_class" disabled>
                                                 <option value="">반</option>
                                                 @for($i = 1; $i <= 20; $i++)
-                                                    <option value="{{ $i }}" @selected($application->applicant_class == $i)>{{ $i }}반</option>
+                                                    <option value="{{ $i }}" @selected($class == $i)>{{ $i }}반</option>
                                                 @endfor
                                             </select>
                                         </div>

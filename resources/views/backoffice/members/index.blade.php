@@ -68,8 +68,11 @@
                             <select id="city" name="city" class="filter-select">
                                 <option value="">전체</option>
                                 @foreach($cities as $city)
-                                    <option value="{{ $city }}" @selected(request('city') == $city)>{{ $city }}</option>
+                                    @if($city && $city !== '전체' && $city !== '외국학교' && $city !== '기타')
+                                        <option value="{{ $city }}" @selected(request('city') == $city)>{{ $city }}</option>
+                                    @endif
                                 @endforeach
+                                <option value="기타" @selected(request('city') == '기타')>기타</option>
                             </select>
                         </div>
                        
@@ -116,7 +119,7 @@
                                     <option value="school_name" @selected(request('search_type') == 'school_name')>학교명</option>
                                     <option value="email" @selected(request('search_type') == 'email')>이메일</option>
                                     <option value="contact" @selected(request('search_type') == 'contact')>연락처</option>
-                                    <option value="city" @selected(request('search_type') == 'city')>소속/시도</option>
+                                    <option value="city" @selected(request('search_type') == 'city')>지역</option>
                                     <option value="grade" @selected(request('search_type') == 'grade')>학년</option>
                                 </select>
                                 <input type="text" id="search_keyword" name="search_keyword" class="filter-input search-keyword-input"
@@ -165,21 +168,21 @@
                                 <th style="width: 40px;" class="board-checkbox-column">
                                     <input type="checkbox" id="select-all" class="form-check-input">
                                 </th>
-                                <th>No</th>
-                                <th>회원구분</th>
-                                <th>ID</th>
-                                <th>이름</th>
-                                <th>성별</th>
-                                <th>소속 시/도</th>
-                                <th>소속학교</th>
-                                <th>학년</th>
-                                <th>반</th>
-                                <th>생년월일</th>
-                                <th>연락처1</th>
-                                <th>연락처2</th>
-                                <th>이메일주소</th>
-                                <th>가입일시</th>
-                                <th>관리</th>
+                                <th class="text-center">No</th>
+                                <th class="text-center" style="width: 80px;">회원구분</th>
+                                <th class="text-center">ID</th>
+                                <th class="text-center">이름</th>
+                                <th class="text-center" style="width: 40px;">성별</th>
+                                <th class="text-center">지역</th>
+                                <th class="text-center">소속학교</th>
+                                <th class="text-center" style="width: 40px;">학년</th>
+                                <th class="text-center">반</th>
+                                <th class="text-center">생년월일</th>
+                                <th class="text-center">연락처1</th>
+                                <th class="text-center">연락처2</th>
+                                <th class="text-center">이메일주소</th>
+                                <th class="text-center">가입일시</th>
+                                <th class="text-center" style="width: 200px;">관리</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -197,7 +200,7 @@
                                     <td>{{ $member->login_id }}</td>
                                     <td>{{ $member->name }}</td>
                                     <td>{{ $member->gender === 'male' ? '남' : '여' }}</td>
-                                    <td>{{ $member->city }}</td>
+                                    <td>{{ empty($member->city) || $member->city === '외국학교' ? '기타' : $member->city }}</td>
                                     <td>{{ $member->school_name }}</td>
                                     <td>{{ $member->grade ?? '-' }}</td>
                                     <td>{{ $member->class_number ?? '-' }}</td>
@@ -223,28 +226,7 @@
                             @endforeach
                         </tbody>
                     </table>
-                </div>
-
-                <!-- 하단 액션 영역 -->
-                <div class="list-footer-actions" style="margin-top: 15px;">
-                    <div class="footer-actions-right">
-                        <select class="btn btn-secondary btn-sm" disabled style="margin-right: 10px;">
-                            <option>메일LIST</option>
-                        </select>
-                        <button type="button" class="btn btn-primary btn-sm" disabled style="margin-right: 10px;">
-                            메일전송
-                        </button>
-                        <button type="button" class="btn btn-secondary btn-sm" disabled style="margin-right: 10px;">
-                            미리보기
-                        </button>
-                        <select class="btn btn-secondary btn-sm" disabled style="margin-right: 10px;">
-                            <option>문자LIST</option>
-                        </select>
-                        <button type="button" class="btn btn-primary btn-sm" disabled>
-                            문자전송
-                        </button>
-                    </div>
-                </div>
+                </div>               
 
                 <x-pagination :paginator="$members" />
             @else
@@ -255,21 +237,21 @@
                                 <th style="width: 40px;" class="board-checkbox-column">
                                     <input type="checkbox" id="select-all" class="form-check-input" disabled>
                                 </th>
-                                <th>No</th>
-                                <th>회원구분</th>
-                                <th>ID</th>
-                                <th>이름</th>
-                                <th>성별</th>
-                                <th>소속 시/도</th>
-                                <th>소속학교</th>
-                                <th>학년</th>
-                                <th>반</th>
-                                <th>생년월일</th>
-                                <th>연락처1</th>
-                                <th>연락처2</th>
-                                <th>이메일주소</th>
-                                <th>가입일시</th>
-                                <th style="width: 150px;">관리</th>
+                                <th class="text-center">No</th>
+                                <th class="text-center" style="width: 90px;">회원구분</th>
+                                <th class="text-center">ID</th>
+                                <th class="text-center">이름</th>
+                                <th class="text-center" style="width: 70px;">성별</th>
+                                <th class="text-center">소속 시/도</th>
+                                <th class="text-center">소속학교</th>
+                                <th class="text-center" style="width: 70px;">학년</th>
+                                <th class="text-center">반</th>
+                                <th class="text-center">생년월일</th>
+                                <th class="text-center">연락처1</th>
+                                <th class="text-center">연락처2</th>
+                                <th class="text-center">이메일주소</th>
+                                <th class="text-center">가입일시</th>
+                                <th class="text-center" style="width: 150px;">관리</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -287,8 +269,30 @@
 <script>
 function withdrawMember(memberId) {
     if (confirm('이 회원을 탈퇴 처리하시겠습니까?')) {
-        // 추후 구현
-        alert('탈퇴 기능은 준비 중입니다.');
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        if (!csrfToken) {
+            alert('보안 토큰이 없어 삭제할 수 없습니다. 새로고침 후 다시 시도해주세요.');
+            return;
+        }
+
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/backoffice/members/${memberId}`;
+
+        const csrf = document.createElement('input');
+        csrf.type = 'hidden';
+        csrf.name = '_token';
+        csrf.value = csrfToken;
+        form.appendChild(csrf);
+
+        const method = document.createElement('input');
+        method.type = 'hidden';
+        method.name = '_method';
+        method.value = 'DELETE';
+        form.appendChild(method);
+
+        document.body.appendChild(form);
+        form.submit();
     }
 }
 
@@ -412,16 +416,13 @@ function exportSelectedMembers() {
         .filter(checkbox => checkbox.checked)
         .map(checkbox => checkbox.value);
 
-    if (selectedMembers.length === 0) {
-        alert('다운로드할 회원을 선택해주세요.');
-        return;
-    }
-
     // 현재 필터 파라미터 유지하면서 선택된 회원 ID만 추가
     const params = new URLSearchParams(window.location.search);
-    selectedMembers.forEach(id => {
-        params.append('member_ids[]', id);
-    });
+    if (selectedMembers.length > 0) {
+        selectedMembers.forEach(id => {
+            params.append('member_ids[]', id);
+        });
+    }
 
     // 엑셀 다운로드 URL로 이동
     window.location.href = '{{ route("backoffice.members.export") }}?' + params.toString();

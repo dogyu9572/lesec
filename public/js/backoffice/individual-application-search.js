@@ -45,16 +45,18 @@ document.addEventListener('DOMContentLoaded', function () {
     const programModalClose = programSearchModal ? programSearchModal.querySelector('.category-modal-close') : null;
 
     // 추첨결과 연동
-    const receptionTypeSelect = document.getElementById('reception_type');
+    const receptionTypeRadios = document.querySelectorAll('input[name="reception_type"]');
     const drawResultSelect = document.getElementById('draw_result_select');
     const drawResultHidden = document.getElementById('draw_result');
 
     function handleDrawResultLock() {
-        if (!receptionTypeSelect || !drawResultSelect || !drawResultHidden) {
+        if (!drawResultSelect || !drawResultHidden) {
             return;
         }
 
-        if (receptionTypeSelect.value === 'lottery') {
+        const selectedReceptionType = document.querySelector('input[name="reception_type"]:checked')?.value;
+        
+        if (selectedReceptionType === 'lottery') {
             drawResultSelect.disabled = false;
         } else {
             drawResultSelect.value = '';
@@ -71,7 +73,10 @@ document.addEventListener('DOMContentLoaded', function () {
         drawResultHidden.value = drawResultSelect.value;
     }
 
-    receptionTypeSelect?.addEventListener('change', handleDrawResultLock);
+    // 라디오 버튼 변경 이벤트
+    receptionTypeRadios.forEach(radio => {
+        radio.addEventListener('change', handleDrawResultLock);
+    });
     handleDrawResultLock();
 
     // 회원 검색 모달 열기

@@ -59,7 +59,85 @@
                     <form method="POST" action="{{ route('backoffice.individual-applications.store') }}">
                         @csrf
 
-                        
+                        <div class="program-section">
+                            <div class="section-title">프로그램 정보</div>
+                            <div class="form-grid grid-2">
+                                <div>
+                                    <label>신청유형</label>
+                                    <div class="radio-group">
+                                        @foreach($receptionTypes ?? [] as $value => $label)
+                                            <label class="radio-label">
+                                                <input type="radio" name="reception_type" value="{{ $value }}" @checked(old('reception_type') === $value)>
+                                                <span>{{ $label }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                    @error('reception_type')
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div>
+                                    <label>교육유형</label>
+                                    <div class="radio-group">
+                                        @foreach($educationTypes ?? [] as $value => $label)
+                                            <label class="radio-label">
+                                                <input type="radio" name="education_type" value="{{ $value }}" @checked(old('education_type') === $value)>
+                                                <span>{{ $label }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                    @error('education_type')
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="form-group grid-span-2">
+                                    <label for="program_name">프로그램명</label>
+                                    <div class="school-search-wrapper">
+                                        <input type="hidden" id="program_reservation_id" name="program_reservation_id" value="{{ old('program_reservation_id') }}">
+                                        <input type="text" id="program_name" name="program_name" value="{{ old('program_name') }}" readonly>
+                                        <button type="button" id="program-search-btn" class="btn btn-secondary btn-sm">
+                                            <i class="fas fa-search"></i> 검색
+                                        </button>
+                                    </div>
+                                    @error('program_reservation_id')
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
+                                    @error('program_name')
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="form-group">
+                                    <label for="participation_date_display">참가일</label>
+                                    <input type="hidden" id="participation_date" name="participation_date" value="{{ old('participation_date') }}">
+                                    <input type="text" id="participation_date_display" value="{{ $participationDateDisplay }}" readonly>
+                                    @error('participation_date')
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="form-group">
+                                    <label for="participation_fee_display">참가비</label>
+                                    <input type="hidden" id="participation_fee" name="participation_fee" value="{{ old('participation_fee') }}">
+                                    <input type="text" id="participation_fee_display" value="{{ $participationFeeDisplay }}" readonly>
+                                    @error('participation_fee')
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div>
+                                    <label>결제방법</label>
+                                    <div class="radio-group">
+                                        @foreach($paymentMethods ?? [] as $value => $label)
+                                            <label class="radio-label">
+                                                <input type="radio" name="payment_method" value="{{ $value }}" @checked(old('payment_method') === $value)>
+                                                <span>{{ $label }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                    @error('payment_method')
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
 
                         <div class="program-section">
                             <div class="section-title">신청 정보</div>

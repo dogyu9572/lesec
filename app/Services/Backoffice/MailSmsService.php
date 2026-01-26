@@ -18,8 +18,7 @@ class MailSmsService
 {
     public function __construct(
         private readonly SmsKakaoApiService $smsKakaoApiService
-    ) {
-    }
+    ) {}
 
     /**
      * 메일/SMS 목록 조회
@@ -150,6 +149,22 @@ class MailSmsService
     }
 
     /**
+     * 수신자(대상 회원)만 동기화 (편집 화면에서 실시간 저장용)
+     */
+    public function syncRecipientsSelection(MailSmsMessage $message, array $memberIds, ?int $memberGroupId = null): MailSmsMessage
+    {
+        return DB::transaction(function () use ($message, $memberIds, $memberGroupId) {
+            $message->update([
+                'member_group_id' => $memberGroupId,
+            ]);
+
+            $this->syncRecipients($message, $memberIds);
+
+            return $message->fresh(['writer', 'memberGroup', 'recipients']);
+        });
+    }
+
+    /**
      * 메일/SMS 삭제
      */
     /**
@@ -158,14 +173,14 @@ class MailSmsService
     public function bulkDelete(array $messageIds): int
     {
         $deletedCount = 0;
-        
+
         foreach ($messageIds as $messageId) {
             $message = MailSmsMessage::find($messageId);
             if ($message && $this->deleteMessage($message)) {
                 $deletedCount++;
             }
         }
-        
+
         return $deletedCount;
     }
 
@@ -249,7 +264,6 @@ class MailSmsService
                             'updated_at' => $now,
                         ];
                         $successCount++;
-
                     } else {
                         // SMS 또는 카카오 알림톡 발송
                         $phone = $recipient->member_contact;
@@ -305,7 +319,6 @@ class MailSmsService
                             $failureCount++;
                         }
                     }
-
                 } catch (\Exception $e) {
                     Log::error('메시지 발송 중 오류 발생', [
                         'message_id' => $message->id,
@@ -366,8 +379,8 @@ class MailSmsService
             $keyword = $request->keyword;
             $query->where(function ($q) use ($keyword) {
                 $q->where('member_name', 'like', "%{$keyword}%")
-                  ->orWhere('member_email', 'like', "%{$keyword}%")
-                  ->orWhere('member_contact', 'like', "%{$keyword}%");
+                    ->orWhere('member_email', 'like', "%{$keyword}%")
+                    ->orWhere('member_contact', 'like', "%{$keyword}%");
             });
         }
 
@@ -404,8 +417,8 @@ class MailSmsService
             $keyword = $request->keyword;
             $query->where(function ($q) use ($keyword) {
                 $q->where('member_name', 'like', "%{$keyword}%")
-                  ->orWhere('member_email', 'like', "%{$keyword}%")
-                  ->orWhere('member_contact', 'like', "%{$keyword}%");
+                    ->orWhere('member_email', 'like', "%{$keyword}%")
+                    ->orWhere('member_contact', 'like', "%{$keyword}%");
             });
         }
 
@@ -456,14 +469,14 @@ class MailSmsService
         $searchKeyword = trim($request->input('search_keyword', ''));
         if (!empty($searchKeyword)) {
             $searchType = $request->input('search_type', 'all');
-            
+
             $query->where(function ($q) use ($searchType, $searchKeyword) {
                 if ($searchType === 'all') {
                     $q->where('name', 'like', "%{$searchKeyword}%")
-                      ->orWhere('login_id', 'like', "%{$searchKeyword}%")
-                      ->orWhere('school_name', 'like', "%{$searchKeyword}%")
-                      ->orWhere('email', 'like', "%{$searchKeyword}%")
-                      ->orWhere('contact', 'like', "%{$searchKeyword}%");
+                        ->orWhere('login_id', 'like', "%{$searchKeyword}%")
+                        ->orWhere('school_name', 'like', "%{$searchKeyword}%")
+                        ->orWhere('email', 'like', "%{$searchKeyword}%")
+                        ->orWhere('contact', 'like', "%{$searchKeyword}%");
                 } else {
                     $q->where($searchType, 'like', "%{$searchKeyword}%");
                 }
@@ -484,7 +497,7 @@ class MailSmsService
             ->where('member_group_id', $groupId)
             ->orderBy('name')
             ->get(['id', 'name', 'email', 'contact'])
-            ->map(fn (Member $member) => [
+            ->map(fn(Member $member) => [
                 'id' => $member->id,
                 'name' => $member->name,
                 'email' => $member->email,
@@ -499,8 +512,8 @@ class MailSmsService
     private function syncRecipients(MailSmsMessage $message, array $memberIds): void
     {
         $uniqueIds = collect($memberIds)
-            ->filter(fn ($id) => $id !== null && $id !== '')
-            ->map(fn ($id) => (int) $id)
+            ->filter(fn($id) => $id !== null && $id !== '')
+            ->map(fn($id) => (int) $id)
             ->unique()
             ->values();
 
@@ -519,7 +532,7 @@ class MailSmsService
         $now = Carbon::now();
         $message->recipients()->delete();
 
-        $insertRows = $members->map(fn (Member $member) => [
+        $insertRows = $members->map(fn(Member $member) => [
             'mail_sms_message_id' => $message->id,
             'member_id' => $member->id,
             'member_name' => $member->name,
@@ -540,7 +553,7 @@ class MailSmsService
     {
         return DB::transaction(function () use ($message, $recipientId) {
             $recipient = $message->recipients()->where('id', $recipientId)->first();
-            
+
             if (!$recipient) {
                 throw new InvalidArgumentException('수신자를 찾을 수 없습니다.');
             }
@@ -549,5 +562,3 @@ class MailSmsService
         });
     }
 }
-
-

@@ -167,7 +167,7 @@
 
 @once
 @push('scripts')
-<script src="{{ asset('js/backoffice/reservation-calendar.js') }}"></script>
+<script src="{{ asset('js/backoffice/reservation-calendar.js') }}?v={{ time() }}"></script>
 @endpush
 @endonce
 

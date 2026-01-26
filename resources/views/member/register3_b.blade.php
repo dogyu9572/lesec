@@ -57,6 +57,7 @@
 									<img src="/images/icon_eye.svg" alt="보기">
 								</button>
 							</div>
+							<input type="hidden" name="password_temp" class="password-temp" value="{{ old('password_temp', old('password')) }}">
 							@error('password')
 							<p class="error_alert">{{ $message }}</p>
 							@enderror
@@ -66,6 +67,7 @@
 						<dt>비밀번호 확인<span>*</span></dt>
 						<dd>
 							<input type="password" name="password_confirmation" class="text w100p" value="{{ old('password_confirmation') }}" placeholder="비밀번호를 다시 입력해주세요.">
+							<input type="hidden" name="password_confirmation_temp" class="password-confirmation-temp" value="{{ old('password_confirmation_temp', old('password_confirmation')) }}">
 						</dd>
 					</dl>
 					<dl>
@@ -99,7 +101,7 @@
 						</dd>
 					</dl>
 					<dl>
-						<dt>학생 연락처<span>*</span></dt>
+						<dt>{{ $memberType === 'teacher' ? '연락처' : '학생 연락처' }}<span>*</span></dt>
 						<dd>
 							<div class="flex inbtn">
 								<input type="text" name="student_contact" value="{{ old('student_contact') }}" placeholder="휴대폰번호를 입력해주세요." data-phone-input inputmode="tel" autocomplete="tel" data-original-contact="{{ preg_replace('/[^0-9]/', '', old('student_contact') ?? '') }}">
@@ -117,6 +119,7 @@
 							@enderror
 						</dd>
 					</dl>
+					@if($memberType === 'student')
 					<dl>
 						<dt>보호자 연락처<span>*</span></dt>
 						<dd>
@@ -126,6 +129,7 @@
 							@enderror
 						</dd>
 					</dl>
+					@endif
 					<dl>
 						<dt>이메일<span>*</span></dt>
 						<dd>
@@ -271,7 +275,7 @@
 			<div class="scroll">
 				<div class="inputs">
 					<dl>
-						<dt>시/도</dt>
+						<dt>지역</dt>
 						<dd>
 							<div class="flex city">
 								<select class="search_city">
@@ -311,7 +315,7 @@
 						</colgroup>
 						<thead>
 							<tr>
-								<th>시/도</th>
+								<th>지역</th>
 								<th>학교명</th>
 								<th>선택</th>
 							</tr>

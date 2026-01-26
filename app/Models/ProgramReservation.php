@@ -152,29 +152,29 @@ class ProgramReservation extends Model
             if ($this->reception_type === 'lottery') {
                 return 'application';
             }
-            
+
             // 네이버폼도 항상 신청 가능
             if ($this->reception_type === 'naver_form') {
                 return 'application';
             }
-            
+
             // 선착순만 정원 체크
             if ($this->reception_type === 'first_come') {
                 if ($this->is_unlimited_capacity) {
                     return 'application';
                 }
-                
+
                 $capacity = $this->capacity ?? 0;
                 $appliedCount = $this->applied_count ?? 0;
-                
+
                 if ($appliedCount >= $capacity) {
                     return 'closed';
                 }
-                
+
                 return 'application';
             }
         }
-        
+
         // 단체 프로그램용 기존 로직
         if ($this->is_unlimited_capacity) {
             return 'application';
@@ -216,6 +216,11 @@ class ProgramReservation extends Model
             return 'scheduled';
         }
 
+        // 신청 종료일이 지났으면 마감
+        if ($this->application_end_date instanceof Carbon && $this->application_end_date->lt($now)) {
+            return 'closed';
+        }
+
         if ($this->current_reception_type === 'closed' && !empty($this->waitlist_url)) {
             return 'waitlist';
         }
@@ -248,7 +253,7 @@ class ProgramReservation extends Model
         if ($this->application_type === 'individual') {
             return $this->applications()->count();
         }
-        
+
         // 단체 프로그램은 기존 로직 유지
         return max(0, $this->applied_count ?? 0);
     }

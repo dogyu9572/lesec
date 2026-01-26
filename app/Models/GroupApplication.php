@@ -109,16 +109,7 @@ class GroupApplication extends Model
             return static::PAYMENT_METHOD_LABELS[$this->payment_method] ?? $this->payment_method;
         }
 
-        if (is_array($this->payment_methods) && count($this->payment_methods) > 0) {
-            $labels = [];
-            foreach ($this->payment_methods as $method) {
-                $labels[] = static::PAYMENT_METHOD_LABELS[$method] ?? $method;
-            }
-
-            return implode(', ', $labels);
-        }
-
-        return '-';
+        return '미선택';
     }
 
     public function getParticipationDateFormattedAttribute(): ?string
@@ -126,10 +117,10 @@ class GroupApplication extends Model
         if (!$this->participation_date) {
             return null;
         }
-        
+
         $dayNames = ['일', '월', '화', '수', '목', '금', '토'];
         $dayName = $dayNames[$this->participation_date->dayOfWeek];
-        
+
         return $this->participation_date->format('Y.m.d') . '(' . $dayName . ')';
     }
 
@@ -143,6 +134,3 @@ class GroupApplication extends Model
         return $this->reservation?->program_name ?? '-';
     }
 }
-
-
-

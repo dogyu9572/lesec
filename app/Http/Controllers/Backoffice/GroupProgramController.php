@@ -68,11 +68,16 @@ class GroupProgramController extends BaseController
         $receptionTypes = $this->groupProgramService->getReceptionTypes();
         $paymentMethods = $this->groupProgramService->getPaymentMethods();
 
+        // 현재 신청인원 합계 계산
+        $totalApplicantCount = \App\Models\GroupApplication::where('program_reservation_id', $programReservation->id)
+            ->sum('applicant_count') ?? 0;
+
         return $this->view('backoffice.group-programs.edit', [
             'program' => $programReservation,
             'educationTypes' => $educationTypes,
             'receptionTypes' => $receptionTypes,
             'paymentMethods' => $paymentMethods,
+            'totalApplicantCount' => $totalApplicantCount,
         ]);
     }
 
@@ -106,7 +111,7 @@ class GroupProgramController extends BaseController
     {
         try {
             $programs = $this->groupProgramService->searchPrograms($request);
-            
+
             return response()->json([
                 'programs' => $programs->items(),
                 'pagination' => [

@@ -120,7 +120,7 @@
                         const editUrl = `/backoffice/rosters/${item.program_reservation_id}/edit`;
                         
                         return `
-                            <tr style="cursor: pointer;" onclick="window.open('${editUrl}', '_blank')">
+                            <tr style="cursor: pointer;" onclick="openRosterEditPopup('${editUrl}')">
                                 <td>${scheduleText}</td>
                                 <td>${escapeHtml(item.program_name)}</td>
                                 <td>${capacityText}</td>
@@ -171,7 +171,7 @@
                         const editUrl = `/backoffice/rosters/${item.program_reservation_id}/edit`;
                         
                         return `
-                            <tr style="cursor: pointer;" onclick="window.open('${editUrl}', '_blank')">
+                            <tr style="cursor: pointer;" onclick="openRosterEditPopup('${editUrl}')">
                                 <td>${scheduleText}</td>
                                 <td>${escapeHtml(item.program_name)}</td>
                                 <td>${capacityText}</td>
@@ -210,6 +210,13 @@
             div.textContent = text;
             return div.innerHTML;
         }
+
+        // 명단 편집 팝업 열기
+        window.openRosterEditPopup = function(url) {
+            const width = window.innerWidth <= 768 ? '100%' : '1200';
+            const height = window.innerHeight <= 768 ? '100%' : '800';
+            window.open(url, 'rosterEdit', `width=${width},height=${height},left=100,top=100,scrollbars=yes,resizable=yes`);
+        };
 
         // 월 네비게이션
         document.querySelectorAll('.arrow.prev, .arrow.next').forEach(function(btn) {

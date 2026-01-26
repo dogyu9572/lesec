@@ -1,4 +1,12 @@
 @extends('layouts.app')
+
+@php
+    $gNum = '04';
+    $sNum = '03';
+    $gName = '센터소개';
+    $sName = '연락처';
+@endphp
+
 @section('content')
 <main class="pb">
 
@@ -15,7 +23,7 @@
 				</colgroup>
 				<thead>
 					<tr>
-						<th colspan="2">팀 / 직책</th>
+						<th colspan="2">이름 / 직책</th>
 						<th>전화번호</th>
 						<th>담당업무</th>
 						<th>이메일</th>
@@ -25,14 +33,14 @@
 					@forelse($contacts as $contact)
 						@php
 							$fields = is_array($contact->custom_fields ?? []) ? $contact->custom_fields : [];
-							$team = $fields['team'] ?? $contact->title ?? '';
+							$name = $fields['name'] ?? $contact->title ?? '';
 							$position = $fields['position'] ?? '';
 							$phone = $fields['contact'] ?? '';
 							$responsibilities = $fields['responsibilities'] ?? '';
 							$email = $fields['email'] ?? '';
 						@endphp
 						<tr>
-							<td class="contact0 bdr">{{ $team }}</td>
+							<td class="contact0 bdr">{{ $name }}</td>
 							<td class="contact1">{{ $position }}</td>
 							<td class="contact2">{{ $phone }}</td>
 							<td class="contact3 tal dots_list">

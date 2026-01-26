@@ -74,14 +74,15 @@
 							</div>
 						</dd>
 					</dl>
-					@if ($member->member_type === 'student' && $member->parent_contact)
+					@if ($member->member_type === 'student')
 					<dl>
 						<dt>학생 연락처<span>*</span></dt>
 						<dd>
 							<div class="flex inbtn">
-								<input type="text" name="contact" value="{{ old('contact', $member->formatted_contact ?? $member->contact) }}" placeholder="휴대폰번호를 입력해주세요." data-phone-input inputmode="tel" autocomplete="tel" class="js-contact-input" data-original-contact="{{ preg_replace('/[^0-9]/', '', $member->contact ?? '') }}">
-								<button type="button" class="btn btn_wkk btn_error js-duplicate-check" data-field="contact" data-input="[name='contact']">중복 확인</button>
+								<input type="text" name="contact" value="{{ old('contact', $member->formatted_contact ?? $member->contact) }}" placeholder="휴대폰번호를 입력해주세요." data-phone-input inputmode="tel" autocomplete="tel" class="js-contact-input" data-original-contact="{{ preg_replace('/[^0-9]/', '', $member->contact ?? '') }}" disabled>
+								<button type="button" class="btn btn_wkk btn_error js-duplicate-check" data-field="contact" data-input="[name='contact']" disabled>중복 확인</button>
 							</div>
+							<input type="hidden" name="contact" value="{{ old('contact', $member->formatted_contact ?? $member->contact) }}">
 							<input type="hidden" name="contact_verified" value="1" class="js-contact-verified" data-original-value="1">
 							@error('contact')
 							<p class="error_alert">{{ $message }}</p>
@@ -91,23 +92,28 @@
 							@enderror
 						</dd>
 					</dl>
+					@if ($member->parent_contact)
 					<dl>
 						<dt>보호자 연락처<span>*</span></dt>
 						<dd>
-							<input type="text" name="parent_contact" value="{{ old('parent_contact', $member->formatted_parent_contact ?? $member->parent_contact) }}" placeholder="휴대폰번호를 입력해주세요." data-phone-input inputmode="tel" autocomplete="tel">
+							<input type="text" name="parent_contact" value="{{ old('parent_contact', $member->formatted_parent_contact ?? $member->parent_contact) }}" placeholder="휴대폰번호를 입력해주세요." data-phone-input inputmode="tel" autocomplete="tel" disabled>
+							<input type="hidden" name="parent_contact" value="{{ old('parent_contact', $member->formatted_parent_contact ?? $member->parent_contact) }}">
 							@error('parent_contact')
 							<p class="error_alert">{{ $message }}</p>
 							@enderror
 						</dd>
 					</dl>
+					@endif
 					@else
 					<dl>
 						<dt>연락처<span>*</span></dt>
 						<dd>
 							<div class="flex inbtn">
-								<input type="text" name="contact" value="{{ old('contact', $member->formatted_contact ?? $member->contact) }}" placeholder="휴대폰번호를 입력해주세요." data-phone-input inputmode="tel" autocomplete="tel">
-								<button type="button" class="btn btn_wkk btn_error js-duplicate-check" data-field="contact" data-input="[name='contact']">중복 확인</button>
+								<input type="text" name="contact" value="{{ old('contact', $member->formatted_contact ?? $member->contact) }}" placeholder="휴대폰번호를 입력해주세요." data-phone-input inputmode="tel" autocomplete="tel" class="js-contact-input" data-original-contact="{{ preg_replace('/[^0-9]/', '', $member->contact ?? '') }}" disabled>
+								<button type="button" class="btn btn_wkk btn_error js-duplicate-check" data-field="contact" data-input="[name='contact']" disabled>중복 확인</button>
 							</div>
+							<input type="hidden" name="contact" value="{{ old('contact', $member->formatted_contact ?? $member->contact) }}">
+							<input type="hidden" name="contact_verified" value="1" class="js-contact-verified" data-original-value="1">
 							@error('contact')
 							<p class="error_alert">{{ $message }}</p>
 							@enderror
@@ -143,18 +149,20 @@
 						<dt>지역<span>*</span></dt>
 						<dd>
 							<div class="flex city">
-								<select name="city">
+								<select class="city_select" disabled>
 									<option value="">선택</option>
 									@if (old('city', $member->city))
 									<option value="{{ old('city', $member->city) }}" selected>{{ old('city', $member->city) }}</option>
 									@endif
 								</select>
-								<select name="district">
+								<input type="hidden" name="city" class="city_hidden" value="{{ old('city', $member->city) }}">
+								<select class="district_select" disabled>
 									<option value="">선택</option>
 									@if (old('district', $member->district))
 									<option value="{{ old('district', $member->district) }}" selected>{{ old('district', $member->district) }}</option>
 									@endif
 								</select>
+								<input type="hidden" name="district" class="district_hidden" value="{{ old('district', $member->district) }}">
 							</div>
 							@php
 								$regionError = $errors->first('city') ?: $errors->first('district');
@@ -239,7 +247,7 @@
 			<div class="scroll">
 				<div class="inputs">
 					<dl>
-						<dt>시/도</dt>
+						<dt>지역</dt>
 						<dd>
 							<div class="flex city">
 								<select class="search_city">
@@ -279,7 +287,7 @@
 						</colgroup>
 						<thead>
 							<tr>
-								<th>시/도</th>
+								<th>지역</th>
 								<th>학교명</th>
 								<th>선택</th>
 							</tr>
@@ -306,10 +314,16 @@
 		<div class="gbox flex_center colm">
 			<p>탈퇴 시 회원의 모든 정보가 삭제되며 복구가 불가합니다.<br/>다시 이용하려면 신규가입이 필요합니다.</p>
 		</div>
-		<div class="flex_center check_area">
-			<label class="check"><input type="checkbox" id="secession_agree"><i></i>위의 내용을 모두 읽었으며, 내용에 동의합니다.</label>
-		</div>
-		<button type="button" class="btn_check btn btn_kwy" onclick="confirmSecession()">탈퇴하기</button>
+		<form method="POST" action="{{ route('mypage.member.secession') }}" id="secessionForm">
+			@csrf
+			<div class="flex_center check_area">
+				<label class="check">
+					<input type="checkbox" id="secession_agree" name="secession_agree" value="1">
+					<i></i>위의 내용을 모두 읽었으며, 내용에 동의합니다.
+				</label>
+			</div>
+			<button type="button" class="btn_check btn btn_kwy" onclick="confirmSecession()">탈퇴하기</button>
+		</form>
 	</div>
 </div>
 
@@ -367,6 +381,9 @@ $(function() {
 	// 연락처 입력값 변경 시 중복 확인 플래그 초기화
 	$('.js-contact-input').on('input', function() {
 		var $input = $(this);
+		if ($input.is(':disabled')) {
+			return;
+		}
 		var $verified = $input.closest('dd').find('.js-contact-verified');
 		var originalContact = $input.data('original-contact') || '';
 		var currentValue = $input.val().replace(/[^0-9]/g, '');
@@ -385,6 +402,10 @@ $(function() {
 	$('.js-member-register').on('submit', function(e) {
 		var $contactInput = $('.js-contact-input');
 		if ($contactInput.length) {
+			// disabled 상태면 변경 불가이므로 중복 확인 체크 제외
+			if ($contactInput.is(':disabled')) {
+				return true;
+			}
 			var $verified = $contactInput.closest('dd').find('.js-contact-verified');
 			if ($verified.val() !== '1') {
 				e.preventDefault();
@@ -405,7 +426,7 @@ $(function(){
 	// 정보 수정 버튼 클릭 시 비밀번호 입력란 노출
 	$showBtn.on("click", function(e){
 		e.preventDefault();
-		alert('비밀번호를 입력해야 수정이 완료됩니다.');
+		$("html, body").animate({ scrollTop: 0 }, 250);
 		$passwordFields.slideDown(300);
 		$showBtn.hide();
 		$submitBtn.show();
@@ -464,9 +485,8 @@ function confirmSecession() {
 		return;
 	}
 	
-	if (confirm('정말 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
-		// TODO: 회원 탈퇴 API 호출
-		alert('회원 탈퇴 기능은 준비 중입니다.');
+	if (confirm('정말 탈퇴하시겠습니까?')) {
+		$('#secessionForm').trigger('submit');
 	}
 }
 </script>

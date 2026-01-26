@@ -255,6 +255,6 @@
         return true;
     }
 </script>
-<script src="{{ asset('js/backoffice/mail-sms-form.js') }}"></script>
+<script src="{{ asset('js/backoffice/mail-sms-form.js') }}?v={{ @filemtime(public_path('js/backoffice/mail-sms-form.js')) }}"></script>
 @endsection
 

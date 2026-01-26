@@ -18,13 +18,9 @@
         data-member-search-url="{{ route('backoffice.mail-sms.search-members') }}"
         data-csrf-token="{{ csrf_token() }}"></div>
     <div class="form-header">
-       
-        <form action="{{ route('backoffice.mail-sms.send', $message) }}" method="POST" style="display: inline-block; margin-right: 10px;">
-            @csrf
-            <button type="submit" class="btn btn-primary btn-sm" onclick="return confirm('정말 발송하시겠습니까?');">
-                <i class="fas fa-paper-plane"></i> <span class="btn-text">발송</span>
-            </button>
-        </form>
+        <button type="button" class="btn btn-primary btn-sm js-mail-sms-send" style="display: inline-block; margin-right: 10px;">
+            <i class="fas fa-paper-plane"></i> <span class="btn-text">발송</span>
+        </button>
         <a href="{{ route('backoffice.mail-sms.index') }}" class="btn btn-secondary btn-sm">
             <i class="fas fa-arrow-left"></i> <span class="btn-text">목록으로</span>
         </a>
@@ -59,6 +55,7 @@
                     <form action="{{ route('backoffice.mail-sms.update', $message) }}" method="POST" id="mailSmsForm">
                         @csrf
                         @method('PUT')
+                        <input type="hidden" name="send" id="mailSmsSendFlag" value="0">
 
                         <div class="program-section">
                             <div class="section-title">기본 정보</div>
@@ -175,12 +172,9 @@
                         </div>
 
                         <div class="form-actions">
-                            <form action="{{ route('backoffice.mail-sms.send', $message) }}" method="POST" style="display: inline-block;">
-                                @csrf
-                                <button type="submit" class="btn btn-primary" onclick="return confirm('정말 발송하시겠습니까?');">
-                                    <i class="fas fa-paper-plane"></i> 발송
-                                </button>
-                            </form>
+                            <button type="button" class="btn btn-primary btn-sm js-mail-sms-send">
+                                <i class="fas fa-paper-plane"></i> <span class="btn-text">발송</span>
+                            </button>
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-save"></i> 저장
                             </button>                            
@@ -212,11 +206,19 @@
         csrfToken: "{{ csrf_token() }}",
         groupMembersUrlTemplate: "{{ route('backoffice.mail-sms.member-groups.members', ['memberGroup' => '__GROUP_ID__']) }}",
         recipientsUrl: "{{ route('backoffice.mail-sms.recipients', $message) }}",
-        deleteRecipientUrl: "{{ route('backoffice.mail-sms.recipients.delete', ['mailSmsMessage' => $message, 'recipient' => '__RECIPIENT_ID__']) }}"
+        deleteRecipientUrl: "{{ route('backoffice.mail-sms.recipients.delete', ['mailSmsMessage' => $message, 'recipient' => '__RECIPIENT_ID__']) }}",
+        syncRecipientsUrl: "{{ route('backoffice.mail-sms.recipients.sync', $message) }}"
     };
 
     let recipientsLoaded = false;
     let currentRecipientsPage = 1;
+
+    function setRecipientCount(total) {
+        const el = document.querySelector('.recipient-count');
+        if (el) {
+            el.textContent = '(' + total + '명)';
+        }
+    }
 
     function toggleRecipientsAccordion() {
         const content = document.getElementById('recipientsContent');
@@ -275,7 +277,13 @@
         
         if (!recipients || recipients.length === 0) {
             container.innerHTML = '<div class="text-center" style="padding: 40px;">등록된 수신자가 없습니다.</div>';
+            if (pagination && typeof pagination.total === 'number') {
+                setRecipientCount(pagination.total);
+            }
             return;
+        }
+        if (pagination && typeof pagination.total === 'number') {
+            setRecipientCount(pagination.total);
         }
 
         let html = '<div class="table-responsive"><table class="board-table"><thead><tr>';
@@ -323,7 +331,6 @@
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('수신자가 삭제되었습니다.');
                 loadRecipients(currentRecipientsPage);
             } else {
                 alert('삭제 중 오류가 발생했습니다: ' + data.message);
@@ -379,7 +386,23 @@
         html += '</ul></nav>';
         container.innerHTML = html;
     }
+
+    // 발송 버튼: 저장(수정) 후 발송(send=1)
+    document.querySelectorAll('.js-mail-sms-send').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            if (!confirm('정말 발송하시겠습니까?')) {
+                return;
+            }
+            const sendFlag = document.getElementById('mailSmsSendFlag');
+            const form = document.getElementById('mailSmsForm');
+            if (!sendFlag || !form) {
+                return;
+            }
+            sendFlag.value = '1';
+            form.submit();
+        });
+    });
 </script>
-<script src="{{ asset('js/backoffice/mail-sms-form.js') }}"></script>
+<script src="{{ asset('js/backoffice/mail-sms-form.js') }}?v={{ @filemtime(public_path('js/backoffice/mail-sms-form.js')) }}"></script>
 @endsection
 

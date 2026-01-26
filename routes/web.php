@@ -28,29 +28,29 @@ Route::get('/popup/{popup}', [PopupController::class, 'showPopup'])->name('popup
 
 // 인증 관련 라우트
 Route::prefix('auth')->name('auth.')->group(function () {
-    // 로그인
-    Route::get('/login', [LoginController::class, 'showLoginForm'])
-        ->name('login');
-    Route::post('/login', [LoginController::class, 'login']);
-    Route::post('/logout', [LoginController::class, 'logout'])
-        ->name('logout');
+	// 로그인
+	Route::get('/login', [LoginController::class, 'showLoginForm'])
+		->name('login');
+	Route::post('/login', [LoginController::class, 'login']);
+	Route::post('/logout', [LoginController::class, 'logout'])
+		->name('logout');
 
-    // 회원가입
-    Route::get('/register', [RegisterController::class, 'showRegistrationForm'])
-        ->name('register');
-    Route::post('/register', [RegisterController::class, 'register']);
+	// 회원가입
+	Route::get('/register', [RegisterController::class, 'showRegistrationForm'])
+		->name('register');
+	Route::post('/register', [RegisterController::class, 'register']);
 
-    // 비밀번호 재설정
-    Route::prefix('password')->name('password.')->group(function () {
-        Route::get('/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])
-            ->name('request');
-        Route::post('/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])
-            ->name('email');
-        Route::get('/reset/{token}', [ResetPasswordController::class, 'showResetForm'])
-            ->name('reset');
-        Route::post('/reset', [ResetPasswordController::class, 'reset'])
-            ->name('update');
-    });
+	// 비밀번호 재설정
+	Route::prefix('password')->name('password.')->group(function () {
+		Route::get('/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])
+			->name('request');
+		Route::post('/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])
+			->name('email');
+		Route::get('/reset/{token}', [ResetPasswordController::class, 'showResetForm'])
+			->name('reset');
+		Route::post('/reset', [ResetPasswordController::class, 'reset'])
+			->name('update');
+	});
 });
 
 // =============================================================================
@@ -59,7 +59,7 @@ Route::prefix('auth')->name('auth.')->group(function () {
 
 // 서브페이지 관련 라우트
 Route::prefix('sub')->name('sub.')->group(function () {
-    Route::get('/sample', [SubController::class, 'sample'])->name('sample');
+	Route::get('/sample', [SubController::class, 'sample'])->name('sample');
 });
 
 //프로그램
@@ -68,40 +68,39 @@ Route::prefix('program')->name('program.')->group(function () {
 	Route::get('/{type}', [ProgramController::class, 'show'])
 		->where('type', 'middle_semester|middle_vacation|high_semester|high_vacation|special')
 		->name('show');
-	
+
 	Route::get('/{type}/apply-group', [ProgramController::class, 'applyGroup'])
 		->where('type', 'middle_semester|middle_vacation|high_semester|high_vacation|special')
 		->name('apply.group');
-	
+
 	Route::get('/{type}/apply-individual', [ProgramController::class, 'applyIndividual'])
 		->where('type', 'middle_semester|middle_vacation|high_semester|high_vacation|special')
 		->name('apply.individual');
 	Route::post('/{type}/apply-individual', [ProgramController::class, 'submitIndividualApplication'])
 		->where('type', 'middle_semester|middle_vacation|high_semester|high_vacation|special')
 		->name('apply.individual.submit');
-	
+
 	Route::post('/{type}/apply-group', [ProgramController::class, 'submitGroupApplication'])
 		->where('type', 'middle_semester|middle_vacation|high_semester|high_vacation|special')
 		->name('apply.group.submit');
-	
+
 	// 교육 선택 페이지
 	Route::get('/{type}/select-group', [ProgramController::class, 'selectGroup'])
 		->where('type', 'middle_semester|middle_vacation|high_semester|high_vacation|special')
 		->name('select.group');
-	
+
 	Route::get('/{type}/select-individual', [ProgramController::class, 'selectIndividual'])
 		->where('type', 'middle_semester|middle_vacation|high_semester|high_vacation|special')
 		->name('select.individual');
-	
+
 	// 완료 페이지
 	Route::get('/{type}/complete-group', [ProgramController::class, 'completeGroup'])
 		->where('type', 'middle_semester|middle_vacation|high_semester|high_vacation|special')
 		->name('complete.group');
-	
+
 	Route::get('/{type}/complete-individual', [ProgramController::class, 'completeIndividual'])
 		->where('type', 'middle_semester|middle_vacation|high_semester|high_vacation|special')
 		->name('complete.individual');
-	
 });
 
 //게시판
@@ -140,6 +139,7 @@ Route::prefix('mypage')->name('mypage.')->group(function () {
 	//회원정보
 	Route::get('/member', [MemberMypageController::class, 'show'])->name('member');
 	Route::post('/member', [MemberMypageController::class, 'update'])->name('member.update');
+	Route::post('/member/secession', [MemberMypageController::class, 'secession'])->name('member.secession');
 	//신청내역 - 단체
 	Route::get('/application_list', [MemberMypageController::class, 'groupApplicationList'])->name('application_list');
 	Route::post('/application_cancel/{id}', [MemberMypageController::class, 'cancelGroupApplication'])->name('application_cancel');
@@ -232,4 +232,4 @@ Route::prefix('error')->name('error.')->group(function () {
 // =============================================================================
 
 // 백오피스 라우트 (관리자 전용)
-require __DIR__.'/backoffice.php';
+require __DIR__ . '/backoffice.php';

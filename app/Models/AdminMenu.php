@@ -51,7 +51,10 @@ class AdminMenu extends Model
      */
     public static function getMainMenus()
     {
-        return self::whereNull('parent_id')
+        return self::with(['children' => function($query) {
+                        $query->where('is_active', true)->orderBy('order');
+                    }])
+                   ->whereNull('parent_id')
                    ->where('is_active', true)
                    ->orderBy('order')
                    ->get();

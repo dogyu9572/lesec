@@ -9,7 +9,7 @@
         </div>
         <div class="category-modal-body">
             <div class="program-search-filter">
-                <form id="school-search-form" data-url="{{ route('member.schools.search') }}">
+                <form id="school-search-form" data-url="{{ route('backoffice.schools.search') }}">
                     <div class="modal-form-row">
                         <div class="modal-form-col">
                             <div class="modal-form-group">

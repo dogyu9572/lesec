@@ -261,6 +261,8 @@ Route::prefix('backoffice')->middleware(['backoffice'])->group(function () {
         ->name('backoffice.member-groups.add-members');
     Route::post('member-groups/{member_group}/remove-member', [MemberGroupController::class, 'removeMember'])
         ->name('backoffice.member-groups.remove-member');
+    Route::get('member-groups/{member_group}/export-members', [MemberGroupController::class, 'exportMembers'])
+        ->name('backoffice.member-groups.export-members');
 
     // 회원 그룹 관리 (user-groups 별칭)
     Route::resource('user-groups', MemberGroupController::class, [

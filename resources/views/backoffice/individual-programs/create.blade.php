@@ -17,9 +17,6 @@
     </div>
 
     <div class="board-card">
-        <div class="board-card-header">
-            <h6>개인 프로그램 등록</h6>
-        </div>
         <div class="board-card-body">
             <form action="{{ route('backoffice.individual-programs.store') }}" method="POST">
                 @csrf

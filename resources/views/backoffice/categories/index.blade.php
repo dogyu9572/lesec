@@ -27,9 +27,6 @@
     </div>
 
     <div class="board-card">
-        <div class="board-card-header">
-            <h6>카테고리 관리</h6>
-        </div>
         <div class="board-card-body">
             <!-- 그룹 탭 -->
             <div class="category-group-tabs">

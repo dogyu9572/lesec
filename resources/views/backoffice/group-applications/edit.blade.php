@@ -236,7 +236,7 @@
                             <button type="button" class="btn btn-danger" onclick="if(confirm('정말 삭제하시겠습니까?')) { document.getElementById('delete-form').submit(); }">
                                 <i class="fas fa-trash"></i> 삭제
                             </button>
-                            <a href="{{ route('print.estimate', ['id' => $applicationId]) }}" target="_blank" class="btn btn-dark">
+                            <a href="{{ route('print.estimate', ['ids' => $applicationId]) }}" target="_blank" class="btn btn-dark">
                                 <i class="fas fa-file-alt"></i> 견적서 출력
                             </a>
                         </div>

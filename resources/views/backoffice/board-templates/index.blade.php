@@ -30,11 +30,6 @@
     </div>
 
     <div class="board-card">
-        <div class="board-card-header">
-            <div class="board-page-card-title">
-                <h6>게시판 템플릿 목록</h6>
-            </div>
-        </div>
         <div class="board-card-body">
             <!-- 검색 필터 -->
             <div class="board-filter">

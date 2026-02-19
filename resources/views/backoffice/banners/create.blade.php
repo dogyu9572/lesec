@@ -27,10 +27,7 @@
     <div class="row">
         <div class="col-12">
             <div class="board-card">
-                <div class="board-card-header">
-                    <h6>배너 추가</h6>
-                </div>
-                <div class="board-card-body">
+        <div class="board-card-body">
                     <form action="{{ route('backoffice.banners.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
 

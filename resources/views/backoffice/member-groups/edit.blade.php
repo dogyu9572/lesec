@@ -51,6 +51,9 @@
                         <div class="form-section">
                             <h3>소속 정보</h3>
                             <div class="member-list-header">
+                                <a href="{{ route('backoffice.member-groups.export-members', $group) }}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-file-excel"></i> 회원 엑셀 다운로드
+                                </a>
                                 <button type="button" id="add-member-btn" class="btn btn-success btn-sm">
                                     <i class="fas fa-plus"></i> 회원 추가
                                 </button>

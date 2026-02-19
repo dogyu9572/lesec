@@ -38,11 +38,6 @@
     </div>
 
     <div class="board-card">
-        <div class="board-card-header">
-            <div class="board-page-card-title">
-                <h6>명단 관리(상세)</h6>
-            </div>
-        </div>
         <div class="board-card-body">
             @php
                 $programInfo = [

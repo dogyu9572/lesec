@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Backoffice;
 
+use App\Models\Member;
 use App\Services\Backoffice\MemberGroupService;
 use App\Models\MemberGroup;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class MemberGroupController extends BaseController
 {
@@ -219,6 +221,86 @@ class MemberGroupController extends BaseController
                 'message' => '회원 제거 중 오류가 발생했습니다: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * 해당 그룹 소속 회원 엑셀(CSV) 다운로드
+     */
+    public function exportMembers(MemberGroup $memberGroup): StreamedResponse
+    {
+        $group = $memberGroup->load('members');
+        $members = $group->members;
+        $filename = '회원그룹_' . \Str::slug($group->name) . '_회원목록_' . date('YmdHis') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ];
+
+        $callback = function () use ($members) {
+            $file = fopen('php://output', 'w');
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF)); // UTF-8 BOM (엑셀 한글)
+
+            fputcsv($file, $this->getMemberExportHeaders());
+
+            $no = 1;
+            foreach ($members as $member) {
+                fputcsv($file, $this->formatMemberExportRow($member, $no++));
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * 회원 엑셀 다운로드 컬럼 헤더
+     */
+    private function getMemberExportHeaders(): array
+    {
+        return [
+            'No',
+            '이름',
+            '로그인ID',
+            '회원구분',
+            '이메일',
+            '생년월일',
+            '성별',
+            '(학생)연락처',
+            '부모 연락처',
+            '학교',
+            '학년',
+            '반',
+            '주소',
+            '등록일',
+        ];
+    }
+
+    /**
+     * 회원 한 행 포맷
+     */
+    private function formatMemberExportRow(Member $member, int $no): array
+    {
+        return [
+            $no,
+            $member->name ?? '',
+            $member->login_id ?? '',
+            $member->member_type === 'teacher' ? '교사' : '학생',
+            $member->email ?? '',
+            $member->birth_date ? $member->birth_date->format('Y-m-d') : '',
+            $member->gender === 'male' ? '남' : ($member->gender === 'female' ? '여' : ''),
+            $member->contact ?? '',
+            $member->parent_contact ?? '',
+            $member->school_name ?? '',
+            $member->grade ?? '',
+            $member->class_number ?? '',
+            $member->address ?? '',
+            $member->created_at ? $member->created_at->format('Y-m-d H:i') : '',
+        ];
     }
 }
 

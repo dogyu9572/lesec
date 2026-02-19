@@ -27,9 +27,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // HTTPS 강제 (.env의 APP_URL이 https://로 시작하는 경우)
+        // HTTPS 강제 (.env의 APP_URL이 https://로 시작하는 경우 또는 실제 요청이 HTTPS인 경우)
         $applicationUrl = config('app.url');
         if (is_string($applicationUrl) && str_starts_with($applicationUrl, 'https://')) {
+            URL::forceScheme('https');
+        } elseif (Request::secure() || Request::header('X-Forwarded-Proto') === 'https') {
+            // 실제 요청이 HTTPS인 경우 강제
             URL::forceScheme('https');
         }
 
@@ -55,26 +58,29 @@ class AppServiceProvider extends ServiceProvider
                     // 슈퍼 관리자는 모든 메뉴 표시
                     $mainMenus = AdminMenu::getMainMenus();
                 } elseif ($user) {
-                    // 일반 관리자는 권한 있는 메뉴만 표시
+                    // 일반 관리자는 권한 있는 메뉴만 표시 (단, permission_key가 없는 메뉴는 모두 표시)
                     $accessibleMenuIds = $user->accessibleMenus()->pluck('admin_menus.id')->toArray();
                     
-                    // 부모 메뉴 가져오기 (자식 메뉴는 eager loading하지 않음)
-                    $mainMenus = AdminMenu::whereNull('parent_id')
+                    // 부모 메뉴 가져오기 (자식 메뉴도 eager loading)
+                    $mainMenus = AdminMenu::with(['children' => function($query) {
+                            $query->where('is_active', true)->orderBy('order');
+                        }])
+                        ->whereNull('parent_id')
                         ->where('is_active', true)
                         ->orderBy('order')
                         ->get()
                         ->filter(function ($menu) use ($accessibleMenuIds) {
-                            // 부모 메뉴 자체에 권한이 있는지 확인
-                            $hasParentPermission = in_array($menu->id, $accessibleMenuIds);
+                            // permission_key가 없으면 권한 체크 없이 표시
+                            $isPublicMenu = empty($menu->permission_key);
                             
-                            // 권한이 있는 자식 메뉴만 필터링하여 로드
-                            $filteredChildren = AdminMenu::where('parent_id', $menu->id)
-                                ->where('is_active', true)
-                                ->orderBy('order')
-                                ->get()
-                                ->filter(function ($child) use ($accessibleMenuIds) {
-                                    return in_array($child->id, $accessibleMenuIds);
-                                });
+                            // 부모 메뉴 자체에 권한이 있는지 확인
+                            $hasParentPermission = $isPublicMenu || in_array($menu->id, $accessibleMenuIds);
+                            
+                            // 권한이 있는 자식 메뉴만 필터링 (permission_key가 없는 메뉴는 모두 포함)
+                            $filteredChildren = $menu->children->filter(function ($child) use ($accessibleMenuIds) {
+                                $isPublicChild = empty($child->permission_key);
+                                return $isPublicChild || in_array($child->id, $accessibleMenuIds);
+                            });
                             
                             // 자식 메뉴를 필터링된 것으로 교체
                             $menu->setRelation('children', $filteredChildren);
@@ -87,6 +93,21 @@ class AppServiceProvider extends ServiceProvider
                 }
                 
                 $view->with('mainMenus', $mainMenus);
+                
+                // 방문자 통계 데이터 추가
+                $today = \App\Models\VisitorLog::whereDate('created_at', today())->count();
+                $yesterday = \App\Models\VisitorLog::whereDate('created_at', today()->subDay())->count();
+                $thisMonth = \App\Models\VisitorLog::whereYear('created_at', today()->year)
+                    ->whereMonth('created_at', today()->month)
+                    ->count();
+                $total = \App\Models\VisitorLog::count();
+                
+                $view->with('visitorStats', [
+                    'today' => $today,
+                    'yesterday' => $yesterday,
+                    'this_month' => $thisMonth,
+                    'total' => $total,
+                ]);
             });
         }
 

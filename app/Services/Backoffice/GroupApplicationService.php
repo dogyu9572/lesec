@@ -370,6 +370,67 @@ class GroupApplicationService
         return response()->noContent();
     }
 
+    /**
+     * 견적서 출력용 데이터 생성 (print/estimate 뷰용)
+     *
+     * @param array<int> $applicationIds
+     * @return array<int, array>
+     */
+    public function getEstimatesForPrint(array $applicationIds): array
+    {
+        if (empty($applicationIds)) {
+            return [];
+        }
+
+        $applications = GroupApplication::query()
+            ->with(['reservation', 'member'])
+            ->whereIn('id', $applicationIds)
+            ->orderBy('id')
+            ->get();
+
+        $estimates = [];
+        foreach ($applications as $app) {
+            $fee = (int) ($app->participation_fee ?? $app->reservation?->education_fee ?? 0);
+            $count = (int) ($app->applicant_count ?? 1);
+            $unitPrice = $count > 0 ? (int) round($fee / $count) : $fee;
+            $subtotal = $fee;
+            $vat = (int) round($subtotal / 11);
+            $total = $subtotal + $vat;
+
+            $educationDate = $app->participation_date
+                ? $app->participation_date->format('Y.m.d')
+                : ($app->reservation?->education_start_date
+                    ? $app->reservation->education_start_date->format('Y.m.d')
+                    : '-');
+
+            $estimates[] = [
+                'number' => $app->application_number ?? '-',
+                'date' => $app->applied_at ? $app->applied_at->format('Y.m.d') : ($app->participation_date ? $app->participation_date->format('Y.m.d') : '-'),
+                'recipient_name' => $app->applicant_name ?? '-',
+                'school_name' => $app->school_name ?? '-',
+                'phone' => $app->applicant_contact ?? '-',
+                'email' => $app->member?->email ?? '-',
+                'items' => [
+                    [
+                        'no' => 1,
+                        'education_date' => $educationDate,
+                        'program_name' => $app->reservation?->program_name ?? '-',
+                        'count' => $count,
+                        'unit_price' => $unitPrice,
+                        'amount' => $fee,
+                    ],
+                ],
+                'subtotal' => $subtotal,
+                'vat' => $vat,
+                'total' => $total,
+                'print_date' => now()->format('Y.m.d'),
+                'note' => '',
+            ];
+        }
+
+        return $estimates;
+    }
+
     public function downloadRosterSample(): StreamedResponse
     {
         $filename = 'group_roster_sample.csv';

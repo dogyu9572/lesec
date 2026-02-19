@@ -146,11 +146,34 @@ class GroupApplicationController extends BaseController
     }
 
     /**
-     * 견적서 출력
+     * 견적서 출력 (다운로드용 단일 건)
      */
     public function downloadQuotation(int $applicationId)
     {
         return $this->groupApplicationService->downloadQuotation($applicationId);
+    }
+
+    /**
+     * 견적서 출력 페이지 (print/estimate 뷰, ids 쿼리로 복수 건 가능)
+     */
+    public function printEstimate(Request $request)
+    {
+        $idsParam = $request->query('ids', '');
+        $ids = is_string($idsParam)
+            ? array_filter(array_map('intval', explode(',', $idsParam)))
+            : [];
+
+        if (empty($ids)) {
+            abort(400, '선택된 견적이 없습니다.');
+        }
+
+        $estimates = $this->groupApplicationService->getEstimatesForPrint($ids);
+
+        if (empty($estimates)) {
+            abort(404, '해당하는 신청 건이 없습니다.');
+        }
+
+        return view('print.estimate', compact('estimates'));
     }
 
     /**

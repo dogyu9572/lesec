@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            // 선택된 ID들을 쿼리 파라미터로 전달하여 하나의 페이지에서 순차적으로 출력
+            // 견적서 출력 페이지 열기 (ids 쿼리로 복수 건 전달)
             var url = '/print/estimate?ids=' + selectedIds.join(',');
             window.open(url, '_blank');
         });

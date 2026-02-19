@@ -15,53 +15,11 @@
     </div>
 
     <div class="board-card">
-        <div class="board-card-header">
-            <h6>템플릿 정보 수정</h6>
-            @if($isInUse)
-                <span class="badge badge-warning">사용 중인 템플릿</span>
-            @endif
-        </div>
         <div class="board-card-body">
-            @if ($errors->any())
-                <div class="board-alert board-alert-danger">
-                    <ul>
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
             <form action="{{ route('backoffice.board-templates.update', $boardTemplate) }}" method="POST">
                 @csrf
                 @method('PUT')
-
-                @if($isInUse)
-                    <!-- 사용 중인 템플릿 경고 -->
-                    <div class="board-alert board-alert-warning">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        이 템플릿은 {{ count($usedBoards) }}개의 게시판에서 사용 중입니다.
-                        템플릿 수정 시 기존 게시판에는 자동으로 반영되지 않습니다.
-                        각 게시판에서 템플릿을 다시 선택하거나 수동으로 설정을 변경해야 합니다.
-                    </div>
-
-                    <!-- 사용 중인 게시판 목록 표시 -->
-                    <div class="board-form-group">
-                        <label class="board-form-label">사용 중인 게시판</label>
-                        <div class="used-boards-list">
-                            @foreach($usedBoards as $board)
-                                <div class="used-board-item">
-                                    <span class="board-name">{{ $board->name }}</span>
-                                    <span class="board-slug">({{ $board->slug }})</span>
-                                    <a href="{{ route('backoffice.boards.edit', $board) }}" class="btn btn-sm btn-outline-primary">
-                                        <i class="fas fa-edit"></i> 수정
-                                    </a>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-                @endif
-
+                
                 <!-- 모든 필드 수정 가능 -->
                     <div class="board-form-row">
                         <div class="board-form-col board-form-col-6">

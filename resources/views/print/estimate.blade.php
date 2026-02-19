@@ -1,4 +1,9 @@
 @extends('layouts.app')
+
+@section('styles')
+<link rel="stylesheet" href="{{ asset('css/styles.css') }}">
+@endsection
+
 @section('content')
 @php
     // 기존 호환성: $estimate가 있으면 배열로 변환
@@ -13,8 +18,8 @@
 	<div class="estimate_wrap" @if($index > 0) style="page-break-before: always;" @endif>
 
 		<div class="top">
-			<div class="tit">견적서</div>
-			<div class="logo"><img src="/images/logo_print.png" alt=""></div>
+			<div class="tit">견적서 <span style="font-size:14px; color:#888; font-weight:400;">(데모)</span></div>
+			<div class="logo" style="font-size:18px; font-weight:700; color:#333;">홈페이지 코리아 DEMO</div>
 		</div>
 
 		<div class="con">
@@ -51,32 +56,32 @@
 					</div>
 				</div>
 				<div class="box">
-					<div class="tit">공급자 정보</div>
+					<div class="tit">공급자 정보 <span style="font-size:12px; color:#888; font-weight:400;">(데모)</span></div>
 					<div class="tbl row">
 						<table>
 							<tr>
 								<th>등록번호</th>
-								<td>119-82-10526</td>
+								<td>-</td>
 							</tr>
 							<tr>
 								<th>기관명</th>
-								<td>서울대학교 농업생명과학대학 농생명과학공동기기원</td>
+								<td>홈페이지 코리아 (데모)</td>
 							</tr>
 							<tr>
 								<th>주소</th>
-								<td>서울특별시 관악구 관악로1</td>
+								<td>-</td>
 							</tr>
 							<tr>
 								<th>담당자</th>
-								<td>김학진</td>
+								<td>-</td>
 							</tr>
 							<tr>
 								<th>TEL</th>
-								<td>02-888-0932</td>
+								<td>-</td>
 							</tr>
 							<tr>
 								<th>EMAIL</th>
-								<td>test1234@naver.com</td>
+								<td>-</td>
 							</tr>
 						</table>
 					</div>
@@ -144,7 +149,7 @@
 			<div class="print_btm">
 				<p>상기 견적의 유효기간은 견적일로 부터 1개월 입니다.</p>
 				<div class="date">{{ $estimate['print_date'] ?? '' }}</div>
-				<div class="copy">서울대학교 농생명과학공동기기원 생명·환경과학교육센터<div class="stamp"><img src="/images/img_stamp.png" alt=""></div></div>
+				<div class="copy">홈페이지 코리아 (데모) <div class="stamp" style="font-size:12px; color:#999; margin-left:8px;">DEMO</div></div>
 			</div>
 			<div class="tbl row etc">
 				<table>

@@ -1,5 +1,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta property="og:image" content="/images/og_image.jpg" />
+<link rel="icon" href="/images/favicon.png" type="image/x-icon"/>
 <title>{{ $title ?? '백오피스' }}</title>
 
 <!-- Google Fonts - Pretendard -->

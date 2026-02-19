@@ -34,9 +34,6 @@
     </div>
 
     <div class="board-card">
-        <div class="board-card-header">
-            <h6>{{ $pageTitle }}</h6>
-        </div>
         <div class="board-card-body">
             <div class="table-responsive">
                 <ul id="mainMenuList" class="menu-list">

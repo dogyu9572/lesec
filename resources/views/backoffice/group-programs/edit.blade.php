@@ -17,9 +17,6 @@
     </div>
 
     <div class="board-card">
-        <div class="board-card-header">
-            <h6>단체 프로그램 등록</h6>
-        </div>
         <div class="board-card-body">
             <form action="{{ route('backoffice.group-programs.update', $program) }}" method="POST">
                 @csrf

@@ -14,6 +14,12 @@ class BoardTemplateSeeder extends Seeder
      */
     public function run(): void
     {
+        // 기존 게시판 템플릿 데이터 모두 삭제 (외래키 제약이 있어서 delete 사용)
+        BoardTemplate::query()->delete();
+        // AUTO_INCREMENT 값 리셋
+        \DB::statement('ALTER TABLE board_templates AUTO_INCREMENT = 1');
+        $this->command->info('✓ 기존 게시판 템플릿 데이터를 모두 삭제했습니다.');
+        
         // 기본 스킨 가져오기
         $defaultSkin = BoardSkin::first();
         

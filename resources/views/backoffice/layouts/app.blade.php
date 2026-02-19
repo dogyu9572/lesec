@@ -26,13 +26,15 @@
 
                 <!-- 유저 드롭다운과 세션 타이머를 함께 배치 -->
                 <div class="user-dropdown">
-                    <span>{{ auth()->user()->name ?? '관리자' }}님 <span class="session-timer" id="sessionTimer">
-                        <i class="fas fa-clock"></i>
-                        <span class="session-timer-text"><span id="sessionTimeLeft">--:--</span></span>
-                    </span>
-                    <button class="session-extend-btn" id="sessionExtendBtn" title="120분 연장">
-                        연장
-                    </button></span>
+					<img src="/images/img_human.svg" alt="">
+                    <span class="name">{{ auth()->user()->name ?? '관리자' }}님</span>
+					<span class="session-timer" id="sessionTimer">
+						<i class="fas fa-clock"></i>
+						<span class="session-timer-text">
+							<span id="sessionTimeLeft">--:--</span>
+						</span>
+	                    <button class="session-extend-btn" id="sessionExtendBtn" title="120분 연장">연장</button>
+					</span>
                     <div class="dropdown-content">
                         <a href="{{ route('backoffice.admins.edit', auth()->user()->id) }}">정보수정</a>
                         <a href="{{ url('/backoffice/logout') }}">로그아웃</a>

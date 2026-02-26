@@ -6,6 +6,7 @@ let currentMemberPage = 1;
 let selectedMemberIds = [];
 let memberSearchUrl = '/backoffice/individual-applications/search-members';
 let selectionMode = 'single'; // 기본값: 단일 선택 (individual-applications용)
+let currentPerPage = 20; // 기본값: 20개
 
 document.addEventListener('DOMContentLoaded', function () {
     // URL 파라미터에서 선택 모드 확인
@@ -24,14 +25,35 @@ document.addEventListener('DOMContentLoaded', function () {
     const popupSelectAll = document.getElementById('popup-select-all');
     const popupResetBtn = document.getElementById('popup-reset-btn');
     const popupSearchKeyword = document.getElementById('popup_search_keyword');
+    const popupPerPage = document.getElementById('popup-per-page');
+
+    // 페이지당 항목 수 변경 이벤트
+    if (popupPerPage) {
+        popupPerPage.addEventListener('change', function() {
+            currentPerPage = parseInt(this.value, 10) || 20;
+            searchMembers(1); // 첫 페이지로 이동하며 검색
+        });
+    }
 
     // 페이지 로드 시 기본 검색 실행
     searchMembers(1);
+
+    // 페이지 로드 시 검색어 입력 필드에 자동 포커스
+    if (popupSearchKeyword) {
+        // 약간의 지연을 두어 DOM이 완전히 렌더링된 후 포커스
+        setTimeout(function() {
+            popupSearchKeyword.focus();
+        }, 100);
+    }
 
     // 회원 검색
     if (popupSearchBtn) {
         popupSearchBtn.addEventListener('click', function () {
             searchMembers(1);
+            // 검색어 입력 필드에 포커스
+            if (popupSearchKeyword) {
+                popupSearchKeyword.focus();
+            }
         });
     }
 
@@ -96,18 +118,29 @@ function searchMembers(page) {
     const form = document.getElementById('member-search-form');
     if (!form) return;
 
+    // 페이지 이동 시 전체 체크박스 해제
+    const popupSelectAll = document.getElementById('popup-select-all');
+    if (popupSelectAll) {
+        popupSelectAll.checked = false;
+    }
+
     const formData = new FormData(form);
     const params = new URLSearchParams(formData);
     params.append('page', page);
+    params.append('per_page', currentPerPage);
 
     const tbody = document.getElementById('popup-member-list-body');
     if (tbody) {
-        tbody.innerHTML = '<tr><td colspan="7" class="text-center">회원 정보를 불러오는 중입니다...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center">회원 정보를 불러오는 중입니다...</td></tr>';
     }
 
     fetch(`${memberSearchUrl}?${params.toString()}`)
         .then(response => response.json())
         .then(data => {
+            console.log('회원 검색 응답:', data);
+            if (data.members && data.members.length > 0) {
+                console.log('첫 번째 회원 데이터:', data.members[0]);
+            }
             renderMemberList(data.members, data.pagination);
             renderMemberPagination(data.pagination);
         })
@@ -115,7 +148,7 @@ function searchMembers(page) {
             console.error('회원 검색 오류:', error);
             const tbody = document.getElementById('popup-member-list-body');
             if (tbody) {
-                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger">회원 검색 중 오류가 발생했습니다.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center text-danger">회원 검색 중 오류가 발생했습니다.</td></tr>';
             }
         });
 }
@@ -130,8 +163,14 @@ function renderMemberList(members, pagination) {
     const current = pagination ? pagination.current_page : 1;
     const baseNumber = total - ((current - 1) * perPage);
 
+    // 페이지 이동 시 전체 체크박스 해제
+    const popupSelectAll = document.getElementById('popup-select-all');
+    if (popupSelectAll) {
+        popupSelectAll.checked = false;
+    }
+
     if (!members || members.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="text-center">검색 결과가 없습니다.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center">검색 결과가 없습니다.</td></tr>`;
         return;
     }
 
@@ -155,6 +194,7 @@ function renderMemberList(members, pagination) {
                 <td>${member.school_name || '-'}</td>
                 <td>${member.email || '-'}</td>
                 <td>${member.contact || '-'}</td>
+                <td>${member.parent_contact || '-'}</td>
             </tr>
         `;
     }).join('');
@@ -184,9 +224,25 @@ function renderMemberList(members, pagination) {
             } else {
                 selectedMemberIds = selectedMemberIds.filter(id => id !== memberId);
             }
+            // 개별 체크박스 변경 시 전체 체크박스 상태 업데이트
+            updateSelectAllCheckbox();
             updateMemberConfirmButton();
         });
     });
+    
+    // 현재 페이지의 체크박스 상태에 따라 전체 체크박스 업데이트
+    updateSelectAllCheckbox();
+}
+
+// 전체 체크박스 상태 업데이트
+function updateSelectAllCheckbox() {
+    const popupSelectAll = document.getElementById('popup-select-all');
+    const checkboxes = document.querySelectorAll('.popup-member-checkbox');
+    
+    if (popupSelectAll && checkboxes.length > 0) {
+        const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+        popupSelectAll.checked = allChecked;
+    }
 }
 
 // 회원 페이지네이션 렌더링
@@ -232,7 +288,12 @@ function renderMemberPagination(pagination) {
             if (!targetPage || targetPage === currentMemberPage) {
                 return;
             }
+            // 페이지 이동 시 선택된 회원 ID 초기화 및 전체 체크박스 해제
             selectedMemberIds = [];
+            const popupSelectAll = document.getElementById('popup-select-all');
+            if (popupSelectAll) {
+                popupSelectAll.checked = false;
+            }
             updateMemberConfirmButton();
             searchMembers(targetPage);
         });

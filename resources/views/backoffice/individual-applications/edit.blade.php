@@ -15,9 +15,7 @@
 @endphp
 <div class="admin-form-container">
     <div class="form-header">      
-        <a href="{{ route('backoffice.individual-applications.index') }}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> <span class="btn-text">목록으로</span>
-        </a>
+        <a href="{{ route('backoffice.individual-applications.index') }}" class="btn btn-secondary"><span class="btn-text">목록으로</span></a>
     </div>
 
     @if(session('success'))
@@ -49,9 +47,25 @@
                         <input type="hidden" name="education_type" value="{{ $application->education_type }}">
                         <input type="hidden" name="program_name" value="{{ $application->program_name }}">
                         <input type="hidden" name="program_reservation_id" value="{{ $application->program_reservation_id }}">
-                        <input type="hidden" name="participation_date" value="{{ $application->participation_date ? $application->participation_date->format('Y-m-d') : '' }}">
                         <input type="hidden" name="participation_fee" value="{{ $application->participation_fee }}">
                         <input type="hidden" name="payment_method" value="{{ $application->payment_method }}">
+
+                        <div class="program-section">
+                            <div class="section-title">프로그램 정보</div>
+                            <div class="form-grid grid-2">
+                                <div class="form-group grid-span-2">
+                                    <label for="program_name_display">프로그램명</label>
+                                    <div class="school-search-wrapper">
+                                        <input type="text" id="program_name_display" value="{{ $application->program_name }}" readonly>
+                                        <button type="button" class="btn btn-secondary btn-sm" disabled>검색</button>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="participation_date">참가일</label>
+                                    <input type="date" id="participation_date" name="participation_date" value="{{ $application->participation_date ? $application->participation_date->format('Y-m-d') : '' }}" class="form-control">
+                                </div>
+                            </div>
+                        </div>
 
                         <div class="program-section">
                             <div class="section-title">신청 정보</div>
@@ -74,9 +88,7 @@
                                     <div class="school-search-wrapper">
                                         <input type="text" id="applicant_name" name="applicant_name" value="{{ $application->applicant_name }}" readonly>
                                         <input type="hidden" id="member_id" name="member_id" value="{{ $application->member_id }}">
-                                        <button type="button" id="member-search-btn" class="btn btn-secondary btn-sm">
-                                            <i class="fas fa-search"></i> 회원 검색
-                                        </button>
+                                        <!-- <button type="button" id="member-search-btn" class="btn btn-secondary btn-sm"><i class="fas fa-search"></i> 회원 검색</button> -->
                                     </div>
                                 </div>
                                 <div class="form-group">

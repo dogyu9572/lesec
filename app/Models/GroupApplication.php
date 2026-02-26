@@ -26,6 +26,7 @@ class GroupApplication extends Model
         'participation_fee',
         'participation_date',
         'applied_at',
+        'estimate_note',
     ];
 
     protected $casts = [
@@ -112,6 +113,30 @@ class GroupApplication extends Model
         return '미선택';
     }
 
+    /**
+     * 표시용 결제방법 라벨 (선택된 것이 없으면 프로그램의 모든 결제수단 표시)
+     */
+    public function getDisplayPaymentMethodLabelAttribute(): string
+    {
+        if ($this->payment_method) {
+            return static::PAYMENT_METHOD_LABELS[$this->payment_method] ?? $this->payment_method;
+        }
+
+        $allowed = is_array($this->reservation->payment_methods ?? null) ? $this->reservation->payment_methods : [];
+        if (empty($allowed)) {
+            return '-';
+        }
+
+        $labels = [];
+        foreach ($allowed as $methodKey) {
+            if (isset(static::PAYMENT_METHOD_LABELS[$methodKey])) {
+                $labels[] = static::PAYMENT_METHOD_LABELS[$methodKey];
+            }
+        }
+
+        return !empty($labels) ? implode(', ', $labels) : '-';
+    }
+
     public function getParticipationDateFormattedAttribute(): ?string
     {
         if (!$this->participation_date) {
@@ -132,5 +157,38 @@ class GroupApplication extends Model
     public function getProgramNameLabelAttribute(): ?string
     {
         return $this->reservation?->program_name ?? '-';
+    }
+
+    /**
+     * 1인당 교육비 (프로그램 등록값 우선)
+     */
+    public function getFeePerPersonAttribute(): int
+    {
+        $fee = $this->reservation->education_fee ?? $this->participation_fee ?? null;
+
+        return $fee !== null ? (int) $fee : 0;
+    }
+
+    /**
+     * 총 결제 금액 (1인당 교육비 × 신청인원)
+     */
+    public function getTotalParticipationFeeAttribute(): int
+    {
+        $count = (int) ($this->applicant_count ?? 0);
+        if ($count <= 0) {
+            return 0;
+        }
+
+        return $this->fee_per_person * $count;
+    }
+
+    /**
+     * 총 결제 금액 표시용 (금액이 있으면 "N원", 없으면 "-")
+     */
+    public function getDisplayTotalFeeLabelAttribute(): string
+    {
+        $total = $this->total_participation_fee;
+
+        return $total > 0 ? number_format($total) . '원' : '-';
     }
 }

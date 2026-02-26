@@ -4,7 +4,7 @@
     
 	<div class="inner">
 		<div class="mem_wrap login_wrap">
-			<div class="ctit">아이디 찾기</div>
+			<div class="ctit">비밀번호 변경</div>
 			<div class="tabs">
 				<a href="/member/find_id">아이디 찾기</a>
 				<a href="/member/find_pw" class="on">비밀번호 변경</a>

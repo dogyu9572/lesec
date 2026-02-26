@@ -11,7 +11,7 @@
 <div class="board-container admins-page">
     <div class="board-header">
         <a href="{{ route('backoffice.admin-groups.create') }}" class="btn btn-success">
-            <i class="fas fa-plus"></i> 등록
+            <i class="fas fa-plus"></i> 신규등록
         </a>
     </div>
 
@@ -37,7 +37,7 @@
                             <label for="name" class="filter-label">그룹명</label>
                             <input type="text" id="name" name="name" class="filter-input"
                                 placeholder="그룹명을 입력하세요" value="{{ request('name') }}">
-                        </div>                      
+                        </div>
                         <div class="filter-group">
                             <div class="filter-buttons">
                                 <button type="submit" class="btn btn-primary">
@@ -60,7 +60,7 @@
                     </div>
                     <div class="list-controls">
                         <form method="GET" action="{{ route('backoffice.admin-groups.index') }}" class="per-page-form">
-                            @foreach(request()->except('per_page') as $key => $value)
+                            @foreach(request()->except(['per_page', 'page']) as $key => $value)
                                 <input type="hidden" name="{{ $key }}" value="{{ $value }}">
                             @endforeach
                             <label for="per_page" class="per-page-label">목록 개수:</label>
@@ -81,7 +81,7 @@
                                 <th>그룹명</th>
                                 <th>사용 관리자 수</th>
                                 <th>등록일</th>
-                                <th>관리중인 메뉴</th>
+                                <th class="w10">관리중인 메뉴</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -93,16 +93,14 @@
                                     <td>{{ $group->created_at->format('Y-m-d') }}</td>
                                     <td>
                                         <div class="board-btn-group">
-                                            <a href="{{ route('backoffice.admin-groups.edit', $group) }}" class="btn btn-primary btn-sm">
-                                                <i class="fas fa-edit"></i> 수정
-                                            </a>
-                                            <form action="{{ route('backoffice.admin-groups.destroy', $group) }}" method="POST" class="d-inline" onsubmit="return confirm('이 권한 그룹을 삭제하시겠습니까?');">
+                                            <a href="{{ route('backoffice.admin-groups.edit', $group) }}" class="btn btn-info btn-sm"><i class="fas fa-eye"></i> 보기</a>
+                                            <!-- <form action="{{ route('backoffice.admin-groups.destroy', $group) }}" method="POST" class="d-inline" onsubmit="return confirm('이 권한 그룹을 삭제하시겠습니까?');">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-danger btn-sm">
                                                     <i class="fas fa-trash"></i> 삭제
                                                 </button>
-                                            </form>
+                                            </form> -->
                                         </div>
                                     </td>
                                 </tr>

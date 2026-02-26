@@ -27,16 +27,7 @@
         data-upload-url="{{ route('backoffice.individual-applications.bulk-upload') }}"
         data-search-url="{{ route('backoffice.individual-applications.search-programs') }}"
         data-csrf-token="{{ csrf_token() }}"></div>
-    <div class="board-page-header">
-        <div class="board-page-buttons">
-            <button type="button" id="bulk-upload-btn" class="btn btn-primary">
-                <i class="fas fa-upload"></i> 일괄 업로드
-            </button>
-            <a href="{{ route('backoffice.individual-applications.create') }}" class="btn btn-success">
-                <i class="fas fa-plus"></i> 신규등록
-            </a>
-        </div>
-    </div>
+    
 
     @include('backoffice.modals.bulk-upload-modal', [
         'educationTypes' => $educationTypes,
@@ -134,9 +125,11 @@
                     <div class="list-info">
                         <span class="list-count">Total : {{ $applications->total() }}</span>
                     </div>
-                    <div class="list-controls">                       
+                    <div class="list-controls">
+						<button type="button" id="bulk-upload-btn" class="btn btn-primary btn-sm"><i class="fas fa-upload"></i> 일괄 업로드</button>
+						<a href="{{ route('backoffice.individual-applications.create') }}" class="btn btn-success btn-sm"><i class="fas fa-plus"></i> 신규등록</a>
                         <form method="GET" action="{{ route('backoffice.individual-applications.index') }}" class="per-page-form">
-                            @foreach(request()->except('per_page') as $key => $value)
+                            @foreach(request()->except(['per_page', 'page']) as $key => $value)
                                 <input type="hidden" name="{{ $key }}" value="{{ $value }}">
                             @endforeach
                             <label for="per_page" class="per-page-label">목록 개수:</label>
@@ -151,6 +144,22 @@
 
                 <div class="table-responsive">
                     <table class="board-table">
+						<colgroup>
+							<col width="40">
+							<col width="7%">
+							<col width="5%">
+							<col width="5%">
+							<col width="7%">
+							<col width="6%">
+							<col width="*">
+							<col width="7%">
+							<col width="7%">
+							<col width="5%">
+							<col width="100">
+							<col width="100">
+							<col width="130">
+							<col width="80">
+						</colgroup>
                         <thead>
                             <tr>
                                 <th>번호</th>
@@ -166,7 +175,7 @@
                                 <th>참가비</th>
                                 <th>참가일</th>
                                 <th>신청일시</th>
-                                <th style="width: 150px;">관리</th>
+                                <th style="width: 80px;">관리</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -217,8 +226,8 @@
                                     <td>{{ optional($application->applied_at)->format('Y.m.d H:i') ?? '-' }}</td>
                                     <td>
                                         <div class="board-btn-group">
-                                            <a href="{{ route('backoffice.individual-applications.edit', $application) }}" class="btn btn-primary btn-sm">
-                                                <i class="fas fa-edit"></i> 수정
+                                            <a href="{{ route('backoffice.individual-applications.edit', $application) }}" class="btn btn-info btn-sm">
+												<i class="fas fa-eye"></i> 보기
                                             </a>
                                         </div>
                                     </td>

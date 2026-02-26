@@ -117,7 +117,7 @@ class IndividualApplicationController extends BaseController
         $this->individualApplicationService->updateApplication($application, $validated);
 
         return redirect()
-            ->route('backoffice.individual-applications.index')
+            ->route('backoffice.individual-applications.edit', $application)
             ->with('success', '신청 정보가 수정되었습니다.');
     }
 

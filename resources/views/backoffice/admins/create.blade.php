@@ -34,7 +34,7 @@
                         @csrf
                         
                         <div class="form-section">
-            <h3>관리자 등록</h3>
+            <h3>기본정보</h3>
             <div class="form-grid">
                 <div class="form-group">
                     <label for="login_id">아이디</label>

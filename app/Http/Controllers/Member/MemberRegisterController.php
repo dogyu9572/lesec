@@ -25,14 +25,31 @@ class MemberRegisterController extends Controller
     public function __construct(
         private readonly MemberRegisterService $registerService,
         private readonly PhoneVerificationService $phoneVerificationService
-    ) {
-    }
+    ) {}
 
     /**
      * 회원 구분 선택 화면
      */
-    public function showTypeSelection(Request $request): \Illuminate\View\View
+    public function showTypeSelection(Request $request)
     {
+        // SMS 인증이 완료된 상태면 회원정보 입력 페이지로 리다이렉트
+        $smsSession = $request->session()->get(self::SMS_VERIFICATION_SESSION_KEY);
+        if (!empty($smsSession) && is_array($smsSession) && !empty($smsSession['phone'])) {
+            // 회원가입 세션 확인
+            $ageGroup = $this->getRegistrationSession($request, 'age_group');
+            if ($ageGroup === 'under14') {
+                return redirect()->route('member.register3_a');
+            } elseif ($ageGroup === 'over14') {
+                return redirect()->route('member.register3_b');
+            }
+            // age_group이 없으면 기본값으로 14세 미만으로 설정하고 이동
+            $this->storeRegistrationSession($request, [
+                'member_type' => 'student',
+                'age_group' => 'under14',
+            ]);
+            return redirect()->route('member.register3_a');
+        }
+
         $this->clearRegistrationSession($request);
 
         $gNum = '00';
@@ -140,18 +157,43 @@ class MemberRegisterController extends Controller
      */
     public function showUnderFourteenForm(Request $request)
     {
-        if (!$this->isValidFlow($request, 'under14')) {
+        // SMS 인증 완료 여부를 먼저 확인
+        $smsSession = $request->session()->get(self::SMS_VERIFICATION_SESSION_KEY);
+        $hasSmsVerification = !empty($smsSession) && is_array($smsSession) && !empty($smsSession['phone']);
+
+        // SMS 인증이 없으면 인증 페이지로 리다이렉트 (절대 회원 구분 페이지로 가지 않음)
+        if (!$hasSmsVerification) {
+            \Log::warning('14세 미만 회원가입: SMS 인증 세션이 없음', [
+                'session_id' => $request->session()->getId(),
+                'has_sms_session' => $request->session()->has(self::SMS_VERIFICATION_SESSION_KEY),
+                'sms_session_content' => $smsSession,
+            ]);
             return redirect()
-                ->route('member.register')
-                ->withErrors(['process' => '회원가입 절차를 처음부터 다시 진행해주세요.']);
+                ->route('member.register2_a')
+                ->withErrors(['process' => '본인 인증을 완료해주세요.']);
         }
+
+        // SMS 인증이 있으면 회원가입 세션을 복구하거나 생성
+        $memberType = $this->getRegistrationSession($request, 'member_type');
+        $ageGroup = $this->getRegistrationSession($request, 'age_group');
+
+        if (!$memberType || !$ageGroup) {
+            // SMS 인증이 완료되었으므로 기본값으로 세션 생성
+            $this->storeRegistrationSession($request, [
+                'member_type' => 'student',
+                'age_group' => 'under14',
+            ]);
+            $memberType = 'student';
+        }
+
+        $verifiedPhone = $smsSession['phone'] ?? null;
 
         $gNum = '00';
         $sNum = '02';
         $gName = '회원가입';
         $sName = '회원정보 입력';
 
-        return view('member.register3_a', compact('gNum', 'sNum', 'gName', 'sName'));
+        return view('member.register3_a', compact('gNum', 'sNum', 'gName', 'sName', 'memberType', 'verifiedPhone'));
     }
 
     /**
@@ -159,19 +201,44 @@ class MemberRegisterController extends Controller
      */
     public function registerUnderFourteen(MemberUnderFourteenRegisterRequest $request): RedirectResponse
     {
-        if (!$this->isValidFlow($request, 'under14')) {
+        // SMS 인증 완료 여부 확인
+        if (!$request->session()->has(self::SMS_VERIFICATION_SESSION_KEY)) {
             return redirect()
-                ->route('member.register')
-                ->withErrors(['process' => '회원가입 절차를 처음부터 다시 진행해주세요.']);
+                ->route('member.register2_a')
+                ->withErrors(['process' => '본인 인증을 완료해주세요.']);
         }
 
-        $member = $this->createMemberRecord($request->validated(), $request, [
-            'grade' => null,
-            'class_number' => null,
-            'parent_contact' => null,
-        ]);
+        // SMS 인증된 연락처는 보호자 연락처로 저장 (14세 미만은 보호자 인증)
+        $data = $request->validated();
+        $smsSession = $request->session()->get(self::SMS_VERIFICATION_SESSION_KEY);
+        $verifiedParentContact = null;
+        if (is_array($smsSession) && !empty($smsSession['phone'])) {
+            $verifiedParentContact = $smsSession['phone'];
+        }
+
+        // 회원가입 세션이 없으면 기본값으로 설정
+        $memberType = $this->getRegistrationSession($request, 'member_type');
+        if (!$memberType) {
+            $this->storeRegistrationSession($request, [
+                'member_type' => 'student',
+                'age_group' => 'under14',
+            ]);
+        }
+
+        $member = $this->createMemberRecord(
+            $data,
+            $request,
+            [
+                'grade' => $request->input('grade'),
+                'class_number' => $request->input('class_number'),
+                'parent_contact' => $verifiedParentContact ?: $request->input('parent_contact'),
+            ]
+        );
 
         $this->finalizeRegistration($request, $member);
+
+        // 회원가입 완료 후 인증 세션 제거
+        $request->session()->forget(self::SMS_VERIFICATION_SESSION_KEY);
 
         return redirect()->route('member.register4');
     }
@@ -194,6 +261,9 @@ class MemberRegisterController extends Controller
                 ->withErrors(['process' => '본인 인증을 완료해주세요.']);
         }
 
+        $smsSession = $request->session()->get(self::SMS_VERIFICATION_SESSION_KEY);
+        $verifiedPhone = is_array($smsSession) ? ($smsSession['phone'] ?? null) : null;
+
         $gNum = '00';
         $sNum = '02';
         $gName = '회원가입';
@@ -201,7 +271,7 @@ class MemberRegisterController extends Controller
 
         $memberType = $this->getRegistrationSession($request, 'member_type');
 
-        return view('member.register3_b', compact('gNum', 'sNum', 'gName', 'sName', 'memberType'));
+        return view('member.register3_b', compact('gNum', 'sNum', 'gName', 'sName', 'memberType', 'verifiedPhone'));
     }
 
     /**
@@ -222,8 +292,15 @@ class MemberRegisterController extends Controller
                 ->withErrors(['process' => '본인 인증을 완료해주세요.']);
         }
 
+        // SMS 인증된 연락처 강제 적용 (폼 값 변조 방지)
+        $data = $request->validated();
+        $smsSession = $request->session()->get(self::SMS_VERIFICATION_SESSION_KEY);
+        if (is_array($smsSession) && !empty($smsSession['phone'])) {
+            $data['contact'] = $smsSession['phone'];
+        }
+
         $member = $this->createMemberRecord(
-            $request->validated(),
+            $data,
             $request,
             [
                 'grade' => $request->input('grade'),
@@ -505,6 +582,34 @@ class MemberRegisterController extends Controller
         $sessionId = $request->session()->getId();
         $purpose = 'register';
 
+        // 14세 미만인 경우 중복 체크 제거 (보호자 번호 인증이므로)
+        $ageGroup = $this->getRegistrationSession($request, 'age_group');
+        $isUnderFourteen = $ageGroup === 'under14';
+
+        // 14세 이상인 경우에만 중복 체크
+        if (!$isUnderFourteen) {
+            $normalized = $this->registerService->normalizeContact($phone);
+            if ($normalized !== null) {
+                $exists = Member::query()
+                    ->where(function ($query) use ($normalized) {
+                        $query->where('contact', $normalized);
+
+                        $formatted = $this->registerService->formatContactForDisplay($normalized);
+                        if ($formatted !== null) {
+                            $query->orWhere('contact', $formatted);
+                        }
+                    })
+                    ->exists();
+
+                if ($exists) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => '이미 회원가입된 연락처입니다. 로그인 또는 비밀번호 찾기를 이용해주세요.',
+                    ], 422);
+                }
+            }
+        }
+
         $result = $this->phoneVerificationService->sendVerificationCode($phone, $purpose, $sessionId);
 
         if ($result['success']) {
@@ -552,4 +657,3 @@ class MemberRegisterController extends Controller
         ], 422);
     }
 }
-

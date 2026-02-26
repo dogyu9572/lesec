@@ -52,6 +52,15 @@ class SmsKakaoApiService
             ];
         }
 
+        // SMS 내용 길이 체크 (200자)
+        if (mb_strlen($message) > 200) {
+            return [
+                'success' => false,
+                'response_code' => 'MESSAGE_TOO_LONG',
+                'response_message' => 'SMS 내용이 너무 깁니다. (최대 200자)',
+            ];
+        }
+
         $apiKey = config('services.sms_kakao.api_key', env('SMS_KAKAO_API_KEY', 'secure-api-key'));
 
         $data = [
@@ -120,6 +129,15 @@ class SmsKakaoApiService
                 'success' => false,
                 'response_code' => 'INVALID_PHONE',
                 'response_message' => '전화번호 형식이 올바르지 않습니다.',
+            ];
+        }
+
+        // 카카오 알림톡 내용 길이 체크 (500자)
+        if (mb_strlen($message) > 500) {
+            return [
+                'success' => false,
+                'response_code' => 'MESSAGE_TOO_LONG',
+                'response_message' => '카카오 알림톡 내용이 너무 깁니다. (최대 500자)',
             ];
         }
 

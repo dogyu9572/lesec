@@ -7,6 +7,8 @@ use App\Http\Requests\Member\MemberUpdateRequest;
 use App\Models\GroupApplication;
 use App\Models\GroupApplicationParticipant;
 use App\Models\IndividualApplication;
+use App\Models\School;
+use App\Services\Backoffice\MemberService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -18,6 +20,12 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 
 class MemberMypageController extends Controller
 {
+    protected $memberService;
+
+    public function __construct(MemberService $memberService)
+    {
+        $this->memberService = $memberService;
+    }
     /**
      * 회원 정보 페이지 표시
      */
@@ -43,15 +51,45 @@ class MemberMypageController extends Controller
     /**
      * 회원 정보 업데이트
      */
-    public function update(MemberUpdateRequest $request)
+    public function update(Request $request)
     {
         $member = Auth::guard('member')->user();
+
+        // AJAX 요청이고 현재 비밀번호만 검증하는 경우
+        if ($request->ajax() && $request->has('_current_password_check')) {
+            $currentPassword = $request->input('current_password');
+            if (empty($currentPassword)) {
+                return response()->json([
+                    'errors' => [
+                        'current_password' => ['현재 비밀번호를 입력해주세요.']
+                    ]
+                ], 422);
+            }
+
+            // 현재 비밀번호 검증만 수행 (다른 validation은 건너뛰기)
+            if (!password_verify($currentPassword, $member->password)) {
+                return response()->json([
+                    'errors' => [
+                        'current_password' => ['현재 비밀번호가 올바르지 않습니다.']
+                    ]
+                ], 422);
+            }
+
+            return response()->json(['success' => true]);
+        }
+
+        // 일반 폼 제출인 경우 validation 수행
+        $updateRequest = MemberUpdateRequest::createFrom($request);
+        $updateRequest->setContainer(app());
+        $updateRequest->setRedirector(app('redirect'));
+        $updateRequest->validateResolved();
+
+        $data = $updateRequest->validated();
 
         // validation 실패 시 자동으로 리다이렉트되므로, 여기까지 오면 validation 통과
         \Log::info('회원 정보 수정 시작', ['member_id' => $member->id]);
 
         try {
-            $data = $request->validated();
 
             \Log::info('회원 정보 수정 시작', ['member_id' => $member->id, 'data_keys' => array_keys($data)]);
 
@@ -61,7 +99,8 @@ class MemberMypageController extends Controller
                 unset($data['password']);
             }
 
-            $notificationAgree = $data['notification_agree'] ?? false;
+            // 수신동의는 필수값이므로 true로 설정
+            $notificationAgree = isset($data['notification_agree']) && $data['notification_agree'] ? true : true;
             unset($data['notification_agree']);
 
             $data['email_consent'] = $notificationAgree;
@@ -71,6 +110,37 @@ class MemberMypageController extends Controller
             unset($data['current_password'], $data['password_confirmation']);
 
             \Log::info('fill 전 데이터', ['original_city' => $member->city, 'original_district' => $member->district, 'new_city' => $data['city'] ?? null, 'new_district' => $data['district'] ?? null]);
+
+            // school_id가 없고 school_name이 있으면 학교 자동 생성 (회원가입과 동일)
+            if (empty($data['school_id']) && !empty($data['school_name'])) {
+                $school = DB::transaction(function () use ($data) {
+                    // 동일한 학교명과 지역이 이미 있는지 확인
+                    $existingSchool = School::where('school_name', $data['school_name'])
+                        ->where('city', $data['city'] ?? null)
+                        ->where('district', $data['district'] ?? null)
+                        ->whereNull('deleted_at')
+                        ->first();
+
+                    if ($existingSchool) {
+                        return $existingSchool;
+                    }
+
+                    // 새 학교 생성
+                    return School::create([
+                        'source_type' => 'user_registration',
+                        'city' => $data['city'] ?? null,
+                        'district' => $data['district'] ?? null,
+                        'school_level' => null,
+                        'school_name' => $data['school_name'],
+                        'school_code' => null,
+                        'status' => 'normal',
+                        'created_by' => null,
+                        'updated_by' => null,
+                    ]);
+                });
+
+                $data['school_id'] = $school->id;
+            }
 
             // fill() 대신 직접 할당하여 확실히 저장
             foreach ($data as $key => $value) {
@@ -118,10 +188,8 @@ class MemberMypageController extends Controller
         ]);
 
         try {
-            DB::transaction(function () use ($member) {
-                // Member 모델은 SoftDeletes가 아니므로 delete()는 물리 삭제입니다.
-                $member->delete();
-            });
+            // 백오피스와 동일한 로직 사용
+            $this->memberService->deleteMember($member);
         } catch (\Exception $e) {
             \Log::error('회원 탈퇴(삭제) 오류', ['error' => $e->getMessage(), 'member_id' => $member->id ?? null]);
             return redirect()->route('mypage.member')
@@ -278,9 +346,16 @@ class MemberMypageController extends Controller
             ->where('member_id', $member->id)
             ->firstOrFail();
 
+        // 승인 완료 전에는 명단 입력 불가
+        if ($application->application_status !== 'approved') {
+            return redirect()->back()
+                ->withErrors(['error' => '승인 완료 후 명단을 입력할 수 있습니다.'])
+                ->withInput();
+        }
+
         $request->validate([
             'payment_method' => 'nullable|in:bank_transfer,on_site_card,online_card',
-            'participants' => 'required|array',
+            'participants' => 'required|array|max:' . $application->applicant_count,
             'participants.*.name' => 'required|string|max:50',
             'participants.*.grade' => 'required|integer|min:1|max:3',
             'participants.*.class' => 'required|string|max:20',
@@ -347,9 +422,13 @@ class MemberMypageController extends Controller
                 }
             }
 
-            // 신청 인원 업데이트
-            $participantCount = GroupApplicationParticipant::where('group_application_id', $application->id)->count();
-            $application->applicant_count = $participantCount;
+            // 신청 인원은 변경하지 않음 (원래 신청 시 정해진 값 유지)
+
+            $reservation = $application->reservation;
+            if ($reservation && $reservation->is_free) {
+                $application->payment_status = 'paid';
+            }
+
             $application->save();
 
             DB::commit();
@@ -446,6 +525,11 @@ class MemberMypageController extends Controller
             ->where('member_id', $member->id)
             ->firstOrFail();
 
+        // 승인 완료 전에는 명단 업로드 불가
+        if ($application->application_status !== 'approved') {
+            return response()->json(['success' => false, 'message' => '승인 완료 후 명단을 업로드할 수 있습니다.'], 403);
+        }
+
         $request->validate([
             'csv_file' => 'required|file|mimes:csv,txt,xlsx,xls|max:2048',
         ]);
@@ -522,10 +606,7 @@ class MemberMypageController extends Controller
                 GroupApplicationParticipant::create($participant);
             }
 
-            // 신청 인원 업데이트: 전체 인원 기준으로 반영
-            $totalCount = GroupApplicationParticipant::where('group_application_id', $application->id)->count();
-            $application->applicant_count = $totalCount;
-            $application->save();
+            // 신청 인원은 변경하지 않음 (원래 신청 시 정해진 값 유지)
 
             DB::commit();
 
@@ -740,7 +821,7 @@ class MemberMypageController extends Controller
             'vat' => $vat,
             'total' => $total,
             'print_date' => now()->format('Y년 m월 d일'),
-            'note' => '',
+            'note' => $application->estimate_note ?? '',
         ];
     }
 

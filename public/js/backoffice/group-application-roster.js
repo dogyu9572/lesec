@@ -18,7 +18,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         fileInput.addEventListener('change', function(e) {
             const file = e.target.files && e.target.files[0];
-            if (!file || !uploadUrl) return;
+            if (!file || !uploadUrl) {
+                this.value = '';
+                return;
+            }
             const formData = new FormData();
             formData.append('csv_file', file);
             fetch(uploadUrl, {
@@ -28,16 +31,29 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: formData
             })
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) {
+                    return res.json().then(json => {
+                        throw new Error(json.message || '업로드 중 오류가 발생했습니다.');
+                    }).catch(() => {
+                        throw new Error('업로드 중 오류가 발생했습니다.');
+                    });
+                }
+                return res.json();
+            })
             .then(json => {
                 if (json && json.success) {
                     alert(json.message || '업로드가 완료되었습니다.');
                     location.reload();
                 } else {
                     alert((json && json.message) || '업로드 중 오류가 발생했습니다.');
+                    fileInput.value = '';
                 }
             })
-            .catch(() => alert('업로드 중 오류가 발생했습니다.'));
+            .catch(err => {
+                alert(err.message || '업로드 중 오류가 발생했습니다.');
+                fileInput.value = '';
+            });
         });
     }
 

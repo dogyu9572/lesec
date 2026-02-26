@@ -255,6 +255,10 @@ document.addEventListener('DOMContentLoaded', function () {
     [citySelect, districtSelect, levelSelect].forEach((select) => {
         select?.addEventListener('change', function () {
             if (select === citySelect && districtSelect) {
+                // 기타/해외 선택 시 시/군/구 비우기
+                if (citySelect.value === '기타/해외') {
+                    districtSelect.innerHTML = '<option value="">시/군/구 선택</option>';
+                }
                 districtSelect.dataset.defaultValue = '';
                 districtSelect.value = '';
             }
@@ -275,13 +279,13 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        // 부모창으로 직접 입력값 전달
+        // 부모창으로 직접 입력값 전달 (직접 입력 시 기타/해외로 설정)
         if (window.opener && typeof window.opener.applySelectedSchool === 'function') {
             window.opener.applySelectedSchool({
                 id: '',
                 name: directValue,
-                city: citySelect?.value || '',
-                district: districtSelect?.value || '',
+                city: '기타/해외',
+                district: '',
             });
             window.close();
         } else {

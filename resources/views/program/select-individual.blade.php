@@ -7,7 +7,8 @@
         data-program-page="select"
         data-select-mode="individual"
         data-type="{{ $type }}"
-        data-base-url="{{ route('program.select.individual', $type) }}">
+        data-base-url="{{ route('program.select.individual', $type) }}"
+        data-prepare-url="{{ route('program.payment.prepare', $type) }}">
 		<div class="btit"><strong>교육 선택</strong><p>원하는 교육 프로그램을 선택 후 신청하기 버튼을 눌러주세요.</p></div>
 
 		@php
@@ -70,7 +71,7 @@
 					<col>
 					<col class="w19_4">
 					<col class="w7">
-					<col class="w7">
+					<col class="w8_3">
 				</colgroup>
 				<thead>
 					<tr>
@@ -123,6 +124,8 @@
 								<button type="button" class="btn btn_kwk disabled" disabled>학생만 신청 가능</button>
 							@elseif($isWrongLevel)
 								<button type="button" class="btn btn_kwk disabled" disabled>학교급 불일치</button>
+							@elseif($program->individual_action_type === 'closed')
+								<a href="javascript:void(0);" class="btn btn_gray">마감</a>
 							@elseif($program->individual_action_type === 'waitlist')
 								<a href="{{ $program->waitlist_url }}" target="_blank" class="btn btn_kwk">대기자 신청</a>
 							@elseif($program->individual_action_type === 'scheduled')
@@ -149,18 +152,20 @@
                                     </button>
                                 @else
                                     @php
-                                        // 신청기간 전인지 체크
                                         $now = now();
                                         $isBeforeApplicationPeriod = $program->application_start_date && $program->application_start_date->greaterThan($now);
-                                        
-                                        // 선착순에서 정원 마감 여부 체크
-                                        $isFirstComeFull = $program->reception_type === 'first_come' 
-                                            && !$program->is_unlimited_capacity 
-                                            && $program->capacity 
+                                        $isAfterApplicationPeriod = $program->application_end_date && $program->application_end_date->lt($now);
+                                        $isFirstComeFull = $program->reception_type === 'first_come'
+                                            && !$program->is_unlimited_capacity
+                                            && $program->capacity
                                             && $program->applied_count_display >= $program->capacity;
+                                        $pm = is_array($program->payment_methods) ? $program->payment_methods : [];
+                                        $hasOnlineCard = in_array('online_card', $pm, true);
                                     @endphp
                                     @if($isBeforeApplicationPeriod)
                                         <a href="javascript:void(0);" class="btn btn_gray">접수예정</a>
+                                    @elseif($isAfterApplicationPeriod)
+                                        <a href="javascript:void(0);" class="btn btn_gray">마감</a>
                                     @elseif($isFirstComeFull)
                                         {{-- 선착순 정원 마감 시 대기자 신청 --}}
                                         @if($program->waitlist_url)
@@ -168,24 +173,32 @@
                                         @else
                                             <form method="POST"
                                                 action="{{ route('program.apply.individual.submit', $type) }}"
-                                                class="inline-form"
-                                                style="display:inline">
+                                                class="inline-form js-individual-apply-form"
+                                                style="display:inline"
+                                                data-program-reservation-id="{{ $program->id }}"
+                                                data-participation-date="{{ optional($program->education_start_date)->format('Y-m-d') }}"
+                                                data-education-fee="{{ $program->education_fee ?? 0 }}"
+                                                data-has-online-card="{{ $hasOnlineCard ? '1' : '0' }}">
                                                 @csrf
                                                 <input type="hidden" name="program_reservation_id" value="{{ $program->id }}">
                                                 <input type="hidden" name="participation_date" value="{{ optional($program->education_start_date)->format('Y-m-d') }}">
-                                                <button type="submit" class="btn btn_kwk">대기자 신청</button>
+                                                <button type="submit" class="btn btn_kwk js-individual-apply-btn">대기자 신청</button>
                                             </form>
                                         @endif
                                     @else
                                         {{-- 정원 마감 전 또는 추첨/네이버폼 --}}
                                         <form method="POST"
                                             action="{{ route('program.apply.individual.submit', $type) }}"
-                                            class="inline-form"
-                                            style="display:inline">
+                                            class="inline-form js-individual-apply-form"
+                                            style="display:inline"
+                                            data-program-reservation-id="{{ $program->id }}"
+                                            data-participation-date="{{ optional($program->education_start_date)->format('Y-m-d') }}"
+                                            data-education-fee="{{ $program->education_fee ?? 0 }}"
+                                            data-has-online-card="{{ $hasOnlineCard ? '1' : '0' }}">
                                             @csrf
                                             <input type="hidden" name="program_reservation_id" value="{{ $program->id }}">
                                             <input type="hidden" name="participation_date" value="{{ optional($program->education_start_date)->format('Y-m-d') }}">
-                                            <button type="submit" class="btn btn_wkk">신청하기</button>
+                                            <button type="submit" class="btn btn_wkk js-individual-apply-btn">신청하기</button>
                                         </form>
                                     @endif
                                 @endif
@@ -240,9 +253,12 @@
 	</div>
 </div>
 
+@include('partials.toss-payment-modal')
+
 @once
 	@push('scripts')
-		<script src="{{ asset('js/program/program.js') }}"></script>
+		<script src="{{ asset('js/vendor/tosspayments-v2.js') }}"></script>
+		<script src="{{ asset('js/program/program.js') }}?v={{ filemtime(public_path('js/program/program.js')) }}"></script>
 	@endpush
 @endonce
 

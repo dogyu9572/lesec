@@ -16,7 +16,7 @@
         </a>
     </div>
 
-    <div class="board-card">
+    <div class="board-card over_v">
 <div class="board-card-body">
             @if ($errors->any())
                 <div class="board-alert board-alert-danger">
@@ -274,7 +274,7 @@
                 </div>
                 @endif
 
-                <div class="board-form-actions">
+                <div class="board-form-actions btns_abso">
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-save"></i> 저장
                     </button>

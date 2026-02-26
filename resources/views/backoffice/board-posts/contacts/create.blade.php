@@ -247,13 +247,13 @@
                 </div>
                 @endif
 
-                @if($board->enable_sorting)
+                <!-- @if($board->enable_sorting)
                 <div class="board-form-group">
                     <label for="sort_order" class="board-form-label">정렬 순서</label>
                     <input type="number" class="board-form-control" id="sort_order" name="sort_order" value="{{ old('sort_order', $nextSortOrder ?? 0) }}" min="0">
                     <small class="board-form-text">숫자가 클수록 위에 표시됩니다.</small>
                 </div>
-                @endif
+                @endif -->
 
                 <div class="board-form-group">
                     <div class="board-checkbox-item">

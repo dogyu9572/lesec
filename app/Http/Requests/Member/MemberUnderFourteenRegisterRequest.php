@@ -31,17 +31,21 @@ class MemberUnderFourteenRegisterRequest extends FormRequest
                 'max:12',
                 'confirmed',
                 'regex:/^(?!.*[\x{AC00}-\x{D7AF}]).+$/u',
+                'different:login_id',
             ],
             'name' => ['required', 'string', 'max:255'],
             'birth_date' => ['required', 'date_format:Ymd', 'before:today'],
             'gender' => ['required', 'in:male,female'],
-            'contact' => ['required', 'string', 'max:50', $this->uniqueContactRule()],
+            'contact' => ['required', 'string', 'max:50'],
             'contact_verified' => ['required', 'in:1'],
+            'parent_contact' => ['required', 'string', 'max:50'],
             'email' => ['required', 'string', 'email', 'max:255'],
             'city' => ['nullable', 'string', 'max:100'],
             'district' => ['nullable', 'string', 'max:100'],
             'school_name' => ['required', 'string', 'max:255'],
             'school_id' => ['nullable', 'integer', 'exists:schools,id'],
+            'grade' => ['required', 'integer', 'between:1,3'],
+            'class_number' => ['required', 'integer', 'between:1,20'],
             'privacy_agree' => ['accepted'],
             'notification_agree' => ['accepted'],
         ];
@@ -63,19 +67,24 @@ class MemberUnderFourteenRegisterRequest extends FormRequest
             'password.max' => '비밀번호는 12자 이하로 입력해주세요.',
             'password.regex' => '한글을 제외한 영문/숫자/특수문자로 9~12자리로 입력해주세요.',
             'password.confirmed' => '비밀번호 확인이 일치하지 않습니다.',
+            'password.different' => '아이디와 동일한 비밀번호는 사용할 수 없습니다.',
             'name.required' => '이름을 입력해주세요.',
             'birth_date.required' => '생년월일을 입력해주세요.',
             'birth_date.date_format' => '생년월일은 YYYYMMDD 형식으로 입력해주세요.',
             'birth_date.before' => '미래 날짜는 입력할 수 없습니다.',
             'gender.required' => '성별을 선택해주세요.',
             'contact.required' => '연락처를 입력해주세요.',
-            'contact.unique' => '이미 등록된 연락처입니다.',
-            'contact_verified.required' => '연락처 중복 확인을 해주세요.',
-            'contact_verified.in' => '연락처 중복 확인을 해주세요.',
+            'contact_verified.required' => '학생 연락처 중복 확인을 해주세요.',
+            'contact_verified.in' => '학생 연락처 중복 확인을 해주세요.',
+            'parent_contact.required' => '보호자 연락처를 입력해주세요.',
             'email.required' => '이메일을 입력해주세요.',
             'email.email' => '올바른 이메일 형식을 입력해주세요.',
             'school_name.required' => '학교명을 입력해주세요.',
             'school_id.exists' => '선택한 학교 정보가 올바르지 않습니다.',
+            'grade.required' => '학년을 선택해주세요.',
+            'grade.between' => '학년은 1~3학년 중에서 선택해주세요.',
+            'class_number.required' => '반을 선택해주세요.',
+            'class_number.between' => '반은 1~20 사이의 숫자로 선택해주세요.',
             'privacy_agree.accepted' => '개인정보 처리방침에 동의해야 회원가입이 가능합니다.',
             'notification_agree.accepted' => '수신 동의 항목에 동의해야 회원가입이 가능합니다.',
         ];
@@ -86,7 +95,10 @@ class MemberUnderFourteenRegisterRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        $contact = preg_replace('/[^0-9]/', '', (string) $this->input('contact'));
+        $studentContactOriginal = (string) $this->input('student_contact');
+        $studentContact = preg_replace('/[^0-9]/', '', $studentContactOriginal);
+        $parentContactOriginal = (string) $this->input('parent_contact');
+        $parentContact = preg_replace('/[^0-9]/', '', $parentContactOriginal);
         $emailId = trim((string) $this->input('email_id'));
         $emailDomainSelected = (string) $this->input('email_domain');
         $emailDomainCustom = trim((string) $this->input('email_domain_custom'));
@@ -100,17 +112,44 @@ class MemberUnderFourteenRegisterRequest extends FormRequest
             $email = trim((string) $this->input('email'));
         }
 
+        // 비밀번호 값 복원 (hidden 필드에서 가져오기)
+        $password = $this->input('password');
+        if (empty($password) && $this->filled('password_temp')) {
+            $password = $this->input('password_temp');
+        }
+
+        // 비밀번호 확인 값 복원 (hidden 필드 우선 사용)
+        $passwordConfirmation = $this->input('password_confirmation');
+        if ($this->filled('password_confirmation_temp')) {
+            $passwordConfirmation = $this->input('password_confirmation_temp');
+        } elseif (empty($passwordConfirmation)) {
+            $passwordConfirmation = null;
+        }
+
         $this->merge([
             'login_id' => trim((string) $this->input('login_id')),
+            'password' => $password,
+            'password_confirmation' => $passwordConfirmation,
+            'password_temp' => $password,
+            'password_confirmation_temp' => $passwordConfirmation,
             'name' => trim((string) $this->input('name')),
-            'contact' => $contact,
+            'contact' => $studentContact,
+            'student_contact' => $studentContactOriginal,
+            'parent_contact' => $parentContactOriginal,
             'email' => $email,
+            'email_id' => $emailId,
+            'email_domain' => $emailDomainSelected,
+            'email_domain_custom' => $emailDomainCustom,
             'city' => trim((string) $this->input('city')),
             'district' => trim((string) $this->input('district')),
             'school_name' => trim((string) $this->input('school_name')),
             'school_id' => $this->filled('school_id') ? (int) $this->input('school_id') : null,
+            'grade' => $this->filled('grade') ? (int) $this->input('grade') : null,
+            'class_number' => $this->filled('class_number') ? (int) $this->input('class_number') : null,
             'privacy_agree' => $this->boolean('privacy_agree'),
             'notification_agree' => $this->boolean('notification_agree'),
+            'login_id_verified' => $this->input('login_id_verified', '0'),
+            'contact_verified' => $this->input('contact_verified', '0'),
         ]);
     }
 

@@ -311,3 +311,13 @@ body.modal-open {
     cursor: not-allowed;
 }
 
+/* 회원 그룹 테이블 행 높이 줄이기 */
+#member-list-body tr td {
+    padding: 8px 12px;
+    vertical-align: middle;
+}
+
+#member-list-body tr th {
+    padding: 8px 12px;
+}
+

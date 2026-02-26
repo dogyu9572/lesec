@@ -66,6 +66,7 @@ class SchoolService
         return School::query()
             ->whereNotNull('city')
             ->distinct()
+            ->orderByRaw("CASE WHEN city = '기타/해외' THEN 1 ELSE 0 END")
             ->orderBy('city')
             ->pluck('city')
             ->filter()
@@ -78,6 +79,11 @@ class SchoolService
      */
     public function getDistricts(?string $city = null): array
     {
+        // 기타/해외 선택 시 빈 배열 반환
+        if ($city === '기타/해외') {
+            return [];
+        }
+
         $query = School::query()
             ->whereNotNull('district');
 
@@ -130,6 +136,14 @@ class SchoolService
     {
         $query = School::query()
             ->select('id', 'school_name', 'city', 'district', 'school_level')
+            ->orderByRaw("
+                CASE 
+                    WHEN school_name REGEXP '^[가-힣]' THEN 0
+                    WHEN school_name REGEXP '^[0-9]' THEN 1
+                    WHEN school_name REGEXP '^[A-Za-z]' THEN 2
+                    ELSE 3
+                END
+            ")
             ->orderBy('school_name', 'asc');
 
         // 학교명 검색
@@ -158,4 +172,3 @@ class SchoolService
         return $query->paginate($perPage)->withQueryString();
     }
 }
-

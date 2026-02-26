@@ -54,18 +54,22 @@
 						<td class="appli05">{{ $application->participation_date_formatted ?? '-' }}</td>
 						<td class="appli06">{{ $application->payment_method_label }}</td>
 						<td class="appli07">
-							@if($application->payment_status === 'unpaid')
+							@if($application->payment_status === 'cancelled')
+								<strong>신청 취소</strong>
+							@elseif($application->reservation && $application->reservation->is_free)
+								<strong>무료</strong>
+							@elseif($application->payment_status === 'unpaid')
 								<strong class="c_red">미입금</strong>
 							@elseif($application->payment_status === 'paid')
 								<strong>입금완료</strong>
-							@elseif($application->payment_status === 'cancelled')
-								<strong>신청 취소</strong>
 							@else
 								-
 							@endif
 						</td>
 						<td class="appli08">
-							@if($application->application_status === 'pending')
+							@if($application->payment_status === 'cancelled')
+								<div class="statebox complet">승인처리</div>
+							@elseif($application->application_status === 'pending')
 								<div class="statebox wait">승인대기</div>
 							@elseif($application->application_status === 'approved')
 								<div class="statebox complet">승인완료</div>

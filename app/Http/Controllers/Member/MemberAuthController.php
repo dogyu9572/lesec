@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Member\MemberLoginRequest;
 use Illuminate\Http\Request;
 use App\Services\Member\MemberAuthService;
+use Illuminate\Support\Facades\Cookie;
 
 class MemberAuthController extends Controller
 {
@@ -30,7 +31,13 @@ class MemberAuthController extends Controller
             }
         }
 
-        return view('member.login', compact('gNum', 'sNum', 'gName', 'sName'));
+        // 저장된 아이디 읽기 (old 값이 없을 때만 사용)
+        $savedLoginId = null;
+        if (!old('login_id')) {
+            $savedLoginId = request()->cookie('saved_login_id');
+        }
+
+        return view('member.login', compact('gNum', 'sNum', 'gName', 'sName', 'savedLoginId'));
     }
 
     /**
@@ -47,7 +54,18 @@ class MemberAuthController extends Controller
         if ($this->authService->attemptLogin($credentials, $request->boolean('remember_login_id'))) {
             $request->session()->regenerate();
 
-            return redirect()->intended(route('home'));
+            $response = redirect()->intended(route('home'));
+
+            // 아이디 저장 기능
+            if ($request->boolean('remember_login_id')) {
+                // 쿠키에 아이디 저장 (1년 유지, 525600분 = 60 * 24 * 365)
+                $response->cookie('saved_login_id', $request->get('login_id'), 525600, '/', null, false, false);
+            } else {
+                // 체크 해제 시 쿠키 삭제
+                $response->withoutCookie('saved_login_id');
+            }
+
+            return $response;
         }
 
         return back()

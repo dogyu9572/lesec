@@ -19,7 +19,7 @@
 	<link rel="canonical" href="http://" />
 	<meta name="viewport" content="width=device-width initial-scale=1.0 maximum-scale=1.0 user-scalable=yes">
 
-	<link rel="icon" href="/images/favicon.ico" type="image/x-icon"/>
+	<link rel="icon" href="/images/favicon.png" type="image/x-icon"/>
 
     <!-- Styles -->
     <link rel="stylesheet" href="{{ asset('/css/popup.css') }}">
@@ -187,7 +187,7 @@
 	<footer class="footer">
 		<div class="point" id="foot"></div>
 		<div class="quick main">
-			<a href="/board/faq" class="qna">Q&amp;A</a>
+			<a href="/board/faq" class="qna">FAQ</a>
 			<button type="button" class="gotop">TOP</button>
 		</div>
 		<div class="inner">

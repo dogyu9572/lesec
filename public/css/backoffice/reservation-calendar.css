@@ -319,3 +319,7 @@
     text-align: right;
 }
 
+	.schedule_table .list li {position: relative;}
+	.schedule_table .table tbody td .list li.off {opacity:0; font-size:0;}
+	.schedule_table .table tbody td .list li .schedule_count {display:none;}
+	.schedule_table .table tbody td .list li.dummy {border: transparent 1px solid;}

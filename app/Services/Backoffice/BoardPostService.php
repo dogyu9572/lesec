@@ -23,29 +23,28 @@ class BoardPostService
     public function getPosts(string $slug, Request $request)
     {
         $query = DB::table($this->getTableName($slug));
-        
+
         $this->applySearchFilters($query, $request);
-        
+
         // 목록 개수 설정
         $perPage = $request->get('per_page', 15);
         $perPage = in_array($perPage, [10, 20, 50, 100]) ? $perPage : 15;
-        
+
         // 정렬 기능이 활성화된 게시판인지 확인
         $board = Board::where('slug', $slug)->first();
-        if ($board && $board->enable_sorting) {
-            // 정렬 기능 활성화: sort_order 내림차순 (큰 값이 위), 공지글, 최신순
-            $posts = $query->orderBy('sort_order', 'desc')
-                ->orderBy('is_notice', 'desc')
-                ->orderBy('created_at', 'desc')
-                ->paginate($perPage)
-                ->withQueryString();
-        } else {
-            // 정렬 기능 비활성화: 공지글, 최신순
-            $posts = $query->orderBy('is_notice', 'desc')
-                ->orderBy('created_at', 'desc')
-                ->paginate($perPage)
-                ->withQueryString();
+
+        // 공지글은 항상 위에
+        if ($board && $board->isNoticeEnabled()) {
+            $query->orderBy('is_notice', 'desc');
         }
+
+        // sort_order가 NULL이거나 0이면 등록일 빠른순, 아니면 sort_order 내림차순(큰 값이 위)
+        // sort_order가 있는 것들을 먼저 보여주고, 그 다음에 sort_order가 없는 것들을 등록일 빠른순으로
+        $query->orderByRaw('CASE WHEN sort_order IS NULL OR sort_order = 0 THEN 1 ELSE 0 END ASC')
+            ->orderByRaw('CASE WHEN sort_order IS NULL OR sort_order = 0 THEN created_at ELSE sort_order END DESC')
+            ->orderBy('created_at', 'asc');
+
+        $posts = $query->paginate($perPage)->withQueryString();
 
         $this->transformDates($posts);
         return $posts;
@@ -83,9 +82,9 @@ class BoardPostService
         } elseif ($searchType === 'content') {
             $query->where('content', 'like', "%{$keyword}%");
         } else {
-            $query->where(function($q) use ($keyword) {
+            $query->where(function ($q) use ($keyword) {
                 $q->where('title', 'like', "%{$keyword}%")
-                  ->orWhere('content', 'like', "%{$keyword}%");
+                    ->orWhere('content', 'like', "%{$keyword}%");
             });
         }
     }
@@ -111,7 +110,7 @@ class BoardPostService
     public function storePost(string $slug, array $validated, Request $request, $board): int
     {
         $data = $this->preparePostData($validated, $request, $slug, $board);
-        
+
         return DB::table($this->getTableName($slug))->insertGetId($data);
     }
 
@@ -125,7 +124,7 @@ class BoardPostService
         if ($board && $board->enable_sorting) {
             $sortOrder = $this->getNextSortOrder($slug);
         }
-        
+
         return [
             'user_id' => null,
             'author_name' => $validated['author_name'] ?? '관리자',
@@ -153,7 +152,7 @@ class BoardPostService
     {
         $maxSortOrder = DB::table($this->getTableName($slug))
             ->max('sort_order');
-        
+
         return ($maxSortOrder ?? 0) + 1;
     }
 
@@ -170,8 +169,34 @@ class BoardPostService
      */
     private function sanitizeContent(string $content): string
     {
-        $allowedTags = '<p><br><strong><em><u><ol><ul><li><h1><h2><h3><h4><h5><h6><blockquote><pre><code><table><thead><tbody><tr><td><th><a><img><div><span><iframe><video><source>';
-        return strip_tags($content, $allowedTags);
+        // 빈 문자열이나 null 체크
+        if (empty($content)) {
+            return '';
+        }
+
+        // font 태그를 span 태그로 변환 (color 속성을 style로 변환)
+        $content = preg_replace_callback(
+            '/<font\s+color=["\']?([^"\'>\s]+)["\']?[^>]*>(.*?)<\/font>/is',
+            function ($matches) {
+                $color = $matches[1];
+                $text = $matches[2];
+                return '<span style="color:' . htmlspecialchars($color, ENT_QUOTES, 'UTF-8') . '">' . $text . '</span>';
+            },
+            $content
+        );
+
+        // color 속성이 없는 font 태그는 그대로 유지 (나중에 제거될 수 있음)
+        // strip_tags는 속성을 유지하므로 스타일이 보존됨
+        // Summernote가 생성하는 모든 태그 허용: <b>, <i>, <s>, <strike> 포함
+        $allowedTags = '<p><br><strong><b><em><i><u><s><strike><ol><ul><li><h1><h2><h3><h4><h5><h6><blockquote><pre><code><table><thead><tbody><tr><td><th><a><img><div><span><iframe><video><source><font>';
+        $cleaned = strip_tags($content, $allowedTags);
+
+        // strip_tags 결과가 false일 경우 원본 반환
+        if ($cleaned === false) {
+            return $content;
+        }
+
+        return $cleaned;
     }
 
     /**
@@ -183,17 +208,17 @@ class BoardPostService
         if ($request->has('remove_thumbnail')) {
             return null;
         }
-        
+
         // 새 썸네일이 업로드된 경우
         if ($request->hasFile('thumbnail')) {
             return $request->file('thumbnail')->store('thumbnails/' . $slug, 'public');
         }
-        
+
         // 기존 썸네일이 있는 경우 보존
         if ($request->has('existing_thumbnail')) {
             return $request->input('existing_thumbnail');
         }
-        
+
         return null;
     }
 
@@ -204,7 +229,7 @@ class BoardPostService
     {
         $attachments = [];
         $removeIndices = $request->input('remove_attachments', []);
-        
+
         // 기존 첨부파일 보존 (제거 요청이 없는 것만)
         if ($request->has('existing_attachments')) {
             $existingAttachments = $request->input('existing_attachments', []);
@@ -213,7 +238,7 @@ class BoardPostService
                 if (in_array($index, $removeIndices)) {
                     continue;
                 }
-                
+
                 if (is_string($attachment)) {
                     $attachment = json_decode($attachment, true);
                 }
@@ -222,7 +247,7 @@ class BoardPostService
                 }
             }
         }
-        
+
         // 새 첨부파일 추가
         if ($request->hasFile('attachments')) {
             foreach ($request->file('attachments') as $file) {
@@ -234,7 +259,7 @@ class BoardPostService
                 ];
             }
         }
-        
+
         return $attachments;
     }
 
@@ -259,7 +284,14 @@ class BoardPostService
         $customFields = [];
         foreach ($board->custom_fields_config as $fieldConfig) {
             $fieldName = $fieldConfig['name'];
-            $customFields[$fieldName] = $request->input("custom_field_{$fieldName}");
+            $fieldValue = $request->input("custom_field_{$fieldName}");
+
+            // 에디터 타입인 경우 HTML sanitize 적용 (문자열인 경우에만)
+            if ($fieldConfig['type'] === 'editor' && !empty($fieldValue) && is_string($fieldValue)) {
+                $fieldValue = $this->sanitizeContent($fieldValue);
+            }
+
+            $customFields[$fieldName] = $fieldValue;
         }
         return $customFields;
     }
@@ -270,7 +302,7 @@ class BoardPostService
     public function getPost(string $slug, int $postId)
     {
         $post = DB::table($this->getTableName($slug))->where('id', $postId)->first();
-        
+
         if (!$post) {
             return null;
         }
@@ -296,8 +328,8 @@ class BoardPostService
      */
     public function updatePost(string $slug, int $postId, array $validated, Request $request, $board): bool
     {
-        $data = $this->prepareUpdateData($validated, $request, $slug, $board);
-        
+        $data = $this->prepareUpdateData($validated, $request, $slug, $board, $postId);
+
         return DB::table($this->getTableName($slug))
             ->where('id', $postId)
             ->update($data);
@@ -306,15 +338,17 @@ class BoardPostService
     /**
      * 수정 데이터 준비
      */
-    private function prepareUpdateData(array $validated, Request $request, string $slug, $board): array
+    private function prepareUpdateData(array $validated, Request $request, string $slug, $board, int $postId): array
     {
-        return [
+        // 기존 게시글 조회 (is_active 값 유지를 위해)
+        $existingPost = $this->getPost($slug, $postId);
+
+        $data = [
             'title' => $validated['title'],
             'content' => $this->sanitizeContent($validated['content']),
             'category' => $validated['category'] ?? null,
             'is_notice' => $request->has('is_notice'),
             'is_secret' => $request->has('is_secret'),
-            'is_active' => $request->has('is_active'),
             'author_name' => $validated['author_name'] ?? '관리자',
             'password' => $validated['password'] ?? null,
             'thumbnail' => $this->handleThumbnail($request, $slug),
@@ -323,6 +357,17 @@ class BoardPostService
             'sort_order' => $request->input('sort_order', 0),
             'updated_at' => now()
         ];
+
+        // is_active는 요청에 있으면 업데이트, 없으면 기존 값 유지
+        if ($request->has('is_active')) {
+            $data['is_active'] = $request->has('is_active');
+        } elseif ($existingPost) {
+            $data['is_active'] = $existingPost->is_active ?? true;
+        } else {
+            $data['is_active'] = true; // 기본값
+        }
+
+        return $data;
     }
 
     /**
@@ -331,13 +376,13 @@ class BoardPostService
     public function deletePost(string $slug, int $postId): bool
     {
         $post = DB::table($this->getTableName($slug))->where('id', $postId)->first();
-        
+
         if (!$post) {
             return false;
         }
 
         $this->deleteAttachments($post);
-        
+
         return DB::table($this->getTableName($slug))->where('id', $postId)->delete();
     }
 

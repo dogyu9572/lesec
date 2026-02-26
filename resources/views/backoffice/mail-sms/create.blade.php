@@ -145,7 +145,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="title">제목 <span class="text-danger">*</span></label>
-                                    <input type="text" id="title" name="title" value="{{ old('title', '') }}" maxlength="255">
+                                    <input type="text" id="title" name="title" value="{{ old('title', '') }}">
                                     @error('title')
                                         <p class="text-danger">{{ $message }}</p>
                                     @enderror
@@ -153,6 +153,10 @@
                                 <div class="form-group">
                                     <label for="content">내용 <span class="text-danger">*</span></label>
                                     <textarea id="content" name="content" rows="10">{{ old('content', '') }}</textarea>
+                                    <div class="text-muted small" style="margin-top: 5px; display: flex; justify-content: space-between; align-items: center;">
+                                        <span id="message-type-limit-guide">※ SMS는 최대 200자, 카카오 알림톡은 최대 500자까지 입력 가능합니다.</span>
+                                        <span id="content-char-count" style="font-weight: bold;">0자</span>
+                                    </div>
                                     @error('content')
                                         <p class="text-danger">{{ $message }}</p>
                                     @enderror
@@ -191,6 +195,62 @@
         csrfToken: "{{ csrf_token() }}",
         groupMembersUrlTemplate: "{{ route('backoffice.mail-sms.member-groups.members', ['memberGroup' => '__GROUP_ID__']) }}"
     };
+
+    // 글자 수 카운트 및 제한 체크
+    function updateCharCount() {
+        const content = document.getElementById('content');
+        const charCount = document.getElementById('content-char-count');
+        const guideText = document.getElementById('message-type-limit-guide');
+        
+        if (!content || !charCount) return;
+        
+        const length = content.value.length;
+        const messageType = document.querySelector('input[name="message_type"]:checked')?.value;
+        
+        let maxLength = 0;
+        let limitText = '';
+        
+        if (messageType === 'sms') {
+            maxLength = 200;
+            limitText = '※ SMS는 최대 200자까지 입력 가능합니다.';
+        } else if (messageType === 'kakao') {
+            maxLength = 500;
+            limitText = '※ 카카오 알림톡은 최대 500자까지 입력 가능합니다.';
+        } else {
+            limitText = '※ 이메일은 글자 수 제한이 없습니다.';
+        }
+        
+        if (guideText) {
+            guideText.textContent = limitText;
+        }
+        
+        charCount.textContent = length.toLocaleString() + '자';
+        
+        // 글자 수 초과 시 경고 색상 표시
+        if (maxLength > 0 && length > maxLength) {
+            charCount.style.color = 'red';
+            charCount.textContent = length.toLocaleString() + '자 (최대 ' + maxLength.toLocaleString() + '자 초과)';
+        } else if (maxLength > 0 && length > maxLength * 0.9) {
+            charCount.style.color = 'orange';
+        } else {
+            charCount.style.color = 'inherit';
+        }
+    }
+    
+    // 페이지 로드 시 및 입력 시 글자 수 업데이트
+    document.addEventListener('DOMContentLoaded', function() {
+        const content = document.getElementById('content');
+        const messageTypeInputs = document.querySelectorAll('input[name="message_type"]');
+        
+        if (content) {
+            content.addEventListener('input', updateCharCount);
+            updateCharCount();
+        }
+        
+        messageTypeInputs.forEach(input => {
+            input.addEventListener('change', updateCharCount);
+        });
+    });
 
     function prepareAndSend(event) {
         if (!confirm('등록과 동시에 발송하시겠습니까?')) {

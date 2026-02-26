@@ -96,7 +96,7 @@
                                     <option value="">전체</option>
                                     <option value="win">당첨</option>
                                     <option value="fail">미당첨</option>
-                                    <option value="waitlist">대기</option>
+                                    <option value="pending">대기중</option>
                                 </select>
                                 <button type="button" id="search-btn" class="btn btn-primary roster-filter-submit" data-skip-button>
                                     <i class="fas fa-search"></i> 검색
@@ -122,38 +122,38 @@
                     </div>
                 </div>
 
-                @if($rosterList->count() > 0)
-                    <div class="table-responsive">
-                        <table class="board-table">
-                            <thead>
-                                <tr>
-                                    <th class="roster-checkbox-column"><input type="checkbox" id="select-all-checkbox"></th>
-                                    <th>No</th>
-                                    @if($program['application_type'] === 'individual')
-                                        <th>신청번호</th>
-                                        <th>신청자명</th>
-                                        <th>학교명</th>
-                                        <th>학년</th>
-                                        <th>반</th>
-                                        <th>생년월일</th>
-                                        <th>성별</th>
-                                        <th>결제상태</th>
-                                        @if($program['reception_type'] === 'lottery')
-                                            <th>추첨결과</th>
-                                        @endif
-                                        <th>신청일시</th>
-                                        <th class="roster-table-actions">관리</th>
-                                    @else
-                                        <th>이름</th>
-                                        <th>학교</th>
-                                        <th>학년</th>
-                                        <th>반</th>
-                                        <th>생년월일</th>
-                                        <th class="roster-table-actions">관리</th>
+                <div class="table-responsive">
+                    <table class="board-table">
+                        <thead>
+                            <tr>
+                                <th class="roster-checkbox-column"><input type="checkbox" id="select-all-checkbox"></th>
+                                <th>No</th>
+                                @if($program['application_type'] === 'individual')
+                                    <th>신청번호</th>
+                                    <th>신청자명</th>
+                                    <th>학교명</th>
+                                    <th>학년</th>
+                                    <th>반</th>
+                                    <th>생년월일</th>
+                                    <th>성별</th>
+                                    <th>결제상태</th>
+                                    @if($program['reception_type'] === 'lottery')
+                                        <th>추첨결과</th>
                                     @endif
-                                </tr>
-                            </thead>
-                            <tbody>
+                                    <th>신청일시</th>
+                                    <th class="roster-table-actions">관리</th>
+                                @else
+                                    <th>이름</th>
+                                    <th>학교</th>
+                                    <th>학년</th>
+                                    <th>반</th>
+                                    <th>생년월일</th>
+                                    <th class="roster-table-actions">관리</th>
+                                @endif
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if($rosterList->count() > 0)
                                 @foreach($rosterList as $index => $item)
                                     <tr data-row-index="{{ $index }}"
                                         @if($program['application_type'] === 'individual')
@@ -203,15 +203,16 @@
                                         @endif
                                     </tr>
                                 @endforeach
-                                
-                            </tbody>
-                        </table>
-                    </div>
-                @else
-                    <div class="no-data">
-                        <p>등록된 명단이 없습니다.</p>
-                    </div>
-                @endif
+                            @else
+                                <tr class="no-data-row">
+                                    <td colspan="{{ $program['application_type'] === 'individual' ? ($program['reception_type'] === 'lottery' ? 13 : 12) : 7 }}" class="text-center" style="padding: 40px;">
+                                        등록된 명단이 없습니다.
+                                    </td>
+                                </tr>
+                            @endif
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <div class="form-actions">

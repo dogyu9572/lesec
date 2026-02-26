@@ -105,14 +105,14 @@
                                 @if($board->enable_sorting)
                                     <th class="w5">순서</th>
                                 @endif
-                                <th class="w5">번호</th>
-                                <th class="w15">팀</th>
+                                <!-- <th class="w5">번호</th> -->
+                                <th class="w10">팀</th>
                                 <th class="w10">이름</th>
                                 <th class="w10">직위</th>
-                                <th class="w10">담당업무</th>
-                                <th class="w15">전화번호</th>
+                                <th class="">담당업무</th>
+                                <th class="w10">전화번호</th>
                                 <th class="w10">노출여부</th>
-                                <th class="w10">등록일</th>
+                                <!-- <th class="w10">등록일</th> -->
                                 <th class="w15">관리</th>
                             </tr>
                         </thead>
@@ -135,7 +135,7 @@
                                             <i class="fas fa-grip-vertical sort-handle" title="드래그하여 순서 변경"></i>
                                         </td>
                                     @endif
-                                    <td>{{ $post->id }}</td>
+                                    <!-- <td>{{ $post->id }}</td> -->
                                     <td>{{ $team }}</td>
                                     <td>{{ $name }}</td>
                                     <td>{{ $position }}</td>
@@ -146,7 +146,7 @@
                                             {{ $post->is_active ? 'Y' : 'N' }}
                                         </span>
                                     </td>
-                                    <td>{{ $post->created_at->format('Y-m-d') }}</td>
+                                    <!-- <td>{{ $post->created_at->format('Y-m-d') }}</td> -->
                                     <td>
                                         <div class="board-btn-group">
                                             <a href="{{ route('backoffice.board-posts.edit', [$board->slug ?? 'notice', $post->id]) }}"

@@ -107,7 +107,29 @@
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
     line-height: 1.6 !important;
     color: #212529 !important;
-    font-size: 14px !important;
+    font-size: 20px !important;
+}
+
+/* 에디터 내부 볼드, 기울임, 취소선 정상 표시 */
+.note-editable strong, .note-editable b {
+    font-weight: 600 !important;
+}
+
+.note-editable em, .note-editable i {
+    font-style: italic !important;
+}
+
+.note-editable u {
+    text-decoration: underline !important;
+}
+
+.note-editable strike, .note-editable s {
+    text-decoration: line-through !important;
+}
+
+/* font 태그는 기본적으로 인라인으로 표시 */
+.note-editable font {
+    display: inline;
 }
 
 /* 드롭다운 메뉴 */

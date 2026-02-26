@@ -28,7 +28,7 @@
 	.header .bg .inner {position:relative; height:100%; background:url('/images/bg_gnb.svg') no-repeat 60px 50%;}
 /* footer */
 	.footer {position:relative; background:#222; padding:40px 0 50px; line-height:1.2;}
-	.footer .inner {position: relative;}
+	.footer .inner {position:relative;}
 	.footer .links {position:relative; display:flex; gap:33px; margin-top:40px;}
 	.footer .links .link {position:relative; font-size:16px; color:#fff; opacity:.7;}
 	.footer .links .link + .link:before {content:""; position:absolute; top:50%; left:-17px; width:1px; height:14px; background:#FFFFFF4D; transform:translateY(-50%);}
@@ -118,6 +118,7 @@
 	.tbl tbody th,
 	.tbl tbody td {border-bottom:#E0E3EE 1px solid; font-size:17px; color:#222; line-height:1.65; padding:16px;}
 	.tbl .bdr {border-right:#E0E3EE 1px solid;}
+	.word_break_tbl td {word-break:break-word;}
 	.tbl col.w28_6 {width:28.6%;}
 	.tbl col.w26_8 {width:26.8%;}
 	.tbl col.w8_3 {width:8.3%;}
@@ -177,16 +178,112 @@
 	.board_bottom .paging .last {transform:scaleX(-1);}
 /* 게시판 상세 */
 	.board_view {border-top:#222 1px solid;}
-	.board_view .tit {border-bottom:#ddd 1px solid; padding:32px 0; text-align:center;}
+	.board_view .tit {border-bottom:#ddd 1px solid; padding:32px 0;}
 	.board_view .tit strong {display:block; font-size:32px; color:#222; line-height:1.4;}
-	.board_view .tit .info {margin-top:16px; justify-content:center;}
+	.board_view .tit .info {margin-top:16px;}
 	.board_view .tit dl {display:flex; gap:16px; font-size:16px;}
 	.board_view .tit dt {color:#666; font-weight:500; padding-left:24px;}
 	.board_view .tit dd {color:#222;}
 	.board_view .tit .day dt {background:url('/images/icon_date.svg') no-repeat 0 50%;}
-	.board_view .con {padding:60px 0; letter-spacing:-0.34px;}
+	.board_view .con {padding:60px 0; letter-spacing:-0.34px; font-size:20px; line-height:1.6; color:#212529;}
 	.board_view .con img {height:auto !important;}
-	.board_view .con * {max-width:100%;}
+	.board_view .con * {max-width:100%; overflow:hidden;}
+	.board_view .con ul,
+	.board_view .con ol,
+	.board_view .con li {overflow:visible;}
+	/* 에디터와 동일한 스타일 적용 */
+	.board_view .con p {margin:0 0 16px 0; font-size:inherit; line-height:inherit;}
+	/* 볼드, 기울임, 취소선 스타일 - default.css 규칙을 덮어쓰기 위해 최우선 적용 */
+	/* default.css의 i {font-style:normal;} 규칙을 덮어쓰기 */
+	.board_view .con i,
+	.board_view .con em,
+	.board_view .con p i,
+	.board_view .con p em,
+	.board_view .con div i,
+	.board_view .con div em,
+	.board_view .con span i,
+	.board_view .con span em,
+	.board_view .con font i,
+	.board_view .con font em,
+	.board_view .con * i, 
+	.board_view .con * em {
+		font-style:italic !important;
+	}
+	/* default.css의 b {font-weight:500;} 규칙을 덮어쓰기 */
+	.board_view .con b,
+	.board_view .con strong,
+	.board_view .con p b,
+	.board_view .con p strong,
+	.board_view .con div b,
+	.board_view .con div strong,
+	.board_view .con span b,
+	.board_view .con span strong,
+	.board_view .con font b,
+	.board_view .con font strong,
+	.board_view .con * b, 
+	.board_view .con * strong {
+		font-weight:700 !important;
+		font-weight:bold !important;
+	}
+	.board_view .con u, 
+	.board_view .con p u,
+	.board_view .con div u,
+	.board_view .con span u,
+	.board_view .con * u {
+		text-decoration:underline !important;
+	}
+	.board_view .con strike, 
+	.board_view .con s, 
+	.board_view .con p strike, 
+	.board_view .con p s,
+	.board_view .con div strike,
+	.board_view .con div s,
+	.board_view .con span strike,
+	.board_view .con span s,
+	.board_view .con * strike, 
+	.board_view .con * s {
+		text-decoration:line-through !important;
+	}
+	/* 색상 스타일 - 인라인 스타일이 정상 반영되도록 (CSS가 인라인 스타일을 덮어쓰지 않도록) */
+	/* 인라인 스타일의 color 속성이 우선되도록 함 */
+	/* 하얀색 텍스트도 정상 표시되도록 */
+	.board_view .con [style*="color:white"], 
+	.board_view .con [style*="color:#fff"], 
+	.board_view .con [style*="color:#ffffff"], 
+	.board_view .con [style*="color:rgb(255, 255, 255)"],
+	.board_view .con [style*="color:rgb(255,255,255)"],
+	.board_view .con [style*="color:rgb(255,255,255)"],
+	.board_view .con [style*="color:rgb(255, 255, 255)"] {color:#fff !important;}
+	/* 배경색도 정상 반영되도록 */
+	.board_view .con [style*="background-color"] {background-color:inherit;}
+	/* font 태그는 기본적으로 색상이 적용되도록 (인라인 스타일이 우선) */
+	.board_view .con font {display:inline;}
+	/* 리스트 스타일 - 마커(점, 숫자)가 정상 표시되도록 */
+	.board_view .con ul, .board_view .con ol {margin:16px 0; padding-left:40px; list-style-position:outside;}
+	.board_view .con ul {list-style-type:disc !important;}
+	.board_view .con ol {list-style-type:decimal !important;}
+	.board_view .con li {margin:8px 0; font-size:inherit; line-height:inherit; display:list-item !important; list-style:inherit;}
+	.board_view .con ul li {list-style-type:disc !important;}
+	.board_view .con ol li {list-style-type:decimal !important;}
+	/* 링크 스타일 */
+	.board_view .con a {color:#0066cc !important; text-decoration:underline;}
+	.board_view .con a:hover {color:#0052a3 !important;}
+	/* 테이블 스타일 */
+	.board_view .con table {width:100%; border-collapse:collapse; margin:16px 0;}
+	.board_view .con table td, .board_view .con table th {padding:8px; border:1px solid #ddd; font-size:inherit; color:inherit;}
+	.board_view .con table th {background-color:#f5f5f5; font-weight:600;}
+	/* 동영상 가운데 정렬 */
+	.board_view .con .video-container {margin:20px auto; display:block; max-width:100%; text-align:center;}
+	.board_view .con iframe {display:block; margin:0 auto;}
+	.board_view .con video {display:block; margin:0 auto; max-width:100%;}
+	/* 제목 스타일 */
+	.board_view .con h1, .board_view .con h2, .board_view .con h3, .board_view .con h4, .board_view .con h5, .board_view .con h6 {margin:24px 0 16px 0; font-weight:600; color:inherit; line-height:1.4;}
+	.board_view .con h1 {font-size:2em;}
+	.board_view .con h2 {font-size:1.75em;}
+	.board_view .con h3 {font-size:1.5em;}
+	.board_view .con h4 {font-size:1.25em;}
+	.board_view .con h5 {font-size:1.1em;}
+	.board_view .con h6 {font-size:1em;}
 	.board_view .files {background:#F7F8F9; border-radius:8px; padding:24px 32px;}
 	.board_view .files a {display:block; font-size:16px; color:#333; line-height:28px; padding-left:34px; background:url('/images/icon_download.svg') no-repeat 0 50%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
 	.board_view .files a + a {margin-top:8px;}
@@ -278,7 +375,7 @@
 	.itit:before {content:""; position:absolute; top:50%; left:0; width:4px; height:24px; border-top:#39B54A 12px solid; border-bottom:#283891 12px solid; border-radius:2px; transform:translateY(-50%);}
 
 /* LOGIN */
-	.mem_wrap {padding:80px 0 120px; width:100%; margin:0 auto;}
+	.mem_wrap {padding:80px 0 120px; width:100%; margin:0 auto; min-height:calc(100vh - 391px);}
 	.login_wrap {max-width:480px;}
 	.login_wrap p.tac {margin:12px 0 40px;}
 	.login_wrap .inputs .text {display:block; width:100%; height:62px; border:#ddd 1px solid; border-radius:8px; padding:0 20px; font-size:17px; color:#222;}
@@ -293,14 +390,14 @@
 	.login_wrap .btn.mt4 {margin-top:40px;}
 	.login_wrap p.c_green {font-size:16px; margin-top:8px;}
 	
-	.password-wrap {position: relative; width: 100%; margin-top: 8px;}
-	.password-wrap .password-input {width: 100%; padding-right: 65px;}
+	.password-wrap {position:relative; width:100%; margin-top:8px;}
+	.password-wrap .password-input {width:100%; padding-right:65px;}
 	.password-wrap .btn-eye,
-	.password-wrap .btn-clear {position: absolute; top: 50%;
-		transform: translateY(-50%); background: none; border: none; padding: 0; cursor: pointer;}
-	.password-wrap .btn-eye {right: 50px;}
-	.password-wrap .btn-eye.r16 {right: 16px;}
-	.password-wrap .btn-clear {right: 20px;}
+	.password-wrap .btn-clear {position:absolute; top:50%;
+		transform:translateY(-50%); background:none; border:none; padding:0; cursor:pointer;}
+	.password-wrap .btn-eye {right:50px;}
+	.password-wrap .btn-eye.r16 {right:16px;}
+	.password-wrap .btn-clear {right:20px;}
 	
 /* 회원가입 */
 	.join_wrap {max-width:880px;}
@@ -384,6 +481,8 @@
 	.join_wrap .inputs .inbtn + .mt {margin-top:8px;}
 .join_wrap .inputs .error_alert {color:#f00; line-height:1.75; margin-top:8px; display:none;}
 .login_wrap .inputs .error_alert {color:#f00; line-height:1.75; margin-top:8px; display:none;}
+	.login_wrap .secession_text {text-align:center; font-weight:700; padding:40px 30px; border:#39B54A 2px solid; border-radius:10px; box-shadow:#39B54A1a 10px 10px 10px;}
+	.login_wrap .secession_text ~ * {display:none;}
 	.join_wrap .inputs .radios {gap:32px; align-items:center; height:52px;}
 	.join_wrap .inputs .email {gap:5px;}
 	.join_wrap .inputs .email span {width:22px; text-align:center; color:#666;}
@@ -394,6 +493,10 @@
 	.inputs [readonly] {background-color:#F7F8F9; color:#666 !important; border-color:#ddd !important;}
 	.inputs [readonly]::placeholder {color:#666 !important;}
 	.inputs [readonly] + .btn {pointer-events:none;}
+	.inputs [readonly] + .btn[onclick*="layerShow"], 
+	.inputs [readonly] + .js-school-search-btn,
+	.inbtn [readonly] + .btn[onclick*="layerShow"],
+	.inbtn [readonly] + .js-school-search-btn {pointer-events:auto !important; cursor:pointer !important;}
 	.term_area {border-top:#222 1px solid;}
 	.term_area .textarea {background:#F7F8F9; border-bottom:#E0E3EE 1px solid; padding:16px 10px 16px 24px; font-size:16px; color:#666; line-height:1.75;}
 	.term_area .textarea .scroll {padding-right:10px; height:170px; overflow:auto;}
@@ -413,7 +516,7 @@
 	.register_end p {font-size:17px; color:#333; line-height:1.65; }
 	.register_end .btn_submit {margin-top:32px; width:160px; line-height:52px; height:52px; font-size:17px;}
 /* 회원정보 찾기 */
-	.find_end {text-align:center; padding:80px 0 120px;}
+	.find_end {text-align:center; padding:80px 0 120px; min-height:auto !important;}
 	.find_end:before {content:""; display:block; width:64px; aspect-ratio:1/1; border-radius:50%; background:url('/images/icon_end_check.svg') no-repeat 50% 50% / contain; margin:0 auto 40px;}
 	.find_end p {font-size:18px; color:#666; line-height:1.65;}
 	.find_end .find_box {padding:32px; background:#F7F8F9; border-radius:12px; margin:40px auto;}
@@ -432,6 +535,7 @@
 	.find_end ~ .find_end:before {display:none;}
 	.apply_end_notice {position:relative; margin-top:32px; padding-top:32px;}
 	.apply_end_notice:before {content:""; position:absolute; top:0; left:50%; width:80px; border-top:#ddd 1px dashed; transform:translateX(-50%);}
+	.password-notice.mb {margin-bottom:80px;}
 
 /* svisual */
 	.svisual {position:relative; height:250px; background:no-repeat 50% 50% / cover; z-index:1;}
@@ -502,7 +606,7 @@
 	.etc_info p {position:relative; font-size:17px; line-height:28px; padding-left:11px;}
 	.etc_info p:before {content:""; position:absolute; top:13px; left:0; width:3px; height:3px; background:#666; border-radius:50%;}
 	/* 단체 신청 */
-	.schedule_wrap {display:flex; gap:40px; align-items: flex-start;}
+	.schedule_wrap {display:flex; gap:40px; align-items:flex-start;}
 	.schedule_wrap > * {width:calc(50% - 20px);}
 	.schedule_top {display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px 20px; margin-bottom:24px;}
 	.schedule_top .month {display:flex; align-items:center; gap:12px;}
@@ -535,6 +639,8 @@
 	.schedule_table .table tbody td .list li + li {margin-top:2px;}
 	.schedule_table .table tbody td .list li.i_possible {color:#fff; background:#39B54A;}
 	.schedule_table .table tbody td .list li.i_impossible {color:#999; line-height:16px; background:#EBEBEB; border:#ddd 1px solid;}
+	.schedule_table .table tbody td .list li.off {opacity:0; font-size:0;}
+	.schedule_table .table tbody td .list li .schedule_count {display:none;}
 	.nebox {margin-top:16px;}
 	.nebox p {font-size:16px; color:#666; font-weight:500; line-height:28px; padding-left:24px; background:url('/images/icon_ne_g.svg') no-repeat 0 50%;}
 	.nebox p + p {margin-top:2px;}
@@ -582,7 +688,7 @@
 	.faq_wrap dt button i:after {width:2px; height:18px;}
 	.faq_wrap dd {background:#F7F8F9; color:#222; line-height:30px; display:none;}
 	.faq_wrap dt button:before,
-	.faq_wrap dd:before {position:absolute; top:24px; left:24px; width:30px; height:30px; line-height:28px; border-radius:50%; border:1px solid; font-size:18px; font-weight:700; text-align:center;}
+	.faq_wrap dd:before {position:absolute; top:50%; transform:translateY(-50%); left:24px; width:30px; height:30px; line-height:28px; border-radius:50%; border:1px solid; font-size:18px; font-weight:700; text-align:center;}
 	.faq_wrap dt button:before {content:"Q"; color:#fff; background:#283891; border-color:#283891;}
 	.faq_wrap dd:before {content:"A"; color:#283891; background:#fff; border-color:#E0E3EE;}
 	.faq_wrap dd .btns {border-top:#E0E3EE 1px dashed; margin-top:24px; padding-top:24px;}

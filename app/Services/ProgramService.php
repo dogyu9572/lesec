@@ -13,17 +13,20 @@ class ProgramService
         'high_vacation',
         'special',
     ];
-    
+
     private const DEFAULT_TYPE = 'middle_semester';
-    
+
     /**
      * 타입별 프로그램 조회
      */
-    public function getProgramByType(string $type): ?Program
+    public function getProgramByType(string $type, string $applicationType = 'individual'): ?Program
     {
-        return Program::byType($type)->active()->first();
+        return Program::byType($type)
+            ->byApplicationType($applicationType)
+            ->active()
+            ->first();
     }
-    
+
     /**
      * 타입 한글명 반환
      */
@@ -36,10 +39,10 @@ class ProgramService
             'high_vacation' => '고등방학',
             'special' => '특별프로그램',
         ];
-        
+
         return $types[$type] ?? '';
     }
-    
+
     /**
      * 타입별 서브 메뉴 번호 반환
      */
@@ -52,7 +55,7 @@ class ProgramService
             'high_vacation' => '04',
             'special' => '05',
         ];
-        
+
         return $numbers[$type] ?? '01';
     }
 
@@ -62,7 +65,7 @@ class ProgramService
     public function getGroupApplySelectRoute(string $type): string
     {
         $resolvedType = in_array($type, self::AVAILABLE_TYPES, true) ? $type : self::DEFAULT_TYPE;
-        
+
         return route('program.select.group', $resolvedType);
     }
 
@@ -72,7 +75,7 @@ class ProgramService
     public function getIndividualApplySelectRoute(string $type): string
     {
         $resolvedType = in_array($type, self::AVAILABLE_TYPES, true) ? $type : self::DEFAULT_TYPE;
-        
+
         return route('program.select.individual', $resolvedType);
     }
 }

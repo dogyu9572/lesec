@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Backoffice;
 
 use App\Services\Backoffice\GroupProgramService;
 use App\Models\ProgramReservation;
+use App\Http\Requests\Backoffice\GroupProgramStoreRequest;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class GroupProgramController extends BaseController
 {
@@ -50,13 +52,36 @@ class GroupProgramController extends BaseController
     /**
      * 단체 프로그램 등록 처리
      */
-    public function store(Request $request)
+    public function store(GroupProgramStoreRequest $request)
     {
-        // TODO: Form Request로 유효성 검사 추가 예정
-        $this->groupProgramService->createProgram($request->all());
+        $data = $request->validated();
+        $educationType = $data['education_type'] ?? '';
 
-        return redirect()->route('backoffice.group-programs.index')
-            ->with('success', '단체 프로그램이 등록되었습니다.');
+        // 중등학기 또는 고등학기인 경우, 교육 시작일부터 종료일까지 각 날짜별로 프로그램 생성
+        if (in_array($educationType, ['middle_semester', 'high_semester'])) {
+            $startDate = Carbon::parse($data['education_start_date']);
+            $endDate = Carbon::parse($data['education_end_date']);
+            $createdCount = 0;
+
+            // 각 날짜별로 프로그램 생성
+            for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
+                $dayData = $data;
+                $dayData['education_start_date'] = $date->format('Y-m-d');
+                $dayData['education_end_date'] = $date->format('Y-m-d');
+
+                $this->groupProgramService->createProgram($dayData);
+                $createdCount++;
+            }
+
+            return redirect()->route('backoffice.group-programs.index')
+                ->with('success', "단체 프로그램 {$createdCount}개가 등록되었습니다.");
+        } else {
+            // 특별프로그램이나 방학은 기존 로직 유지
+            $this->groupProgramService->createProgram($data);
+
+            return redirect()->route('backoffice.group-programs.index')
+                ->with('success', '단체 프로그램이 등록되었습니다.');
+        }
     }
 
     /**

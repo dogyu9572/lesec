@@ -4,8 +4,10 @@
 
 	<div class="inner">
 		<div class="mem_wrap join_wrap">
-			<div class="stit num mb0 nbd_b"><span>1</span>기본 정보 <p class="abso">* 는 필수 입력 사항입니다.</p></div>
-			
+			<p class="error_alert password-notice mb tac" style="display:none; color:#dc3545;">* 안전한 정보 수정을 위해 현재 사용 중인 비밀번호를 입력해주세요.</p>
+
+			<p class="edit-notice mb tac" style="color:#666; font-size:14px;">정보 수정을 위해 '수정' 버튼을 클릭해 주세요.</p>
+
 			@if ($errors->has('auth'))
 			<div class="alert alert-error mb16">
 				{{ $errors->first('auth') }}
@@ -13,6 +15,8 @@
 			@endif
 
 			<form method="POST" action="{{ route('mypage.member.update') }}" class="js-member-register" data-duplicate-url="{{ route('member.register.check.duplicate') }}" data-school-search-url="{{ route('member.schools.search') }}" data-school-modal="#pop_school">
+				<div class="stit num mb0 nbd_b"><span>1</span>기본 정보 <p class="abso">* 는 필수 입력 사항입니다.</p>
+				</div>
 				@csrf
 
 				<div class="inputs">
@@ -31,16 +35,19 @@
 					<dl class="password-fields" style="display:none;">
 						<dt>현재 비밀번호<span>*</span></dt>
 						<dd>
-							<input type="password" name="current_password" class="text w100p" placeholder="안전한 정보 수정을 위해 현재 사용 중인 비밀번호를 입력해주세요.">
-							@error('current_password')
-							<p class="error_alert">{{ $message }}</p>
-							@enderror
+							<div class="password-wrap">
+								<input type="password" name="current_password" class="text w100p password-input" placeholder="안전한 정보 수정을 위해 현재 사용 중인 비밀번호를 입력해주세요.">
+								<button type="button" class="btn-eye toggle-password r16"><img src="/images/icon_eye.svg" alt="보기"></button>
+							</div>
 						</dd>
 					</dl>
 					<dl class="password-fields" style="display:none;">
 						<dt>새 비밀번호</dt>
 						<dd>
-							<input type="password" name="password" class="text w100p now_pw" placeholder="변경할 비밀번호를 입력해주세요. (변경하지 않으려면 비워두세요)">
+							<div class="password-wrap password-wrap_add">
+								<input type="password" name="password" class="text w100p now_pw password-input password-input_add" placeholder="변경할 비밀번호를 입력해주세요. (변경하지 않으려면 비워두세요)">
+								<button type="button" class="btn-eye toggle-password toggle-password_add r16"><img src="/images/icon_eye.svg" alt="보기"></button>
+							</div>
 							@error('password')
 							<p class="error_alert">{{ $message }}</p>
 							@enderror
@@ -78,29 +85,14 @@
 					<dl>
 						<dt>학생 연락처<span>*</span></dt>
 						<dd>
-							<div class="flex inbtn">
-								<input type="text" name="contact" value="{{ old('contact', $member->formatted_contact ?? $member->contact) }}" placeholder="휴대폰번호를 입력해주세요." data-phone-input inputmode="tel" autocomplete="tel" class="js-contact-input" data-original-contact="{{ preg_replace('/[^0-9]/', '', $member->contact ?? '') }}" disabled>
-								<button type="button" class="btn btn_wkk btn_error js-duplicate-check" data-field="contact" data-input="[name='contact']" disabled>중복 확인</button>
-							</div>
-							<input type="hidden" name="contact" value="{{ old('contact', $member->formatted_contact ?? $member->contact) }}">
-							<input type="hidden" name="contact_verified" value="1" class="js-contact-verified" data-original-value="1">
-							@error('contact')
-							<p class="error_alert">{{ $message }}</p>
-							@enderror
-							@error('contact_verified')
-							<p class="error_alert">{{ $message }}</p>
-							@enderror
+							<input type="text" value="{{ old('contact', $member->formatted_contact ?? $member->contact) }}" placeholder="휴대폰번호를 입력해주세요." data-phone-input inputmode="tel" autocomplete="tel" disabled>
 						</dd>
 					</dl>
-					@if ($member->parent_contact)
+					@if ($member->member_type === 'student')
 					<dl>
 						<dt>보호자 연락처<span>*</span></dt>
 						<dd>
 							<input type="text" name="parent_contact" value="{{ old('parent_contact', $member->formatted_parent_contact ?? $member->parent_contact) }}" placeholder="휴대폰번호를 입력해주세요." data-phone-input inputmode="tel" autocomplete="tel" disabled>
-							<input type="hidden" name="parent_contact" value="{{ old('parent_contact', $member->formatted_parent_contact ?? $member->parent_contact) }}">
-							@error('parent_contact')
-							<p class="error_alert">{{ $message }}</p>
-							@enderror
 						</dd>
 					</dl>
 					@endif
@@ -108,15 +100,7 @@
 					<dl>
 						<dt>연락처<span>*</span></dt>
 						<dd>
-							<div class="flex inbtn">
-								<input type="text" name="contact" value="{{ old('contact', $member->formatted_contact ?? $member->contact) }}" placeholder="휴대폰번호를 입력해주세요." data-phone-input inputmode="tel" autocomplete="tel" class="js-contact-input" data-original-contact="{{ preg_replace('/[^0-9]/', '', $member->contact ?? '') }}" disabled>
-								<button type="button" class="btn btn_wkk btn_error js-duplicate-check" data-field="contact" data-input="[name='contact']" disabled>중복 확인</button>
-							</div>
-							<input type="hidden" name="contact" value="{{ old('contact', $member->formatted_contact ?? $member->contact) }}">
-							<input type="hidden" name="contact_verified" value="1" class="js-contact-verified" data-original-value="1">
-							@error('contact')
-							<p class="error_alert">{{ $message }}</p>
-							@enderror
+							<input type="text" value="{{ old('contact', $member->formatted_contact ?? $member->contact) }}" placeholder="휴대폰번호를 입력해주세요." data-phone-input inputmode="tel" autocomplete="tel" disabled>
 						</dd>
 					</dl>
 					@endif
@@ -124,26 +108,27 @@
 						<dt>이메일<span>*</span></dt>
 						<dd>
 							<div class="flex email">
-								<input type="text" name="email_id" value="{{ old('email_id', $emailParts['id'] ?? '') }}" placeholder="이메일을 입력해주세요.">
+								<input type="text" name="email_id" value="{{ old('email_id', $emailParts['id'] ?? '') }}" placeholder="이메일을 입력해주세요." disabled class="js-editable-field">
 								<span>@</span>
-								<select name="email_domain" class="email-domain-select">
+								<select name="email_domain" class="email-domain-select js-editable-field" disabled>
 									<option value="">이메일 주소 선택</option>
-									<option value="naver.com" @selected(old('email_domain', $emailParts['domain'] ?? '') === 'naver.com')>naver.com</option>
-									<option value="gmail.com" @selected(old('email_domain', $emailParts['domain'] ?? '') === 'gmail.com')>gmail.com</option>
-									<option value="daum.net" @selected(old('email_domain', $emailParts['domain'] ?? '') === 'daum.net')>daum.net</option>
-									<option value="nate.com" @selected(old('email_domain', $emailParts['domain'] ?? '') === 'nate.com')>nate.com</option>
-									<option value="custom" @selected(old('email_domain', $emailParts['domain'] ?? '') === 'custom')>직접 입력</option>
+									<option value="naver.com" @selected(old('email_domain', $emailParts['domain'] ?? '' )==='naver.com' )>naver.com</option>
+									<option value="gmail.com" @selected(old('email_domain', $emailParts['domain'] ?? '' )==='gmail.com' )>gmail.com</option>
+									<option value="daum.net" @selected(old('email_domain', $emailParts['domain'] ?? '' )==='daum.net' )>daum.net</option>
+									<option value="nate.com" @selected(old('email_domain', $emailParts['domain'] ?? '' )==='nate.com' )>nate.com</option>
+									<option value="custom" @selected(old('email_domain', $emailParts['domain'] ?? '' )==='custom' )>직접 입력</option>
 								</select>
 							</div>
-							<input type="text" name="email_domain_custom" value="{{ old('email_domain_custom', $emailParts['custom_domain'] ?? '') }}" class="text w100p mt8 email-domain-custom" placeholder="직접 입력 시 도메인을 입력해 주세요." @if(old('email_domain', $emailParts['domain'] ?? '') !== 'custom') style="display:none;" @endif>
+							<input type="text" name="email_domain_custom" value="{{ old('email_domain_custom', $emailParts['custom_domain'] ?? '') }}" class="text w100p mt8 email-domain-custom js-editable-field" placeholder="직접 입력 시 도메인을 입력해 주세요." disabled @if(old('email_domain', $emailParts['domain'] ?? '' ) !=='custom' ) style="display:none;" @endif>
 							@error('email')
 							<p class="error_alert">{{ $message }}</p>
 							@enderror
 						</dd>
 					</dl>
 				</div>
-			
-				<div class="stit num mb0 nbd_b"><span>2</span>소속 정보 <p class="abso">* 는 필수 입력 사항입니다.</p></div>
+
+				<div class="stit num mb0 nbd_b"><span>2</span>소속 정보 <p class="abso">* 는 필수 입력 사항입니다.</p>
+				</div>
 				<div class="inputs">
 					<dl>
 						<dt>지역<span>*</span></dt>
@@ -165,7 +150,7 @@
 								<input type="hidden" name="district" class="district_hidden" value="{{ old('district', $member->district) }}">
 							</div>
 							@php
-								$regionError = $errors->first('city') ?: $errors->first('district');
+							$regionError = $errors->first('city') ?: $errors->first('district');
 							@endphp
 							@if ($regionError)
 							<p class="error_alert">{{ $regionError }}</p>
@@ -176,8 +161,8 @@
 						<dt>학교명<span>*</span></dt>
 						<dd>
 							<div class="flex inbtn">
-								<input type="text" name="school_name" class="input_school" value="{{ old('school_name', $member->school_name) }}" placeholder="학교명을 검색해주세요.">
-								<button type="button" class="btn btn_wkk" onclick="layerShow('pop_school')">학교 검색</button>
+								<input type="text" name="school_name" class="input_school js-editable-field" value="{{ old('school_name', $member->school_name) }}" placeholder="학교명을 검색해주세요." readonly>
+								<button type="button" class="btn btn_wkk js-school-search-btn" onclick="layerShow('pop_school')" disabled>학교 검색</button>
 							</div>
 							<input type="hidden" name="school_id" class="input_school_id" value="{{ old('school_id', $member->school_id) }}">
 							@error('school_name')
@@ -193,21 +178,21 @@
 						<dt>학년/반</dt>
 						<dd>
 							<div class="flex city">
-								<select name="grade">
+								<select name="grade" class="js-editable-field" disabled>
 									<option value="">학년 선택</option>
 									@for ($i = 1; $i <= 12; $i++)
-									<option value="{{ $i }}" @selected(old('grade', $member->grade) == $i)>{{ $i }}학년</option>
-									@endfor
+										<option value="{{ $i }}" @selected(old('grade', $member->grade) == $i)>{{ $i }}학년</option>
+										@endfor
 								</select>
-								<select name="class_number">
+								<select name="class_number" class="js-editable-field" disabled>
 									<option value="">반 선택</option>
 									@for ($i = 1; $i <= 30; $i++)
-									<option value="{{ $i }}" @selected(old('class_number', $member->class_number) == $i)>{{ $i }}반</option>
-									@endfor
+										<option value="{{ $i }}" @selected(old('class_number', $member->class_number) == $i)>{{ $i }}반</option>
+										@endfor
 								</select>
 							</div>
 							@php
-								$classError = $errors->first('grade') ?: $errors->first('class_number');
+							$classError = $errors->first('grade') ?: $errors->first('class_number');
 							@endphp
 							@if ($classError)
 							<p class="error_alert">{{ $classError }}</p>
@@ -216,11 +201,11 @@
 					</dl>
 					@endif
 				</div>
-			
+
 				<div class="stit num mb0 nbd_b"><span>3</span>수신 동의</div>
 				<div class="term_area">
 					<div class="check_area">
-						<label class="check"><input type="checkbox" name="notification_agree" value="1" @checked(old('notification_agree', $member->email_consent || $member->sms_consent || $member->kakao_consent))><i></i><strong>(선택)</strong>이메일 / SMS / 카카오 알림톡</label>
+						<label class="check"><input type="checkbox" name="notification_agree" value="1" @checked(old('notification_agree', $member->email_consent || $member->sms_consent || $member->kakao_consent)) class="js-editable-field" disabled><i></i><strong>(필수)</strong>이메일 / SMS / 카카오 알림톡</label>
 						@error('notification_agree')
 						<p class="error_alert">{{ $message }}</p>
 						@enderror
@@ -228,12 +213,12 @@
 				</div>
 
 				<div class="btns_tac">
-					<button type="button" class="btn_submit btn_wbb js-show-password-btn">정보 수정</button>
-					<button type="submit" class="btn_submit btn_wbb js-submit-btn" style="display:none;">정보 수정</button>
+					<button type="button" class="btn_submit btn_wbb js-edit-btn">수정</button>
+					<button type="submit" class="btn_submit btn_wbb js-submit-btn" style="display:none;">수정 완료</button>
 					<button type="button" class="btn btn_kwy" onclick="layerShow('pop_secession')">회원 탈퇴</button>
 				</div>
 			</form>
-			
+
 		</div>
 	</div>
 </main>
@@ -278,12 +263,12 @@
 						</dd>
 					</dl>
 				</div>
-				<div class="tbl">
+				<div class="tbl word_break_tbl">
 					<table>
 						<colgroup>
-							<col class="w28_6"/>
-							<col/>
-							<col class="w28_6"/>
+							<col class="w28_6" />
+							<col />
+							<col class="w28_6" />
 						</colgroup>
 						<thead>
 							<tr>
@@ -299,8 +284,16 @@
 						</tbody>
 					</table>
 				</div>
+				<div class="board_bottom">
+					<div class="paging school_pagination" style="display:none;">
+						<!-- 페이지네이션은 JavaScript로 동적 생성 -->
+					</div>
+				</div>
 			</div>
-			<button type="button" class="btn_submit btn_wbb mt4 btn_select_school">확인</button>
+			<div class="btn_group mt4" style="display: flex; gap: 8px;">
+				<button type="button" class="btn_submit btn_wbb btn_select_school" style="flex: 1;">확인</button>
+				<button type="button" class="btn_submit btn_wkk btn_input_school" style="flex: 1;" disabled>입력</button>
+			</div>
 		</div>
 	</div>
 </div>
@@ -312,7 +305,7 @@
 		<div class="tit mb0">회원 탈퇴</div>
 		<p><strong class="c_blue">회원 탈퇴</strong>를 진행하시겠습니까?</p>
 		<div class="gbox flex_center colm">
-			<p>탈퇴 시 회원의 모든 정보가 삭제되며 복구가 불가합니다.<br/>다시 이용하려면 신규가입이 필요합니다.</p>
+			<p>탈퇴 시 회원의 모든 정보가 삭제되며 복구가 불가합니다.<br />다시 이용하려면 신규가입이 필요합니다.</p>
 		</div>
 		<form method="POST" action="{{ route('mypage.member.secession') }}" id="secessionForm">
 			@csrf
@@ -330,165 +323,255 @@
 @push('scripts')
 <script src="{{ asset('js/member/register.js') }}?v={{ time() }}"></script>
 <script>
-$(function() {
-	// 저장 완료 알럿 표시
-	@if (session('success'))
-	alert('{{ session('success') }}');
-	@endif
+	$(function() {
+		// 저장 완료 알럿 표시 (성공 시에만 필드 비활성화)
+		@if(session('success'))
+		alert('정보 수정이 완료되었습니다.');
+		// 모든 필드 비활성화
+		$('.js-editable-field').prop('disabled', true);
+		$('.input_school').prop('readonly', true);
+		$('.js-school-search-btn').prop('disabled', true);
+		$('.password-fields input, .password-fields select').prop('disabled', true);
+		$('.password-fields').slideUp(300);
+		$('.password-notice').slideUp(300);
+		$('.edit-notice').show();
+		$('.js-submit-btn').hide();
+		$('.js-edit-btn').show();
+		$('input[name="current_password"]').val('');
+		$('input[name="password"]').val('');
+		$('input[name="password_confirmation"]').val('');
+		@endif
 
-	// validation 에러 알럿 표시
-	@if ($errors->any())
-	var errorMessages = [];
-	@foreach ($errors->all() as $error)
+		// validation 에러 알럿 표시 (검증 오류 시 수정 모드 유지)
+		@if($errors->any() && !session('success'))
+		var errorMessages = [];
+		var passwordErrors = ['password', 'password.password', 'password.letters', 'password.numbers', 'password.symbols', 'password.min', 'password.max', 'password.confirmed'];
+		var hasPasswordError = false;
+
+		@foreach($errors->all() as $key => $error)
+		@php
+		$errorKey = $errors->keys()[$key] ?? '';
+		$isPasswordError = in_array($errorKey, ['password', 'password.password', 'password.letters', 'password.numbers', 'password.symbols', 'password.min', 'password.max', 'password.confirmed']);
+		$isCurrentPasswordError = $errorKey === 'current_password';
+		@endphp
+		@if($isCurrentPasswordError)
+		// current_password 에러는 알럿으로만 표시
 		errorMessages.push('{{ $error }}');
-	@endforeach
-	if (errorMessages.length > 0) {
-		alert('다음 오류가 발생했습니다:\n\n' + errorMessages.join('\n'));
-	}
-	@endif
+		@elseif(!$isPasswordError)
+		errorMessages.push('{{ $error }}');
+		@else
+		hasPasswordError = true;
+		@endif
+		@endforeach
 
-	// 이메일 도메인 직접 입력 토글
-	$('.email-domain-select').on('change', function() {
-		var $customInput = $(this).closest('dd').find('.email-domain-custom');
-		if ($(this).val() === 'custom') {
-			$customInput.show();
-		} else {
-			$customInput.hide();
+		if (errorMessages.length > 0) {
+			alert('다음 오류가 발생했습니다:\n\n' + errorMessages.join('\n'));
+			// 검증 오류 시 수정 모드로 전환 (유지)
+			$('.password-fields').show();
+			$('.password-notice').show();
+			$('.js-editable-field').prop('disabled', false);
+			// school_name 필드는 readonly 유지 (직접 입력 불가, 검색만 가능)
+			$('.input_school').prop('readonly', true);
+			$('.js-school-search-btn').prop('disabled', false);
+			$('.password-fields input, .password-fields select').prop('disabled', false);
+			$('.edit-notice').hide();
+			$('.js-submit-btn').show();
+			$('.js-edit-btn').hide();
 		}
-	});
+		@endif
 
-	// 연락처 중복 확인 성공 시 플래그 설정
-	var observer = new MutationObserver(function(mutations) {
-		mutations.forEach(function(mutation) {
-			mutation.addedNodes.forEach(function(node) {
-				if (node.nodeType === 1 && $(node).hasClass('success_alert')) {
-					var $dd = $(node).closest('dd');
-					if ($dd.find('.js-contact-input').length) {
-						$dd.find('.js-contact-verified').val('1');
-					}
-				}
-			});
-		});
-	});
-	
-	if ($('.js-contact-input').length) {
-		observer.observe(document.body, {
-			childList: true,
-			subtree: true
-		});
-	}
-
-	// 연락처 입력값 변경 시 중복 확인 플래그 초기화
-	$('.js-contact-input').on('input', function() {
-		var $input = $(this);
-		if ($input.is(':disabled')) {
-			return;
-		}
-		var $verified = $input.closest('dd').find('.js-contact-verified');
-		var originalContact = $input.data('original-contact') || '';
-		var currentValue = $input.val().replace(/[^0-9]/g, '');
-		
-		// 원래 연락처와 다르면 중복 확인 필요
-		if (originalContact !== currentValue) {
-			$verified.val('0');
-			$input.closest('dd').find('.success_alert').remove();
-		} else {
-			// 원래 연락처와 같으면 중복 확인 불필요
-			$verified.val('1');
-		}
-	});
-
-	// 폼 제출 시 연락처 중복 확인 체크
-	$('.js-member-register').on('submit', function(e) {
-		var $contactInput = $('.js-contact-input');
-		if ($contactInput.length) {
-			// disabled 상태면 변경 불가이므로 중복 확인 체크 제외
-			if ($contactInput.is(':disabled')) {
-				return true;
+		// 이메일 도메인 직접 입력 토글
+		$('.email-domain-select').on('change', function() {
+			var $customInput = $(this).closest('dd').find('.email-domain-custom');
+			if ($(this).val() === 'custom') {
+				$customInput.show();
+			} else {
+				$customInput.hide();
 			}
-			var $verified = $contactInput.closest('dd').find('.js-contact-verified');
-			if ($verified.val() !== '1') {
+		});
+
+	});
+
+	// 페이지 로드 시 처리
+	$(function() {
+		// 검증 오류가 있을 때는 수정 모드로 시작
+		@if($errors->any() && !session('success'))
+		// 검증 오류 시 수정 모드로 전환
+		$('.password-fields').show();
+		$('.password-notice').show();
+		$('.js-editable-field').prop('disabled', false);
+		// school_name 필드는 readonly 유지 (직접 입력 불가, 검색만 가능)
+		$('.input_school').prop('readonly', true);
+		$('.js-school-search-btn').prop('disabled', false);
+		$('.password-fields input, .password-fields select').prop('disabled', false);
+		$('.edit-notice').hide();
+		$('.js-submit-btn').show();
+		$('.js-edit-btn').hide();
+		@else
+		// 검증 오류가 없을 때만 모든 입력 필드 비활성화
+		$('.js-editable-field').prop('disabled', true);
+		$('.input_school').prop('readonly', true);
+		$('.js-school-search-btn').prop('disabled', true);
+		@endif
+	});
+
+	// 수정 모드 전환
+	$(function() {
+		var $editBtn = $(".js-edit-btn");
+		var $submitBtn = $(".js-submit-btn");
+		var $passwordFields = $(".password-fields");
+		var $passwordNotice = $(".password-notice");
+		var $editNotice = $(".edit-notice");
+
+		// 수정 버튼 클릭 시 수정 모드로 전환
+		$editBtn.on("click", function(e) {
+			e.preventDefault();
+			$("html, body").animate({
+				scrollTop: 0
+			}, 250);
+
+			// 비밀번호 필드 노출
+			$passwordFields.slideDown(300);
+			$passwordNotice.slideDown(300);
+
+			// 수정 가능한 필드만 활성화: 비밀번호, 이메일, 소속 정보
+			$('.password-fields input, .password-fields select').prop('disabled', false);
+			$('.js-editable-field').prop('disabled', false);
+			// school_name 필드는 readonly 유지 (직접 입력 불가, 검색만 가능)
+			$('.input_school').prop('readonly', true);
+			$('.js-school-search-btn').prop('disabled', false);
+
+			// 안내 문구 숨기기
+			$editNotice.hide();
+
+			// 버튼 텍스트 변경
+			$editBtn.hide();
+			$submitBtn.show();
+		});
+
+	});
+
+	// 새 비밀번호 확인
+	$(function() {
+		var $pw = $(".now_pw");
+		var $pwCheck = $(".now_pw_check");
+		var $err = $pwCheck.closest("dd").find(".error_alert");
+
+		$err.hide();
+
+		function checkPasswordMatch() {
+			var pw = $pw.val().trim();
+			var pwCheck = $pwCheck.val().trim();
+
+			if (pwCheck === "" || pw === "") {
+				$err.hide();
+				return;
+			}
+
+			if (pw !== pwCheck) {
+				$err.show().text('* 동일한 비밀번호가 아닙니다.');
+			} else {
+				$err.hide();
+			}
+		}
+
+		$pw.on("input", checkPasswordMatch);
+		$pwCheck.on("input", checkPasswordMatch);
+
+		var $form = $("form.js-member-register");
+		var isSubmitting = false;
+
+		$form.on("submit", function(e) {
+			// 새 비밀번호 확인 체크
+			if ($pw.val().trim() !== "" && $pw.val().trim() !== $pwCheck.val().trim()) {
 				e.preventDefault();
-				alert('학생 연락처 중복 확인을 해주세요.');
-				$contactInput.focus();
+				$err.show().text('* 동일한 비밀번호가 아닙니다.');
+				$pwCheck.focus();
 				return false;
 			}
-		}
+
+			// 현재 비밀번호 검증 (새 비밀번호를 입력한 경우)
+			var newPassword = $pw.val().trim();
+			var currentPassword = $('input[name="current_password"]').val().trim();
+
+			if (newPassword !== "") {
+				if (currentPassword === "") {
+					e.preventDefault();
+					alert('비밀번호를 변경하려면 현재 비밀번호를 입력해주세요.');
+					$('input[name="current_password"]').focus();
+					return false;
+				}
+
+				// 현재 비밀번호를 먼저 검증 (AJAX)
+				if (isSubmitting) {
+					return false;
+				}
+
+				e.preventDefault();
+				isSubmitting = true;
+
+				// 현재 비밀번호만 먼저 검증
+				$.ajax({
+					url: '{{ route("mypage.member.update") }}',
+					method: 'POST',
+					headers: {
+						'X-Requested-With': 'XMLHttpRequest',
+						'Accept': 'application/json'
+					},
+					data: {
+						current_password: currentPassword,
+						_current_password_check: true,
+						_token: '{{ csrf_token() }}'
+					},
+					success: function(response) {
+						// 검증 성공 시 폼 제출
+						isSubmitting = false;
+						$form.off('submit').submit();
+					},
+					error: function(xhr) {
+						isSubmitting = false;
+						if (xhr.status === 422) {
+							var errors = xhr.responseJSON?.errors || {};
+							if (errors.current_password && errors.current_password.length > 0) {
+								// 현재 비밀번호 에러만 표시
+								alert('현재 비밀번호가 올바르지 않습니다.');
+								$('input[name="current_password"]').focus();
+							} else {
+								// 다른 에러가 있으면 폼 제출하여 서버에서 처리
+								$form.off('submit').submit();
+							}
+						} else {
+							// 다른 에러는 폼 제출하여 서버에서 처리
+							$form.off('submit').submit();
+						}
+					}
+				});
+
+				return false;
+			}
+		});
 	});
-});
 
-// 비밀번호 입력란 노출
-$(function(){
-	var $showBtn = $(".js-show-password-btn");
-	var $submitBtn = $(".js-submit-btn");
-	var $passwordFields = $(".password-fields");
+	// 팝업
+	function layerShow(id) {
+		$("#" + id).fadeIn(300);
+	}
 
-	// 정보 수정 버튼 클릭 시 비밀번호 입력란 노출
-	$showBtn.on("click", function(e){
-		e.preventDefault();
-		$("html, body").animate({ scrollTop: 0 }, 250);
-		$passwordFields.slideDown(300);
-		$showBtn.hide();
-		$submitBtn.show();
-	});
-});
+	function layerHide(id) {
+		$("#" + id).fadeOut(300);
+	}
 
-// 새 비밀번호 확인
-$(function(){
-	var $pw = $(".now_pw");
-	var $pwCheck = $(".now_pw_check");
-	var $err = $pwCheck.closest("dd").find(".error_alert");
-
-	$err.hide();
-
-	function checkPasswordMatch(){
-		var pw = $pw.val().trim();
-		var pwCheck = $pwCheck.val().trim();
-
-		if (pwCheck === "" || pw === "") {
-			$err.hide();
+	// 회원 탈퇴 확인
+	function confirmSecession() {
+		if (!$('#secession_agree').is(':checked')) {
+			alert('탈퇴 동의에 체크해주세요.');
 			return;
 		}
 
-		if (pw !== pwCheck) {
-			$err.show().text('* 동일한 비밀번호가 아닙니다.');
-		} else {
-			$err.hide();
+		if (confirm('정말 탈퇴하시겠습니까?')) {
+			$('#secessionForm').trigger('submit');
 		}
 	}
-
-	$pw.on("input", checkPasswordMatch);
-	$pwCheck.on("input", checkPasswordMatch);
-
-	$("form").on("submit", function(e){
-		if ($pw.val().trim() !== "" && $pw.val().trim() !== $pwCheck.val().trim()) {
-			e.preventDefault();
-			$err.show().text('* 동일한 비밀번호가 아닙니다.');
-			$pwCheck.focus();
-			return false;
-		}
-	});
-});
-
-// 팝업
-function layerShow(id) {
-	$("#" + id).fadeIn(300);
-}
-function layerHide(id) {
-	$("#" + id).fadeOut(300);
-}
-
-// 회원 탈퇴 확인
-function confirmSecession() {
-	if (!$('#secession_agree').is(':checked')) {
-		alert('탈퇴 동의에 체크해주세요.');
-		return;
-	}
-	
-	if (confirm('정말 탈퇴하시겠습니까?')) {
-		$('#secessionForm').trigger('submit');
-	}
-}
 </script>
 @endpush
 

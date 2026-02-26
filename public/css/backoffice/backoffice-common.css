@@ -26,6 +26,7 @@
     font-size: 0.9rem;
     padding: 0.5rem 0.9rem;
     margin-left: auto; /* 버튼을 오른쪽으로 밀어냄 */
+	line-height:22px;
 }
 
 /* 게시판 카드 */
@@ -36,6 +37,7 @@
     border: 1px solid #e9ecef;
     overflow: hidden;
 }
+.board-card.over_v {overflow:visible;}
 
 .board-card-header {
     padding: 1.25rem 1.5rem;
@@ -51,8 +53,12 @@
 }
 
 .board-card-body {
-    padding: 1.5rem;
+	position: relative;
+    padding: 1rem;
 }
+
+.board-card-body .btns_abso {position: absolute; top:-58px; right:108px; margin: 0; padding: 0; border: 0; flex-direction:row;}
+.board-card-body .btns_abso .btn {line-height:22px; padding: .5rem .9rem;}
 
 /* 게시판 테이블 */
 .board-table {
@@ -71,7 +77,7 @@
 }
 
 .board-table td {
-    padding: 0.75rem 0.5rem;
+    padding: 0.25rem 0.5rem;
     border-bottom: 1px solid #f1f3f4;
     color: #333;
     vertical-align: middle;
@@ -220,6 +226,7 @@
     gap: 5px;
     flex-wrap: wrap;
 }
+.board-btn-group.flex_center {justify-content: center;}
 
 .board-btn-group .btn {
     font-size: 0.8rem;
@@ -349,6 +356,7 @@
     font-size: 14px;
     transition: border-color 0.2s ease;
 }
+.board-form-control.wauto {width:auto;}
 
 .board-form-control:focus {
     outline: none;
@@ -1155,6 +1163,7 @@
     align-items: center;
     margin-bottom: 1rem;
 }
+.board-page-header.mb0 {margin-bottom: 0;}
 
 .board-page-buttons {
     display: flex;

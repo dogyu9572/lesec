@@ -269,7 +269,7 @@ function initSummernote() {
                 ['style', ['style']],
                 ['font', ['bold', 'underline', 'italic', 'strikethrough', 'clear']],
                 ['fontname', ['fontname']],
-                ['color', ['color', 'forecolor', 'backcolor']],
+                ['color', ['forecolor', 'backcolor']],
                 ['fontsize', ['fontsize']],
                 ['para', ['ul', 'ol', 'paragraph']],
                 ['height', ['height']],

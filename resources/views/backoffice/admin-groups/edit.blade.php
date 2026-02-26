@@ -96,6 +96,13 @@
                     <a href="{{ route('backoffice.admin-groups.index') }}" class="btn btn-secondary">
                         <i class="fas fa-times"></i> 취소
                     </a>
+					<form action="{{ route('backoffice.admin-groups.destroy', $group) }}" method="POST" class="d-inline" onsubmit="return confirm('이 권한 그룹을 삭제하시겠습니까?');">
+						@csrf
+						@method('DELETE')
+						<button type="submit" class="btn btn-danger btn-sm">
+							<i class="fas fa-trash"></i> 삭제
+						</button>
+					</form>
                 </div>
             </form>
         </div>

@@ -8,6 +8,9 @@ window.csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribu
 // Summernote 에디터 초기화
 function initSummernote() {
     if (typeof $.fn.summernote !== 'undefined') {
+        // 기존 내용 저장 (초기화 전에)
+        const existingContent = $('#content').val();
+        
         $('#content').summernote({
             height: 400,
             lang: 'ko-KR',
@@ -15,22 +18,23 @@ function initSummernote() {
             disableHtml: false,
             // 드래그 앤 드롭 비활성화 (썸네일/첨부파일과 충돌 방지)
             disableDragAndDrop: true,
-            // 허용할 HTML 태그 설정
-            allowedTags: ['p', 'br', 'strong', 'b', 'em', 'i', 'u', 'strike', 'div', 'span', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote', 'pre', 'code', 'a', 'img', 'table', 'thead', 'tbody', 'tr', 'td', 'th', 'iframe', 'video', 'source'],
+            // 허용할 HTML 태그 설정 (볼드, 기울임, 취소선 태그 포함)
+            allowedTags: ['p', 'br', 'strong', 'b', 'em', 'i', 'u', 's', 'strike', 'div', 'span', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote', 'pre', 'code', 'a', 'img', 'table', 'thead', 'tbody', 'tr', 'td', 'th', 'iframe', 'video', 'source', 'font'],
             // 허용할 속성 설정
-            allowedAttributes: {
+                allowedAttributes: {
                 '*': ['style', 'class', 'id'],
                 'iframe': ['src', 'width', 'height', 'frameborder', 'allowfullscreen', 'title', 'allow'],
                 'img': ['src', 'alt', 'width', 'height'],
                 'a': ['href', 'target'],
                 'table': ['border', 'cellpadding', 'cellspacing'],
-                'td': ['colspan', 'rowspan']
+                'td': ['colspan', 'rowspan'],
+                'font': ['color', 'size', 'face', 'style']
             },
             toolbar: [
                 ['style', ['style']],
                 ['font', ['bold', 'underline', 'italic', 'strikethrough', 'clear']],
                 ['fontname', ['fontname']],
-                ['color', ['color', 'forecolor', 'backcolor']],
+                ['color', ['forecolor', 'backcolor']],
                 ['fontsize', ['fontsize']],
                 ['para', ['ul', 'ol', 'paragraph']],
                 ['height', ['height']],
@@ -40,6 +44,7 @@ function initSummernote() {
             ],
             fontNames: ['맑은 고딕', '굴림체', '바탕체', 'Arial', 'Times New Roman', 'Courier New', 'Verdana'],
             fontSizes: ['8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '32', '33', '34', '35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47', '48', '49', '50', '51', '52', '53', '54', '55', '56', '57', '58', '59', '60', '61', '62', '63', '64', '65', '66', '67', '68', '69', '70', '71', '72'],
+            defaultFontSize: '20',
             callbacks: {
                 onImageUpload: function(files) {
                     for (let i = 0; i < files.length; i++) {
@@ -47,7 +52,16 @@ function initSummernote() {
                     }
                 },
                 onInit: function() {
-                    // Summernote 초기화 완료
+                    // Summernote 초기화 완료 후 기존 내용이 있으면 설정
+                    if (existingContent && existingContent.trim() !== '') {
+                        // 약간의 지연을 두고 설정 (에디터가 완전히 준비된 후)
+                        setTimeout(function() {
+                            const currentContent = $('#content').summernote('code');
+                            if (!currentContent || currentContent.trim() === '') {
+                                $('#content').summernote('code', existingContent);
+                            }
+                        }, 100);
+                    }
                 },
                 onChange: function(contents, $editable) {
                     // 콘텐츠 변경 시 실제 textarea에 동기화
@@ -190,29 +204,35 @@ function initSummernote() {
 function initCustomFieldEditors() {
     if (typeof $.fn.summernote !== 'undefined') {
         $('.summernote-editor').each(function() {
-            $(this).summernote({
+            // 기존 내용 저장 (초기화 전에)
+            const $editor = $(this);
+            const editorId = $editor.attr('id');
+            const existingContent = editorId ? $('#' + editorId).val() : '';
+            
+            $editor.summernote({
                 height: 300,
                 lang: 'ko-KR',
                 // HTML 태그 필터링 비활성화
                 disableHtml: false,
                 // 드래그 앤 드롭 비활성화 (썸네일/첨부파일과 충돌 방지)
                 disableDragAndDrop: true,
-                // 허용할 HTML 태그 설정
-                allowedTags: ['p', 'br', 'strong', 'b', 'em', 'i', 'u', 'strike', 'div', 'span', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote', 'pre', 'code', 'a', 'img', 'table', 'thead', 'tbody', 'tr', 'td', 'th', 'iframe', 'video', 'source'],
+                // 허용할 HTML 태그 설정 (볼드, 기울임, 취소선 태그 포함)
+                allowedTags: ['p', 'br', 'strong', 'b', 'em', 'i', 'u', 's', 'strike', 'div', 'span', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote', 'pre', 'code', 'a', 'img', 'table', 'thead', 'tbody', 'tr', 'td', 'th', 'iframe', 'video', 'source', 'font'],
                 // 허용할 속성 설정
                 allowedAttributes: {
-                    '*': ['style', 'class', 'id'],
-                    'iframe': ['src', 'width', 'height', 'frameborder', 'allowfullscreen', 'title', 'allow'],
-                    'img': ['src', 'alt', 'width', 'height'],
-                    'a': ['href', 'target'],
-                    'table': ['border', 'cellpadding', 'cellspacing'],
-                    'td': ['colspan', 'rowspan']
-                },
+                '*': ['style', 'class', 'id'],
+                'iframe': ['src', 'width', 'height', 'frameborder', 'allowfullscreen', 'title', 'allow'],
+                'img': ['src', 'alt', 'width', 'height'],
+                'a': ['href', 'target'],
+                'table': ['border', 'cellpadding', 'cellspacing'],
+                'td': ['colspan', 'rowspan'],
+                'font': ['color', 'size', 'face', 'style']
+            },
                 toolbar: [
                     ['style', ['style']],
                     ['font', ['bold', 'underline', 'italic', 'strikethrough', 'clear']],
                     ['fontname', ['fontname']],
-                    ['color', ['color', 'forecolor', 'backcolor']],
+                    ['color', ['forecolor', 'backcolor']],
                     ['fontsize', ['fontsize']],
                     ['para', ['ul', 'ol', 'paragraph']],
                     ['height', ['height']],
@@ -225,6 +245,18 @@ function initCustomFieldEditors() {
                     onImageUpload: function(files) {
                         for (let i = 0; i < files.length; i++) {
                             uploadImage(files[i], this);
+                        }
+                    },
+                    onInit: function() {
+                        // Summernote 초기화 완료 후 기존 내용이 있으면 설정
+                        if (existingContent && existingContent.trim() !== '' && editorId) {
+                            // 약간의 지연을 두고 설정 (에디터가 완전히 준비된 후)
+                            setTimeout(function() {
+                                const currentContent = $('#' + editorId).summernote('code');
+                                if (!currentContent || currentContent.trim() === '') {
+                                    $('#' + editorId).summernote('code', existingContent);
+                                }
+                            }, 100);
                         }
                     },
                     onChange: function(contents, $editable) {

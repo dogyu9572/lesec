@@ -43,15 +43,18 @@ document.addEventListener("DOMContentLoaded", function () {
       memberCityInput.value = data.city || "";
     }
     if (memberDistrictInput) {
-      memberDistrictInput.value = data.district || "";
+      // 기타/해외 선택 시 시/군/구는 빈 값
+      memberDistrictInput.value = (data.city === "기타/해외") ? "" : (data.district || "");
     }
     if (memberCityDisplay) {
       const cityText = (data.city || "").trim() !== "" ? data.city : "선택";
       memberCityDisplay.innerHTML = `<option value="${cityText}" selected>${cityText}</option>`;
     }
     if (memberDistrictDisplay) {
-      const districtText =
-        (data.district || "").trim() !== "" ? data.district : "선택";
+      // 기타/해외 선택 시 시/군/구는 "선택"으로 표시
+      const districtText = (data.city === "기타/해외") 
+        ? "선택" 
+        : ((data.district || "").trim() !== "" ? data.district : "선택");
       memberDistrictDisplay.innerHTML = `<option value="${districtText}" selected>${districtText}</option>`;
     }
   };

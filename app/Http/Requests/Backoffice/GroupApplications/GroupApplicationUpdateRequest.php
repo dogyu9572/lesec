@@ -39,8 +39,7 @@ class GroupApplicationUpdateRequest extends FormRequest
             'payment_status' => ['required', Rule::in($allowedPaymentStatuses)],
             'participation_fee' => ['nullable', 'integer', 'min:0'],
             'participation_date' => ['nullable', 'date'],
+            'estimate_note' => ['nullable', 'string', 'max:1000'],
         ];
     }
 }
-
-

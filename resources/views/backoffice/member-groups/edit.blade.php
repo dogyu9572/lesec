@@ -58,6 +58,8 @@
                                         <tr>
                                             <th>No</th>
                                             <th>이름</th>
+                                            <th>학교</th>
+                                            <th>학년</th>
                                             <th>(학생)연락처</th>
                                             <th>보호자 연락처</th>
                                             <th>이메일</th>
@@ -71,6 +73,8 @@
                                                 <tr data-member-id="{{ $member->id }}">
                                                     <td>{{ $index + 1 }}</td>
                                                     <td>{{ $member->name }}</td>
+                                                    <td>{{ $member->school_name ?? '-' }}</td>
+                                                    <td>{{ $member->grade ?? '-' }}</td>
                                                     <td>{{ $member->contact ?? '-' }}</td>
                                                     <td>{{ $member->parent_contact ?? '-' }}</td>
                                                     <td>{{ $member->email }}</td>
@@ -85,7 +89,7 @@
                                             @endforeach
                                         @else
                                             <tr style="border: none;">
-                                                <td colspan="7" class="text-center" style="padding: 40px 20px; border: none !important; border-bottom: none !important;">등록된 회원이 없습니다.</td>
+                                                <td colspan="9" class="text-center" style="padding: 40px 20px; border: none !important; border-bottom: none !important;">등록된 회원이 없습니다.</td>
                                             </tr>
                                         @endif
                                     </tbody>
@@ -97,10 +101,19 @@
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-save"></i> 저장
                             </button>
+                            <button type="button" class="btn btn-danger" onclick="if(confirm('정말 이 회원 그룹을 삭제하시겠습니까?\n\n삭제 시 관련된 모든 정보도 함께 삭제되며, 이 작업은 되돌릴 수 없습니다.')) { document.getElementById('delete-form').submit(); }">
+                                <i class="fas fa-trash"></i> 삭제
+                            </button>
                             <a href="{{ route('backoffice.member-groups.index') }}" class="btn btn-secondary">
                                 <i class="fas fa-times"></i> 취소
                             </a>
                         </div>
+                    </form>
+                    
+                    <!-- 삭제 폼 (저장 폼 밖으로 분리) -->
+                    <form id="delete-form" action="{{ route('backoffice.member-groups.destroy', $group) }}" method="POST" style="display: none;">
+                        @csrf
+                        @method('DELETE')
                     </form>
                 </div>
             </div>

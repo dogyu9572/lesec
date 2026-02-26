@@ -63,11 +63,11 @@
                     <small class="board-form-text">프로그램명 검색 버튼을 클릭하면 기존 프로그램명을 검색할 수 있습니다.</small>
                 </div>
 
-                <!-- 교육일정 -->
+                <!-- 참가일 -->
                 <div class="board-form-row">
                     <div class="board-form-col board-form-col-6">
                         <div class="board-form-group">
-                            <label for="education_start_date" class="board-form-label">교육 시작일 <span class="required">*</span></label>
+                            <label for="education_start_date" class="board-form-label">참가 시작일 <span class="required">*</span></label>
                             <input type="date" class="board-form-control @error('education_start_date') is-invalid @enderror" 
                                    id="education_start_date" name="education_start_date" value="{{ old('education_start_date', $program->education_start_date ? $program->education_start_date->format('Y-m-d') : '') }}" required>
                             @error('education_start_date')
@@ -77,7 +77,7 @@
                     </div>
                     <div class="board-form-col board-form-col-6">
                         <div class="board-form-group">
-                            <label for="education_end_date" class="board-form-label">교육 종료일 <span class="required">*</span></label>
+                            <label for="education_end_date" class="board-form-label">참가 종료일 <span class="required">*</span></label>
                             <input type="date" class="board-form-control @error('education_end_date') is-invalid @enderror" 
                                    id="education_end_date" name="education_end_date" value="{{ old('education_end_date', $program->education_end_date ? $program->education_end_date->format('Y-m-d') : '') }}" required>
                             @error('education_end_date')
@@ -109,9 +109,9 @@
                 <div class="program-section">
                     <div class="section-title">접수정보</div>
 
-                    <!-- 접수유형 -->
+                    <!-- 신청유형 -->
                 <div class="board-form-group">
-                    <label for="reception_type" class="board-form-label">접수유형 <span class="required">*</span></label>
+                    <label for="reception_type" class="board-form-label">신청유형 <span class="required">*</span></label>
                     <select class="board-form-control @error('reception_type') is-invalid @enderror" 
                             id="reception_type" name="reception_type" required>
                         <option value="">선택하세요</option>
@@ -129,8 +129,8 @@
                     <div class="board-form-col board-form-col-6">
                         <div class="board-form-group">
                             <label for="application_start_date" class="board-form-label">신청 시작일 <span class="required">*</span></label>
-                            <input type="date" class="board-form-control @error('application_start_date') is-invalid @enderror" 
-                                   id="application_start_date" name="application_start_date" value="{{ old('application_start_date', $program->application_start_date ? $program->application_start_date->format('Y-m-d') : '') }}" required>
+                            <input type="datetime-local" class="board-form-control @error('application_start_date') is-invalid @enderror" 
+                                   id="application_start_date" name="application_start_date" value="{{ old('application_start_date', $program->application_start_date ? $program->application_start_date->format('Y-m-d\TH:i') : '') }}" required>
                             @error('application_start_date')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -139,8 +139,8 @@
                     <div class="board-form-col board-form-col-6">
                         <div class="board-form-group">
                             <label for="application_end_date" class="board-form-label">신청 종료일 <span class="required">*</span></label>
-                            <input type="date" class="board-form-control @error('application_end_date') is-invalid @enderror" 
-                                   id="application_end_date" name="application_end_date" value="{{ old('application_end_date', $program->application_end_date ? $program->application_end_date->format('Y-m-d') : '') }}" required>
+                            <input type="datetime-local" class="board-form-control @error('application_end_date') is-invalid @enderror" 
+                                   id="application_end_date" name="application_end_date" value="{{ old('application_end_date', $program->application_end_date ? $program->application_end_date->format('Y-m-d\TH:i') : '') }}" required>
                             @error('application_end_date')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -172,9 +172,9 @@
                     </div>
                 </div>
 
-                <!-- 교육비 -->
+                <!-- 참가비 -->
                 <div class="board-form-group">
-                    <label for="education_fee" class="board-form-label">교육비</label>
+                    <label for="education_fee" class="board-form-label">참가비</label>
                     <div class="board-form-row">
                         <div class="board-form-col board-form-col-6">
                             <input type="number" class="board-form-control @error('education_fee') is-invalid @enderror" 
@@ -201,10 +201,19 @@
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-save"></i> 저장
                     </button>
+                    <button type="button" class="btn btn-danger" onclick="if(confirm('정말 이 프로그램을 삭제하시겠습니까?\n\n삭제 시 관련된 모든 신청 내역도 함께 삭제되며, 이 작업은 되돌릴 수 없습니다.')) { document.getElementById('delete-form').submit(); }">
+                        <i class="fas fa-trash"></i> 삭제
+                    </button>
                     <a href="{{ route('backoffice.group-programs.index') }}" class="btn btn-secondary">
                         <i class="fas fa-times"></i> 취소
                     </a>
                 </div>
+            </form>
+            
+            <!-- 삭제 폼 (저장 폼 밖으로 분리) -->
+            <form id="delete-form" action="{{ route('backoffice.group-programs.destroy', $program) }}" method="POST" style="display: none;">
+                @csrf
+                @method('DELETE')
             </form>
         </div>
     </div>

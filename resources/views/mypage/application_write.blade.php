@@ -3,7 +3,7 @@
 <main class="pb">
     
 	<div class="inner">
-		<form method="POST" action="{{ route('mypage.application_write.update', $application->id) }}" enctype="multipart/form-data" id="participantForm">
+		<form method="POST" action="{{ route('mypage.application_write.update', $application->id) }}" enctype="multipart/form-data" id="participantForm" data-is-free="{{ ($application->reservation && $application->reservation->is_free) ? '1' : '0' }}">
 			@csrf
 		
 		<div class="stit nbd_b">신청내역</div>
@@ -69,15 +69,22 @@
 					</tr>
 					<tr>
 						<th>교육료</th>
-						<td>{{ $application->participation_fee ? number_format($application->participation_fee) . '원' : '-' }}</td>
+						<td>{{ $application->display_total_fee_label }}</td>
 					</tr>
 					<tr>
 						<th>결제방법</th>
 						<td>
+							@php
+								$allowedPaymentMethods = is_array($application->reservation->payment_methods ?? null) ? $application->reservation->payment_methods : [];
+								$selectedPayment = in_array($application->payment_method, $allowedPaymentMethods) ? $application->payment_method : ($allowedPaymentMethods[0] ?? null);
+								$paymentMethodLabels = \App\Models\GroupApplication::PAYMENT_METHOD_LABELS;
+							@endphp
 							<div class="flex radios">
-								<label class="radio"><input type="radio" name="payment_method" value="bank_transfer" {{ $application->payment_method === 'bank_transfer' ? 'checked' : '' }}><i></i>무통장 입금</label>
-								<label class="radio"><input type="radio" name="payment_method" value="on_site_card" {{ $application->payment_method === 'on_site_card' ? 'checked' : '' }}><i></i>방문 카드결제</label>
-								<label class="radio"><input type="radio" name="payment_method" value="online_card" {{ $application->payment_method === 'online_card' ? 'checked' : '' }}><i></i>온라인 카드결제</label>
+								@foreach($allowedPaymentMethods as $methodKey)
+									@if(isset($paymentMethodLabels[$methodKey]))
+										<label class="radio"><input type="radio" name="payment_method" value="{{ $methodKey }}" {{ $selectedPayment === $methodKey ? 'checked' : '' }}><i></i>{{ $paymentMethodLabels[$methodKey] }}</label>
+									@endif
+								@endforeach
 							</div>
 						</td>
 					</tr>
@@ -86,11 +93,14 @@
 		</div>
 		
 		<div class="stit nbd_b mt">명단 입력<span class="c_green">* 는 필수 입력 사항입니다.</span>
-			<div class="abso_btns">
+			@if($application->application_status !== 'approved')
+			<div style="color: #ff0000; margin-bottom: 10px; font-weight: bold;">승인 완료 후 명단을 입력할 수 있습니다.</div>
+			@endif
+			<div class="abso_btns mo_long">
 				<a href="{{ route('mypage.application_write.sample', $application->id) }}" class="btn btn_kwy">샘플파일 받기</a>
-				<label for="csv_upload" class="btn btn_kwy" style="cursor: pointer; margin-left: 5px;">일괄 업로드</label>
-				<input type="file" id="csv_upload" name="csv_file" accept=".csv,.xlsx,.xls" style="display: none;">
-				<button type="button" class="btn btn_wkk btn_add">추가</button>
+				<label for="csv_upload" class="btn btn_kwy {{ $application->application_status !== 'approved' ? 'disabled' : '' }}" style="cursor: {{ $application->application_status === 'approved' ? 'pointer' : 'not-allowed' }}; margin-left: 5px; {{ $application->application_status !== 'approved' ? 'opacity: 0.5; pointer-events: none;' : '' }}">일괄 업로드</label>
+				<input type="file" id="csv_upload" name="csv_file" accept=".csv,.xlsx,.xls" style="display: none;" {{ $application->application_status !== 'approved' ? 'disabled' : '' }}>
+				<button type="button" class="btn btn_wkk btn_add" {{ ($application->application_status !== 'approved' || ($application->applicant_count > 0 && count($application->participants) >= $application->applicant_count)) ? 'disabled' : '' }}>추가</button>
 			</div>
 		</div>
 		<div class="over_tbl">
@@ -98,12 +108,12 @@
 				<div class="tbl board_write board_apply_list">
 					<table>
 						<colgroup>
-							<col width="4%">
+							<col width="6%">
 							<col>
 							<col>
 							<col>
 							<col>
-							<col width="8%">
+							<col width="10%">
 						</colgroup>
 						<thead>
 							<tr>
@@ -121,10 +131,10 @@
 								<td>{{ $loop->iteration }}</td>
 								<td>
 									<input type="hidden" name="participants[{{ $loop->index }}][id]" value="{{ $participant->id }}">
-									<input type="text" name="participants[{{ $loop->index }}][name]" class="w100p" placeholder="이름을 입력해주세요." value="{{ $participant->name ?? '' }}" required>
+									<input type="text" name="participants[{{ $loop->index }}][name]" class="w100p" placeholder="이름을 입력해주세요." value="{{ $participant->name ?? '' }}" required {{ $application->application_status !== 'approved' ? 'disabled' : '' }}>
 								</td>
 								<td>
-									<select name="participants[{{ $loop->index }}][grade]" class="w100p" required>
+									<select name="participants[{{ $loop->index }}][grade]" class="w100p" required {{ $application->application_status !== 'approved' ? 'disabled' : '' }}>
 										<option value="">학년을 선택해주세요.</option>
 										@for($i = 1; $i <= 3; $i++)
 										<option value="{{ $i }}" {{ $participant->grade == $i ? 'selected' : '' }}>{{ $i }}학년</option>
@@ -132,24 +142,24 @@
 									</select>
 								</td>
 								<td>
-									<select name="participants[{{ $loop->index }}][class]" class="w100p" required>
+									<select name="participants[{{ $loop->index }}][class]" class="w100p" required {{ $application->application_status !== 'approved' ? 'disabled' : '' }}>
 										<option value="">반을 선택해주세요.</option>
 										@for($i = 1; $i <= 20; $i++)
 										<option value="{{ $i }}" {{ $participant->class == $i ? 'selected' : '' }}>{{ $i }}반</option>
 										@endfor
 									</select>
 								</td>
-								<td><input type="text" name="participants[{{ $loop->index }}][birthday]" class="w100p" placeholder="20010101" value="{{ $participant->birthday ? $participant->birthday->format('Ymd') : '' }}"></td>
+								<td><input type="text" name="participants[{{ $loop->index }}][birthday]" class="w100p" placeholder="20010101" value="{{ $participant->birthday ? $participant->birthday->format('Ymd') : '' }}" {{ $application->application_status !== 'approved' ? 'disabled' : '' }}></td>
 								<td>
-									<button type="button" class="btn btn_gray btn_delete_participant" style="width: 100%; padding: 5px;">삭제</button>
+									<button type="button" class="btn btn_gray btn_delete_participant" style="width: 100%; padding: 5px;" {{ $application->application_status !== 'approved' ? 'disabled' : '' }}>삭제</button>
 								</td>
 							</tr>
 							@empty
 							<tr>
 								<td>1</td>
-								<td><input type="text" name="participants[0][name]" class="w100p" placeholder="이름을 입력해주세요." required></td>
+								<td><input type="text" name="participants[0][name]" class="w100p" placeholder="이름을 입력해주세요." required {{ $application->application_status !== 'approved' ? 'disabled' : '' }}></td>
 								<td>
-									<select name="participants[0][grade]" class="w100p" required>
+									<select name="participants[0][grade]" class="w100p" required {{ $application->application_status !== 'approved' ? 'disabled' : '' }}>
 										<option value="">학년을 선택해주세요.</option>
 										@for($i = 1; $i <= 3; $i++)
 										<option value="{{ $i }}">{{ $i }}학년</option>
@@ -157,16 +167,16 @@
 									</select>
 								</td>
 								<td>
-									<select name="participants[0][class]" class="w100p" required>
+									<select name="participants[0][class]" class="w100p" required {{ $application->application_status !== 'approved' ? 'disabled' : '' }}>
 										<option value="">반을 선택해주세요.</option>
 										@for($i = 1; $i <= 20; $i++)
 										<option value="{{ $i }}">{{ $i }}반</option>
 										@endfor
 									</select>
 								</td>
-								<td><input type="text" name="participants[0][birthday]" class="w100p" placeholder="20010101"></td>
+								<td><input type="text" name="participants[0][birthday]" class="w100p" placeholder="20010101" {{ $application->application_status !== 'approved' ? 'disabled' : '' }}></td>
 								<td>
-									<button type="button" class="btn btn_gray btn_delete_participant" style="width: 100%; padding: 5px;">삭제</button>
+									<button type="button" class="btn btn_gray btn_delete_participant" style="width: 100%; padding: 5px;" {{ $application->application_status !== 'approved' ? 'disabled' : '' }}>삭제</button>
 								</td>
 							</tr>
 							@endforelse
@@ -196,7 +206,7 @@
 		</div>
 
 		<div class="btns_tac">
-			<button type="submit" class="btn_submit btn_wbb">저장하기</button>
+			<button type="submit" class="btn_submit btn_wbb" id="group-application-submit-btn" {{ $application->application_status !== 'approved' ? 'disabled' : '' }}>저장하기</button>
 			<a href="{{ route('mypage.application_list') }}" class="btn btn_kwy">신청취소</a>
 		</div>
 
@@ -204,6 +214,8 @@
 	</div>
 
 </main>
+
+@include('partials.toss-payment-modal')
 
 @if(session('success'))
 <script>
@@ -217,14 +229,146 @@
 </script>
 @endif
 
+@once
+	@push('scripts')
+		<script src="{{ asset('js/vendor/tosspayments-v2.js') }}"></script>
+	@endpush
+@endonce
+
 <script>
 $(document).ready(function () {
-	// 폼 제출 시 유효성 검사
+	var currentTossPayment = null;
+
+	function loadTossScript() {
+		return new Promise(function (resolve, reject) {
+			if (window.TossPayments) {
+				resolve();
+				return;
+			}
+			const s = document.createElement("script");
+			s.src = "/js/vendor/tosspayments-v2.js";
+			s.onload = resolve;
+			s.onerror = function () {
+				reject(new Error("결제 스크립트를 불러올 수 없습니다. (네트워크/방화벽 확인)"));
+			};
+			document.head.appendChild(s);
+		});
+	}
+
+	// 폼 제출 시 유효성 검사 및 토스 결제 처리
 	$('#participantForm').on('submit', function(e) {
+		@if($application->application_status !== 'approved')
+		e.preventDefault();
+		alert('승인 완료 후 명단을 저장할 수 있습니다.');
+		return false;
+		@endif
 		if (!$('input[name="privacy_agree"]').is(':checked')) {
 			e.preventDefault();
 			alert('개인정보 처리방침에 동의해주세요.');
 			$('input[name="privacy_agree"]').focus();
+			return false;
+		}
+		
+		// 신청인원 초과 체크
+		const currentRows = $('.board_apply_list tbody tr').length;
+		const maxApplicants = {{ $application->applicant_count ?? 0 }};
+		if (maxApplicants > 0 && currentRows > maxApplicants) {
+			e.preventDefault();
+			alert('신청인원(' + maxApplicants + '명)을 초과할 수 없습니다.');
+			return false;
+		}
+
+		const isFree = $('#participantForm').data('is-free') === 1;
+		if (isFree) {
+			return;
+		}
+
+		// 온라인 카드결제 선택 시 토스 결제 흐름
+		const selectedPaymentMethod = $('input[name="payment_method"]:checked').val();
+		if (selectedPaymentMethod === 'online_card') {
+			e.preventDefault();
+
+			let participantCount = 0;
+			$('.board_apply_list tbody tr').each(function () {
+				const $row = $(this);
+				const name = $row.find('input[name*="[name]"]').val();
+				const grade = $row.find('select[name*="[grade]"]').val();
+				const cls = $row.find('select[name*="[class]"]').val();
+				if (name && grade && cls) {
+					participantCount++;
+				}
+			});
+			if (participantCount <= 0) {
+				alert('명단을 1명 이상 입력한 뒤 결제해 주세요.');
+				return false;
+			}
+
+			const applicationId = {{ $application->id }};
+			const prepareUrl = "{{ route('mypage.application_write.payment.prepare', $application->id) }}";
+			const csrf = $('meta[name="csrf-token"]').attr("content");
+
+			if (!prepareUrl || !csrf) {
+				alert("결제 정보를 확인할 수 없습니다. 페이지를 새로고침한 뒤 다시 시도해 주세요.");
+				return false;
+			}
+
+			$.ajax({
+				url: prepareUrl,
+				method: "POST",
+				data: { participant_count: participantCount },
+				headers: {
+					"X-CSRF-TOKEN": csrf,
+					Accept: "application/json",
+				},
+				success: function (data) {
+					loadTossScript()
+						.then(function () {
+							var customerKey = "lesec_group_" + Date.now() + "_" + Math.random().toString(36).substring(2, 12);
+							var tossPayments = window.TossPayments(data.client_key);
+							var widgets = tossPayments.widgets({ customerKey: customerKey });
+
+							$("#toss-payment-widget").empty();
+							$("#toss-agreement").empty();
+
+							return widgets
+								.setAmount({ currency: "KRW", value: data.amount })
+								.then(function () {
+									return widgets.renderPaymentMethods({
+										selector: "#toss-payment-widget",
+										variantKey: "DEFAULT",
+									});
+								})
+								.then(function () {
+									return widgets.renderAgreement({
+										selector: "#toss-agreement",
+										variantKey: "AGREEMENT",
+									});
+								})
+								.then(function () {
+									currentTossPayment = {
+										widgets: widgets,
+										orderId: data.orderId,
+										orderName: "단체 프로그램 신청",
+										successUrl: data.success_url,
+										failUrl: data.fail_url,
+										applicationId: applicationId,
+									};
+									$("#pop_toss_payment").fadeIn(300);
+								});
+						})
+						.catch(function (err) {
+							alert(err && err.message ? err.message : "결제 창을 여는 데 실패했습니다.");
+						});
+				},
+				error: function (xhr) {
+					const msg =
+						xhr.responseJSON && xhr.responseJSON.message
+							? xhr.responseJSON.message
+							: "결제 준비에 실패했습니다. 다시 시도해 주세요.";
+					alert(msg);
+				},
+			});
+
 			return false;
 		}
 	});
@@ -256,7 +400,23 @@ $(document).ready(function () {
 	$(window).on('resize', updatePlaceholders);
 
 	$('.btn_add').on('click', function () {
+		@if($application->application_status !== 'approved')
+		alert('승인 완료 후 명단을 추가할 수 있습니다.');
+		return false;
+		@endif
+		
+		// 버튼이 비활성화되어 있으면 클릭 차단
+		if ($(this).prop('disabled')) {
+			return false;
+		}
+		
 		const currentRows = $('.board_apply_list tbody tr').length;
+		const maxApplicants = {{ $application->applicant_count ?? 0 }};
+		
+		if (maxApplicants > 0 && currentRows >= maxApplicants) {
+			alert('신청인원(' + maxApplicants + '명)까지만 추가할 수 있습니다.');
+			return false;
+		}
 		let gradeOptions = '';
 		let classOptions = '';
 		for (let i = 1; i <= 3; i++) {
@@ -311,13 +471,48 @@ $(document).ready(function () {
 		$('.board_apply_list tbody').append(newRow);
 		updatePlaceholders();
 		updateRowNumbers();
+		checkAddButtonState();
+	});
+	
+	// 추가 버튼 상태 체크 함수
+	function checkAddButtonState() {
+		const currentRows = $('.board_apply_list tbody tr').length;
+		const maxApplicants = {{ $application->applicant_count ?? 0 }};
+		const $addButton = $('.btn_add');
+		const isApproved = {{ $application->application_status === 'approved' ? 'true' : 'false' }};
+		
+		// 승인 완료 상태이고, 신청인원이 설정되어 있으며, 현재 명단 수가 신청인원에 도달한 경우
+		if (isApproved && maxApplicants > 0 && currentRows >= maxApplicants) {
+			$addButton.prop('disabled', true);
+			$addButton.css('opacity', '0.5');
+			$addButton.css('cursor', 'not-allowed');
+		} else if (!isApproved) {
+			// 승인 전이면 비활성화
+			$addButton.prop('disabled', true);
+			$addButton.css('opacity', '0.5');
+			$addButton.css('cursor', 'not-allowed');
+		} else {
+			$addButton.prop('disabled', false);
+			$addButton.css('opacity', '1');
+			$addButton.css('cursor', 'pointer');
+		}
+	}
+	
+	// 페이지 로드 시 추가 버튼 상태 체크
+	$(document).ready(function() {
+		checkAddButtonState();
 	});
 
 	// 삭제 버튼 클릭 이벤트 (이벤트 위임 사용)
 	$(document).on('click', '.btn_delete_participant', function() {
+		@if($application->application_status !== 'approved')
+		alert('승인 완료 후 명단을 삭제할 수 있습니다.');
+		return false;
+		@endif
 		if (confirm('정말 삭제하시겠습니까?')) {
 			$(this).closest('tr').remove();
 			updateRowNumbers();
+			checkAddButtonState();
 		}
 	});
 
@@ -337,6 +532,11 @@ $(document).ready(function () {
 	}
 
 	$('#csv_upload').on('change', function() {
+		@if($application->application_status !== 'approved')
+		alert('승인 완료 후 명단을 업로드할 수 있습니다.');
+		$(this).val('');
+		return false;
+		@endif
 		if (this.files && this.files[0]) {
 			const formData = new FormData();
 			formData.append('csv_file', this.files[0]);
@@ -366,6 +566,34 @@ $(document).ready(function () {
 			});
 		}
 	});
+
+	// 토스 결제 모달 "결제하기" 버튼 클릭
+	$(document).off("click", "#toss-payment-submit-btn");
+	$(document).on("click", "#toss-payment-submit-btn", function () {
+		if (!currentTossPayment) {
+			return;
+		}
+		var payload = currentTossPayment;
+		var $btn = $(this);
+		$btn.prop("disabled", true);
+		payload.widgets
+			.requestPayment({
+				orderId: payload.orderId,
+				orderName: payload.orderName,
+				successUrl: payload.successUrl,
+				failUrl: payload.failUrl,
+			})
+			.catch(function (err) {
+				alert(err && err.message ? err.message : "결제 요청에 실패했습니다.");
+				$btn.prop("disabled", false);
+			});
+	});
+
+	// 토스 결제 모달 닫기 시 상태 초기화
+	$(document).on("click", "[data-layer-close='pop_toss_payment']", function () {
+		currentTossPayment = null;
+	});
+
 //over_tbl
 	$(window).on('scroll resize', function() {
 		$(".over_tbl").each(function() {

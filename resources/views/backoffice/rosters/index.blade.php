@@ -22,16 +22,11 @@
         </div>
     @endif
 
-    <div class="board-page-header">
+    <!-- <div class="board-page-header">
         <div class="board-page-buttons">
-            <button type="button" id="download-btn" class="btn btn-dark">
-                <i class="fas fa-download"></i> 다운로드
-            </button>
-            <button type="button" id="sms-email-btn" class="btn btn-info">
-                <i class="fas fa-envelope"></i> SMS/메일 발송
-            </button>
+            
         </div>
-    </div>
+    </div> -->
 
     <div class="board-card">
 <div class="board-card-body">
@@ -104,8 +99,10 @@
                         <span class="list-count">Total : {{ $rosters->total() }}</span>
                     </div>
                     <div class="list-controls">
+						<button type="button" id="download-btn" class="btn btn-dark btn-sm"><i class="fas fa-download"></i> 다운로드</button>
+						<button type="button" id="sms-email-btn" class="btn btn-info btn-sm"><i class="fas fa-envelope"></i> SMS/메일 발송</button>
                         <form method="GET" action="{{ route('backoffice.rosters.index') }}" class="per-page-form">
-                            @foreach(request()->except('per_page') as $key => $value)
+                            @foreach(request()->except(['per_page', 'page']) as $key => $value)
                                 <input type="hidden" name="{{ $key }}" value="{{ $value }}">
                             @endforeach
                             <label for="per_page" class="per-page-label">목록 개수:</label>
@@ -130,7 +127,8 @@
                                 <th>참가일</th>
                                 <th>정원</th>
                                 <th>신청인원</th>
-                                <th style="width: 120px;">관리</th>
+								<th>명단등록인원</th>
+                                <th style="width: 80px;">관리</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -156,10 +154,11 @@
                                         @endif
                                     </td>
                                     <td>{{ $roster['applicant_count'] }}</td>
+									<td>{{ $roster['participant_count'] ?? 0 }}</td>
                                     <td>
                                         <div class="board-btn-group">
-                                            <a href="{{ route('backoffice.rosters.edit', $roster['id']) }}" class="btn btn-primary btn-sm">
-                                                <i class="fas fa-edit"></i> 수정
+                                            <a href="{{ route('backoffice.rosters.edit', $roster['id']) }}" class="btn btn-info btn-sm">
+												<i class="fas fa-eye"></i> 보기
                                             </a>
                                         </div>
                                     </td>

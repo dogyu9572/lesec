@@ -34,6 +34,10 @@
     this.restorePasswordValues();
     // 페이지 로드 시 학교 데이터 미리 불러오기
     this.preloadSchools();
+    // 비밀번호 토글 기능 (있는 경우에만)
+    if (typeof this.bindTogglePassword === 'function') {
+      this.bindTogglePassword();
+    }
   };
 
   MemberRegister.prototype.getCsrfToken = function () {
@@ -527,6 +531,11 @@
     });
 
     this.$modal.on("change", ".search_city", function () {
+      var selectedCity = $(this).val();
+      // 기타/해외 선택 시 시/군/구 비우기
+      if (selectedCity === "기타/해외") {
+        self.$modal.find(".search_district").html('<option value="">전체</option>');
+      }
       self.$modal.find(".search_district").val("");
       self.currentSchoolPage = 1;
       self.fetchSchools(true);
@@ -677,11 +686,17 @@
             );
           }
           if (data.filters.districts) {
-            self.setSelectOptions(
-              self.$modal.find(".search_district"),
-              data.filters.districts,
-              "전체"
-            );
+            // 기타/해외 선택 시 시/군/구는 비우기
+            var selectedCity = self.$modal.find(".search_city").val();
+            if (selectedCity === "기타/해외") {
+              self.$modal.find(".search_district").html('<option value="">전체</option>');
+            } else {
+              self.setSelectOptions(
+                self.$modal.find(".search_district"),
+                data.filters.districts,
+                "전체"
+              );
+            }
           }
           if (data.filters.levels) {
             self.setSelectOptions(
@@ -937,7 +952,10 @@
     var $districtHidden = this.$form.find(".district_hidden");
 
     if ($citySelect.length && school.city) {
-      if (!$citySelect.find('option[value="' + school.city + '"]').length) {
+      // 기타/해외 옵션 추가
+      if (school.city === "기타/해외" && !$citySelect.find('option[value="기타/해외"]').length) {
+        $citySelect.append('<option value="기타/해외">기타/해외</option>');
+      } else if (school.city !== "기타/해외" && !$citySelect.find('option[value="' + school.city + '"]').length) {
         $citySelect.append(
           '<option value="' + school.city + '">' + school.city + "</option>"
         );
@@ -945,6 +963,18 @@
       $citySelect.val(school.city);
       if ($cityHidden.length) {
         $cityHidden.val(school.city);
+      }
+      
+      // 기타/해외 선택 시 시/군/구 비우기
+      if (school.city === "기타/해외") {
+        if ($districtSelect.length) {
+          $districtSelect.val("");
+          $districtSelect.html('<option value="">전체</option>');
+        }
+        if ($districtHidden.length) {
+          $districtHidden.val("");
+        }
+        return;
       }
     }
 
@@ -964,6 +994,12 @@
       if ($districtHidden.length) {
         $districtHidden.val(school.district);
       }
+    } else if ($districtSelect.length && !school.district) {
+      // district가 없으면 비우기
+      $districtSelect.val("");
+      if ($districtHidden.length) {
+        $districtHidden.val("");
+      }
     }
   };
 
@@ -978,39 +1014,30 @@
     this.$form.find(".input_school").val(schoolName);
     this.$form.find(".input_school_id").val(""); // 학교 ID는 없으므로 빈 값
 
-    // 지역 정보가 있으면 함께 설정
-    var city = this.$modal.find(".search_city").val();
-    var district = this.$modal.find(".search_district").val();
+    // 직접 입력 시 기타/해외로 설정
+    var $citySelect = this.$form.find(".city_select");
+    var $districtSelect = this.$form.find(".district_select");
+    var $cityHidden = this.$form.find(".city_hidden");
+    var $districtHidden = this.$form.find(".district_hidden");
 
-    if (city || district) {
-      var $citySelect = this.$form.find(".city_select");
-      var $districtSelect = this.$form.find(".district_select");
-      var $cityHidden = this.$form.find(".city_hidden");
-      var $districtHidden = this.$form.find(".district_hidden");
-
-      if (city && $citySelect.length) {
-        if (!$citySelect.find('option[value="' + city + '"]').length) {
-          $citySelect.append(
-            '<option value="' + city + '">' + city + "</option>"
-          );
-        }
-        $citySelect.val(city);
-        if ($cityHidden.length) {
-          $cityHidden.val(city);
-        }
+    // 기타/해외 옵션 추가 및 선택
+    if ($citySelect.length) {
+      if (!$citySelect.find('option[value="기타/해외"]').length) {
+        $citySelect.append('<option value="기타/해외">기타/해외</option>');
       }
-
-      if (district && $districtSelect.length) {
-        if (!$districtSelect.find('option[value="' + district + '"]').length) {
-          $districtSelect.append(
-            '<option value="' + district + '">' + district + "</option>"
-          );
-        }
-        $districtSelect.val(district);
-        if ($districtHidden.length) {
-          $districtHidden.val(district);
-        }
+      $citySelect.val("기타/해외");
+      if ($cityHidden.length) {
+        $cityHidden.val("기타/해외");
       }
+    }
+
+    // 시/군/구는 비우기
+    if ($districtSelect.length) {
+      $districtSelect.val("");
+      $districtSelect.html('<option value="">전체</option>');
+    }
+    if ($districtHidden.length) {
+      $districtHidden.val("");
     }
 
     this.closeModal();
@@ -1094,25 +1121,81 @@
   });
 
   // 전역 팝업 함수 (기존 퍼블리싱 호환)
-  if (typeof window.layerShow !== "function") {
-    window.layerShow = function (id) {
-      var $target = $("#" + id);
-      if ($target.length) {
-        $target.fadeIn(300, function () {
-          $target.trigger("popup:show");
-        });
-      }
-    };
-  }
+  window.layerShow = function (id) {
+    var $target = $("#" + id);
+    if ($target.length) {
+      $target.fadeIn(300, function () {
+        $target.trigger("popup:show");
+      });
+    } else {
+      console.error("팝업 요소를 찾을 수 없습니다: #" + id);
+    }
+  };
 
-  if (typeof window.layerHide !== "function") {
-    window.layerHide = function (id) {
-      var $target = $("#" + id);
-      if ($target.length) {
-        $target.fadeOut(300, function () {
-          $target.trigger("popup:hide");
-        });
-      }
-    };
-  }
+  window.layerHide = function (id) {
+    var $target = $("#" + id);
+    if ($target.length) {
+      $target.fadeOut(300, function () {
+        $target.trigger("popup:hide");
+      });
+    } else {
+      console.error("팝업 요소를 찾을 수 없습니다: #" + id);
+    }
+  };
+
+	//비번확인 눈알
+	$(document).on('click', '.toggle-password_add', function () {
+	  var $btn = $(this);
+	  var $wrap = $btn.closest('.password-wrap_add');
+	  var $input = $wrap.find('input.password-input_add');
+	  if (!$input.length) return;
+	  var isPassword = $input.attr('type') === 'password';
+	  $input.attr('type', isPassword ? 'text' : 'password');
+	});
+	
+	//가입하기 클릭시 안된 내용 있을 경우
+	$(function () {
+	  var $form = $('.js-member-register');
+	  if (!$form.length) return;
+
+	  var hasErrors = $form.data('errors');
+	  if (!hasErrors) return;
+
+	  var $header = $('.header');
+	  var headerHeight = $header.length ? $header.outerHeight() : 0;
+
+	  // 에러 대상 찾기
+	  var $target = $form.find('.is-invalid').first();
+
+	  if (!$target.length) {
+		$target = $form
+		  .find('input, select, textarea')
+		  .filter(function () {
+			return $(this).closest('dd').find('.error_alert').length;
+		  })
+		  .first();
+	  }
+
+	  if (!$target.length) return;
+
+	  var targetTop = $target.offset().top - headerHeight - 20;
+
+	  // 👇 핵심: 먼저 아래로 순간 이동
+	  $('html, body').scrollTop(targetTop + 300);
+
+	  // 👇 그 다음 위로 부드럽게
+	  setTimeout(function () {
+		$('html, body').stop().animate(
+		  { scrollTop: targetTop },
+		  500,
+		  function () {
+			if ($target.is('input, textarea, select')) {
+			  $target.focus();
+			}
+		  }
+		);
+	  }, 50);
+	});
+
+
 })(window.jQuery);

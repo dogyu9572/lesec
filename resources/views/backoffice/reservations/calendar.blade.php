@@ -69,7 +69,7 @@
                                                     $statusClass = ($reservation['is_closed'] ?? false) ? 'i_impossible' : 'i_possible';
                                                 @endphp
                                                 <li class="{{ $statusClass }}">
-                                                    {{ \Illuminate\Support\Str::limit($reservation['program_name'], 20) }}
+                                                    {{ \Illuminate\Support\Str::limit($reservation['program_name'], 30) }}
                                                 </li>
                                                 @endforeach
                                                 @foreach($reservationsForDate['group'] as $reservation)
@@ -77,7 +77,7 @@
                                                     $statusClass = ($reservation['is_closed'] ?? false) ? 'i_impossible' : 'i_possible';
                                                 @endphp
                                                 <li class="{{ $statusClass }}">
-                                                    {{ \Illuminate\Support\Str::limit($reservation['program_name'], 20) }}
+                                                    {{ \Illuminate\Support\Str::limit($reservation['program_name'], 30) }}
                                                 </li>
                                                 @endforeach
                                             </ul>

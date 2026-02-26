@@ -27,8 +27,9 @@ class IndividualProgramStoreRequest extends FormRequest
             'payment_methods' => 'required|array|min:1',
             'payment_methods.*' => 'in:bank_transfer,on_site_card,online_card',
             'reception_type' => 'required|in:first_come,lottery,naver_form',
-            'application_start_date' => 'required|date',
-            'application_end_date' => 'required|date|after_or_equal:application_start_date',
+            'application_start_date' => 'required|date_format:Y-m-d\TH:i',
+            'application_end_date' => 'required|date_format:Y-m-d\TH:i|after_or_equal:application_start_date',
+            'education_end_date.after_or_equal' => '참가 종료일은 시작일과 같거나 이후여야 합니다.',
             'capacity' => 'nullable|integer|min:1|required_without:is_unlimited_capacity|required_if:reception_type,lottery',
             'is_unlimited_capacity' => 'nullable|boolean|prohibited_if:reception_type,lottery',
             'education_fee' => 'nullable|integer|min:0|required_without:is_free',
@@ -63,9 +64,9 @@ class IndividualProgramStoreRequest extends FormRequest
             'reception_type.required' => '접수유형을 선택해주세요.',
             'reception_type.in' => '올바른 접수유형을 선택해주세요.',
             'application_start_date.required' => '신청 시작일을 선택해주세요.',
-            'application_start_date.date' => '올바른 날짜 형식을 입력해주세요.',
+            'application_start_date.date_format' => '올바른 날짜 및 시간 형식을 입력해주세요.',
             'application_end_date.required' => '신청 종료일을 선택해주세요.',
-            'application_end_date.date' => '올바른 날짜 형식을 입력해주세요.',
+            'application_end_date.date_format' => '올바른 날짜 및 시간 형식을 입력해주세요.',
             'application_end_date.after_or_equal' => '신청 종료일은 시작일과 같거나 이후여야 합니다.',
             'capacity.integer' => '정원은 숫자로 입력해주세요.',
             'capacity.min' => '정원은 1명 이상이어야 합니다.',
@@ -86,4 +87,3 @@ class IndividualProgramStoreRequest extends FormRequest
         ];
     }
 }
-

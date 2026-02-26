@@ -4,6 +4,9 @@
     
 	<div class="inner">
 		<div class="mem_wrap login_wrap">
+			@if (session('status'))
+				<p class="c_green mb16 secession_text">{{ session('status') }}</p>
+			@endif
 			<div class="ctit">LOGIN<div class="tb">로그인</div></div>
 			<div class="inputs">
 				@if (session('status'))
@@ -15,7 +18,7 @@
 				<form method="POST" action="{{ route('member.login.submit') }}" class="js-member-form">
 					@csrf
 					<div class="password-wrap">
-						<input type="text" name="login_id" class="text" placeholder="아이디를 입력해주세요." value="{{ old('login_id') }}">
+						<input type="text" name="login_id" class="text" placeholder="아이디를 입력해주세요." value="{{ old('login_id', $savedLoginId ?? '') }}">
 						<button type="button" class="btn-clear clear-password">
 							<img src="/images/icon_clear.svg" alt="삭제">
 						</button>
@@ -43,7 +46,7 @@
 
 					<div class="btns">
 						<label class="check">
-							<input type="checkbox" name="remember_login_id" value="1" {{ old('remember_login_id') ? 'checked' : '' }}>
+							<input type="checkbox" name="remember_login_id" value="1" {{ old('remember_login_id') || (isset($savedLoginId) && $savedLoginId) ? 'checked' : '' }}>
 							<i></i>아이디 저장
 						</label>
 						<div class="finds">

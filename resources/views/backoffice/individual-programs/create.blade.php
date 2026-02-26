@@ -99,7 +99,7 @@
                         </div>
                         <div class="board-form-col board-form-col-4">
                             <div class="board-form-group">
-                                <label for="education_start_date" class="board-form-label">참가일정 시작일 <span class="required">*</span></label>
+                                <label for="education_start_date" class="board-form-label">참가 시작일 <span class="required">*</span></label>
                                 <input type="date" class="board-form-control @error('education_start_date') is-invalid @enderror" 
                                        id="education_start_date" name="education_start_date" value="{{ old('education_start_date') }}" required>
                                 @error('education_start_date')
@@ -109,7 +109,7 @@
                         </div>
                         <div class="board-form-col board-form-col-4">
                             <div class="board-form-group">
-                                <label for="education_end_date" class="board-form-label">참가일정 종료일 <span class="required">*</span></label>
+                                <label for="education_end_date" class="board-form-label">참가 종료일 <span class="required">*</span></label>
                                 <input type="date" class="board-form-control @error('education_end_date') is-invalid @enderror" 
                                        id="education_end_date" name="education_end_date" value="{{ old('education_end_date') }}" required>
                                 @error('education_end_date')
@@ -165,12 +165,12 @@
                 <div class="program-section">
                     <div class="section-title">접수정보</div>
 
-                    <!-- 신청기간, 신청 정원, 교육비 -->
+                    <!-- 신청기간, 신청 정원, 참가비 -->
                     <div class="board-form-row">
                         <div class="board-form-col board-form-col-4">
                             <div class="board-form-group">
-                                <label for="application_start_date" class="board-form-label">신청 기간 <span class="required">*</span></label>
-                                <input type="date" class="board-form-control @error('application_start_date') is-invalid @enderror" 
+                                <label for="application_start_date" class="board-form-label">신청 시작일 <span class="required">*</span></label>
+                                <input type="datetime-local" class="board-form-control @error('application_start_date') is-invalid @enderror" 
                                        id="application_start_date" name="application_start_date" value="{{ old('application_start_date') }}" required>
                                 @error('application_start_date')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -180,7 +180,7 @@
                         <div class="board-form-col board-form-col-4">
                             <div class="board-form-group">
                                 <label for="application_end_date" class="board-form-label">신청 종료일 <span class="required">*</span></label>
-                                <input type="date" class="board-form-control @error('application_end_date') is-invalid @enderror" 
+                                <input type="datetime-local" class="board-form-control @error('application_end_date') is-invalid @enderror" 
                                        id="application_end_date" name="application_end_date" value="{{ old('application_end_date') }}" required>
                                 @error('application_end_date')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -213,11 +213,11 @@
                         </div>
                     </div>
 
-                    <!-- 교육비 -->
+                    <!-- 참가비 -->
                     <div class="board-form-row">
                         <div class="board-form-col board-form-col-4">
                             <div class="board-form-group">
-                                <label for="education_fee" class="board-form-label">교육비</label>
+                                <label for="education_fee" class="board-form-label">참가비</label>
                                 <div style="display: flex; align-items: center;">
                                     <input type="number" class="board-form-control @error('education_fee') is-invalid @enderror" 
                                            id="education_fee" name="education_fee" value="{{ old('education_fee') !== null ? (int) old('education_fee') : '' }}" min="0" step="1"

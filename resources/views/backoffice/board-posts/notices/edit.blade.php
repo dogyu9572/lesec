@@ -16,7 +16,7 @@
         </a>
     </div>
 
-    <div class="board-card">
+    <div class="board-card over_v">
 <div class="board-card-body">
             @if ($errors->any())
                 <div class="board-alert board-alert-danger">
@@ -36,8 +36,9 @@
                 <div class="board-form-group">
                     <div class="board-checkbox-item">
                         <input type="checkbox" class="board-checkbox-input" id="is_notice" name="is_notice" value="1" @checked($post->is_notice)>
-                        <label for="is_notice" class="board-form-label">공지 등록</label>
-                    </div>                    
+                        <label for="is_notice" class="board-form-label"><i class="fas fa-bullhorn"></i> 공지글</label>
+                    </div>
+					<small class="board-form-text">체크하면 공지글로 설정되어 최상단에 표시됩니다.</small>
                 </div>
                 @endif
 
@@ -84,13 +85,11 @@
                 </div>
                 @endif
 
-                @if($board->enable_sorting)
                 <div class="board-form-group">
                     <label for="sort_order" class="board-form-label">정렬 순서</label>
                     <input type="number" class="board-form-control" id="sort_order" name="sort_order" value="{{ old('sort_order', $post->sort_order ?? 0) }}" min="0">
-                    <small class="board-form-text">숫자가 작을수록 위에 표시됩니다. (0이면 자동 정렬)</small>
+                    <small class="board-form-text">숫자가 클수록 위에 표시됩니다. 0이거나 비워두면 등록일 빠른순으로 정렬됩니다.</small>
                 </div>
-                @endif
 
                 <!-- 커스텀 필드 입력 폼 -->
                 @if($board->custom_fields_config && count($board->custom_fields_config) > 0)
@@ -308,11 +307,17 @@
                 </div>
                 @endif
 
-                <div class="board-form-actions">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> 저장
-                    </button>
+                <div class="board-form-actions btns_abso">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> 저장</button>
                     <a href="{{ route('backoffice.board-posts.index', $board->slug ?? 'notice') }}" class="btn btn-secondary">취소</a>
+					<form
+						action="{{ route('backoffice.board-posts.destroy', [$board->slug ?? 'notice', $post->id]) }}"
+						method="POST" class="d-inline"
+						onsubmit="return confirm('정말 이 게시글을 삭제하시겠습니까?');">
+						@csrf
+						@method('DELETE')
+						<button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> 삭제</button>
+					</form>
                 </div>
             </form>
         </div>

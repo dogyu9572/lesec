@@ -241,7 +241,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const row = document.createElement("tr");
       row.classList.add("selected-member-empty");
       row.innerHTML =
-        '<td colspan="4" class="text-center text-muted">선택된 회원이 없습니다.</td>';
+        '<td colspan="5" class="text-center text-muted">선택된 회원이 없습니다.</td>';
       selectedMembersBody.appendChild(row);
     }
   }
@@ -339,6 +339,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <td>${member.name || "-"}</td>
             <td>${member.email || "-"}</td>
             <td>${member.contact || "-"}</td>
+            <td>${member.parent_contact || "-"}</td>
             <td>
                 ${removeButton}
                 <input type="hidden" name="member_ids[]" value="${member.id}">
@@ -372,6 +373,7 @@ document.addEventListener("DOMContentLoaded", () => {
             name: member.name || "-",
             email: member.email || "-",
             contact: member.contact || "-",
+            parent_contact: member.parent_contact || null,
           },
           options
         )
@@ -424,7 +426,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     selectedMembersBody.innerHTML = `
             <tr class="selected-member-loading">
-                <td colspan="4" class="text-center text-muted">회원 정보를 불러오는 중입니다...</td>
+                <td colspan="5" class="text-center text-muted">회원 정보를 불러오는 중입니다...</td>
             </tr>
         `;
 
@@ -547,7 +549,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function renderMemberList(members) {
     if (!Array.isArray(members) || members.length === 0) {
       memberListBody.innerHTML =
-        '<tr><td colspan="7" class="text-center text-muted">검색 결과가 없습니다.</td></tr>';
+        '<tr><td colspan="8" class="text-center text-muted">검색 결과가 없습니다.</td></tr>';
       return;
     }
 
@@ -564,6 +566,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                 data-name="${member.name || ""}"
                                 data-email="${member.email || ""}"
                                 data-contact="${member.contact || ""}"
+                                data-parent-contact="${member.parent_contact || ""}"
                                 ${disabled}>
                         </td>
                         <td>${number}</td>
@@ -572,6 +575,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         <td>${member.school_name || "-"}</td>
                         <td>${member.email || "-"}</td>
                         <td>${member.contact || "-"}</td>
+                        <td>${member.parent_contact || "-"}</td>
                     </tr>
                 `;
       })
@@ -681,6 +685,7 @@ document.addEventListener("DOMContentLoaded", () => {
       name: checkbox.dataset.name || "-",
       email: checkbox.dataset.email || "-",
       contact: checkbox.dataset.contact || "-",
+      parent_contact: checkbox.dataset.parentContact || null,
     }));
 
     addMembersToSelection(members, { removable: true });

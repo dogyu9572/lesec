@@ -91,7 +91,7 @@ class GroupApplicationController extends BaseController
         $this->groupApplicationService->updateApplication($applicationId, $request->validated());
 
         return redirect()
-            ->route('backoffice.group-applications.index')
+            ->route('backoffice.group-applications.edit', $applicationId)
             ->with('success', '단체 신청 정보가 수정되었습니다.');
     }
 
@@ -213,6 +213,3 @@ class GroupApplicationController extends BaseController
         ]);
     }
 }
-
-
-

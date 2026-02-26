@@ -16,8 +16,7 @@ class PhoneVerificationService
 
     public function __construct(
         private readonly SmsKakaoApiService $smsKakaoApiService
-    ) {
-    }
+    ) {}
 
     /**
      * 인증번호 생성 및 발송
@@ -63,7 +62,7 @@ class PhoneVerificationService
         ]);
 
         // SMS 발송
-        $message = "[생명·환경과학교육센터] 인증번호는 {$code}입니다. 5분간 유효합니다.";
+        $message = "[서울대학교 생명·환경과학교육센터] 인증번호는 {$code}입니다. ";
         $smsResult = $this->smsKakaoApiService->sendSms($phone, $message);
 
         if (!$smsResult['success']) {

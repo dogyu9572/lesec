@@ -22,6 +22,15 @@
         </div>
     @endif
 
+    @if(session('debug_queries'))
+        <script>
+        console.log('=== 실행된 SQL 쿼리 ===');
+        @foreach(session('debug_queries', []) as $query)
+            console.log({!! json_encode($query) !!});
+        @endforeach
+        </script>
+    @endif
+
     <div class="board-page-header">
         <div class="board-page-buttons">
             <button type="button" id="bulk-delete-btn" class="btn btn-danger">
@@ -82,7 +91,7 @@
                     </div>
                     <div class="list-controls">                       
                         <form method="GET" action="{{ route('backoffice.revenue-statistics.index') }}" class="per-page-form">
-                            @foreach(request()->except('per_page') as $key => $value)
+                            @foreach(request()->except(['per_page', 'page']) as $key => $value)
                                 <input type="hidden" name="{{ $key }}" value="{{ $value }}">
                             @endforeach
                             <label for="per_page" class="per-page-label">목록 개수:</label>

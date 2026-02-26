@@ -22,7 +22,7 @@ class ProgramReservationService
     {
         $startOfMonth = Carbon::create($year, $month, 1)->startOfDay();
         $endOfMonth = (clone $startOfMonth)->endOfMonth();
-        
+
         $programs = ProgramReservation::query()
             ->byEducationType($educationType)
             ->byApplicationType($applicationType)
@@ -31,7 +31,7 @@ class ProgramReservationService
             ->whereDate('education_end_date', '>=', $startOfMonth)
             ->orderBy('education_start_date', 'asc')
             ->get();
-        
+
         return $this->filterProgramsBySchedule($programs);
     }
 
@@ -46,7 +46,7 @@ class ProgramReservationService
             ->active()
             ->orderBy('created_at', 'desc')
             ->get();
-        
+
         return $this->filterProgramsBySchedule($programs);
     }
 
@@ -151,7 +151,7 @@ class ProgramReservationService
     public function getIndividualProgramMonths(SupportCollection $programs): SupportCollection
     {
         return $programs
-            ->filter(fn (ProgramReservation $program) => $program->education_start_date instanceof Carbon)
+            ->filter(fn(ProgramReservation $program) => $program->education_start_date instanceof Carbon)
             ->map(function (ProgramReservation $program) {
                 $startDate = $program->education_start_date;
                 return $startDate instanceof Carbon ? (int) $startDate->month : null;
@@ -168,7 +168,7 @@ class ProgramReservationService
     public function getIndividualProgramNames(SupportCollection $programs): SupportCollection
     {
         return $programs
-            ->map(fn (ProgramReservation $program) => $program->program_name)
+            ->map(fn(ProgramReservation $program) => $program->program_name)
             ->unique()
             ->values();
     }
@@ -197,14 +197,15 @@ class ProgramReservationService
 
         $memberModel = $member;
         if (!$memberModel && !empty($data['member_id'])) {
-             $memberModel = Member::find($data['member_id']);
-         }
- 
-         if ($memberModel && $memberModel->member_type === 'student') {
+            $memberModel = Member::find($data['member_id']);
+        }
+
+        if ($memberModel && $memberModel->member_type === 'student') {
             $programPrefix = Str::upper(Str::substr($reservation->program_name, 0, 2));
 
             $existingApplication = IndividualApplication::query()
                 ->where('member_id', $memberModel->id)
+                ->where('payment_status', '!=', 'cancelled') // 취소된 신청 제외
                 ->with('reservation')
                 ->get()
                 ->contains(function (IndividualApplication $application) use ($programPrefix) {
@@ -216,7 +217,7 @@ class ProgramReservationService
             if ($existingApplication) {
                 throw new \InvalidArgumentException('이미 동일한 프로그램을 신청하셨습니다. 다른 프로그램을 선택해주세요.');
             }
-         }
+        }
 
         $applicantContact = $this->normalizeContactNumber($data['applicant_contact'] ?? '');
         if ($applicantContact === null) {
@@ -267,15 +268,15 @@ class ProgramReservationService
     public function groupProgramsByDate(Collection $programs): array
     {
         $programsByDate = [];
-        
+
         foreach ($programs as $program) {
             $startDate = $program->education_start_date;
             $endDate = $program->education_end_date;
-            
+
             // 시작일부터 종료일까지 모든 날짜에 프로그램 추가
             $currentDate = Carbon::parse($startDate);
             $endDateCarbon = Carbon::parse($endDate);
-            
+
             while ($currentDate <= $endDateCarbon) {
                 $dateKey = $currentDate->format('Y-m-d');
                 if (!isset($programsByDate[$dateKey])) {
@@ -285,7 +286,7 @@ class ProgramReservationService
                 $currentDate->addDay();
             }
         }
-        
+
         return $programsByDate;
     }
 
@@ -297,11 +298,11 @@ class ProgramReservationService
         $firstDay = mktime(0, 0, 0, $month, 1, $year);
         $daysInMonth = date('t', $firstDay);
         $dayOfWeek = date('w', $firstDay);
-        
+
         $calendar = [];
         $day = 1;
         $week = [];
-        
+
         // 이전 달 날짜로 채우기
         $prevMonth = $month - 1;
         $prevYear = $year;
@@ -310,7 +311,7 @@ class ProgramReservationService
             $prevYear--;
         }
         $daysInPrevMonth = date('t', mktime(0, 0, 0, $prevMonth, 1, $prevYear));
-        
+
         for ($i = 0; $i < $dayOfWeek; $i++) {
             $week[] = [
                 'day' => $daysInPrevMonth - ($dayOfWeek - $i - 1),
@@ -319,7 +320,7 @@ class ProgramReservationService
                 'programs' => []
             ];
         }
-        
+
         // 현재 달 날짜
         while ($day <= $daysInMonth) {
             $dateKey = sprintf('%d-%02d-%02d', $year, $month, $day);
@@ -332,15 +333,15 @@ class ProgramReservationService
                 'disabled_date_title' => $disabledDateInfo['title'] ?? null,
                 'programs' => $isDisabled ? [] : ($programsByDate[$dateKey] ?? [])
             ];
-            
+
             if (count($week) == 7) {
                 $calendar[] = $week;
                 $week = [];
             }
-            
+
             $day++;
         }
-        
+
         // 다음 달 날짜로 채우기
         $nextDay = 1;
         while (count($week) < 7) {
@@ -352,11 +353,11 @@ class ProgramReservationService
             ];
             $nextDay++;
         }
-        
+
         if (count($week) > 0) {
             $calendar[] = $week;
         }
-        
+
         return $calendar;
     }
 
@@ -374,7 +375,7 @@ class ProgramReservationService
     public function checkAvailability(int $programId, int $requestedCount): array
     {
         $program = $this->getProgramById($programId);
-        
+
         if (!$program) {
             return [
                 'available' => false,
@@ -442,15 +443,15 @@ class ProgramReservationService
             ->orderBy('application_number', 'desc')
             ->lockForUpdate()
             ->value('application_number');
- 
-         $nextSequence = 1;
-         if ($latestNumber) {
+
+        $nextSequence = 1;
+        if ($latestNumber) {
             if (preg_match('/^' . preg_quote($prefix . $year, '/') . '(\d{4})$/', $latestNumber, $matches)) {
                 $nextSequence = ((int) $matches[1]) + 1;
             }
-         }
- 
-         return sprintf('%s%s%04d', $prefix, $year, $nextSequence);
+        }
+
+        return sprintf('%s%s%04d', $prefix, $year, $nextSequence);
     }
 
     private function extractProgramPrefix(?string $programName): string
@@ -486,12 +487,12 @@ class ProgramReservationService
     {
         $now = now();
         $year = $now->year;
-        
+
         // 3월 1일 이전이면 전년도 사용
         if ($now->month < 3) {
             $year--;
         }
-        
+
         return $year;
     }
 
@@ -540,6 +541,26 @@ class ProgramReservationService
                 $remainingCapacity = $reservation->remaining_capacity;
                 if ($remainingCapacity < $requestedCount) {
                     throw new \InvalidArgumentException('잔여 정원이 부족합니다. (잔여: ' . $remainingCapacity . '명)');
+                }
+
+                // 방학 프로그램인 경우 정원을 모두 채워야 함
+                $isVacation = in_array($reservation->education_type, ['middle_vacation', 'high_vacation'], true);
+                if ($isVacation) {
+                    $capacity = (int) ($reservation->capacity ?? 0);
+                    $applied = (int) ($reservation->applied_count ?? 0);
+                    // 신청가능 상태면 정원을 모두 채워야 하고, 잔여석 신청 가능 상태면 잔여석을 모두 채워야 함
+                    if ($applied === 0) {
+                        // 신청가능 상태: 정원을 모두 채워야 함
+                        if ($capacity > 0 && $requestedCount !== $capacity) {
+                            throw new \InvalidArgumentException('방학 프로그램은 정원(' . $capacity . '명)을 모두 채워야 신청 가능합니다.');
+                        }
+                    } else {
+                        // 잔여석 신청 가능 상태: 잔여석을 모두 채워야 함
+                        $remaining = $capacity - $applied;
+                        if ($remaining > 0 && $requestedCount !== $remaining) {
+                            throw new \InvalidArgumentException('방학 프로그램은 잔여석(' . $remaining . '명)을 모두 채워야 신청 가능합니다.');
+                        }
+                    }
                 }
             }
 
@@ -602,4 +623,3 @@ class ProgramReservationService
         return sprintf('%s%s%04d', $prefix, $year, $nextSequence);
     }
 }
-

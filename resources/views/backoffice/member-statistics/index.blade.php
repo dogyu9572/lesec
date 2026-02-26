@@ -14,7 +14,7 @@
                 <div class="section-header">
                     <h5>지역별 통계</h5>
                 </div>
-                <div class="member-stats-table">
+                <div class="member-stats-table area_slide16 mo_colm">
                     <div class="member-stats-row member-stats-row--labels">
                         @foreach($region_stats as $region)
                             <div class="member-stats-cell">{{ $region['label'] }}</div>
@@ -35,7 +35,7 @@
                         전체 회원 중 학생 비율: {{ $student_ratio }}, 교사 비율: {{ $teacher_ratio }}
                     </p>
                 </div>
-                <div class="member-stats-table">
+                <div class="member-stats-table area_slide13 mo_colm">
                     <div class="member-stats-row member-stats-row--labels">
                         @foreach($grade_stats as $grade)
                             <div class="member-stats-cell">{{ $grade['label'] }}</div>
@@ -54,7 +54,7 @@
                     <h5>학교급 통계</h5>
                     <p class="section-description">학년 구분 값이 없거나 교사 회원은 ‘기타’ 항목으로 분류됩니다.</p>
                 </div>
-                <div class="member-stats-table member-stats-table--wide">
+                <div class="member-stats-table member-stats-table--wide mo_colm">
                     <div class="member-stats-row member-stats-row--labels">
                         @foreach($school_level_stats as $level)
                             <div class="member-stats-cell">{{ $level['label'] }}</div>

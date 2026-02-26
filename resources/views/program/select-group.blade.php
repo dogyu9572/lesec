@@ -68,22 +68,41 @@
 								<ul class="list">
 									@foreach($dayData['programs'] as $program)
 									@php
-										$appliedCount = $program->applied_count ?? 0;
+										$appliedCount = $program->applied_count_display ?? 0;
 										$capacity = $program->capacity ?? 0;
+										$isUnlimited = $program->is_unlimited_capacity ?? false;
+										$applicationEndDate = optional($program->application_end_date);
+										
+										// 접수 마감일 체크
+										$isApplicationClosed = false;
+										if ($applicationEndDate) {
+											$isApplicationClosed = now()->gt($applicationEndDate->endOfDay());
+										}
+										
+										// 정원 마감 체크
+										$isCapacityFull = !$isUnlimited && $appliedCount >= $capacity;
+										
+										// 마감 상태 판단 (접수 마감 또는 정원 마감)
 										$statusClass = 'i_possible';
-										if (!$program->is_unlimited_capacity && $appliedCount >= $capacity) {
+										if ($isApplicationClosed || $isCapacityFull) {
 											$statusClass = 'i_impossible';
 										}
-										$educationDate = optional($program->education_start_date)->format('Y-m-d') ?? '';
+										
+										$educationStartDate = optional($program->education_start_date)->format('Y-m-d') ?? '';
+										$educationEndDate = optional($program->education_end_date)->format('Y-m-d') ?? '';
+										$applicationEndDateStr = optional($program->application_end_date)->format('Y-m-d') ?? '';
 										$educationType = $program->education_type ?? '';
 										$educationFee = $program->education_fee ?? 0;
 									@endphp
 									<li class="{{ $statusClass }}" 
 										data-applied="{{ $appliedCount }}" 
 										data-total="{{ $capacity }}" 
+										data-is-unlimited="{{ $isUnlimited ? '1' : '0' }}"
 										data-program-id="{{ $program->id }}"
 										data-program-name="{{ $program->program_name }}"
-										data-education-date="{{ $educationDate }}"
+										data-education-start-date="{{ $educationStartDate }}"
+										data-education-end-date="{{ $educationEndDate }}"
+										data-application-end-date="{{ $applicationEndDateStr }}"
 										data-education-type="{{ $educationType }}"
 										data-education-fee="{{ $educationFee }}">{{ $program->program_name }}</li>
 									@endforeach
@@ -91,14 +110,14 @@
 								@endif
 							</td>
 							@endforeach
-						</tr>
+						</tr>	
 						@endforeach
 					</tbody>
 					</table>
 				</div>
 
 				<div class="nebox">
-					<p>단체 신청 가능 인원은 최소 10명입니다.</p>
+					<p id="group-application-info">단체 신청 가능 인원은 최소 10명입니다.</p>
 					<p>잔여석이 있을 경우 4명 이상 단체도 신청 가능합니다.</p>
 				</div>
 			</div>

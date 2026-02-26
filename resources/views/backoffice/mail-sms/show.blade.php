@@ -6,6 +6,15 @@
     <link rel="stylesheet" href="{{ asset('css/common/buttons.css') }}">
     <link rel="stylesheet" href="{{ asset('css/backoffice/users.css') }}">
     <link rel="stylesheet" href="{{ asset('css/backoffice/boards.css') }}">
+<style>
+.content-cell {
+    word-break: break-word;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: pre-wrap;
+    max-width: 100%;
+}
+</style>
 @endsection
 
 @section('content')

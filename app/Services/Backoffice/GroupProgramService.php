@@ -7,6 +7,7 @@ use App\Services\Backoffice\Concerns\ValidatesScheduleAvailability;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class GroupProgramService
 {
@@ -50,7 +51,7 @@ class GroupProgramService
         if ($request->filled('search_keyword')) {
             $keyword = $request->search_keyword;
             $searchType = $request->input('search_type', '');
-            
+
             if ($searchType === 'program_name') {
                 $query->where('program_name', 'like', "%{$keyword}%");
             } elseif ($searchType === 'author') {
@@ -59,12 +60,13 @@ class GroupProgramService
                 // 전체 검색
                 $query->where(function ($q) use ($keyword) {
                     $q->where('program_name', 'like', "%{$keyword}%")
-                      ->orWhere('author', 'like', "%{$keyword}%");
+                        ->orWhere('author', 'like', "%{$keyword}%");
                 });
             }
         }
 
-        return $query->paginate(20)->withQueryString();
+        $perPage = (int) $request->input('per_page', 20);
+        return $query->paginate($perPage)->withQueryString();
     }
 
     /**
@@ -112,7 +114,7 @@ class GroupProgramService
     {
         // application_type은 항상 'group'
         $data['application_type'] = 'group';
-        
+
         // 결제수단 처리
         if (isset($data['payment_methods']) && is_array($data['payment_methods'])) {
             $data['payment_methods'] = array_values($data['payment_methods']);
@@ -137,10 +139,18 @@ class GroupProgramService
 
         // 작성자 필드는 현재 로그인한 관리자 이름으로 자동 설정
         $data['author'] = Auth::user()?->name ?? null;
-        
+
         // 신청 인원은 0으로 초기화
         $data['applied_count'] = 0;
-        
+
+        // datetime-local 형식 처리
+        if (isset($data['application_start_date']) && $data['application_start_date']) {
+            $data['application_start_date'] = Carbon::createFromFormat('Y-m-d\TH:i', $data['application_start_date'])->format('Y-m-d H:i:s');
+        }
+        if (isset($data['application_end_date']) && $data['application_end_date']) {
+            $data['application_end_date'] = Carbon::createFromFormat('Y-m-d\TH:i', $data['application_end_date'])->format('Y-m-d H:i:s');
+        }
+
         return ProgramReservation::create($data);
     }
 
@@ -163,9 +173,14 @@ class GroupProgramService
         // 제한없음 체크 시 capacity는 null
         if (isset($data['is_unlimited_capacity']) && $data['is_unlimited_capacity']) {
             $data['capacity'] = null;
-        } elseif (isset($data['is_unlimited_capacity']) && !$data['is_unlimited_capacity'] && !isset($data['capacity'])) {
-            // 제한없음 해제 시 capacity는 필수
-            $data['capacity'] = null;
+        } elseif (isset($data['is_unlimited_capacity']) && !$data['is_unlimited_capacity']) {
+            // 제한없음 해제 시 capacity 값이 있으면 사용, 없으면 기존 값 유지
+            if (isset($data['capacity']) && $data['capacity'] !== null && $data['capacity'] !== '') {
+                $data['capacity'] = (int) $data['capacity'];
+            } else {
+                // capacity가 없으면 기존 값 유지 (변경하지 않음)
+                unset($data['capacity']);
+            }
         }
 
         // 무료 체크 시 education_fee는 null
@@ -181,7 +196,15 @@ class GroupProgramService
 
         // 작성자 필드는 현재 로그인한 관리자 이름으로 자동 업데이트
         $data['author'] = Auth::user()?->name ?? $programReservation->author;
-        
+
+        // datetime-local 형식 처리
+        if (isset($data['application_start_date']) && $data['application_start_date']) {
+            $data['application_start_date'] = Carbon::createFromFormat('Y-m-d\TH:i', $data['application_start_date'])->format('Y-m-d H:i:s');
+        }
+        if (isset($data['application_end_date']) && $data['application_end_date']) {
+            $data['application_end_date'] = Carbon::createFromFormat('Y-m-d\TH:i', $data['application_end_date'])->format('Y-m-d H:i:s');
+        }
+
         return $programReservation->update($data);
     }
 
@@ -215,7 +238,7 @@ class GroupProgramService
         }
 
         $perPage = $request->get('per_page', 10);
-        
+
         return $query->paginate($perPage)->withQueryString();
     }
 }

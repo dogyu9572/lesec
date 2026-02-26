@@ -43,7 +43,8 @@ class ProgramController extends Controller
     public function show($type)
     {
         $member = Auth::guard('member')->user();
-        $program = $this->programService->getProgramByType($type);
+        // 기본값으로 개인 프로그램 조회 (유형 선택 페이지에서는 개인 정보 표시)
+        $program = $this->programService->getProgramByType($type, 'individual');
         $gNum = "01";
         $sNum = $this->programService->getSubMenuNumber($type);
         $gName = "프로그램";
@@ -71,6 +72,13 @@ class ProgramController extends Controller
             $programLevel = str_starts_with($type, 'middle') ? 'middle' : (str_starts_with($type, 'high') ? 'high' : null);
 
             if ($schoolLevel && $programLevel && $schoolLevel !== $programLevel) {
+                // 초등 교사가 중등/고등 프로그램 신청 시
+                if ($schoolLevel === 'elementary') {
+                    return redirect()
+                        ->route('program.show', $type)
+                        ->withErrors(['access' => '특별 프로그램만 신청 가능합니다.']);
+                }
+                // 중등/고등 교사가 다른 학교급 프로그램 신청 시
                 $levelName = $schoolLevel === 'middle' ? '중등' : '고등';
                 return redirect()
                     ->route('program.show', $type)
@@ -78,7 +86,7 @@ class ProgramController extends Controller
             }
         }
 
-        $program = $this->programService->getProgramByType($type);
+        $program = $this->programService->getProgramByType($type, 'group');
         $gNum = "01";
         $sNum = $this->programService->getSubMenuNumber($type);
         $gName = "프로그램";
@@ -95,7 +103,7 @@ class ProgramController extends Controller
     public function applyIndividual($type)
     {
         $member = Auth::guard('member')->user();
-        $program = $this->programService->getProgramByType($type);
+        $program = $this->programService->getProgramByType($type, 'individual');
         $gNum = "01";
         $sNum = $this->programService->getSubMenuNumber($type);
         $gName = "프로그램";
@@ -125,6 +133,13 @@ class ProgramController extends Controller
             $programLevel = str_starts_with($type, 'middle') ? 'middle' : (str_starts_with($type, 'high') ? 'high' : null);
 
             if ($schoolLevel && $programLevel && $schoolLevel !== $programLevel) {
+                // 초등 교사가 중등/고등 프로그램 신청 시
+                if ($schoolLevel === 'elementary') {
+                    return redirect()
+                        ->route('program.show', $type)
+                        ->withErrors(['access' => '특별 프로그램만 신청 가능합니다.']);
+                }
+                // 중등/고등 교사가 다른 학교급 프로그램 신청 시
                 $levelName = $schoolLevel === 'middle' ? '중등' : '고등';
                 return redirect()
                     ->route('program.show', $type)
@@ -296,6 +311,13 @@ class ProgramController extends Controller
         if (!$reservation || $reservation->education_type !== $type) {
             return back()
                 ->withErrors(['application' => '유효하지 않은 프로그램입니다.'])
+                ->withInput();
+        }
+
+        $paymentMethods = is_array($reservation->payment_methods) ? $reservation->payment_methods : [];
+        if (in_array('online_card', $paymentMethods, true)) {
+            return back()
+                ->withErrors(['application' => '온라인 카드 결제 프로그램은 결제 창에서 결제를 완료해 주세요.'])
                 ->withInput();
         }
 
@@ -473,7 +495,7 @@ class ProgramController extends Controller
      */
     public function completeGroup(Request $request, $type)
     {
-        $program = $this->programService->getProgramByType($type);
+        $program = $this->programService->getProgramByType($type, 'group');
         $gNum = "01";
         $sNum = $this->programService->getSubMenuNumber($type);
         $gName = "프로그램";
@@ -513,7 +535,7 @@ class ProgramController extends Controller
      */
     public function completeIndividual(Request $request, $type)
     {
-        $program = $this->programService->getProgramByType($type);
+        $program = $this->programService->getProgramByType($type, 'individual');
         $gNum = "01";
         $sNum = $this->programService->getSubMenuNumber($type);
         $gName = "프로그램";

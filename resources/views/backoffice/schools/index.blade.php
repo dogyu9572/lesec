@@ -22,13 +22,6 @@
         </div>
     @endif
 
-    <div class="board-page-header">
-        <div class="board-page-buttons">
-            <a href="{{ route('backoffice.schools.create') }}" class="btn btn-success">
-                <i class="fas fa-plus"></i> 신규등록
-            </a>
-        </div>
-    </div>
 
     <div class="board-card">
 <div class="board-card-body">
@@ -89,9 +82,12 @@
                     <div class="list-info">
                         <span class="list-count">Total : {{ $schools->total() }}</span>
                     </div>
-                    <div class="list-controls">                       
+                    <div class="list-controls">
+                        <a href="{{ route('backoffice.schools.create') }}" class="btn btn-success btn-sm">
+                            <i class="fas fa-plus"></i> 신규등록
+                        </a>                       
                         <form method="GET" action="{{ route('backoffice.schools.index') }}" class="per-page-form">
-                            @foreach(request()->except('per_page') as $key => $value)
+                            @foreach(request()->except(['per_page', 'page']) as $key => $value)
                                 <input type="hidden" name="{{ $key }}" value="{{ $value }}">
                             @endforeach
                             <label for="per_page" class="per-page-label">목록 개수:</label>
@@ -109,7 +105,7 @@
                         <thead>
                             <tr>
                                 <th>번호</th>
-                                <th>학교구분</th>
+                                <th>구분</th>
                                 <th>시/도</th>
                                 <th>시/군/구</th>
                                 <th>학교급</th>

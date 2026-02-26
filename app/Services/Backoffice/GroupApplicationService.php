@@ -27,7 +27,7 @@ class GroupApplicationService
     public function getFilteredApplications(Request $request): LengthAwarePaginator
     {
         $query = GroupApplication::query()
-            ->with(['reservation'])
+            ->with(['reservation', 'participants'])
             ->orderByDesc('created_at');
 
         if ($request->filled('application_status')) {
@@ -103,7 +103,7 @@ class GroupApplicationService
     public function getApplicationDetail(int $applicationId): GroupApplication
     {
         return GroupApplication::query()
-            ->with(['participants' => fn($query) => $query->orderBy('id', 'asc')])
+            ->with(['participants' => fn($query) => $query->orderBy('id', 'asc'), 'reservation'])
             ->findOrFail($applicationId);
     }
 
@@ -233,8 +233,10 @@ class GroupApplicationService
     {
         $application = GroupApplication::findOrFail($applicationId);
 
-        $paymentMethods = array_values(array_filter(Arr::wrap($data['payment_methods'] ?? [])));
-        $paymentMethods = count($paymentMethods) > 0 ? $paymentMethods : null;
+        // payment_methods는 프로그램의 결제방법이므로 변경하지 않음
+        // reservation의 payment_methods를 그대로 유지
+        $reservation = $application->reservation;
+        $paymentMethods = $reservation ? ($reservation->payment_methods ?? null) : null;
 
         $payload = [
             'education_type' => $data['education_type'],
@@ -248,9 +250,10 @@ class GroupApplicationService
             'school_name' => $data['school_name'] ?? null,
             'applicant_count' => $data['applicant_count'] ?? 0,
             'payment_status' => $data['payment_status'],
-            'payment_method' => $data['payment_method'] ?? null,
+            'payment_method' => !empty($data['payment_method']) ? $data['payment_method'] : null,
             'participation_fee' => isset($data['participation_fee']) ? (int) $data['participation_fee'] : null,
-            'payment_methods' => $paymentMethods,
+            'payment_methods' => $paymentMethods, // 프로그램의 결제방법 유지
+            'estimate_note' => $data['estimate_note'] ?? null,
         ];
 
         if (!empty($data['participation_date'])) {
@@ -281,7 +284,16 @@ class GroupApplicationService
         }
 
         $perPage = (int) $request->input('per_page', 10);
-        $paginator = $query->orderBy('school_name')->paginate($perPage);
+        $paginator = $query->orderByRaw("
+                CASE 
+                    WHEN school_name REGEXP '^[가-힣]' THEN 0
+                    WHEN school_name REGEXP '^[0-9]' THEN 1
+                    WHEN school_name REGEXP '^[A-Za-z]' THEN 2
+                    ELSE 3
+                END
+            ")
+            ->orderBy('school_name', 'asc')
+            ->paginate($perPage);
 
         return [
             'schools' => $paginator->items(),

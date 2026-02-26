@@ -42,10 +42,10 @@
 <div class="board-container">   
     <!-- 상단 탭 -->
     <div class="program-tabs">
-        @foreach($types as $typeKey => $typeName)
-            <a href="{{ route('backoffice.programs.index', ['type' => $typeKey]) }}" 
-               class="program-tab {{ $currentType === $typeKey ? 'active' : '' }}">
-                {{ $typeName }}
+        @foreach($tabs as $tabKey => $tabName)
+            <a href="{{ route('backoffice.programs.index', ['tab' => $tabKey]) }}" 
+               class="program-tab {{ $currentTabKey === $tabKey ? 'active' : '' }}">
+                {{ $tabName }}
             </a>
         @endforeach
     </div>

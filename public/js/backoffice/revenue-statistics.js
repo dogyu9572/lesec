@@ -33,11 +33,18 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // 입력 필드 변경 감지 (필요시)
+            // 입력 필드 변경 감지 (필요시)
         itemsBody.addEventListener('change', function(e) {
             if (e.target.tagName === 'INPUT') {
                 // 입력 값 변경 처리
                 updateEmptyRowVisibility();
+            }
+        });
+        
+        // 수익 입력 필드 변경 시 합계 계산
+        itemsBody.addEventListener('input', function(e) {
+            if (e.target.classList.contains('revenue-input')) {
+                calculateTotalRevenue();
             }
         });
     }
@@ -54,16 +61,17 @@ document.addEventListener('DOMContentLoaded', function() {
         newRow.setAttribute('data-item-index', currentIndex);
         newRow.innerHTML = `
             <td>
-                <input type="text" name="items[${currentIndex}][item_name]" class="form-control" placeholder="항목명을 입력하세요" required>
+                <select name="items[${currentIndex}][school_type]" class="form-control" required>
+                    <option value="">선택하세요</option>
+                    <option value="middle">중등</option>
+                    <option value="high">고등</option>
+                </select>
             </td>
             <td>
-                <input type="number" name="items[${currentIndex}][participants_count]" class="form-control" placeholder="0" min="0" value="0">
+                <input type="number" name="items[${currentIndex}][participants_count]" class="form-control participants-count" placeholder="0" min="0" value="0" data-index="${currentIndex}">
             </td>
             <td>
-                <input type="text" name="items[${currentIndex}][school_name]" class="form-control" placeholder="참가학교를 입력하세요">
-            </td>
-            <td>
-                <input type="number" name="items[${currentIndex}][revenue]" class="form-control" placeholder="0" min="0" value="0">
+                <input type="number" name="items[${currentIndex}][revenue]" class="form-control revenue-input" placeholder="0" min="0" value="0" data-index="${currentIndex}">
             </td>
             <td>
                 <div class="board-btn-group">
@@ -80,6 +88,12 @@ document.addEventListener('DOMContentLoaded', function() {
         itemsBody.appendChild(newRow);
         window.itemIndex++;
         updateEmptyRowVisibility();
+        
+        // 수익 입력 필드에 이벤트 리스너 추가
+        const revenueInput = newRow.querySelector('.revenue-input');
+        if (revenueInput) {
+            revenueInput.addEventListener('input', calculateTotalRevenue);
+        }
     }
 
     // 항목 행 삭제
@@ -90,6 +104,9 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // 인덱스 재정렬 (선택사항, 필요시 구현)
             reindexRows();
+            
+            // 합계 재계산
+            calculateTotalRevenue();
         }
     }
 
@@ -144,12 +161,12 @@ document.addEventListener('DOMContentLoaded', function() {
             let hasError = false;
             
             itemRows.forEach((row, index) => {
-                const itemNameInput = row.querySelector('input[name*="[item_name]"]');
-                if (itemNameInput && !itemNameInput.value.trim()) {
+                const schoolTypeSelect = row.querySelector('select[name*="[school_type]"]');
+                if (schoolTypeSelect && !schoolTypeSelect.value) {
                     hasError = true;
-                    alert(`${index + 1}번째 항목의 항목명을 입력해주세요.`);
-                    if (itemNameInput) {
-                        itemNameInput.focus();
+                    alert(`${index + 1}번째 항목의 구분을 선택해주세요.`);
+                    if (schoolTypeSelect) {
+                        schoolTypeSelect.focus();
                     }
                     return false;
                 }
@@ -176,5 +193,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 초기 빈 행 표시 여부 설정
     updateEmptyRowVisibility();
+    
+    // 수익 합계 계산 함수
+    function calculateTotalRevenue() {
+        const revenueInputs = document.querySelectorAll('.revenue-input');
+        let total = 0;
+        
+        revenueInputs.forEach(input => {
+            const value = parseFloat(input.value) || 0;
+            total += value;
+        });
+        
+        const totalRevenueCell = document.getElementById('total-revenue');
+        if (totalRevenueCell) {
+            totalRevenueCell.textContent = total.toLocaleString();
+        }
+    }
+    
+    // 페이지 로드 시 합계 계산
+    calculateTotalRevenue();
 });
 

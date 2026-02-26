@@ -39,6 +39,12 @@ $(function() {
 			const lowerType = String(programType || '').toLowerCase();
 			const programLevel = lowerType.includes('middle') ? 'middle' : (lowerType.includes('high') ? 'high' : null);
 			if (programLevel && schoolLevel !== programLevel) {
+				// 초등 교사가 중등/고등 프로그램 신청 시
+				if (schoolLevel === 'elementary') {
+					alert('특별 프로그램만 신청 가능합니다.');
+					return;
+				}
+				// 중등/고등 교사가 다른 학교급 프로그램 신청 시
 				const levelName = schoolLevel === 'middle' ? '중등' : '고등';
 				alert(`회원님은 ${levelName} 프로그램만 신청 가능합니다.`);
 				return;

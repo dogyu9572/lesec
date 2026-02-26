@@ -39,8 +39,17 @@
                             <h3>제목</h3>
                             <div class="form-grid">
                                 <div class="form-group">
-                                    <label for="title">제목</label>
-                                    <input type="text" id="title" name="title" value="{{ old('title', $statistics->title) }}" required placeholder="제목을 입력하세요">
+                                    <label for="title">제목 (년/월 선택)</label>
+                                    @php
+                                        // "2026년 1월" 형식을 "2026-01" 형식으로 변환
+                                        $monthValue = old('title', $statistics->title);
+                                        if (preg_match('/(\d{4})년\s*(\d{1,2})월/', $monthValue, $matches)) {
+                                            $year = $matches[1];
+                                            $month = str_pad($matches[2], 2, '0', STR_PAD_LEFT);
+                                            $monthValue = $year . '-' . $month;
+                                        }
+                                    @endphp
+                                    <input type="month" id="title" name="title" value="{{ $monthValue }}" required>
                                 </div>
                             </div>
                         </div>
@@ -59,9 +68,8 @@
                                 <table class="board-table" id="items-table">
                                     <thead>
                                         <tr>
-                                            <th>항목</th>
+                                            <th>구분</th>
                                             <th>참가인원</th>
-                                            <th>참가학교</th>
                                             <th>수익</th>
                                             <th style="width: 150px;">관리</th>
                                         </tr>
@@ -71,16 +79,17 @@
                                             @foreach($statistics->items as $index => $item)
                                                 <tr data-item-index="{{ $index }}">
                                                     <td>
-                                                        <input type="text" name="items[{{ $index }}][item_name]" class="form-control" value="{{ $item->item_name }}" required>
+                                                        <select name="items[{{ $index }}][school_type]" class="form-control" required>
+                                                            <option value="">선택하세요</option>
+                                                            <option value="middle" {{ old("items.{$index}.school_type", $item->school_type) === 'middle' ? 'selected' : '' }}>중등</option>
+                                                            <option value="high" {{ old("items.{$index}.school_type", $item->school_type) === 'high' ? 'selected' : '' }}>고등</option>
+                                                        </select>
                                                     </td>
                                                     <td>
-                                                        <input type="number" name="items[{{ $index }}][participants_count]" class="form-control" value="{{ $item->participants_count }}" min="0">
+                                                        <input type="number" name="items[{{ $index }}][participants_count]" class="form-control participants-count" value="{{ old("items.{$index}.participants_count", $item->participants_count) }}" min="0" data-index="{{ $index }}">
                                                     </td>
                                                     <td>
-                                                        <input type="text" name="items[{{ $index }}][school_name]" class="form-control" value="{{ $item->school_name }}">
-                                                    </td>
-                                                    <td>
-                                                        <input type="number" name="items[{{ $index }}][revenue]" class="form-control" value="{{ $item->revenue }}" min="0">
+                                                        <input type="number" name="items[{{ $index }}][revenue]" class="form-control revenue-input" value="{{ old("items.{$index}.revenue", $item->revenue) }}" min="0" data-index="{{ $index }}">
                                                     </td>
                                                     <td>
                                                         <div class="board-btn-group">
@@ -96,10 +105,17 @@
                                             @endforeach
                                         @else
                                             <tr class="empty-row" style="border: none; display: table-row;">
-                                                <td colspan="5" class="text-center" style="padding: 40px 20px; border: none !important; border-bottom: none !important;">등록된 항목이 없습니다.</td>
+                                                <td colspan="4" class="text-center" style="padding: 40px 20px; border: none !important; border-bottom: none !important;">등록된 항목이 없습니다.</td>
                                             </tr>
                                         @endif
                                     </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="2" class="text-right" style="font-weight: bold;">수익 합계:</td>
+                                            <td id="total-revenue" style="font-weight: bold; font-size: 1.1em;">{{ $statistics->items ? $statistics->items->sum('revenue') : 0 }}</td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
                                 </table>
                             </div>
                         </div>

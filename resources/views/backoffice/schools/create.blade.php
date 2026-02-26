@@ -34,10 +34,10 @@
                 <div class="board-form-group">
                     <label class="board-form-label">구분 <span class="required">*</span></label>
                     <div class="board-radio-group">
-                        <div class="board-radio-item">
+                        <div class="board-radio-item" style="opacity: 0.5;">
                             <input type="radio" id="source_type_api" name="source_type" value="api" 
-                                   class="board-radio-input" @checked(old('source_type') == 'api') required>
-                            <label for="source_type_api">학교정보</label>
+                                   class="board-radio-input" disabled>
+                            <label for="source_type_api" style="cursor: not-allowed;">학교정보</label>
                         </div>
                         <div class="board-radio-item">
                             <input type="radio" id="source_type_user" name="source_type" value="user_registration" 
@@ -46,7 +46,7 @@
                         </div>
                         <div class="board-radio-item">
                             <input type="radio" id="source_type_admin" name="source_type" value="admin_registration" 
-                                   class="board-radio-input" @checked(old('source_type') == 'admin_registration' || (!old('source_type')))>
+                                   class="board-radio-input" @checked(old('source_type') == 'admin_registration' || (!old('source_type'))) required>
                             <label for="source_type_admin">관리자 등록</label>
                         </div>
                     </div>
@@ -140,6 +140,12 @@ document.addEventListener('DOMContentLoaded', function() {
             districtSelect.innerHTML = '<option value="">선택하세요</option>';
             
             if (selectedCity) {
+                // 기타/해외 선택 시 시/군/구 비우기
+                if (selectedCity === '기타/해외') {
+                    districtSelect.innerHTML = '<option value="">선택하세요</option>';
+                    return;
+                }
+                
                 // AJAX로 시/군/구 목록 가져오기
                 fetch('{{ route("backoffice.schools.get-districts") }}?city=' + encodeURIComponent(selectedCity), {
                     method: 'GET',

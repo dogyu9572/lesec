@@ -66,8 +66,14 @@
                     <span class="list-count">Total : {{ $messages->total() }}</span>
                 </div>
                 <div class="list-controls">
+                    @if($messages->count() > 0)
+                        <button type="button" id="bulk-delete-btn-header" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> 선택 삭제</button>
+                    @endif
+                    <a href="{{ route('backoffice.mail-sms.create') }}" class="btn btn-success btn-sm">
+                        <i class="fas fa-plus"></i> 신규등록
+                    </a>
                     <form method="GET" action="{{ route('backoffice.mail-sms.index') }}" class="per-page-form">
-                        @foreach(request()->except('per_page') as $key => $value)
+                        @foreach(request()->except(['per_page', 'page']) as $key => $value)
                             <input type="hidden" name="{{ $key }}" value="{{ $value }}">
                         @endforeach
                         <label for="per_page" class="per-page-label">목록 개수:</label>
@@ -77,14 +83,6 @@
                             <option value="100" @selected(request('per_page') == 100)>100개</option>
                         </select>
                     </form>
-                    @if($messages->count() > 0)
-                        <button type="button" id="bulk-delete-btn-header" class="btn btn-danger btn-sm">
-                            <i class="fas fa-trash"></i> 선택 삭제
-                        </button>
-                    @endif
-                    <a href="{{ route('backoffice.mail-sms.create') }}" class="btn btn-success btn-sm">
-                        <i class="fas fa-plus"></i> 등록
-                    </a>
                 </div>
             </div>
 
@@ -117,16 +115,14 @@
                                     <td>{{ optional($message->created_at)->format('Y.m.d') ?? '-' }}</td>
                                     <td>
                                         <div class="board-btn-group">
-                                            <a href="{{ route('backoffice.mail-sms.edit', $message) }}" class="btn btn-primary btn-sm">
-                                                <i class="fas fa-edit"></i> 수정
-                                            </a>
-                                            <form action="{{ route('backoffice.mail-sms.destroy', $message) }}" method="POST" onsubmit="return confirm('삭제하시겠습니까?');">
+                                            <a href="{{ route('backoffice.mail-sms.edit', $message) }}" class="btn btn-info btn-sm"><i class="fas fa-eye"></i> 보기</a>
+                                            <!-- <form action="{{ route('backoffice.mail-sms.destroy', $message) }}" method="POST" onsubmit="return confirm('삭제하시겠습니까?');">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-danger btn-sm">
                                                     <i class="fas fa-trash"></i> 삭제
                                                 </button>
-                                            </form>
+                                            </form> -->
                                         </div>
                                     </td>
                                 </tr>

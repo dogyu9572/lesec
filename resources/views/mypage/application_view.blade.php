@@ -53,13 +53,30 @@
 					<tr>
 						<th>교육일</th>
 						<td>
-							@if($application->participation_date)
-								{{ $application->participation_date->format('Y.m.d') }}
+							@php
+								$reservation = $application->reservation;
+								$startDate = $reservation?->education_start_date;
+								$endDate = $reservation?->education_end_date;
+								$dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+							@endphp
+							@if($startDate)
+								@if($endDate && $startDate->format('Y-m-d') !== $endDate->format('Y-m-d'))
+									@php
+										$startDayName = $dayNames[$startDate->dayOfWeek];
+										$endDayName = $dayNames[$endDate->dayOfWeek];
+									@endphp
+									{{ $startDate->format('Y.m.d') }}({{ $startDayName }}) ~ {{ $endDate->format('Y.m.d') }}({{ $endDayName }})
+								@else
+									@php
+										$dayName = $dayNames[$startDate->dayOfWeek];
+									@endphp
+									{{ $startDate->format('Y.m.d') }}({{ $dayName }})
+								@endif
+							@elseif($application->participation_date)
 								@php
-									$dayNames = ['일', '월', '화', '수', '목', '금', '토'];
 									$dayName = $dayNames[$application->participation_date->dayOfWeek];
 								@endphp
-								({{ $dayName }})
+								{{ $application->participation_date->format('Y.m.d') }}({{ $dayName }})
 							@else
 								-
 							@endif
@@ -67,11 +84,11 @@
 					</tr>
 					<tr>
 						<th>교육료</th>
-						<td>{{ $application->participation_fee ? number_format($application->participation_fee) . '원' : '-' }}</td>
+						<td>{{ $application->display_total_fee_label }}</td>
 					</tr>
 					<tr>
 						<th>결제방법</th>
-						<td>{{ $application->payment_method_label }}</td>
+						<td>{{ $application->display_payment_method_label }}</td>
 					</tr>
 				</tbody>
 			</table>

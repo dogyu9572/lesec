@@ -98,12 +98,14 @@ class MailSmsController extends BaseController
 
         // old input이 없으면 recipients를 사용
         if ($selectedMembers->isEmpty()) {
+            $mailSmsMessage->load('recipients.member');
             $selectedMembers = $mailSmsMessage->recipients->map(function ($recipient) {
                 return (object) [
                     'member_id' => $recipient->member_id,
                     'member_name' => $recipient->member_name,
                     'member_email' => $recipient->member_email,
                     'member_contact' => $recipient->member_contact,
+                    'parent_contact' => $recipient->member ? $recipient->member->parent_contact : null,
                 ];
             });
         }
@@ -406,6 +408,7 @@ class MailSmsController extends BaseController
                     'member_name' => $member->name,
                     'member_email' => $member->email,
                     'member_contact' => $member->contact,
+                    'parent_contact' => $member->parent_contact,
                 ];
             });
     }

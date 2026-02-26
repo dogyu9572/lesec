@@ -141,6 +141,12 @@ document.addEventListener('DOMContentLoaded', function() {
             districtSelect.innerHTML = '<option value="">선택하세요</option>';
             
             if (selectedCity) {
+                // 기타/해외 선택 시 시/군/구 비우기
+                if (selectedCity === '기타/해외') {
+                    districtSelect.innerHTML = '<option value="">선택하세요</option>';
+                    return;
+                }
+                
                 // AJAX로 시/군/구 목록 가져오기
                 const currentDistrict = '{{ old("district", $school->district) }}';
                 fetch('{{ route("backoffice.schools.get-districts") }}?city=' + encodeURIComponent(selectedCity), {

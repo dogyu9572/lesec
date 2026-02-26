@@ -11,6 +11,13 @@
 .program-info-row {
     padding: 12px 24px;
 }
+.program-info-row dd {
+    word-break: break-word;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: pre-wrap;
+    max-width: 100%;
+}
 </style>
 @endsection
 
@@ -74,7 +81,7 @@
                                     <tr>
                                         <td>{{ $logs->total() - ($logs->currentPage() - 1) * $logs->perPage() - $index }}</td>
                                         <td>{{ $log->member->name ?? $log->member_name ?? '-' }}</td>
-                                        <td>{{ $log->member->contact ?? $log->member_contact ?? '-' }}</td>
+                                        <td>{{ $log->member_contact ?? '-' }}</td>
                                         <td>{{ $log->member->email ?? $log->member_email ?? '-' }}</td>
                                         <td>{{ optional($log->sent_at)->format('Y.m.d H:i') ?? '-' }}</td>
                                         <td>

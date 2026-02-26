@@ -10,9 +10,7 @@ use Illuminate\Http\JsonResponse;
 
 class SchoolSearchController extends Controller
 {
-    public function __construct(private readonly SchoolSearchService $schoolSearchService)
-    {
-    }
+    public function __construct(private readonly SchoolSearchService $schoolSearchService) {}
     /**
      * 학교 검색 결과 반환
      */
@@ -24,10 +22,12 @@ class SchoolSearchController extends Controller
             ->where('status', 'normal')
             ->whereNotNull('city')
             ->distinct()
+            ->orderByRaw("CASE WHEN city = '기타/해외' THEN 1 ELSE 0 END")
             ->orderBy('city')
             ->pluck('city')
             ->filter()
-            ->values();
+            ->values()
+            ->toArray();
 
         $districtsQuery = School::query()
             ->where('status', 'normal')
@@ -80,5 +80,3 @@ class SchoolSearchController extends Controller
         ]);
     }
 }
-
-

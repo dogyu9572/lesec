@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Backoffice;
 use App\Services\Backoffice\RevenueStatisticsService;
 use App\Models\RevenueStatistics;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class RevenueStatisticsController extends BaseController
 {
@@ -40,14 +43,22 @@ class RevenueStatisticsController extends BaseController
         $request->validate([
             'title' => 'required|string|max:255',
             'items' => 'nullable|array',
-            'items.*.item_name' => 'nullable|string|max:255',
+            'items.*.school_type' => 'required_with:items|in:middle,high',
             'items.*.participants_count' => 'nullable|integer|min:0',
-            'items.*.school_name' => 'nullable|string|max:255',
             'items.*.revenue' => 'nullable|integer|min:0',
+        ], [
+            'items.*.school_type.required_with' => '구분을 선택해주세요.',
+            'items.*.school_type.in' => '구분은 중등 또는 고등만 선택 가능합니다.',
         ]);
 
         try {
-            $this->revenueStatisticsService->createStatistics($request->all());
+            // title을 "2026년 1월" 형식으로 변환
+            $data = $request->all();
+            if (isset($data['title']) && preg_match('/^(\d{4})-(\d{2})$/', $data['title'], $matches)) {
+                $data['title'] = $matches[1] . '년 ' . intval($matches[2]) . '월';
+            }
+
+            $this->revenueStatisticsService->createStatistics($data);
 
             return redirect()->route('backoffice.revenue-statistics.index')
                 ->with('success', '수익 통계가 등록되었습니다.');
@@ -75,21 +86,38 @@ class RevenueStatisticsController extends BaseController
         $request->validate([
             'title' => 'required|string|max:255',
             'items' => 'nullable|array',
-            'items.*.item_name' => 'nullable|string|max:255',
+            'items.*.school_type' => 'required_with:items|in:middle,high',
             'items.*.participants_count' => 'nullable|integer|min:0',
-            'items.*.school_name' => 'nullable|string|max:255',
             'items.*.revenue' => 'nullable|integer|min:0',
+        ], [
+            'items.*.school_type.required_with' => '구분을 선택해주세요.',
+            'items.*.school_type.in' => '구분은 중등 또는 고등만 선택 가능합니다.',
         ]);
 
         try {
-            $this->revenueStatisticsService->updateStatistics($revenue_statistic, $request->all());
+            // title을 "2026년 1월" 형식으로 변환
+            $data = $request->all();
+            if (isset($data['title']) && preg_match('/^(\d{4})-(\d{2})$/', $data['title'], $matches)) {
+                $data['title'] = $matches[1] . '년 ' . intval($matches[2]) . '월';
+            }
+
+            $this->revenueStatisticsService->updateStatistics($revenue_statistic, $data);
 
             return redirect()->route('backoffice.revenue-statistics.index')
                 ->with('success', '수익 통계가 수정되었습니다.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return redirect()->back()
+                ->withErrors($e->errors())
+                ->withInput();
         } catch (\Exception $e) {
+            \Log::error('수익 통계 수정 오류', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'request_data' => $request->all()
+            ]);
             return redirect()->back()
                 ->withInput()
-                ->with('error', '수익 통계 수정에 실패했습니다.');
+                ->with('error', '수익 통계 수정에 실패했습니다: ' . $e->getMessage());
         }
     }
 
@@ -120,7 +148,7 @@ class RevenueStatisticsController extends BaseController
         ]);
 
         $statisticsIds = $request->input('statistics_ids');
-        
+
         try {
             $deletedCount = $this->revenueStatisticsService->bulkDelete($statisticsIds);
 
@@ -149,4 +177,3 @@ class RevenueStatisticsController extends BaseController
         }
     }
 }
-

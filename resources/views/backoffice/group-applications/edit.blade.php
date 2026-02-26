@@ -79,20 +79,55 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label for="participation_date_display">참가일</label>
-                                    <input type="hidden" id="participation_date" name="participation_date" value="{{ data_get($application, 'participation_date') }}">
-                                    <input type="text" id="participation_date_display" value="{{ data_get($application, 'participation_date_formatted', data_get($application, 'participation_date')) }}" readonly>
+                                    <label for="participation_date">참가일</label>
+                                    @php
+                                        $reservation = data_get($application, 'reservation');
+                                        $startDate = $reservation?->education_start_date;
+                                        $endDate = $reservation?->education_end_date;
+                                        $dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+                                    @endphp
+                                    @if($startDate)
+                                        @if($endDate && $startDate->format('Y-m-d') !== $endDate->format('Y-m-d'))
+                                            @php
+                                                $startDayName = $dayNames[$startDate->dayOfWeek];
+                                                $endDayName = $dayNames[$endDate->dayOfWeek];
+                                            @endphp
+                                            <input type="text" id="participation_date_display" value="{{ $startDate->format('Y.m.d') }}({{ $startDayName }}) ~ {{ $endDate->format('Y.m.d') }}({{ $endDayName }})" readonly class="form-control" style="background-color: #f5f5f5;">
+                                        @else
+                                            @php
+                                                $dayName = $dayNames[$startDate->dayOfWeek];
+                                            @endphp
+                                            <input type="text" id="participation_date_display" value="{{ $startDate->format('Y.m.d') }}({{ $dayName }})" readonly class="form-control" style="background-color: #f5f5f5;">
+                                        @endif
+                                    @elseif(data_get($application, 'participation_date'))
+                                        @php
+                                            $participationDate = \Carbon\Carbon::parse(data_get($application, 'participation_date'));
+                                            $dayName = $dayNames[$participationDate->dayOfWeek];
+                                        @endphp
+                                        <input type="text" id="participation_date_display" value="{{ $participationDate->format('Y.m.d') }}({{ $dayName }})" readonly class="form-control" style="background-color: #f5f5f5;">
+                                    @else
+                                        <input type="text" id="participation_date_display" value="-" readonly class="form-control" style="background-color: #f5f5f5;">
+                                    @endif
+                                    <input type="hidden" id="participation_date" name="participation_date" value="{{ data_get($application, 'participation_date') ? \Carbon\Carbon::parse(data_get($application, 'participation_date'))->format('Y-m-d') : '' }}">
                                 </div>
                                 <div>
-                                    <label>결제방법</label>
+                                    <label>결제방법 (프로그램 설정)</label>
                                     <div class="checkbox-group">
-                                        @foreach(data_get($formOptions, 'payment_methods', []) as $value => $label)
-                                            <label class="checkbox-label">
-                                                <input type="checkbox" name="payment_methods[]" value="{{ $value }}" @checked(in_array($value, data_get($application, 'payment_methods', []), true))>
+                                        @php
+                                            $reservationPaymentMethods = data_get($application, 'reservation.payment_methods', []);
+                                            $paymentMethodLabels = data_get($formOptions, 'payment_methods', []);
+                                        @endphp
+                                        @foreach($paymentMethodLabels as $value => $label)
+                                            <label class="checkbox-label" style="opacity: {{ in_array($value, $reservationPaymentMethods, true) ? '1' : '0.5' }};">
+                                                <input type="checkbox" value="{{ $value }}" 
+                                                       @checked(in_array($value, $reservationPaymentMethods, true))
+                                                       disabled
+                                                       style="cursor: not-allowed;">
                                                 <span>{{ $label }}</span>
                                             </label>
                                         @endforeach
                                     </div>
+                                    <small style="color: #666; font-size: 0.9em;">프로그램에서 설정한 결제방법입니다. 변경할 수 없습니다.</small>
                                 </div>
                             </div>
                         </div>
@@ -167,6 +202,30 @@
                                         @endforeach
                                     </div>
                                 </div>
+                                <div>
+                                    <label>선택 결제 방법</label>
+                                    <div class="radio-group">
+                                        @php
+                                            $paymentMethodLabels = data_get($formOptions, 'payment_methods', []);
+                                            $selectedPaymentMethod = data_get($application, 'payment_method');
+                                        @endphp
+                                        @foreach($paymentMethodLabels as $value => $label)
+                                            <label class="radio-label">
+                                                <input type="radio" name="payment_method" value="{{ $value }}" @checked($selectedPaymentMethod === $value)>
+                                                <span>{{ $label }}</span>
+                                            </label>
+                                        @endforeach
+                                        <label class="radio-label">
+                                            <input type="radio" name="payment_method" value="" @checked(empty($selectedPaymentMethod))>
+                                            <span>미선택</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="form-group grid-span-2">
+                                    <label for="estimate_note">견적서 비고</label>
+                                    <textarea id="estimate_note" name="estimate_note" class="form-control" rows="3" placeholder="견적서에 표시할 비고 내용을 입력하세요.">{{ data_get($application, 'estimate_note', '') }}</textarea>
+                                    <small style="color: #666; font-size: 0.9em;">견적서 출력 시 하단 비고란에 표시됩니다.</small>
+                                </div>
                             </div>
                         </div>
 
@@ -177,7 +236,7 @@
                                     <a href="{{ route('backoffice.group-applications.download-roster-sample', $applicationId) }}" class="btn btn-outline-secondary btn-sm">
                                         <i class="fas fa-file-download"></i> 샘플파일 받기
                                     </a>
-                                    <input type="file" id="admin_csv_upload" accept=".csv" style="display:none;">
+                                    <input type="file" id="admin_csv_upload" accept=".csv,.xlsx,.xls" style="display:none;">
                                     <button type="button" class="btn btn-light btn-sm" id="btn-admin-upload">
                                         <i class="fas fa-upload"></i> 일괄 업로드
                                     </button>

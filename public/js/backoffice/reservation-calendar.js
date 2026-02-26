@@ -276,3 +276,103 @@
     });
 })();
 
+/* 예약 캘린더 동일 프로그램 병합 처리 (관리자 캘린더용) */
+(function() {
+    function refreshCalendarLayout() {
+        const rows = document.querySelectorAll('.schedule_table tbody tr');
+        let appIdCounter = 1;
+
+        rows.forEach(row => {
+            const cells = [...row.querySelectorAll('td.calendar-day')];
+            if (cells.length === 0) return;
+
+            const appIdMap = new Map(); // "제목|정원" -> appid
+            const scheduleData = {};    // appid -> { startIdx, count, element }
+            const globalOrder = [];     // 이 주(row)에 등장하는 appid 순서
+
+            // 1. 데이터 파악: 어느 일정이 어디서 시작해서 며칠간 이어지는지 계산
+            cells.forEach((td, colIdx) => {
+                const items = td.querySelectorAll('.list li:not(.dummy)');
+                items.forEach(li => {
+                    const title = li.getAttribute('title') || li.textContent.trim();
+                    const total = li.dataset.total || '';
+                    const key = `${title}|${total}`;
+
+                    if (!appIdMap.has(key)) {
+                        appIdMap.set(key, appIdCounter++);
+                        const appid = appIdMap.get(key);
+                        globalOrder.push(appid);
+                        scheduleData[appid] = { 
+                            start: colIdx, 
+                            count: 1, 
+                            el: li.cloneNode(true) 
+                        };
+                    } else {
+                        const appid = appIdMap.get(key);
+                        // 연속된 날짜인지 확인하여 count 증가
+                        if (scheduleData[appid].start + scheduleData[appid].count === colIdx) {
+                            scheduleData[appid].count++;
+                        }
+                    }
+                });
+            });
+
+            // 2. DOM 재배치
+            cells.forEach((td, colIdx) => {
+                let list = td.querySelector('.list');
+                // 만약 list가 없는데 일정을 넣어야 한다면 생성
+                if (!list && globalOrder.some(id => scheduleData[id].start <= colIdx)) {
+                    list = document.createElement('ul');
+                    list.className = 'list';
+                    td.appendChild(list);
+                }
+                if (!list) return;
+
+                list.innerHTML = ''; // 기존 내용 삭제
+
+                globalOrder.forEach(appid => {
+                    const data = scheduleData[appid];
+                    const endIdx = data.start + data.count - 1;
+
+                    if (colIdx < data.start || colIdx > endIdx) {
+                        // 해당 일정이 이 날짜 범위에 없음 -> 아무것도 안 함 (또는 다른 일정의 dummy가 올 수 있음)
+                        return; 
+                    }
+
+                    if (colIdx === data.start) {
+                        // 일정이 시작되는 날: 실제 li 배치 + width 계산
+                        const newLi = data.el;
+                        newLi.dataset.appid = appid;
+                        
+                        if (data.count > 1) {
+                            const gap = 9;
+                            newLi.style.width = `calc(${data.count * 100}% + ${(data.count - 1) * gap}px)`;
+                            
+                            // schedule_count 추가
+                            let countSpan = newLi.querySelector('.schedule_count');
+                            if (!countSpan) {
+                                countSpan = document.createElement('span');
+                                countSpan.className = 'schedule_count';
+                                newLi.appendChild(countSpan);
+                            }
+                            countSpan.textContent = data.count;
+                        }
+                        list.appendChild(newLi);
+                    } else {
+                        // 일정이 이어지는 날: dummy 배치 (결과값 HTML 기준)
+                        const dummy = document.createElement('li');
+                        dummy.className = 'dummy';
+                        dummy.innerHTML = '&nbsp;';
+                        dummy.dataset.appid = appid;
+                        list.appendChild(dummy);
+                    }
+                });
+            });
+        });
+    }
+
+    // 초기 실행
+    document.addEventListener('DOMContentLoaded', refreshCalendarLayout);
+    // 외부(AJAX 후) 호출용
+    window.refreshCalendarLayout = refreshCalendarLayout;
+})();

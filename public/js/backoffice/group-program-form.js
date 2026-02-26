@@ -12,14 +12,29 @@ document.addEventListener('DOMContentLoaded', function() {
     const capacityInput = document.getElementById('capacity');
     
     if (unlimitedCapacityCheckbox && capacityInput) {
+        // 초기 상태 저장
+        const initialCapacityValue = capacityInput.value || '';
+        
         unlimitedCapacityCheckbox.addEventListener('change', function() {
             if (this.checked) {
                 capacityInput.disabled = true;
                 capacityInput.value = '';
             } else {
                 capacityInput.disabled = false;
+                // 제한없음 해제 시 기존 값이 있으면 복원, 없으면 빈 값
+                if (!capacityInput.value && initialCapacityValue) {
+                    capacityInput.value = initialCapacityValue;
+                }
             }
         });
+        
+        // 페이지 로드 시 초기 상태 확인
+        if (unlimitedCapacityCheckbox.checked) {
+            capacityInput.disabled = true;
+            capacityInput.value = '';
+        } else {
+            capacityInput.disabled = false;
+        }
     }
 
     // 무료 체크박스 처리
@@ -87,29 +102,70 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // 폼 제출 시 disabled 필드 처리
+    // 폼 제출 시 disabled 필드 처리 및 체크박스 상태 명시적 전송
     const form = document.querySelector('form[action*="group-programs"]');
     if (form) {
         form.addEventListener('submit', function(e) {
-            // 제한없음이 체크되어 있으면 capacity 필드를 제출에 포함 (disabled 해제)
             const unlimitedCapacityCheckbox = document.getElementById('is_unlimited_capacity');
             const capacityInput = document.getElementById('capacity');
-            if (unlimitedCapacityCheckbox && unlimitedCapacityCheckbox.checked && capacityInput) {
-                capacityInput.disabled = false;
-                // 빈 값으로 설정 (서버에서 null 처리)
-                if (!capacityInput.value) {
-                    capacityInput.value = '';
+            const freeCheckbox = document.getElementById('is_free');
+            const educationFeeInput = document.getElementById('education_fee');
+            
+            // 제한없음 체크박스 상태 명시적 전송
+            if (unlimitedCapacityCheckbox) {
+                // 기존 hidden input 제거 (있다면)
+                const existingHidden = form.querySelector('input[name="is_unlimited_capacity"][type="hidden"]');
+                if (existingHidden) {
+                    existingHidden.remove();
+                }
+                
+                if (unlimitedCapacityCheckbox.checked) {
+                    // 체크되어 있으면 capacity 필드를 제출에 포함 (disabled 해제)
+                    if (capacityInput) {
+                        capacityInput.disabled = false;
+                        capacityInput.value = '';
+                    }
+                } else {
+                    // 체크 해제되었으면 hidden input으로 명시적으로 false 전송
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = 'is_unlimited_capacity';
+                    hiddenInput.value = '0';
+                    form.appendChild(hiddenInput);
+                    
+                    // capacity 필드 활성화
+                    if (capacityInput) {
+                        capacityInput.disabled = false;
+                    }
                 }
             }
 
-            // 무료가 체크되어 있으면 education_fee 필드를 제출에 포함 (disabled 해제)
-            const freeCheckbox = document.getElementById('is_free');
-            const educationFeeInput = document.getElementById('education_fee');
-            if (freeCheckbox && freeCheckbox.checked && educationFeeInput) {
-                educationFeeInput.disabled = false;
-                // 빈 값으로 설정 (서버에서 null 처리)
-                if (!educationFeeInput.value) {
-                    educationFeeInput.value = '';
+            // 무료 체크박스 상태 명시적 전송
+            if (freeCheckbox) {
+                // 기존 hidden input 제거 (있다면)
+                const existingHidden = form.querySelector('input[name="is_free"][type="hidden"]');
+                if (existingHidden) {
+                    existingHidden.remove();
+                }
+                
+                if (freeCheckbox.checked) {
+                    // 체크되어 있으면 education_fee 필드를 제출에 포함 (disabled 해제)
+                    if (educationFeeInput) {
+                        educationFeeInput.disabled = false;
+                        educationFeeInput.value = '';
+                    }
+                } else {
+                    // 체크 해제되었으면 hidden input으로 명시적으로 false 전송
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = 'is_free';
+                    hiddenInput.value = '0';
+                    form.appendChild(hiddenInput);
+                    
+                    // education_fee 필드 활성화
+                    if (educationFeeInput) {
+                        educationFeeInput.disabled = false;
+                    }
                 }
             }
         }, false);

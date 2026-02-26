@@ -52,10 +52,8 @@
 						<dt>비밀번호<span>*</span></dt>
 						<dd>
 							<div class="password-wrap">
-								<input type="password" name="password" class="text w100p password-input" value="{{ old('password') }}" placeholder="영문/숫자/특수문자를 포함하여 9~12자리로 입력해주세요.">
-								<button type="button" class="btn-eye toggle-password r16">
-									<img src="/images/icon_eye.svg" alt="보기">
-								</button>
+								<input type="password" name="password" class="text w100p password-input" value="{{ old('password') }}" placeholder="영문/숫자/특수문자를 포함하여 8자리~20자리로 입력해주세요">
+								<button type="button" class="btn-eye toggle-password r16"><img src="/images/icon_eye.svg" alt="보기"></button>
 							</div>
 							<input type="hidden" name="password_temp" class="password-temp" value="{{ old('password_temp', old('password')) }}">
 							@error('password')
@@ -66,7 +64,10 @@
 					<dl>
 						<dt>비밀번호 확인<span>*</span></dt>
 						<dd>
-							<input type="password" name="password_confirmation" class="text w100p" value="{{ old('password_confirmation') }}" placeholder="비밀번호를 다시 입력해주세요.">
+							<div class="password-wrap password-wrap_add">
+								<input type="password" name="password_confirmation" class="text w100p password-input password-input_add" value="{{ old('password_confirmation') }}" placeholder="비밀번호를 다시 입력해주세요.">
+								<button type="button" class="btn-eye toggle-password toggle-password_add r16"><img src="/images/icon_eye.svg" alt="보기"></button>
+							</div>
 							<input type="hidden" name="password_confirmation_temp" class="password-confirmation-temp" value="{{ old('password_confirmation_temp', old('password_confirmation')) }}">
 						</dd>
 					</dl>
@@ -100,17 +101,29 @@
 							@enderror
 						</dd>
 					</dl>
+					@php
+						$verifiedPhoneDisplay = $verifiedPhone ?? null;
+					@endphp
 					<dl>
 						<dt>{{ $memberType === 'teacher' ? '연락처' : '학생 연락처' }}<span>*</span></dt>
 						<dd>
 							<div class="flex inbtn">
-								<input type="text" name="student_contact" value="{{ old('student_contact') }}" placeholder="휴대폰번호를 입력해주세요." data-phone-input inputmode="tel" autocomplete="tel" data-original-contact="{{ preg_replace('/[^0-9]/', '', old('student_contact') ?? '') }}">
+								<input type="text"
+								       name="student_contact"
+								       value="{{ old('student_contact', $verifiedPhoneDisplay) }}"
+								       placeholder="휴대폰번호를 입력해주세요."
+								       data-phone-input
+								       inputmode="tel"
+								       autocomplete="tel"
+								       data-original-contact="{{ preg_replace('/[^0-9]/', '', old('student_contact', $verifiedPhoneDisplay) ?? '') }}"
+								       @if(!empty($verifiedPhoneDisplay)) readonly @endif>
 								<button type="button"
 									class="btn btn_wkk btn_error js-duplicate-check"
 									data-field="contact"
-									data-input="[name='student_contact']">중복 확인</button>
+									data-input="[name='student_contact']"
+									@if(!empty($verifiedPhoneDisplay)) disabled @endif>중복 확인</button>
 							</div>
-							<input type="hidden" name="contact_verified" value="{{ old('contact_verified', '0') }}">
+							<input type="hidden" name="contact_verified" value="{{ old('contact_verified', !empty($verifiedPhoneDisplay) ? '1' : '0') }}">
 							@error('contact')
 							<p class="error_alert">{{ $message }}</p>
 							@enderror
@@ -156,11 +169,11 @@
 				<div class="stit num mb0 nbd_b"><span>2</span>소속 정보 <p class="abso">* 는 필수 입력 사항입니다.</p></div>
 				<div class="inputs">
 					<dl>
-						<dt>지역<span>*</span></dt>
+						<dt>지역</dt>
 						<dd>
 							<div class="flex city">
 								<select class="city_select" disabled>
-									<option value="">선택</option>
+									<option value="">학교 검색 시 지역은 자동으로 반영됩니다.</option>
 									@if (old('city'))
 									<option value="{{ old('city') }}" selected>{{ old('city') }}</option>
 									@endif
@@ -186,7 +199,7 @@
 						<dt>학교명<span>*</span></dt>
 						<dd>
 							<div class="flex inbtn">
-								<input type="text" name="school_name" class="input_school" value="{{ old('school_name') }}" placeholder="학교명을 검색해주세요.">
+								<input type="text" name="school_name" class="input_school" value="{{ old('school_name') }}" placeholder="학교명을 검색해주세요." readonly>
 								<button type="button" class="btn btn_wkk" onclick="layerShow('pop_school')">학교 검색</button>
 							</div>
 							<input type="hidden" name="school_id" class="input_school_id" value="{{ old('school_id') }}">

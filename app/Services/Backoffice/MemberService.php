@@ -15,49 +15,50 @@ class MemberService
         $query = $this->buildFilterQuery($request);
         $perPage = $request->get('per_page', 20);
         $perPage = in_array($perPage, [20, 50, 100]) ? $perPage : 20;
-        
+
         return $query->paginate($perPage);
     }
-    
+
     /**
      * 필터 쿼리 빌드 (공통)
      */
     private function buildFilterQuery(\Illuminate\Http\Request $request)
     {
         $query = Member::with('memberGroup');
-        
+
         // 선택된 회원 ID 필터 (엑셀 다운로드용)
         if ($request->filled('member_ids')) {
             $memberIds = is_array($request->member_ids) ? $request->member_ids : [$request->member_ids];
             $query->whereIn('id', $memberIds);
         }
-        
+
         // 회원구분 필터
         if ($request->filled('member_type')) {
             $query->where('member_type', $request->member_type);
         }
-        
+
         // 회원그룹 필터
         if ($request->filled('member_group_id')) {
             $query->where('member_group_id', $request->member_group_id);
         }
-        
+
         // 소속 시/도 필터
         if ($request->filled('city')) {
             $city = trim((string) $request->city);
 
-            // 지역 값이 없으면 "기타"로 취급
-            if ($city === '기타') {
+            // 지역 값이 없으면 "기타/해외"로 취급
+            if ($city === '기타/해외') {
                 $query->where(function ($q) {
                     $q->whereNull('city')
                         ->orWhere('city', '')
+                        ->orWhere('city', '기타/해외')
                         ->orWhere('city', '외국학교');
                 });
             } else {
                 $query->where('city', $city);
             }
         }
-        
+
         // 가입일 필터
         if ($request->filled('joined_from')) {
             $query->whereDate('joined_at', '>=', $request->joined_from);
@@ -65,7 +66,7 @@ class MemberService
         if ($request->filled('joined_to')) {
             $query->whereDate('joined_at', '<=', $request->joined_to);
         }
-        
+
         // 수신동의 필터
         if ($request->filled('email_consent')) {
             $query->where('email_consent', $request->email_consent);
@@ -76,29 +77,30 @@ class MemberService
         if ($request->filled('kakao_consent')) {
             $query->where('kakao_consent', $request->kakao_consent);
         }
-        
+
         // 검색어 필터
         if ($request->filled('search_keyword')) {
             $searchType = $request->get('search_type', 'all');
             $searchKeyword = trim((string) $request->search_keyword);
             $normalizedKeyword = str_replace('-', '', $searchKeyword);
-            
+
             if ($searchType === 'all') {
                 // 전체 검색
-                $query->where(function($q) use ($searchKeyword, $normalizedKeyword) {
+                $query->where(function ($q) use ($searchKeyword, $normalizedKeyword) {
                     $q->where('login_id', 'like', "%{$searchKeyword}%")
-                      ->orWhere('name', 'like', "%{$searchKeyword}%")
-                      ->orWhere('school_name', 'like', "%{$searchKeyword}%")
-                      ->orWhere('email', 'like', "%{$searchKeyword}%")
-                      ->orWhere('contact', 'like', "%{$normalizedKeyword}%")
-                      ->orWhere('city', 'like', "%{$searchKeyword}%")
-                      ->orWhere('grade', 'like', "%{$searchKeyword}%");
+                        ->orWhere('name', 'like', "%{$searchKeyword}%")
+                        ->orWhere('school_name', 'like', "%{$searchKeyword}%")
+                        ->orWhere('email', 'like', "%{$searchKeyword}%")
+                        ->orWhere('contact', 'like', "%{$normalizedKeyword}%")
+                        ->orWhere('city', 'like', "%{$searchKeyword}%")
+                        ->orWhere('grade', 'like', "%{$searchKeyword}%");
 
-                    // "기타" 검색 시: 지역 미입력(또는 외국학교)도 포함
-                    if ($searchKeyword === '기타') {
+                    // "기타/해외" 검색 시: 지역 미입력(또는 외국학교)도 포함
+                    if ($searchKeyword === '기타/해외' || $searchKeyword === '기타') {
                         $q->orWhereNull('city')
-                          ->orWhere('city', '')
-                          ->orWhere('city', '외국학교');
+                            ->orWhere('city', '')
+                            ->orWhere('city', '기타/해외')
+                            ->orWhere('city', '외국학교');
                     }
                 });
             } else {
@@ -112,12 +114,13 @@ class MemberService
                         $query->where('grade', (int)$searchKeyword);
                     }
                 } elseif ($searchType === 'city') {
-                    // 지역(시/도) 검색: "기타"는 지역 미입력(또는 외국학교)로 처리
-                    if ($searchKeyword === '기타') {
+                    // 지역(시/도) 검색: "기타/해외"는 지역 미입력(또는 외국학교)로 처리
+                    if ($searchKeyword === '기타/해외' || $searchKeyword === '기타') {
                         $query->where(function ($q) {
                             $q->whereNull('city')
-                              ->orWhere('city', '')
-                              ->orWhere('city', '외국학교');
+                                ->orWhere('city', '')
+                                ->orWhere('city', '기타/해외')
+                                ->orWhere('city', '외국학교');
                         });
                     } else {
                         $query->where('city', 'like', "%{$searchKeyword}%");
@@ -127,10 +130,10 @@ class MemberService
                 }
             }
         }
-        
+
         return $query->orderBy('created_at', 'desc');
     }
-    
+
     /**
      * 회원을 생성합니다.
      */
@@ -158,10 +161,10 @@ class MemberService
             'kakao_consent' => $data['kakao_consent'] ?? false,
             'joined_at' => now(),
         ];
-        
+
         return Member::create($memberData);
     }
-    
+
     /**
      * 회원 정보를 업데이트합니다.
      */
@@ -185,14 +188,14 @@ class MemberService
         $member->sms_consent = isset($data['sms_consent']) ? (bool)$data['sms_consent'] : false;
         $member->kakao_consent = isset($data['kakao_consent']) ? (bool)$data['kakao_consent'] : false;
         $member->memo = $data['memo'] ?? $member->memo;
-        
+
         if (!empty($data['password'])) {
             $member->password = Hash::make($data['password']);
         }
-        
+
         return $member->save();
     }
-    
+
     /**
      * 회원을 삭제합니다.
      */
@@ -200,7 +203,7 @@ class MemberService
     {
         return $member->delete();
     }
-    
+
     /**
      * 회원 일괄 삭제
      */
@@ -208,7 +211,7 @@ class MemberService
     {
         return Member::whereIn('id', $memberIds)->delete();
     }
-    
+
     /**
      * 전화번호 정규화 (숫자만)
      */
@@ -217,12 +220,12 @@ class MemberService
         if (empty($phoneNumber)) {
             return null;
         }
-        
+
         $digits = preg_replace('/[^0-9]/', '', $phoneNumber);
-        
+
         return $digits !== '' ? $digits : null;
     }
-    
+
     /**
      * Excel 다운로드용 회원 목록 가져오기
      */
@@ -231,4 +234,3 @@ class MemberService
         return $this->buildFilterQuery($request)->get();
     }
 }
-

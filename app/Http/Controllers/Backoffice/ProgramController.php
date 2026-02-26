@@ -18,26 +18,37 @@ class ProgramController extends BaseController
     }
 
     /**
-     * 프로그램 정보 관리 페이지 (타입별)
+     * 프로그램 정보 관리 페이지 (타입별 + 신청유형별)
      */
     public function index(Request $request, ?string $type = null)
     {
-        $requestedType = $type ?? $request->get('type');
-        
+        $tabKey = $request->get('tab') ?? $type;
+
+        // 탭 키 파싱
+        $parsed = $this->programService->parseTabKey($tabKey ?? '');
+        $selectedType = $parsed['type'] ?? 'middle_semester';
+        $selectedApplicationType = $parsed['application_type'] ?? 'individual';
+
         // 유효한 타입인지 확인
         $types = $this->programService->getAllTypes();
-        $defaultType = array_key_first($types) ?? 'middle_semester';
-        $selectedType = $requestedType ?: $defaultType;
         if (!isset($types[$selectedType])) {
-            $types[$selectedType] = $this->programService->getTypeName($selectedType);
+            $selectedType = 'middle_semester';
+            $selectedApplicationType = 'individual';
         }
-        
+
+        // 모든 탭 목록 가져오기
+        $tabs = $this->programService->getAllTabs();
+        $currentTabKey = $selectedType . '_' . $selectedApplicationType;
+
         // 타입별 프로그램 조회 (없으면 생성)
-        $program = $this->programService->getOrCreateProgram($selectedType);
-        
+        $program = $this->programService->getOrCreateProgram($selectedType, $selectedApplicationType);
+
         return $this->view('backoffice.programs.index', [
             'program' => $program,
             'currentType' => $selectedType,
+            'currentApplicationType' => $selectedApplicationType,
+            'currentTabKey' => $currentTabKey,
+            'tabs' => $tabs,
             'types' => $types,
         ]);
     }
@@ -51,7 +62,7 @@ class ProgramController extends BaseController
 
         $this->programService->updateProgram($program, $data);
 
-        return redirect()->route('backoffice.programs.index', ['type' => $program->type])
-                        ->with('success', '프로그램 정보가 성공적으로 저장되었습니다.');
+        return redirect()->route('backoffice.programs.index', ['tab' => $program->type . '_' . $program->application_type])
+            ->with('success', '프로그램 정보가 성공적으로 저장되었습니다.');
     }
 }

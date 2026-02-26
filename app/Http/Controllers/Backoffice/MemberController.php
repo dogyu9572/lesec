@@ -58,7 +58,14 @@ class MemberController extends BaseController
         $cities = SidoSggCode::select('sido_name')
             ->distinct()
             ->orderBy('sido_name')
-            ->pluck('sido_name');
+            ->pluck('sido_name')
+            ->filter(function ($city) {
+                return $city && $city !== '전체' && $city !== '외국학교' && $city !== '기타' && $city !== '기타/해외';
+            })
+            ->values();
+
+        // 기타/해외 추가 (맨 아래)
+        $cities->push('기타/해외');
 
         return view('backoffice.members.index', compact('members', 'memberGroups', 'cities'));
     }
@@ -114,7 +121,20 @@ class MemberController extends BaseController
     public function show(Member $member)
     {
         $memberGroups = MemberGroup::active()->ordered()->get();
-        return view('backoffice.members.show', compact('member', 'memberGroups'));
+
+        // 개인 신청 내역
+        $individualApplications = \App\Models\IndividualApplication::where('member_id', $member->id)
+            ->with('reservation')
+            ->orderBy('applied_at', 'desc')
+            ->get();
+
+        // 단체 신청 내역
+        $groupApplications = \App\Models\GroupApplication::where('member_id', $member->id)
+            ->with('reservation')
+            ->orderBy('applied_at', 'desc')
+            ->get();
+
+        return view('backoffice.members.show', compact('member', 'memberGroups', 'individualApplications', 'groupApplications'));
     }
 
     /**
@@ -305,6 +325,10 @@ class MemberController extends BaseController
             'ID',
             '이름',
             '성별',
+            '생년월일',
+            '연락처',
+            '학년',
+            '반',
             '지역',
             '소속학교',
         ];
@@ -319,15 +343,47 @@ class MemberController extends BaseController
         $district = (string) ($member->district ?? '');
         $region = trim($city) !== '' ? trim($city . ' ' . $district) : '기타';
 
+        // 생년월일 포맷팅
+        $birthDate = $member->birth_date ? $member->birth_date->format('Y-m-d') : '-';
+
+        // 연락처 포맷팅
+        $contact = $this->formatPhoneNumber($member->contact);
+
         return [
             $no,
             $member->member_type === 'teacher' ? '교사' : '학생',
             $member->login_id,
             $member->name,
             $member->gender === 'male' ? '남' : '여',
+            $birthDate,
+            $contact ?? '-',
+            $member->grade ?? '-',
+            $member->class_number ?? '-',
             $region,
             $member->school_name ?? '-',
         ];
+    }
+
+    /**
+     * 전화번호 포맷팅
+     */
+    private function formatPhoneNumber(?string $phoneNumber): ?string
+    {
+        if (empty($phoneNumber)) {
+            return null;
+        }
+
+        $digits = preg_replace('/[^0-9]/', '', $phoneNumber);
+
+        if (strlen($digits) === 11) {
+            return preg_replace('/(\d{3})(\d{4})(\d{4})/', '$1-$2-$3', $digits);
+        }
+
+        if (strlen($digits) === 10) {
+            return preg_replace('/(\d{3})(\d{3})(\d{4})/', '$1-$2-$3', $digits);
+        }
+
+        return $phoneNumber;
     }
 
     // (Excel) 회원 신청내역 포함 내보내기 기능은 현재 사용하지 않음

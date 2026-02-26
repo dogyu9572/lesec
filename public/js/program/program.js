@@ -199,12 +199,29 @@
     const $approvalModal = $("#pop_approval");
 
     function updateSelectionInfo($td) {
-      const day = $td.find("span").text().padStart(2, "0");
+      // td의 첫 번째 span에서 날짜 가져오기 (프로그램 리스트의 span과 구분)
+      const dayText = $td.children("span").first().text().trim();
+      const day = parseInt(dayText, 10);
+
+      // 유효한 날짜인지 확인
+      if (isNaN(day) || day < 1 || day > 31) {
+        console.error("Invalid day:", dayText);
+        return;
+      }
+
       const year = currentDate.getFullYear();
       const month = (currentDate.getMonth() + 1).toString().padStart(2, "0");
-      const selectedDate = `${year}.${month}.${day}`;
-      const dateObj = new Date(`${year}-${month}-${day}`);
-      const dayOfWeek = daysKor[dateObj.getDay()];
+      const dayStr = day.toString().padStart(2, "0");
+      const selectedDate = `${year}.${month}.${dayStr}`;
+
+      // 날짜 객체 생성 및 유효성 검증
+      const dateObj = new Date(year, currentDate.getMonth(), day);
+      if (isNaN(dateObj.getTime())) {
+        console.error("Invalid date:", year, month, day);
+        return;
+      }
+
+      const dayOfWeek = daysKor[dateObj.getDay()] || "일";
 
       $wrap
         .find(".glbox.select_day .day dd")
@@ -220,18 +237,42 @@
         const title = $item.text();
         const programId = $item.data("programId") || 0;
         const programName = $item.data("programName") || title;
-        const educationDate = $item.data("educationDate") || "";
+        const educationStartDate = $item.data("educationStartDate") || "";
+        const educationEndDate = $item.data("educationEndDate") || "";
+        const applicationEndDate = $item.data("applicationEndDate") || "";
         const educationType = $item.data("educationType") || "";
         const educationFee = $item.data("educationFee") || 0;
         const applied = $item.data("applied") || 0;
-        const total = $item.data("total") || 24;
-        const remain = total - applied;
-        const remainText = `${applied}/${total}`;
+        const isUnlimited =
+          $item.data("isUnlimited") === 1 ||
+          $item.data("is-unlimited") === 1 ||
+          $item.data("isUnlimited") === "1" ||
+          $item.data("is-unlimited") === "1";
+        const total = $item.data("total") || 0;
+        const remain = isUnlimited ? 9999 : total - applied;
+        const remainText = isUnlimited
+          ? `${applied}/제한없음`
+          : `${applied}/${total}`;
+
+        // 접수기간 종료 체크
+        const now = new Date();
+        let isApplicationClosed = false;
+
+        if (applicationEndDate) {
+          const endDate = new Date(applicationEndDate);
+          endDate.setHours(23, 59, 59, 999); // 종료일 마지막 시간까지
+          if (now > endDate) {
+            isApplicationClosed = true;
+          }
+        }
 
         let status = "";
         let stateClass = "";
 
-        if (remain <= 0) {
+        if (isApplicationClosed) {
+          status = "마감";
+          stateClass = "c3";
+        } else if (remain <= 0) {
           status = "마감";
           stateClass = "c3";
         } else if (applied > 0) {
@@ -242,24 +283,103 @@
           stateClass = "c1";
         }
 
+        // 교육기간 포맷팅 (시작일 ~ 종료일)
+        let educationPeriod = "";
+        if (educationStartDate) {
+          const startDate = new Date(educationStartDate);
+          const startFormatted = `${startDate.getFullYear()}.${String(
+            startDate.getMonth() + 1
+          ).padStart(2, "0")}.${String(startDate.getDate()).padStart(2, "0")}`;
+
+          if (educationEndDate && educationStartDate !== educationEndDate) {
+            const endDate = new Date(educationEndDate);
+            const endFormatted = `${endDate.getFullYear()}.${String(
+              endDate.getMonth() + 1
+            ).padStart(2, "0")}.${String(endDate.getDate()).padStart(2, "0")}`;
+            educationPeriod = `${startFormatted} ~ ${endFormatted}`;
+          } else {
+            educationPeriod = startFormatted;
+          }
+        } else {
+          // 교육기간이 없으면 선택한 날짜 표시
+          educationPeriod = `${year}-${month}-${day}`;
+        }
+
+        const isVacation =
+          educationType === "middle_vacation" ||
+          educationType === "high_vacation";
         $tbody.append(
           `<tr data-program-id="${programId}" 
                          data-program-name="${programName}"
-                         data-education-date="${educationDate}"
+                         data-education-start-date="${educationStartDate}"
+                         data-education-end-date="${educationEndDate}"
                          data-education-type="${educationType}"
                          data-education-fee="${educationFee}"
                          data-status="${status}"
                          data-applied="${applied}"
-                         data-total="${total}">
+                         data-total="${total}"
+                         data-is-unlimited="${isUnlimited ? "1" : "0"}"
+                         data-is-vacation="${isVacation ? "1" : "0"}">
                         <td class="edu11"><label class="check solo"><input type="radio" name="select_day" data-program-id="${programId}"><i></i></label></td>
-						<!-- 시간 제거 주석 <td class="edu12">${year}-${month}-${day} 09:00</td> -->
-						<td class="edu12">${year}-${month}-${day}</td>
+						<td class="edu12">${educationPeriod}</td>
                         <td class="edu13 over_dot">${title}</td>
                         <td class="edu14">${remainText}</td>
                         <td class="edu15"><i class="state ${stateClass}">${status}</i></td>
                     </tr>`
         );
       });
+
+      // 프로그램 목록 업데이트 후 + 버튼 상태 업데이트
+      updatePlusButtonState();
+
+      // 첫 번째 프로그램이 선택되어 있으면 안내 문구 업데이트
+      const $firstRow = $tbody.find("tr").first();
+      if ($firstRow.length) {
+        const firstProgramInfo = {
+          isVacation:
+            $firstRow.data("isVacation") === 1 ||
+            $firstRow.data("is-vacation") === 1 ||
+            $firstRow.data("isVacation") === "1" ||
+            $firstRow.data("is-vacation") === "1",
+          isUnlimited:
+            $firstRow.data("isUnlimited") === 1 ||
+            $firstRow.data("is-unlimited") === 1 ||
+            $firstRow.data("isUnlimited") === "1" ||
+            $firstRow.data("is-unlimited") === "1",
+          total: parseInt($firstRow.data("total"), 10) || 0,
+        };
+        updateVacationInfo(firstProgramInfo);
+      }
+    }
+
+    // 방학 프로그램 안내 문구 업데이트
+    function updateVacationInfo(programInfo) {
+      const $info = $wrap.find("#group-application-info");
+      if (!$info.length) return;
+
+      if (
+        programInfo &&
+        programInfo.isVacation &&
+        !programInfo.isUnlimited &&
+        programInfo.total > 0
+      ) {
+        // 신청가능 상태면 정원을 모두 채워야 하고, 잔여석 신청 가능 상태면 잔여석을 모두 채워야 함
+        if (programInfo.status === "신청가능") {
+          $info.text(
+            `방학 프로그램은 정원(${programInfo.total}명)을 모두 채워야 신청 가능합니다.`
+          );
+        } else if (programInfo.status === "잔여석 신청 가능") {
+          $info.text(
+            `방학 프로그램은 잔여석(${programInfo.remaining}명)을 모두 채워야 신청 가능합니다.`
+          );
+        } else {
+          $info.text(
+            `방학 프로그램은 정원(${programInfo.total}명)을 모두 채워야 신청 가능합니다.`
+          );
+        }
+      } else {
+        $info.text("단체 신청 가능 인원은 최소 10명입니다.");
+      }
     }
 
     function adjustScrollHeight() {
@@ -346,10 +466,21 @@
       updateSelectionInfo($cell);
     });
 
-    function getInitialCount(status) {
+    function getInitialCount(status, programInfo) {
+      const isVacation = programInfo && programInfo.isVacation;
+      const isUnlimited = programInfo && programInfo.isUnlimited;
+
       if (status === "신청가능") {
+        // 방학 프로그램이고 정원이 있으면 정원을 모두 채워야 함
+        if (isVacation && !isUnlimited && programInfo.total > 0) {
+          return programInfo.total;
+        }
         return 10;
       } else if (status === "잔여석 신청 가능") {
+        // 방학 프로그램이고 정원이 있으면 잔여석을 모두 채워야 함
+        if (isVacation && !isUnlimited && programInfo.remaining > 0) {
+          return programInfo.remaining;
+        }
         return 4;
       }
       return 0;
@@ -362,10 +493,63 @@
       if (!$selectedRow.length) {
         return null;
       }
+      const total = parseInt($selectedRow.data("total"), 10) || 0;
+      const applied = parseInt($selectedRow.data("applied"), 10) || 0;
+      const isUnlimited =
+        $selectedRow.data("isUnlimited") === 1 ||
+        $selectedRow.data("is-unlimited") === 1 ||
+        $selectedRow.data("isUnlimited") === "1" ||
+        $selectedRow.data("is-unlimited") === "1";
+      const isVacation =
+        $selectedRow.data("isVacation") === 1 ||
+        $selectedRow.data("is-vacation") === 1 ||
+        $selectedRow.data("isVacation") === "1" ||
+        $selectedRow.data("is-vacation") === "1";
+      const remaining = isUnlimited ? 9999 : total - applied; // 잔여석
       return {
         status: $selectedRow.data("status") || "",
-        total: parseInt($selectedRow.data("total"), 10) || 0,
+        total: total,
+        applied: applied,
+        remaining: remaining,
+        isUnlimited: isUnlimited,
+        isVacation: isVacation,
       };
+    }
+
+    // + 버튼 활성화/비활성화 업데이트 함수
+    function updatePlusButtonState() {
+      const $plusBtn = $wrap.find(".btn.plus");
+      const programInfo = getSelectedProgramInfo();
+      const $input = $wrap.find(".count input");
+      const currentValue = parseInt($input.val(), 10) || 0;
+
+      if (!programInfo || !programInfo.status) {
+        $plusBtn.prop("disabled", true);
+        return;
+      }
+
+      // 제한없음인 경우
+      if (programInfo.isUnlimited) {
+        $plusBtn.prop("disabled", false);
+        return;
+      }
+
+      // 방학 프로그램인 경우 정원을 모두 채워야 하므로 + 버튼 비활성화
+      if (programInfo.isVacation && programInfo.total > 0) {
+        if (currentValue >= programInfo.total) {
+          $plusBtn.prop("disabled", true);
+        } else {
+          $plusBtn.prop("disabled", false);
+        }
+        return;
+      }
+
+      // 정원이 있는 경우: 현재 값이 잔여석보다 작으면 활성화
+      if (currentValue < programInfo.remaining) {
+        $plusBtn.prop("disabled", false);
+      } else {
+        $plusBtn.prop("disabled", true);
+      }
     }
 
     $wrap.find(".btn.plus").on("click", function () {
@@ -376,16 +560,33 @@
 
       const $input = $wrap.find(".count input");
       const currentValue = parseInt($input.val(), 10) || 0;
-      const initialCount = getInitialCount(programInfo.status);
+      const initialCount = getInitialCount(programInfo.status, programInfo);
 
       if (currentValue < initialCount) {
         $input.val(initialCount);
+        updatePlusButtonState();
         return;
       }
 
-      const newValue = currentValue + 1;
-      if (newValue <= programInfo.total) {
+      // 제한없음인 경우
+      if (programInfo.isUnlimited) {
+        const newValue = currentValue + 1;
         $input.val(newValue);
+        updatePlusButtonState();
+        return;
+      }
+
+      // 정원이 있는 경우 잔여석 확인
+      const newValue = currentValue + 1;
+      if (newValue <= programInfo.remaining) {
+        $input.val(newValue);
+        updatePlusButtonState();
+      } else {
+        alert(
+          "신청 가능한 인원을 초과했습니다. (잔여석: " +
+            programInfo.remaining +
+            "명)"
+        );
       }
     });
 
@@ -397,16 +598,18 @@
 
       const $input = $wrap.find(".count input");
       const currentValue = parseInt($input.val(), 10) || 0;
-      const initialCount = getInitialCount(programInfo.status);
+      const initialCount = getInitialCount(programInfo.status, programInfo);
 
       if (currentValue <= initialCount) {
         $input.val(initialCount);
+        updatePlusButtonState();
         return;
       }
 
       const newValue = currentValue - 1;
       if (newValue >= initialCount) {
         $input.val(newValue);
+        updatePlusButtonState();
       }
     });
 
@@ -415,8 +618,36 @@
       .on("change", 'input[type="radio"]', function () {
         const $row = $(this).closest("tr");
         const status = $row.data("status") || "";
-        const initialCount = getInitialCount(status);
+
+        // 선택된 행에서 직접 정보 가져오기
+        const total = parseInt($row.data("total"), 10) || 0;
+        const applied = parseInt($row.data("applied"), 10) || 0;
+        const isUnlimited =
+          $row.data("isUnlimited") === 1 ||
+          $row.data("is-unlimited") === 1 ||
+          $row.data("isUnlimited") === "1" ||
+          $row.data("is-unlimited") === "1";
+        const isVacation =
+          $row.data("isVacation") === 1 ||
+          $row.data("is-vacation") === 1 ||
+          $row.data("isVacation") === "1" ||
+          $row.data("is-vacation") === "1";
+        const remaining = isUnlimited ? 9999 : total - applied;
+
+        const programInfo = {
+          status: status,
+          total: total,
+          applied: applied,
+          remaining: remaining,
+          isUnlimited: isUnlimited,
+          isVacation: isVacation,
+        };
+
+        const initialCount = getInitialCount(status, programInfo);
         $wrap.find(".count input").val(initialCount > 0 ? initialCount : 0);
+
+        // 방학 프로그램 안내 문구 업데이트
+        updateVacationInfo(programInfo);
 
         selectedProgramData = {
           programId: $row.data("programId"),
@@ -425,6 +656,9 @@
           educationType: $row.data("educationType"),
           educationFee: $row.data("educationFee"),
         };
+
+        // 프로그램 선택 시 + 버튼 상태 업데이트
+        updatePlusButtonState();
       });
 
     $wrap
@@ -435,6 +669,15 @@
 
         if (!selectedProgramData || !selectedProgramData.programId) {
           alert("프로그램을 선택해주세요.");
+          return;
+        }
+
+        // 접수기간 종료 체크
+        const $selectedRow = $wrap.find(
+          `tr[data-program-id="${selectedProgramData.programId}"]`
+        );
+        if ($selectedRow.length && $selectedRow.data("is-closed") === true) {
+          alert("접수기간이 종료되어 신청할 수 없습니다.");
           return;
         }
 
@@ -458,15 +701,40 @@
       }
 
       const selectedInfo = getSelectedProgramInfo();
-      const defaultCount = selectedInfo
-        ? getInitialCount(selectedInfo.status)
-        : 10;
+      if (!selectedInfo) {
+        alert("프로그램을 선택해주세요.");
+        return;
+      }
+
+      const defaultCount = getInitialCount(selectedInfo.status, selectedInfo);
       const applicantCount =
         parseInt($wrap.find(".count input").val(), 10) || defaultCount;
 
-      if (applicantCount < 4) {
-        alert("단체 신청은 최소 4명 이상이어야 합니다.");
-        return;
+      // 방학 프로그램인 경우 정원을 모두 채워야 함
+      if (
+        selectedInfo.isVacation &&
+        !selectedInfo.isUnlimited &&
+        selectedInfo.total > 0
+      ) {
+        // 신청가능 상태면 정원을 모두 채워야 하고, 잔여석 신청 가능 상태면 잔여석을 모두 채워야 함
+        const requiredCount =
+          selectedInfo.status === "신청가능"
+            ? selectedInfo.total
+            : selectedInfo.remaining;
+        if (applicantCount !== requiredCount) {
+          const statusText =
+            selectedInfo.status === "신청가능" ? "정원" : "잔여석";
+          alert(
+            `방학 프로그램은 ${statusText}(${requiredCount}명)을 모두 채워야 신청 가능합니다.`
+          );
+          return;
+        }
+      } else {
+        // 일반 프로그램은 최소 4명
+        if (applicantCount < 4) {
+          alert("단체 신청은 최소 4명 이상이어야 합니다.");
+          return;
+        }
       }
 
       const csrfToken = $('meta[name="csrf-token"]').attr("content");
@@ -520,6 +788,28 @@
     });
   }
 
+  function loadTossScript() {
+    return new Promise(function (resolve, reject) {
+      if (window.TossPayments) {
+        resolve();
+        return;
+      }
+      const s = document.createElement("script");
+      s.src = "/js/vendor/tosspayments-v2.js";
+      s.onload = resolve;
+      s.onerror = function () {
+        reject(
+          new Error(
+            "결제 스크립트를 불러올 수 없습니다. (네트워크/방화벽 확인)"
+          )
+        );
+      };
+      document.head.appendChild(s);
+    });
+  }
+
+  var currentTossPayment = null;
+
   function initIndividualSelect($container) {
     if (!$container.length) {
       return;
@@ -532,6 +822,160 @@
         $form.trigger("submit");
       });
     }
+
+    // 이벤트 바인딩은 initSelectPages에서 $(document) 레벨로 처리
+  }
+
+  function initIndividualApplyHandler() {
+    $(document).off("click", ".js-individual-apply-btn");
+    $(document).on("click", ".js-individual-apply-btn", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const $btn = $(this);
+      const $applyForm = $btn.closest("form.js-individual-apply-form");
+      if (!$applyForm.length) {
+        return false;
+      }
+
+      const $container = $applyForm.closest('[data-program-page="select"]');
+      if (!$container.length) {
+        $applyForm[0].submit();
+        return false;
+      }
+
+      // 신청 확인 알럿
+      if (!confirm("신청하시겠습니까?")) {
+        return false;
+      }
+
+      const hasOnlineCard = $applyForm.attr("data-has-online-card") === "1";
+
+      if (!hasOnlineCard) {
+        $applyForm[0].submit();
+        return false;
+      }
+
+      const prepareUrl = $container.attr("data-prepare-url");
+      const csrf = $('meta[name="csrf-token"]').attr("content");
+      const reservationId = $applyForm
+        .find('input[name="program_reservation_id"]')
+        .val();
+      const participationDate = $applyForm
+        .find('input[name="participation_date"]')
+        .val();
+
+      if (!prepareUrl || !csrf || !reservationId) {
+        alert(
+          "결제 정보를 확인할 수 없습니다. 페이지를 새로고침한 뒤 다시 시도해 주세요."
+        );
+        return false;
+      }
+
+      $.ajax({
+        url: prepareUrl,
+        method: "POST",
+        headers: {
+          "X-CSRF-TOKEN": csrf,
+          Accept: "application/json",
+        },
+        data: {
+          program_reservation_id: reservationId,
+          participation_date: participationDate || undefined,
+        },
+        success: function (data) {
+          loadTossScript()
+            .then(function () {
+              var customerKey =
+                "lesec_" +
+                Date.now() +
+                "_" +
+                Math.random().toString(36).substring(2, 12);
+              var tossPayments = window.TossPayments(data.client_key);
+              var widgets = tossPayments.widgets({ customerKey: customerKey });
+
+              $("#toss-payment-widget").empty();
+              $("#toss-agreement").empty();
+
+              return widgets
+                .setAmount({ currency: "KRW", value: data.amount })
+                .then(function () {
+                  return widgets.renderPaymentMethods({
+                    selector: "#toss-payment-widget",
+                    variantKey: "DEFAULT",
+                  });
+                })
+                .then(function () {
+                  return widgets.renderAgreement({
+                    selector: "#toss-agreement",
+                    variantKey: "AGREEMENT",
+                  });
+                })
+                .then(function () {
+                  currentTossPayment = {
+                    widgets: widgets,
+                    orderId: data.orderId,
+                    orderName: "프로그램 신청",
+                    successUrl: data.success_url,
+                    failUrl: data.fail_url,
+                  };
+                  $("#pop_toss_payment").fadeIn(300);
+                });
+            })
+            .catch(function (err) {
+              alert(
+                err && err.message
+                  ? err.message
+                  : "결제 창을 여는 데 실패했습니다."
+              );
+            });
+        },
+        error: function (xhr) {
+          const msg =
+            xhr.responseJSON && xhr.responseJSON.message
+              ? xhr.responseJSON.message
+              : "결제 준비에 실패했습니다. 다시 시도해 주세요.";
+
+          if (xhr.status === 400 && msg && msg.includes("0원")) {
+            $applyForm[0].submit();
+            return;
+          }
+
+          alert(msg);
+        },
+      });
+
+      return false;
+    });
+
+    $(document).off("click", "#toss-payment-submit-btn");
+    $(document).on("click", "#toss-payment-submit-btn", function () {
+      if (!currentTossPayment) {
+        return;
+      }
+      var payload = currentTossPayment;
+      var $btn = $(this);
+      $btn.prop("disabled", true);
+      payload.widgets
+        .requestPayment({
+          orderId: payload.orderId,
+          orderName: payload.orderName,
+          successUrl: payload.successUrl,
+          failUrl: payload.failUrl,
+        })
+        .catch(function (err) {
+          alert(err && err.message ? err.message : "결제 요청에 실패했습니다.");
+          $btn.prop("disabled", false);
+        });
+    });
+
+    $(document).on(
+      "click",
+      "[data-layer-close='pop_toss_payment']",
+      function () {
+        currentTossPayment = null;
+      }
+    );
   }
 
   function initSelectPages() {
@@ -583,6 +1027,67 @@
     initLayerHandlers();
     initCompletionNavigation();
     initApplyPages();
+    initIndividualApplyHandler();
     initSelectPages();
+  });
+})(jQuery);
+
+/* 일정 캘린더 동일 프로그램 병합 처리 */
+(function ($) {
+  function applyScheduleMerge() {
+    $(".schedule_table tbody tr").each(function () {
+      const programMap = {};
+
+      $(this)
+        .find("td")
+        .each(function (tdIndex) {
+          $(this)
+            .find("ul.list li")
+            .each(function () {
+              const $li = $(this);
+              const programId = $li.data("programId");
+
+              if (!programId) {
+                return;
+              }
+
+              if (!programMap[programId]) {
+                programMap[programId] = [];
+              }
+
+              programMap[programId].push({
+                $el: $li,
+                tdIndex: tdIndex,
+              });
+            });
+        });
+
+      $.each(programMap, function (_, items) {
+        if (items.length <= 1) {
+          return;
+        }
+
+        const $first = items[0].$el;
+        const count = items.length;
+
+        // 1. width 계산
+        const gap = 9;
+        const width =
+          count === 1
+            ? "100%"
+            : `calc(${count * 100}% + ${(count - 1) * gap}px)`;
+
+        $first.css("width", width);
+
+        // 2. 이후 항목 off 처리
+        for (let i = 1; i < items.length; i++) {
+          items[i].$el.addClass("off");
+        }
+      });
+    });
+  }
+
+  $(function () {
+    applyScheduleMerge();
   });
 })(jQuery);

@@ -65,13 +65,15 @@
 .detail-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 20px 25px;
+    gap: 15px 25px;
 }
 
 .detail-item {
     display: flex;
     flex-direction: column;
 }
+.detail-item_flexrow {display: flex; gap:5px;}
+.detail-item_flexrow label {margin: 0;}
 
 .detail-item label {
     font-weight: 600;
@@ -90,7 +92,7 @@
 .form-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 20px 25px;
+    gap: 15px 25px;
 }
 
 .form-grid > div {
@@ -101,7 +103,7 @@
 .form-group {
     display: flex;
     flex-direction: column;
-    margin-bottom: 12px !important;
+    margin-bottom: 15px !important;
 }
 
 .form-group label,

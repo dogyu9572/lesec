@@ -16,7 +16,7 @@
         </a>
     </div>
 
-    <div class="board-card">
+    <div class="board-card over_v">
 <div class="board-card-body">
             @if ($errors->any())
                 <div class="board-alert board-alert-danger">
@@ -308,11 +308,19 @@
                 </div>
                 @endif
 
-                <div class="board-form-actions">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> 저장
-                    </button>
+                <div class="board-form-actions btns_abso">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> 저장</button>
                     <a href="{{ route('backoffice.board-posts.index', $board->slug ?? 'notice') }}" class="btn btn-secondary">취소</a>
+					<form
+						action="{{ route('backoffice.board-posts.destroy', [$board->slug ?? 'library', $post->id]) }}"
+						method="POST" class="d-inline"
+						onsubmit="return confirm('정말 이 게시글을 삭제하시겠습니까?');">
+						@csrf
+						@method('DELETE')
+						<button type="submit" class="btn btn-danger btn-sm">
+							삭제
+						</button>
+					</form>
                 </div>
             </form>
         </div>

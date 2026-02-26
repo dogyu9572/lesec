@@ -38,8 +38,8 @@
                             <h3>제목</h3>
                             <div class="form-grid">
                                 <div class="form-group">
-                                    <label for="title">제목</label>
-                                    <input type="text" id="title" name="title" value="{{ old('title') }}" required placeholder="제목을 입력하세요">
+                                    <label for="title">제목 (년/월 선택)</label>
+                                    <input type="month" id="title" name="title" value="{{ old('title') }}" required>
                                 </div>
                             </div>
                         </div>
@@ -58,18 +58,24 @@
                                 <table class="board-table" id="items-table">
                                     <thead>
                                         <tr>
-                                            <th>항목</th>
+                                            <th>구분</th>
                                             <th>참가인원</th>
-                                            <th>참가학교</th>
                                             <th>수익</th>
                                             <th style="width: 150px;">관리</th>
                                         </tr>
                                     </thead>
                                     <tbody id="items-body">
                                         <tr class="empty-row" style="border: none;">
-                                            <td colspan="5" class="text-center" style="padding: 40px 20px; border: none !important; border-bottom: none !important;">등록된 항목이 없습니다.</td>
+                                            <td colspan="4" class="text-center" style="padding: 40px 20px; border: none !important; border-bottom: none !important;">등록된 항목이 없습니다.</td>
                                         </tr>
                                     </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="2" class="text-right" style="font-weight: bold;">수익 합계:</td>
+                                            <td id="total-revenue" style="font-weight: bold; font-size: 1.1em;">0</td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
                                 </table>
                             </div>
                         </div>

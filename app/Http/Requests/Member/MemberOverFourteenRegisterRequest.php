@@ -33,6 +33,7 @@ class MemberOverFourteenRegisterRequest extends FormRequest
                 'max:12',
                 'confirmed',
                 'regex:/^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).+$/',
+                'different:login_id',
             ],
             'name' => ['required', 'string', 'max:255'],
             'birth_date' => ['required', 'date_format:Ymd', 'before:today'],
@@ -74,6 +75,7 @@ class MemberOverFourteenRegisterRequest extends FormRequest
             'password.max' => '비밀번호는 12자 이하로 입력해주세요.',
             'password.regex' => '한글을 제외한 영문/숫자/특수문자로 9~12자리로 입력해주세요.',
             'password.confirmed' => '비밀번호 확인이 일치하지 않습니다.',
+            'password.different' => '아이디와 동일한 비밀번호는 사용할 수 없습니다.',
             'name.required' => '이름을 입력해주세요.',
             'birth_date.required' => '생년월일을 입력해주세요.',
             'birth_date.date_format' => '생년월일은 YYYYMMDD 형식으로 입력해주세요.',
@@ -190,5 +192,25 @@ class MemberOverFourteenRegisterRequest extends FormRequest
         }
 
         return $digits;
+    }
+
+    /**
+     * 검증 후 추가 검증
+     */
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            $memberType = $this->session()->get('member_registration.member_type');
+            
+            // 학생인 경우에만 학생 연락처와 보호자 연락처가 같은지 확인
+            if ($memberType === 'student') {
+                $studentContact = preg_replace('/[^0-9]/', '', (string) $this->input('student_contact', ''));
+                $parentContact = preg_replace('/[^0-9]/', '', (string) $this->input('parent_contact', ''));
+                
+                if (!empty($studentContact) && !empty($parentContact) && $studentContact === $parentContact) {
+                    $validator->errors()->add('parent_contact', '학생 연락처와 보호자 연락처는 같을 수 없습니다.');
+                }
+            }
+        });
     }
 }

@@ -23,20 +23,6 @@
         </div>
     @endif
 
-    <div class="board-page-header">
-        <div class="board-page-buttons">
-            <button type="button" id="export-btn" class="btn btn-secondary">
-                <i class="fas fa-download"></i> 엑셀 다운로드
-            </button>
-            <button type="button" id="bulk-delete-btn" class="btn btn-danger">
-                <i class="fas fa-trash"></i> 선택 삭제
-            </button>
-            <a href="{{ route('backoffice.members.create') }}" class="btn btn-success">
-                <i class="fas fa-plus"></i> 신규등록
-            </a>
-        </div>
-    </div>
-
     <div class="board-card">      
         <div class="board-card-body">
             <!-- 검색 필터 -->
@@ -44,7 +30,7 @@
                 <form method="GET" action="{{ route('backoffice.members.index') }}" class="filter-form">
                     <!-- 첫 번째 줄 -->
                     <div class="filter-row">
-                        <div class="filter-group">
+                        <div class="filter-group_flexgrow">
                             <label for="member_type" class="filter-label">회원구분</label>
                             <select id="member_type" name="member_type" class="filter-select">
                                 <option value="">전체</option>
@@ -52,7 +38,7 @@
                                 <option value="student" @selected(request('member_type') == 'student')>학생</option>
                             </select>
                         </div>
-                        <div class="filter-group">
+                        <div class="filter-group_flexgrow">
                             <label for="member_group_id" class="filter-label">회원그룹</label>
                             <select id="member_group_id" name="member_group_id" class="filter-select">
                                 <option value="">전체</option>
@@ -63,16 +49,13 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="filter-group">
+                        <div class="filter-group_flexgrow">
                             <label for="city" class="filter-label">지역</label>
                             <select id="city" name="city" class="filter-select">
                                 <option value="">전체</option>
                                 @foreach($cities as $city)
-                                    @if($city && $city !== '전체' && $city !== '외국학교' && $city !== '기타')
-                                        <option value="{{ $city }}" @selected(request('city') == $city)>{{ $city }}</option>
-                                    @endif
+                                    <option value="{{ $city }}" @selected(request('city') == $city)>{{ $city }}</option>
                                 @endforeach
-                                <option value="기타" @selected(request('city') == '기타')>기타</option>
                             </select>
                         </div>
                        
@@ -90,7 +73,7 @@
                                     value="{{ request('joined_to') }}">
                             </div>
                         </div>
-                        <div class="filter-group">
+                        <!-- <div class="filter-group">
                             <label class="filter-label">수신동의</label>
                             <div class="checkbox-group">
                                 <label>
@@ -106,10 +89,8 @@
                                     카카오 알림톡
                                 </label>
                             </div>
-                        </div>                      
-                    </div>
-                    <div class="filter-row">                       
-                        <div class="filter-group">
+                        </div> -->
+						<div class="filter-group">
                             <label for="search_type" class="filter-label">검색</label>
                             <div class="search-input-wrapper">
                                 <select id="search_type" name="search_type" class="filter-select search-type-select">
@@ -137,6 +118,9 @@
                             </div>
                         </div>
                     </div>
+                    <div class="filter-row">
+                        
+                    </div>
                 </form>
             </div>
 
@@ -146,9 +130,20 @@
                     <div class="list-info">
                         <span class="list-count">Total : {{ $members->total() }}</span>
                     </div>
-                    <div class="list-controls">                       
+                    <div class="list-controls">
+						<div class="board-page-header mb0">
+							<div class="board-page-buttons">
+								<button type="button" id="export-btn" class="btn btn-secondary">
+									<i class="fas fa-download"></i> 엑셀 다운로드
+								</button>
+								<button type="button" id="bulk-delete-btn" class="btn btn-danger"><i class="fas fa-trash"></i> 선택 삭제</button>
+								<a href="{{ route('backoffice.members.create') }}" class="btn btn-success">
+									<i class="fas fa-plus"></i> 신규등록
+								</a>
+							</div>
+						</div>
                         <form method="GET" action="{{ route('backoffice.members.index') }}" class="per-page-form">
-                            @foreach(request()->except('per_page') as $key => $value)
+                            @foreach(request()->except(['per_page', 'page']) as $key => $value)
                                 <input type="hidden" name="{{ $key }}" value="{{ $value }}">
                             @endforeach
                             <label for="per_page" class="per-page-label">목록 개수:</label>
@@ -168,21 +163,21 @@
                                 <th style="width: 40px;" class="board-checkbox-column">
                                     <input type="checkbox" id="select-all" class="form-check-input">
                                 </th>
-                                <th class="text-center">No</th>
-                                <th class="text-center" style="width: 80px;">회원구분</th>
-                                <th class="text-center">ID</th>
-                                <th class="text-center">이름</th>
-                                <th class="text-center" style="width: 40px;">성별</th>
-                                <th class="text-center">지역</th>
-                                <th class="text-center">소속학교</th>
-                                <th class="text-center" style="width: 40px;">학년</th>
-                                <th class="text-center">반</th>
-                                <th class="text-center">생년월일</th>
-                                <th class="text-center">연락처1</th>
-                                <th class="text-center">연락처2</th>
-                                <th class="text-center">이메일주소</th>
-                                <th class="text-center">가입일시</th>
-                                <th class="text-center" style="width: 200px;">관리</th>
+                                <th>No</th>
+                                <th style="width: 80px;">회원구분</th>
+                                <th>ID</th>
+                                <th>이름</th>
+                                <th style="width: 40px;">성별</th>
+                                <th>지역</th>
+                                <th>소속학교</th>
+                                <th style="width: 40px;">학년</th>
+                                <th>반</th>
+                                <th>생년월일</th>
+                                <th style="width: 123px;">연락처1</th>
+                                <th style="width: 123px;">연락처2</th>
+                                <th>이메일주소</th>
+                                <th>가입일시</th>
+                                <th style="width: 90px;">관리</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -200,7 +195,7 @@
                                     <td>{{ $member->login_id }}</td>
                                     <td>{{ $member->name }}</td>
                                     <td>{{ $member->gender === 'male' ? '남' : '여' }}</td>
-                                    <td>{{ empty($member->city) || $member->city === '외국학교' ? '기타' : $member->city }}</td>
+                                    <td>{{ empty($member->city) || $member->city === '외국학교' ? '-' : $member->city }}</td>
                                     <td>{{ $member->school_name }}</td>
                                     <td>{{ $member->grade ?? '-' }}</td>
                                     <td>{{ $member->class_number ?? '-' }}</td>
@@ -210,16 +205,16 @@
                                     <td>{{ $member->email }}</td>
                                     <td>{{ $member->joined_at ? $member->joined_at->format('Y.m.d') : '-' }}</td>
                                     <td>
-                                        <div class="board-btn-group">
+                                        <div class="board-btn-group flex_center">
                                             <a href="{{ route('backoffice.members.show', $member) }}" class="btn btn-info btn-sm">
                                                 <i class="fas fa-eye"></i> 보기
                                             </a>
-                                            <a href="{{ route('backoffice.members.edit', $member) }}" class="btn btn-primary btn-sm" target="_blank">
+                                            <!-- <a href="{{ route('backoffice.members.edit', $member) }}" class="btn btn-primary btn-sm" target="_blank">
                                                 <i class="fas fa-edit"></i> 수정
                                             </a>
                                             <button type="button" class="btn btn-danger btn-sm" onclick="withdrawMember({{ $member->id }})">
                                                 <i class="fas fa-trash"></i> 탈퇴
-                                            </button>
+                                            </button> -->
                                         </div>
                                     </td>
                                 </tr>
@@ -237,21 +232,21 @@
                                 <th style="width: 40px;" class="board-checkbox-column">
                                     <input type="checkbox" id="select-all" class="form-check-input" disabled>
                                 </th>
-                                <th class="text-center">No</th>
-                                <th class="text-center" style="width: 90px;">회원구분</th>
-                                <th class="text-center">ID</th>
-                                <th class="text-center">이름</th>
-                                <th class="text-center" style="width: 70px;">성별</th>
-                                <th class="text-center">소속 시/도</th>
-                                <th class="text-center">소속학교</th>
-                                <th class="text-center" style="width: 70px;">학년</th>
-                                <th class="text-center">반</th>
-                                <th class="text-center">생년월일</th>
-                                <th class="text-center">연락처1</th>
-                                <th class="text-center">연락처2</th>
-                                <th class="text-center">이메일주소</th>
-                                <th class="text-center">가입일시</th>
-                                <th class="text-center" style="width: 150px;">관리</th>
+                                <th>No</th>
+                                <th style="width: 80px;">회원구분</th>
+                                <th>ID</th>
+                                <th>이름</th>
+                                <th style="width: 40px;">성별</th>
+                                <th>지역</th>
+                                <th>소속학교</th>
+                                <th style="width: 40px;">학년</th>
+                                <th>반</th>
+                                <th>생년월일</th>
+                                <th style="width: 123px;">연락처1</th>
+                                <th style="width: 123px;">연락처2</th>
+                                <th>이메일주소</th>
+                                <th>가입일시</th>
+                                <th style="width: 90px;">관리</th>
                             </tr>
                         </thead>
                         <tbody>

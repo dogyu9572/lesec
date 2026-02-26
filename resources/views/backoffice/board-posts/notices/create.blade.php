@@ -16,7 +16,7 @@
         </a>
     </div>
 
-    <div class="board-card">
+    <div class="board-card over_v">
 <div class="board-card-body">
             @if ($errors->any())
                 <div class="board-alert board-alert-danger">
@@ -40,9 +40,7 @@
                                name="is_notice" 
                                value="1" 
                                @checked(old('is_notice') == '1')>
-                        <label for="is_notice" class="board-form-label">
-                            <i class="fas fa-bullhorn"></i> 공지글
-                        </label>
+                        <label for="is_notice" class="board-form-label"><i class="fas fa-bullhorn"></i> 공지글</label>
                     </div>
                     <small class="board-form-text">체크하면 공지글로 설정되어 최상단에 표시됩니다.</small>
                 </div>
@@ -279,7 +277,7 @@
                 </div>
                 @endif
 
-                <div class="board-form-actions">
+                <div class="board-form-actions btns_abso">
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-save"></i> 저장
                     </button>

@@ -122,7 +122,7 @@
                                             @php
                                                 $statusClass = ($reservation['is_closed'] ?? false) ? 'i_impossible' : 'i_possible';
                                             @endphp
-                                            <li class="{{ $statusClass }}">
+                                            <li class="{{ $statusClass }}" title="{{ $reservation['program_name'] ?? '' }}">
                                                 {{ \Illuminate\Support\Str::limit($reservation['program_name'] ?? '', 20) }}
                                             </li>
                                             @endforeach
@@ -130,7 +130,7 @@
                                             @php
                                                 $statusClass = ($reservation['is_closed'] ?? false) ? 'i_impossible' : 'i_possible';
                                             @endphp
-                                            <li class="{{ $statusClass }}">
+                                            <li class="{{ $statusClass }}" title="{{ $reservation['program_name'] ?? '' }}">
                                                 {{ \Illuminate\Support\Str::limit($reservation['program_name'] ?? '', 20) }}
                                             </li>
                                             @endforeach

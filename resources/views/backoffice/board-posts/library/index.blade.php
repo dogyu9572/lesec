@@ -16,16 +16,11 @@
     @endif
 
     <div class="board-container">
-        <div class="board-page-header">
+        <!-- <div class="board-page-header">
             <div class="board-page-buttons">
-                <button type="button" id="bulk-delete-btn" class="btn btn-danger">
-                    <i class="fas fa-trash"></i> 선택 삭제
-                </button>
-                <a href="{{ route('backoffice.board-posts.create', $board->slug ?? 'library') }}" class="btn btn-success">
-                    <i class="fas fa-plus"></i> 신규등록
-                </a>              
+                
             </div>
-        </div>
+        </div> -->
 
         <div class="board-card">
     <div class="board-card-body">
@@ -34,12 +29,12 @@
                     <form method="GET" action="{{ route('backoffice.board-posts.index', $board->slug ?? 'library') }}" class="filter-form">
                         <div class="filter-row">
                             <div class="filter-group">
-                                <label for="start_date" class="filter-label">등록일 시작</label>
+                                <label for="start_date" class="filter-label">등록 기간</label>
                                 <input type="date" id="start_date" name="start_date" class="filter-input"
                                     value="{{ request('start_date') }}">
                             </div>
                             <div class="filter-group">
-                                <label for="end_date" class="filter-label">등록일 끝</label>
+                                <label for="end_date" class="filter-label mo_break">&nbsp;</label>
                                 <input type="date" id="end_date" name="end_date" class="filter-input"
                                     value="{{ request('end_date') }}">
                             </div>
@@ -79,6 +74,8 @@
                         <span class="list-count">총 {{ $posts->total() }}건</span>
                     </div>
                     <div class="list-controls">
+						<button type="button" id="bulk-delete-btn" class="btn btn-danger btn-sm" disabled><i class="fas fa-trash"></i> 선택 삭제</button>
+		                <a href="{{ route('backoffice.board-posts.create', $board->slug ?? 'library') }}" class="btn btn-success btn-sm"><i class="fas fa-plus"></i> 신규등록</a>
                         <form method="GET" action="{{ route('backoffice.board-posts.index', $board->slug ?? 'library') }}" class="per-page-form">
                             <input type="hidden" name="start_date" value="{{ request('start_date') }}">
                             <input type="hidden" name="end_date" value="{{ request('end_date') }}">
@@ -110,8 +107,8 @@
                                 <th class="w10">첨부파일</th>
                                 <th class="w10">작성자</th>
                                 <th class="w10">등록일</th>
-                                <th class="w10">조회수</th>
-                                <th class="w15">관리</th>
+                                <th class="w5">조회수</th>
+                                <th class="w5">관리</th>
                             </tr>
                         </thead>
                         <tbody @if($board->enable_sorting) id="sortable-tbody" @endif>
@@ -134,7 +131,7 @@
                                     <td>
                                         {{ $post->title }}
                                     </td>
-                                    <td class="text-center">
+                                    <td>
                                         @php
                                             $attachments = $post->attachments ? json_decode($post->attachments, true) : null;
                                         @endphp
@@ -147,11 +144,8 @@
                                     <td>{{ $post->view_count ?? 0 }}</td>
                                     <td>
                                         <div class="board-btn-group">
-                                            <a href="{{ route('backoffice.board-posts.edit', [$board->slug ?? 'library', $post->id]) }}"
-                                                class="btn btn-primary btn-sm">
-                                                수정
-                                            </a>
-                                            <form
+                                            <a href="{{ route('backoffice.board-posts.edit', [$board->slug ?? 'library', $post->id]) }}" class="btn btn-info btn-sm"><i class="fas fa-eye"></i> 보기</a>
+                                            <!-- <form
                                                 action="{{ route('backoffice.board-posts.destroy', [$board->slug ?? 'library', $post->id]) }}"
                                                 method="POST" class="d-inline"
                                                 onsubmit="return confirm('정말 이 게시글을 삭제하시겠습니까?');">
@@ -160,7 +154,7 @@
                                                 <button type="submit" class="btn btn-danger btn-sm">
                                                     삭제
                                                 </button>
-                                            </form>
+                                            </form> -->
                                         </div>
                                     </td>
                                 </tr>

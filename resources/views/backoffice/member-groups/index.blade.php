@@ -22,17 +22,6 @@
         </div>
     @endif
 
-    <div class="board-page-header">
-        <div class="board-page-buttons">
-            <button type="button" id="bulk-delete-btn" class="btn btn-danger">
-                <i class="fas fa-trash"></i> 선택 삭제
-            </button>
-            <a href="{{ route('backoffice.member-groups.create') }}" class="btn btn-success">
-                <i class="fas fa-plus"></i> 신규등록
-            </a>
-        </div>
-    </div>
-
     <div class="board-card">       
         <div class="board-card-body">
             <!-- 검색 필터 -->
@@ -74,7 +63,9 @@
                     <div class="list-info">
                         <span class="list-count">Total : {{ $groups->total() }}</span>
                     </div>
-                    <div class="list-controls">                       
+                    <div class="list-controls">
+                        <button type="button" id="bulk-delete-btn" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> 선택 삭제</button>
+                        <a href="{{ route('backoffice.member-groups.create') }}" class="btn btn-success btn-sm"><i class="fas fa-plus"></i> 신규등록</a>
                         <form method="GET" action="{{ route('backoffice.member-groups.index') }}" class="per-page-form">
                             @foreach(request()->except('per_page') as $key => $value)
                                 <input type="hidden" name="{{ $key }}" value="{{ $value }}">
@@ -98,9 +89,17 @@
 
                 <div class="table-responsive">
                     <table class="board-table">
+						<colgroup>
+							<col width="50px">
+							<col width="10%">
+							<col width="*">
+							<col width="15%">
+							<col width="15%">
+							<col width="10%">
+						</colgroup>
                         <thead>
                             <tr>
-                                <th style="width: 40px;" class="board-checkbox-column">
+                                <th class="board-checkbox-column">
                                     <input type="checkbox" id="select-all" class="form-check-input">
                                 </th>
                                 <th>번호</th>
@@ -125,13 +124,6 @@
                                             <a href="{{ route('backoffice.member-groups.edit', $group) }}" class="btn btn-primary btn-sm">
                                                 <i class="fas fa-edit"></i> 수정
                                             </a>
-                                            <form action="{{ route('backoffice.member-groups.destroy', $group) }}" method="POST" class="d-inline" onsubmit="return confirm('이 회원 그룹을 삭제하시겠습니까?');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-danger btn-sm">
-                                                    <i class="fas fa-trash"></i> 삭제
-                                                </button>
-                                            </form>
                                         </div>
                                     </td>
                                 </tr>

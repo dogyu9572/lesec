@@ -11,9 +11,8 @@ class RevenueStatisticsItem extends Model
 
     protected $fillable = [
         'revenue_statistics_id',
-        'item_name',
+        'school_type',
         'participants_count',
-        'school_name',
         'revenue',
         'sort_order',
     ];

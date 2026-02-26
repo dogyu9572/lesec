@@ -7,6 +7,7 @@ use App\Services\Backoffice\Concerns\ValidatesScheduleAvailability;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class IndividualProgramService
 {
@@ -18,7 +19,8 @@ class IndividualProgramService
     {
         $query = ProgramReservation::query()
             ->byApplicationType('individual')
-            ->orderBy('created_at', 'desc');
+            ->orderBy('education_start_date', 'desc')
+            ->orderBy('education_end_date', 'desc');
 
         // 교육유형 필터
         if ($request->filled('education_type')) {
@@ -50,7 +52,7 @@ class IndividualProgramService
         if ($request->filled('search_keyword')) {
             $keyword = $request->search_keyword;
             $searchType = $request->input('search_type', '');
-            
+
             if ($searchType === 'program_name') {
                 $query->where('program_name', 'like', "%{$keyword}%");
             } elseif ($searchType === 'author') {
@@ -59,12 +61,13 @@ class IndividualProgramService
                 // 전체 검색
                 $query->where(function ($q) use ($keyword) {
                     $q->where('program_name', 'like', "%{$keyword}%")
-                      ->orWhere('author', 'like', "%{$keyword}%");
+                        ->orWhere('author', 'like', "%{$keyword}%");
                 });
             }
         }
 
-        return $query->paginate(20)->withQueryString();
+        $perPage = (int) $request->input('per_page', 20);
+        return $query->paginate($perPage)->withQueryString();
     }
 
     /**
@@ -115,7 +118,7 @@ class IndividualProgramService
 
         // application_type은 항상 'individual'
         $data['application_type'] = 'individual';
-        
+
         // 결제수단 처리
         if (isset($data['payment_methods']) && is_array($data['payment_methods'])) {
             $data['payment_methods'] = array_values($data['payment_methods']);
@@ -144,10 +147,18 @@ class IndividualProgramService
 
         // 작성자 필드는 현재 로그인한 관리자 이름으로 자동 설정
         $data['author'] = Auth::user()?->name ?? null;
-        
+
         // 신청 인원은 0으로 초기화
         $data['applied_count'] = 0;
-        
+
+        // datetime-local 형식 처리
+        if (isset($data['application_start_date']) && $data['application_start_date']) {
+            $data['application_start_date'] = Carbon::createFromFormat('Y-m-d\TH:i', $data['application_start_date'])->format('Y-m-d H:i:s');
+        }
+        if (isset($data['application_end_date']) && $data['application_end_date']) {
+            $data['application_end_date'] = Carbon::createFromFormat('Y-m-d\TH:i', $data['application_end_date'])->format('Y-m-d H:i:s');
+        }
+
         return ProgramReservation::create($data);
     }
 
@@ -196,7 +207,15 @@ class IndividualProgramService
 
         // 작성자 필드는 현재 로그인한 관리자 이름으로 자동 업데이트
         $data['author'] = Auth::user()?->name ?? $programReservation->author;
-        
+
+        // datetime-local 형식 처리
+        if (isset($data['application_start_date']) && $data['application_start_date']) {
+            $data['application_start_date'] = Carbon::createFromFormat('Y-m-d\TH:i', $data['application_start_date'])->format('Y-m-d H:i:s');
+        }
+        if (isset($data['application_end_date']) && $data['application_end_date']) {
+            $data['application_end_date'] = Carbon::createFromFormat('Y-m-d\TH:i', $data['application_end_date'])->format('Y-m-d H:i:s');
+        }
+
         return $programReservation->update($data);
     }
 
@@ -205,6 +224,9 @@ class IndividualProgramService
      */
     public function deleteProgram(ProgramReservation $programReservation): bool
     {
+        // 관련된 개인 신청 내역 먼저 삭제
+        $programReservation->applications()->delete();
+
         return $programReservation->delete();
     }
 
@@ -230,8 +252,7 @@ class IndividualProgramService
         }
 
         $perPage = $request->get('per_page', 10);
-        
+
         return $query->paginate($perPage)->withQueryString();
     }
 }
-

@@ -50,6 +50,16 @@
         </div>
     </form>
 </div>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; margin-bottom: 10px;">
+    <div style="display: flex; align-items: center; gap: 8px;">
+        <label for="popup-per-page" style="margin: 0; font-weight: normal;">페이지당 항목 수:</label>
+        <select id="popup-per-page" name="per_page" class="form-control" style="min-width: 80px; padding: 6px 12px; display: inline-block;">
+            <option value="20">20개</option>
+            <option value="50">50개</option>
+            <option value="100">100개</option>
+        </select>
+    </div>
+</div>
 <div class="table-responsive">
     <table class="board-table">
         <thead>
@@ -63,11 +73,12 @@
                 <th>학교</th>
                 <th>이메일</th>
                 <th>연락처</th>
+                <th>학부모 연락처</th>
             </tr>
         </thead>
         <tbody id="popup-member-list-body">
             <tr>
-                <td colspan="7" class="text-center">검색어를 입력하거나 필터를 선택해주세요.</td>
+                <td colspan="8" class="text-center">검색어를 입력하거나 필터를 선택해주세요.</td>
             </tr>
         </tbody>
     </table>
@@ -80,6 +91,6 @@
 @endsection
 
 @section('scripts')
-<script src="{{ asset('js/backoffice/member-search-popup.js') }}"></script>
+<script src="{{ asset('js/backoffice/member-search-popup.js') }}?v={{ time() }}"></script>
 @endsection
 

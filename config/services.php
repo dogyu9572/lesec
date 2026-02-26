@@ -52,4 +52,9 @@ return [
         'kakao_template_code' => env('SMS_KAKAO_TEMPLATE_CODE', 'bizp_2022012015300394819857304'),
     ],
 
+    'toss' => [
+        'client_key' => env('TOSS_CLIENT_KEY'),
+        'secret_key' => env('TOSS_SECRET_KEY'),
+    ],
+
 ];

@@ -4,9 +4,7 @@ namespace App\Http\Requests\Member;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
-use Illuminate\Validation\Rules\Unique;
 
 class MemberUpdateRequest extends FormRequest
 {
@@ -23,19 +21,16 @@ class MemberUpdateRequest extends FormRequest
      */
     public function rules(): array
     {
-        $member = Auth::guard('member')->user();
-        $memberId = $member->id;
-
         $passwordRules = ['nullable', 'string'];
         $passwordValue = trim((string) $this->input('password'));
         $hasPassword = $this->filled('password') && $passwordValue !== '';
-        
+
         \Log::info('rules() 체크', [
             'filled_password' => $this->filled('password'),
             'password_value_length' => strlen($passwordValue),
             'has_password' => $hasPassword,
         ]);
-        
+
         if ($hasPassword) {
             $passwordRules = array_merge($passwordRules, [
                 'min:8',
@@ -48,8 +43,6 @@ class MemberUpdateRequest extends FormRequest
         $rules = [
             'current_password' => $hasPassword ? ['required'] : ['nullable'],
             'password' => $passwordRules,
-            'contact' => ['required', 'string', 'max:50', $this->uniqueContactRule($memberId)],
-            'parent_contact' => ['nullable', 'string', 'max:50'],
             'email' => ['required', 'string', 'email', 'max:255'],
             'city' => ['nullable', 'string', 'max:100'],
             'district' => ['nullable', 'string', 'max:100'],
@@ -57,7 +50,7 @@ class MemberUpdateRequest extends FormRequest
             'school_id' => ['nullable', 'integer', 'exists:schools,id'],
             'grade' => ['nullable', 'integer', 'between:1,12'],
             'class_number' => ['nullable', 'integer', 'between:1,30'],
-            'notification_agree' => ['nullable', 'boolean'],
+            'notification_agree' => ['required', 'accepted'],
         ];
 
         return $rules;
@@ -73,18 +66,18 @@ class MemberUpdateRequest extends FormRequest
             'password.min' => '비밀번호는 8자 이상 입력해주세요.',
             'password.max' => '비밀번호는 20자 이하로 입력해주세요.',
             'password.password' => '비밀번호는 영문, 숫자, 특수문자를 모두 포함해 8~20자로 입력해주세요.',
-            'password.letters' => '비밀번호는 최소 1개의 영문자를 포함해야 합니다.',
-            'password.numbers' => '비밀번호는 최소 1개의 숫자를 포함해야 합니다.',
-            'password.symbols' => '비밀번호는 최소 1개의 특수문자를 포함해야 합니다.',
+            'password.letters' => '비밀번호는 영문, 숫자, 특수문자를 모두 포함해 8~20자로 입력해주세요.',
+            'password.numbers' => '비밀번호는 영문, 숫자, 특수문자를 모두 포함해 8~20자로 입력해주세요.',
+            'password.symbols' => '비밀번호는 영문, 숫자, 특수문자를 모두 포함해 8~20자로 입력해주세요.',
             'password.confirmed' => '비밀번호 확인이 일치하지 않습니다.',
-            'contact.required' => '연락처를 입력해주세요.',
-            'contact.unique' => '이미 등록된 연락처입니다.',
             'email.required' => '이메일을 입력해주세요.',
             'email.email' => '올바른 이메일 형식을 입력해주세요.',
             'school_name.required' => '학교명을 입력해주세요.',
             'school_id.exists' => '선택한 학교 정보가 올바르지 않습니다.',
             'grade.between' => '학년은 1~12 사이의 숫자로 선택해주세요.',
             'class_number.between' => '반은 1~30 사이의 숫자로 선택해주세요.',
+            'notification_agree.required' => '수신 동의 항목에 동의해주세요.',
+            'notification_agree.accepted' => '수신 동의 항목에 동의해주세요.',
         ];
     }
 
@@ -93,8 +86,6 @@ class MemberUpdateRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        $contact = preg_replace('/[^0-9]/', '', (string) $this->input('contact'));
-        $parentContact = preg_replace('/[^0-9]/', '', (string) $this->input('parent_contact'));
         $emailId = trim((string) $this->input('email_id'));
         $emailDomainSelected = (string) $this->input('email_domain');
         $emailDomainCustom = trim((string) $this->input('email_domain_custom'));
@@ -109,8 +100,6 @@ class MemberUpdateRequest extends FormRequest
         }
 
         $this->merge([
-            'contact' => $contact,
-            'parent_contact' => $parentContact ?: null,
             'email' => $email,
             'city' => trim((string) $this->input('city')) ?: null,
             'district' => trim((string) $this->input('district')) ?: null,
@@ -120,7 +109,7 @@ class MemberUpdateRequest extends FormRequest
             'class_number' => $this->filled('class_number') ? (int) $this->input('class_number') : null,
             'notification_agree' => $this->boolean('notification_agree'),
         ]);
-        
+
         \Log::info('prepareForValidation 완료', [
             'city' => $this->input('city'),
             'district' => $this->input('district'),
@@ -136,65 +125,26 @@ class MemberUpdateRequest extends FormRequest
     }
 
     /**
-     * 연락처 중복 체크 규칙
-     */
-    private function uniqueContactRule(int $memberId): Unique
-    {
-        $contactDigits = preg_replace('/[^0-9]/', '', (string) $this->input('contact'));
-
-        return Rule::unique('members', 'contact')
-            ->ignore($memberId)
-            ->where(function ($query) use ($contactDigits) {
-                $query->where('contact', $contactDigits);
-
-                $formatted = $this->formatContactForDisplay($contactDigits);
-                if ($formatted !== null) {
-                    $query->orWhere('contact', $formatted);
-                }
-            });
-    }
-
-    /**
-     * 연락처 포맷팅
-     */
-    private function formatContactForDisplay(?string $digits): ?string
-    {
-        if (empty($digits)) {
-            return null;
-        }
-
-        if (strlen($digits) === 11) {
-            return preg_replace('/(\d{3})(\d{4})(\d{4})/', '$1-$2-$3', $digits);
-        }
-
-        if (strlen($digits) === 10) {
-            return preg_replace('/(\d{3})(\d{3})(\d{4})/', '$1-$2-$3', $digits);
-        }
-
-        return $digits;
-    }
-
-    /**
      * 검증 후 추가 검증
      */
     public function withValidator($validator): void
     {
         $validator->after(function ($validator) {
             $member = Auth::guard('member')->user();
-            
+
             if (!$member) {
                 return;
             }
-            
+
             $newPassword = trim((string) $this->input('password'));
             $currentPassword = $this->input('current_password');
-            
+
             \Log::info('withValidator password 체크', [
                 'new_password_length' => strlen($newPassword),
                 'has_new_password' => !empty($newPassword),
                 'has_current_password' => !empty($currentPassword),
             ]);
-            
+
             // 비밀번호를 변경하는 경우에만 current_password 검증
             if (!empty($newPassword)) {
                 if (empty($currentPassword)) {
@@ -202,7 +152,7 @@ class MemberUpdateRequest extends FormRequest
                     \Log::warning('회원 정보 수정 validation 실패: current_password 없음');
                     return;
                 }
-                
+
                 if (!password_verify($currentPassword, $member->password)) {
                     $validator->errors()->add('current_password', '현재 비밀번호가 올바르지 않습니다.');
                     \Log::warning('회원 정보 수정 validation 실패: current_password 불일치');
@@ -210,21 +160,6 @@ class MemberUpdateRequest extends FormRequest
                 }
             }
 
-            // 학생 회원이고 연락처가 변경된 경우에만 중복 확인 필수
-            if ($member->member_type === 'student' && $member->parent_contact) {
-                $currentContact = preg_replace('/[^0-9]/', '', (string) $member->contact);
-                $newContact = preg_replace('/[^0-9]/', '', (string) $this->input('contact'));
-                
-                // 연락처가 실제로 변경된 경우에만 중복 확인 필수
-                if ($currentContact !== $newContact) {
-                    $contactVerified = $this->input('contact_verified');
-                    if ($contactVerified !== '1') {
-                        $validator->errors()->add('contact_verified', '학생 연락처 중복 확인을 해주세요.');
-                        \Log::warning('회원 정보 수정 validation 실패: contact_verified 없음');
-                    }
-                }
-            }
-            
             // validation 에러가 있으면 로그 기록
             if ($validator->errors()->any()) {
                 \Log::warning('회원 정보 수정 validation 실패', [
@@ -241,4 +176,3 @@ class MemberUpdateRequest extends FormRequest
         });
     }
 }
-

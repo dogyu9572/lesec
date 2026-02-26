@@ -12,9 +12,9 @@
     <div class="detail-header">
         <h1>관리자 정보</h1>
         <div class="detail-actions">
-            <a href="{{ route('backoffice.admins.index') }}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> <span class="btn-text">목록으로</span>
-            </a>
+			<a href="{{ route('backoffice.admins.edit', $admin) }}" class="btn btn-primary btn-sm"><i class="fas fa-edit"></i> 수정</a>
+			<!-- <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> 삭제</button> -->
+            <a href="{{ route('backoffice.admins.index') }}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> <span class="btn-text">목록으로</span></a>
         </div>
     </div>
 

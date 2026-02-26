@@ -80,6 +80,8 @@ window.applySelectedMember = function(selectedMember) {
             row.innerHTML = `
                 <td>${rowNumber}</td>
                 <td>${member.name || '-'}</td>
+                <td>${member.school_name || '-'}</td>
+                <td>${member.grade || '-'}</td>
                 <td>${member.contact || '-'}</td>
                 <td>${member.parent_contact || '-'}</td>
                 <td>${member.email || '-'}</td>
@@ -124,7 +126,7 @@ window.applySelectedMember = function(selectedMember) {
                         
                         // 회원이 없으면 빈 메시지 표시
                         if (memberListBody.querySelectorAll('tr[data-member-id]').length === 0) {
-                            memberListBody.innerHTML = '<tr style="border: none;"><td colspan="7" class="text-center" style="padding: 40px 20px; border: none !important; border-bottom: none !important;">등록된 회원이 없습니다.</td></tr>';
+                            memberListBody.innerHTML = '<tr style="border: none;"><td colspan="9" class="text-center" style="padding: 40px 20px; border: none !important; border-bottom: none !important;">등록된 회원이 없습니다.</td></tr>';
                         } else {
                             // 번호 재정렬
                             memberListBody.querySelectorAll('tr[data-member-id]').forEach((row, index) => {
@@ -205,6 +207,8 @@ window.applySelectedMember = function(selectedMember) {
             row.innerHTML = `
                 <td>${rowNumber}</td>
                 <td>${member.name || '-'}</td>
+                <td>${member.school_name || '-'}</td>
+                <td>${member.grade || '-'}</td>
                 <td>${member.contact || '-'}</td>
                 <td>${member.parent_contact || '-'}</td>
                 <td>${member.email || '-'}</td>
@@ -250,7 +254,7 @@ window.applySelectedMember = function(selectedMember) {
                     
                     // 회원이 없으면 빈 메시지 표시
                     if (memberListBody.querySelectorAll('tr[data-member-id]').length === 0) {
-                        memberListBody.innerHTML = '<tr style="border: none;"><td colspan="7" class="text-center" style="padding: 40px 20px; border: none !important; border-bottom: none !important;">등록된 회원이 없습니다.</td></tr>';
+                        memberListBody.innerHTML = '<tr style="border: none;"><td colspan="9" class="text-center" style="padding: 40px 20px; border: none !important; border-bottom: none !important;">등록된 회원이 없습니다.</td></tr>';
                     } else {
                         // 번호 재정렬
                         memberListBody.querySelectorAll('tr[data-member-id]').forEach((row, index) => {
@@ -308,7 +312,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     // 회원이 없으면 빈 메시지 표시
                     if (memberListBody.querySelectorAll('tr[data-member-id]').length === 0) {
-                        memberListBody.innerHTML = '<tr style="border: none;"><td colspan="7" class="text-center" style="padding: 40px 20px; border: none !important; border-bottom: none !important;">등록된 회원이 없습니다.</td></tr>';
+                        memberListBody.innerHTML = '<tr style="border: none;"><td colspan="9" class="text-center" style="padding: 40px 20px; border: none !important; border-bottom: none !important;">등록된 회원이 없습니다.</td></tr>';
                     } else {
                         // 번호 재정렬
                         memberListBody.querySelectorAll('tr[data-member-id]').forEach((row, index) => {
@@ -505,7 +509,7 @@ function renderMemberList(members) {
     }
 
     if (!members || members.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="text-center">검색 결과가 없습니다.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" class="text-center">검색 결과가 없습니다.</td></tr>`;
         return;
     }
 

@@ -50,10 +50,8 @@
 					<dl>
 						<dt>비밀번호<span>*</span></dt>
 						<dd class="password-wrap">
-							<input type="password" name="password" class="text w100p password-input" value="{{ old('password') }}" placeholder="영문/숫자/특수문자를 포함하여 9~12자리로 입력해주세요.">
-							<button type="button" class="btn-eye toggle-password r16">
-								<img src="/images/icon_eye.svg" alt="보기">
-							</button>
+							<input type="password" name="password" class="text w100p password-input" value="{{ old('password') }}" placeholder="영문/숫자/특수문자를 포함하여 8자리~20자리로 입력해주세요">
+							<button type="button" class="btn-eye toggle-password r16"><img src="/images/icon_eye.svg" alt="보기"></button>
 							<input type="hidden" name="password_temp" class="password-temp" value="{{ old('password_temp', old('password')) }}">
 							@error('password')
 							<p class="error_alert">{{ $message }}</p>
@@ -63,7 +61,10 @@
 					<dl>
 						<dt>비밀번호 확인<span>*</span></dt>
 						<dd>
-							<input type="password" name="password_confirmation" class="text w100p" value="{{ old('password_confirmation') }}" placeholder="비밀번호를 다시 입력해주세요.">
+							<div class="password-wrap password-wrap_add">
+								<input type="password" name="password_confirmation" class="text w100p password-input_add" value="{{ old('password_confirmation') }}" placeholder="비밀번호를 다시 입력해주세요.">
+								<button type="button" class="btn-eye toggle-password_add r16"><img src="/images/icon_eye.svg" alt="보기"></button>
+							</div>
 							<input type="hidden" name="password_confirmation_temp" class="password-confirmation-temp" value="{{ old('password_confirmation_temp', old('password_confirmation')) }}">
 						</dd>
 					</dl>
@@ -97,21 +98,40 @@
 							@enderror
 						</dd>
 					</dl>
+					@php
+						$verifiedPhoneDisplay = $verifiedPhone ?? null;
+					@endphp
 					<dl>
-						<dt>연락처<span>*</span></dt>
+						<dt>학생 연락처<span>*</span></dt>
 						<dd>
 							<div class="flex inbtn">
-								<input type="text" name="contact" value="{{ old('contact') }}" placeholder="휴대폰번호를 입력해주세요." data-phone-input inputmode="tel" autocomplete="tel" data-original-contact="{{ preg_replace('/[^0-9]/', '', old('contact') ?? '') }}">
+								<input type="text"
+								       name="student_contact"
+								       value="{{ old('student_contact') }}"
+								       placeholder="휴대폰번호를 입력해주세요."
+								       data-phone-input
+								       inputmode="tel"
+								       autocomplete="tel"
+								       data-original-contact="{{ preg_replace('/[^0-9]/', '', old('student_contact') ?? '') }}">
 								<button type="button"
 									class="btn btn_wkk btn_error js-duplicate-check"
 									data-field="contact"
-									data-input="[name='contact']">중복 확인</button>
+									data-input="[name='student_contact']">중복 확인</button>
 							</div>
-							<input type="hidden" name="contact_verified" value="0">
+							<input type="hidden" name="contact_verified" value="{{ old('contact_verified', '0') }}">
 							@error('contact')
 							<p class="error_alert">{{ $message }}</p>
 							@enderror
 							@error('contact_verified')
+							<p class="error_alert">{{ $message }}</p>
+							@enderror
+						</dd>
+					</dl>
+					<dl>
+						<dt>보호자 연락처<span>*</span></dt>
+						<dd>
+							<input type="text" name="parent_contact" class="w100p" value="{{ old('parent_contact', $verifiedPhoneDisplay) }}" placeholder="휴대폰번호를 입력해주세요." data-phone-input inputmode="tel" autocomplete="tel" @if(!empty($verifiedPhoneDisplay)) readonly @endif>
+							@error('parent_contact')
 							<p class="error_alert">{{ $message }}</p>
 							@enderror
 						</dd>
@@ -142,21 +162,23 @@
 				<div class="stit num mb0 nbd_b"><span>2</span>소속 정보 <p class="abso">* 는 필수 입력 사항입니다.</p></div>
 				<div class="inputs">
 					<dl>
-						<dt>지역<span>*</span></dt>
+						<dt>지역</dt>
 						<dd>
 							<div class="flex city">
-								<select name="city">
-									<option value="">선택</option>
+								<select class="city_select" disabled>
+									<option value="">학교 검색 시 지역은 자동으로 반영됩니다.</option>
 									@if (old('city'))
 									<option value="{{ old('city') }}" selected>{{ old('city') }}</option>
 									@endif
 								</select>
-								<select name="district">
+								<input type="hidden" name="city" class="city_hidden" value="{{ old('city') }}">
+								<select class="district_select" disabled>
 									<option value="">선택</option>
 									@if (old('district'))
 									<option value="{{ old('district') }}" selected>{{ old('district') }}</option>
 									@endif
 								</select>
+								<input type="hidden" name="district" class="district_hidden" value="{{ old('district') }}">
 							</div>
 							@php
 								$regionError = $errors->first('city') ?: $errors->first('district');
@@ -170,7 +192,7 @@
 						<dt>학교명<span>*</span></dt>
 						<dd>
 							<div class="flex inbtn">
-								<input type="text" name="school_name" class="input_school" value="{{ old('school_name') }}" placeholder="학교명을 검색해주세요.">
+								<input type="text" name="school_name" class="input_school" value="{{ old('school_name') }}" placeholder="학교명을 검색해주세요." readonly>
 								<button type="button" class="btn btn_wkk" onclick="layerShow('pop_school')">학교 검색</button>
 							</div>
 							<input type="hidden" name="school_id" class="input_school_id" value="{{ old('school_id') }}">
@@ -309,8 +331,16 @@
 						</tbody>
 					</table>
 				</div>
+				<div class="board_bottom">
+					<div class="paging school_pagination" style="display:none;">
+						<!-- 페이지네이션은 JavaScript로 동적 생성 -->
+					</div>
+				</div>
 			</div>
-			<button type="button" class="btn_submit btn_wbb mt4 btn_select_school">확인</button>
+			<div class="btn_group mt4" style="display: flex; gap: 8px;">
+				<button type="button" class="btn_submit btn_wbb btn_select_school" style="flex: 1;">확인</button>
+				<button type="button" class="btn_submit btn_wkk btn_input_school" style="flex: 1;" disabled>입력</button>
+			</div>
 		</div>
 	</div>
 </div>

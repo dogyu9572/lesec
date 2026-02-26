@@ -284,11 +284,12 @@ class ReservationCalendarService
             return false;
         }
 
-        $today = Carbon::today();
+        // 신청 종료일 시간까지 비교
+        $now = Carbon::now();
         $applicationEnd = $reservation->application_end_date;
         if ($applicationEnd) {
             $applicationEndDate = $applicationEnd instanceof Carbon ? $applicationEnd : Carbon::parse($applicationEnd);
-            if ($applicationEndDate->lt($today)) {
+            if ($applicationEndDate->lt($now)) {
                 return true;
             }
         }
@@ -302,4 +303,3 @@ class ReservationCalendarService
         return false;
     }
 }
-

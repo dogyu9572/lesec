@@ -36,22 +36,23 @@ class BoardContentService
         $this->applyKeywordFilter($query, $filters);
         $this->applyCategoryFilter($query, $filters);
 
-        if ($board->enable_sorting) {
-            $query->orderBy('sort_order', 'desc');
-        }
-
+        // 공지글은 항상 위에
         if ($board->isNoticeEnabled()) {
             $query->orderBy('is_notice', 'desc');
         }
 
-        $query->orderBy('created_at', 'desc');
+        // sort_order가 NULL이거나 0이면 등록일 빠른순(오름차순), 아니면 sort_order 내림차순(큰 값이 위)
+        // sort_order가 있는 것들을 먼저 보여주고, 그 다음에 sort_order가 없는 것들을 등록일 빠른순으로
+        $query->orderByRaw('CASE WHEN sort_order IS NULL OR sort_order = 0 THEN 1 ELSE 0 END ASC')
+            ->orderByRaw('CASE WHEN sort_order IS NULL OR sort_order = 0 THEN created_at ELSE sort_order END DESC')
+            ->orderBy('created_at', 'asc');
 
         $perPage = $this->resolvePerPage($board, $filters);
 
         $paginator = $query->paginate($perPage)->withQueryString();
 
         $paginator->setCollection(
-            $paginator->getCollection()->map(fn ($post) => $this->transformPost($post))
+            $paginator->getCollection()->map(fn($post) => $this->transformPost($post))
         );
 
         return $paginator;
@@ -108,13 +109,13 @@ class BoardContentService
         }
 
         $attachments = $this->decodeAttachments($post->attachments);
-        
+
         if (empty($attachments)) {
             return null;
         }
 
         $attachmentsArray = array_values($attachments);
-        
+
         if ($attachmentIndex < 0 || $attachmentIndex >= count($attachmentsArray)) {
             return null;
         }
@@ -141,17 +142,27 @@ class BoardContentService
     public function getActivePosts(Board $board, int $limit = 0, ?callable $queryCallback = null): Collection
     {
         $table = $this->getTableName($board->slug);
-        $query = DB::table($table)->whereNull('deleted_at');
+        $query = DB::table($table)
+            ->whereNull('deleted_at')
+            ->where(function ($q) {
+                $q->where('is_active', true)
+                    ->orWhereNull('is_active');
+            });
 
         if ($queryCallback) {
             $queryCallback($query);
         }
 
-        if ($board->enable_sorting) {
-            $query->orderBy('sort_order', 'desc');
+        // 공지글은 항상 위에
+        if ($board->isNoticeEnabled()) {
+            $query->orderBy('is_notice', 'desc');
         }
 
-        $query->orderBy('created_at', 'desc');
+        // sort_order가 NULL이거나 0이면 등록일 빠른순(오름차순), 아니면 sort_order 내림차순
+        // sort_order가 있는 것들을 먼저 보여주고, 그 다음에 sort_order가 없는 것들을 등록일 빠른순으로
+        $query->orderByRaw('CASE WHEN sort_order IS NULL OR sort_order = 0 THEN 1 ELSE 0 END ASC')
+            ->orderByRaw('CASE WHEN sort_order IS NULL OR sort_order = 0 THEN created_at ELSE sort_order END DESC')
+            ->orderBy('created_at', 'asc');
 
         if ($limit > 0) {
             $query->limit($limit);
@@ -159,14 +170,43 @@ class BoardContentService
 
         $posts = $query->get();
 
-        return $posts->map(fn ($post) => $this->transformPost($post));
+        return $posts->map(fn($post) => $this->transformPost($post));
     }
 
     /**
      * 최신 게시글 한 건을 얻는다.
+     * 단일 페이지 게시판의 경우 is_active 상태와 관계없이 최신 게시글을 반환
      */
     public function getLatestPost(Board $board): ?object
     {
+        // 단일 페이지 게시판인 경우 is_active 체크 없이 최신 게시글 조회
+        if ($board->is_single_page) {
+            $table = $this->getTableName($board->slug);
+            $query = DB::table($table)
+                ->whereNull('deleted_at');
+
+            // 공지글은 항상 위에
+            if ($board->isNoticeEnabled()) {
+                $query->orderBy('is_notice', 'desc');
+            }
+
+            // sort_order가 NULL이거나 0이면 등록일 빠른순(오름차순), 아니면 sort_order 내림차순
+            // sort_order가 있는 것들을 먼저 보여주고, 그 다음에 sort_order가 없는 것들을 등록일 빠른순으로
+            $query->orderByRaw('CASE WHEN sort_order IS NULL OR sort_order = 0 THEN 1 ELSE 0 END ASC')
+                ->orderByRaw('CASE WHEN sort_order IS NULL OR sort_order = 0 THEN created_at ELSE sort_order END DESC')
+                ->orderBy('created_at', 'desc')
+                ->orderBy('id', 'desc')
+                ->limit(1);
+
+            $post = $query->first();
+
+            if ($post) {
+                return $this->transformPost($post);
+            }
+            return null;
+        }
+
+        // 일반 게시판은 활성화된 게시글만 조회
         return $this->getActivePosts($board, 1)->first();
     }
 
@@ -338,4 +378,3 @@ class BoardContentService
             ->first();
     }
 }
-

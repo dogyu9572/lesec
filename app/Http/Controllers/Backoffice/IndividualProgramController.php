@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Backoffice;
 
 use App\Services\Backoffice\IndividualProgramService;
 use App\Models\ProgramReservation;
+use App\Http\Requests\Backoffice\IndividualProgramStoreRequest;
+use App\Http\Requests\Backoffice\IndividualProgramUpdateRequest;
 use Illuminate\Http\Request;
 
 class IndividualProgramController extends BaseController
@@ -50,10 +52,9 @@ class IndividualProgramController extends BaseController
     /**
      * 개인 프로그램 등록 처리
      */
-    public function store(Request $request)
+    public function store(IndividualProgramStoreRequest $request)
     {
-        // TODO: Form Request로 유효성 검사 추가 예정
-        $this->individualProgramService->createProgram($request->all());
+        $this->individualProgramService->createProgram($request->validated());
 
         return redirect()->route('backoffice.individual-programs.index')
             ->with('success', '개인 프로그램이 등록되었습니다.');
@@ -79,10 +80,9 @@ class IndividualProgramController extends BaseController
     /**
      * 개인 프로그램 수정 처리
      */
-    public function update(Request $request, ProgramReservation $programReservation)
+    public function update(IndividualProgramUpdateRequest $request, ProgramReservation $programReservation)
     {
-        // TODO: Form Request로 유효성 검사 추가 예정
-        $this->individualProgramService->updateProgram($programReservation, $request->all());
+        $this->individualProgramService->updateProgram($programReservation, $request->validated());
 
         return redirect()->route('backoffice.individual-programs.index')
             ->with('success', '개인 프로그램이 수정되었습니다.');
@@ -107,7 +107,7 @@ class IndividualProgramController extends BaseController
         $searchAction = $request->get('search_action', '');
         $mode = $request->get('mode', 'reservation');
         $educationTypes = $this->individualProgramService->getEducationTypes();
-        
+
         return $this->view('backoffice.popups.program-search', [
             'searchAction' => $searchAction,
             'mode' => $mode,
@@ -127,7 +127,7 @@ class IndividualProgramController extends BaseController
     {
         try {
             $programs = $this->individualProgramService->searchPrograms($request);
-            
+
             return response()->json([
                 'programs' => $programs->items(),
                 'pagination' => [
@@ -152,4 +152,3 @@ class IndividualProgramController extends BaseController
         }
     }
 }
-

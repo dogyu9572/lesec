@@ -16,7 +16,7 @@ class ParticipantRequest extends FormRequest
         // 업로드 요청: 파일 존재 시
         if ($this->hasFile('csv_file')) {
             return [
-                'csv_file' => 'required|file|mimes:csv,txt|max:4096',
+                'csv_file' => 'required|file|mimes:csv,txt,xlsx,xls|max:4096',
             ];
         }
 
@@ -29,5 +29,3 @@ class ParticipantRequest extends FormRequest
         ];
     }
 }
-
-

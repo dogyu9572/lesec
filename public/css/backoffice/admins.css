@@ -295,11 +295,11 @@
     gap: 0.5rem;
 }
 
-.list-controls .btn {
+/* .list-controls .btn {
     font-size: 0.9rem;
     padding: 0.5rem 1rem;
     white-space: nowrap;
-}
+} */
 
 .per-page-form {
     display: flex;
@@ -357,17 +357,19 @@
 }
 
 .admins-page .board-table th:nth-child(1),
-.admins-page .board-table td:nth-child(1) { width: 40px; }
+.admins-page .board-table td:nth-child(1) { width: 50px; }
 .admins-page .board-table th:nth-child(2),
-.admins-page .board-table td:nth-child(2) { width: 50px; }
+.admins-page .board-table td:nth-child(2) { width: 10%; }
 .admins-page .board-table th:nth-child(3),
-.admins-page .board-table td:nth-child(3) { width: 120px; }
+.admins-page .board-table td:nth-child(3) { width: auto; }
 .admins-page .board-table th:nth-child(4),
-.admins-page .board-table td:nth-child(4) { width: 120px; }
+.admins-page .board-table td:nth-child(4) { width: 15%; }
 .admins-page .board-table th:nth-child(5),
-.admins-page .board-table td:nth-child(5) { width: 100px; }
+.admins-page .board-table td:nth-child(5) { width: 15%; }
 .admins-page .board-table th:nth-child(6),
-.admins-page .board-table td:nth-child(6) { width: 180px; }
+.admins-page .board-table td:nth-child(6) { width: 10%; }
+.admins-page .board-table.tal th,
+.admins-page .board-table.tal td {text-align: left;}
 
 /* 역할 배지 */
 .role-badge {
@@ -484,7 +486,7 @@
 }
 
 .form-section {
-    padding: 25px;
+    padding: .5rem 1rem;
     border-bottom: 1px solid #e9ecef;
 }
 
@@ -493,7 +495,7 @@
 }
 
 .form-section h3 {
-    margin: 0 0 20px 0;
+    margin: 0 0 15px 0;
     color: #333;
     font-size: 18px;
     font-weight: 600;
@@ -502,22 +504,24 @@
 .form-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 20px;
+    gap: 10px;
 }
 
 .form-group {
     display: flex;
     flex-direction: column;
-    margin-bottom: 12px !important;
+    margin-bottom: 6px !important;
 }
 
 .form-group label {
-    margin-bottom: 8px;
+    margin-bottom: 4px;
     font-weight: 500;
     color: #555;
 }
 
+.form-group select,
 .form-group input {
+	height:auto;
     padding: 10px 12px;
     border: 1px solid #ddd;
     border-radius: 4px;
@@ -569,6 +573,7 @@
 
 .radio-label input[type="radio"] {
     margin-right: 8px;
+	width: auto;
 }
 
 /* 권한 설정 스타일 */
@@ -590,7 +595,7 @@
     align-items: center;
     flex-wrap: wrap;
     gap: 8px;
-    padding: 8px 0;
+    padding: 4px 0;
     border-bottom: 1px solid #e9ecef;
 }
 
@@ -610,6 +615,8 @@
     color: #333;
     font-size: 14px;
 }
+.permission-simple-item .permission-main-menu,
+.permission-simple-item .permission-sub-menu {margin: 0;}
 
 .permission-main-menu input[type="checkbox"] {
     margin-right: 8px;

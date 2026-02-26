@@ -6,6 +6,7 @@ use App\Models\RevenueStatistics;
 use App\Models\RevenueStatisticsItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class RevenueStatisticsService
@@ -16,7 +17,7 @@ class RevenueStatisticsService
     public function getStatisticsWithFilters(Request $request)
     {
         $query = RevenueStatistics::query();
-        
+
         // 등록일 필터
         if ($request->filled('created_from')) {
             $query->whereDate('created_at', '>=', $request->created_from);
@@ -24,11 +25,11 @@ class RevenueStatisticsService
         if ($request->filled('created_to')) {
             $query->whereDate('created_at', '<=', $request->created_to);
         }
-        
+
         // 검색어 필터
         $searchType = $request->get('search_type', 'all');
         $searchTerm = $request->get('search_term');
-        
+
         if ($searchTerm && $searchType !== 'all') {
             if ($searchType === 'title') {
                 $query->where('title', 'like', '%' . $searchTerm . '%');
@@ -37,11 +38,11 @@ class RevenueStatisticsService
             // 전체 검색
             $query->where('title', 'like', '%' . $searchTerm . '%');
         }
-        
+
         // 목록 개수 설정
         $perPage = $request->get('per_page', 20);
         $perPage = in_array($perPage, [20, 50, 100]) ? $perPage : 20;
-        
+
         return $query->withCount('items')->orderBy('created_at', 'desc')->paginate($perPage);
     }
 
@@ -53,12 +54,12 @@ class RevenueStatisticsService
         $statistics = RevenueStatistics::create([
             'title' => $data['title'],
         ]);
-        
+
         // 통계 항목 추가
         if (isset($data['items']) && is_array($data['items'])) {
             $this->saveItems($statistics->id, $data['items']);
         }
-        
+
         return $statistics;
     }
 
@@ -78,12 +79,15 @@ class RevenueStatisticsService
         $updated = $statistics->update([
             'title' => $data['title'],
         ]);
-        
+
         // 통계 항목 업데이트
         if (isset($data['items']) && is_array($data['items'])) {
             $this->saveItems($statistics->id, $data['items']);
+        } else {
+            // items가 없으면 기존 항목 모두 삭제
+            RevenueStatisticsItem::where('revenue_statistics_id', $statistics->id)->delete();
         }
-        
+
         return $updated;
     }
 
@@ -102,14 +106,14 @@ class RevenueStatisticsService
     public function bulkDelete(array $statisticsIds): int
     {
         $deletedCount = 0;
-        
+
         foreach ($statisticsIds as $statisticsId) {
             $statistics = RevenueStatistics::find($statisticsId);
             if ($statistics && $this->deleteStatistics($statistics)) {
                 $deletedCount++;
             }
         }
-        
+
         return $deletedCount;
     }
 
@@ -120,32 +124,30 @@ class RevenueStatisticsService
     {
         // 통계 항목 데이터 조회
         $items = $statistics->items()->orderBy('sort_order')->get();
-        
+
         // 다운로드 데이터 변환
         $data = $items->map(function ($item) {
             return [
-                'item_name' => $item->item_name ?? '-',
+                'school_type' => $item->school_type === 'middle' ? '중등' : ($item->school_type === 'high' ? '고등' : '-'),
                 'participants_count' => $item->participants_count ?? 0,
-                'school_name' => $item->school_name ?? '-',
                 'revenue' => $item->revenue ?? 0,
             ];
         });
-        
+
         // 컬럼 매핑
         $columnMapping = [
-            'item_name' => '항목',
+            'school_type' => '구분',
             'participants_count' => '참가인원',
-            'school_name' => '참가학교',
             'revenue' => '수익',
         ];
-        
+
         // 모든 컬럼 선택
         $selectedColumns = array_keys($columnMapping);
-        
+
         // 파일명 생성
         $title = str_replace(['/', '\\', ':', '*', '?', '"', '<', '>', '|'], '_', $statistics->title);
         $filename = '수익통계_' . $title . '_' . date('Ymd_His');
-        
+
         // CSV로 다운로드
         return $this->exportToCsv($data, $selectedColumns, $columnMapping, $filename);
     }
@@ -163,19 +165,19 @@ class RevenueStatisticsService
             'Expires' => '0',
         ];
 
-        $callback = function() use ($data, $selectedColumns, $columnMapping) {
+        $callback = function () use ($data, $selectedColumns, $columnMapping) {
             $file = fopen('php://output', 'w');
-            
+
             // UTF-8 BOM 추가 (한글 깨짐 방지)
-            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
-            
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
             // 헤더 작성
             $csvHeaders = [];
             foreach ($selectedColumns as $column) {
                 $csvHeaders[] = $columnMapping[$column] ?? $column;
             }
             fputcsv($file, $csvHeaders);
-            
+
             // 데이터 작성
             foreach ($data as $item) {
                 $row = [];
@@ -184,7 +186,7 @@ class RevenueStatisticsService
                 }
                 fputcsv($file, $row);
             }
-            
+
             fclose($file);
         };
 
@@ -198,22 +200,20 @@ class RevenueStatisticsService
     {
         // 기존 항목 삭제
         RevenueStatisticsItem::where('revenue_statistics_id', $statisticsId)->delete();
-        
+
         // 새 항목 추가
         foreach ($items as $index => $item) {
-            if (empty($item['item_name'])) {
-                continue; // 항목명이 없으면 건너뛰기
+            if (empty($item['school_type'])) {
+                continue; // 구분이 없으면 건너뛰기
             }
-            
+
             RevenueStatisticsItem::create([
                 'revenue_statistics_id' => $statisticsId,
-                'item_name' => $item['item_name'],
-                'participants_count' => $item['participants_count'] ?? 0,
-                'school_name' => $item['school_name'] ?? null,
-                'revenue' => $item['revenue'] ?? 0,
+                'school_type' => $item['school_type'],
+                'participants_count' => $item['participants_count'] ?? null,
+                'revenue' => $item['revenue'] ?? null,
                 'sort_order' => $index,
             ]);
         }
     }
 }
-

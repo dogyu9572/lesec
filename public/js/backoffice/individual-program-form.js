@@ -88,11 +88,9 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 educationEndDateInput.value = '';
             }
-            educationEndDateInput.readOnly = true;
-            educationEndDateInput.classList.add('board-input-readonly');
+            // readOnly 제거 - 항상 수정 가능하도록
         } else {
-            educationEndDateInput.readOnly = false;
-            educationEndDateInput.classList.remove('board-input-readonly');
+            // readOnly 제거 - 항상 수정 가능하도록
         }
     }
 

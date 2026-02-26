@@ -132,7 +132,7 @@ textarea {border:#ddd 1px solid; max-width:100%; border-radius:8px;}
 input[type="text"],
 input[type="password"],
 input[type="date"],
-select {height:52px; padding:0 16px;}
+select {height:52px; padding:0 16px; color:#222;}
 select {-webkit-appearance:none; -moz-appearance:none; appearance:none; background:#fff url('/images/arrow_select.svg') no-repeat right 16px center / 18px;}
 textarea {padding:10px;}
 

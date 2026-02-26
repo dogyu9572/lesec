@@ -28,7 +28,7 @@
 
                     <!-- 교육유형, 신청유형, 프로그램명 -->
                     <div class="board-form-row">
-                        <div class="board-form-col board-form-col-4">
+                        <div class="board-form-col">
                             <div class="board-form-group">
                                 <label class="board-form-label">교육유형 <span class="required">*</span></label>
                                 <div class="board-radio-group">
@@ -45,10 +45,12 @@
                                 @enderror
                             </div>
                         </div>
-                        <div class="board-form-col board-form-col-4">
+					</div>
+                    <div class="board-form-row">
+                        <div class="board-form-col">
                             <div class="board-form-group">
                                 <label for="reception_type" class="board-form-label">신청유형 <span class="required">*</span></label>
-                                <select class="board-form-control @error('reception_type') is-invalid @enderror" 
+                                <select class="board-form-control wauto @error('reception_type') is-invalid @enderror" 
                                         id="reception_type" name="reception_type" required>
                                     <option value="">선택하세요</option>
                                     @foreach($receptionTypes as $key => $name)
@@ -60,12 +62,14 @@
                                 @enderror
                             </div>
                         </div>
-                        <div class="board-form-col board-form-col-4">
+					</div>
+                    <div class="board-form-row">
+                        <div class="board-form-col">
                             <div class="board-form-group">
                                 <label for="program_name" class="board-form-label">프로그램명 <span class="required">*</span></label>
                                 <div class="board-form-row">
-                                    <div class="board-form-col" style="flex: 1;">
-                                        <input type="text" class="board-form-control @error('program_name') is-invalid @enderror" 
+                                    <div class="board-form-col" style="flex: 0;">
+                                        <input type="text" class="board-form-control wauto @error('program_name') is-invalid @enderror" 
                                                id="program_name" name="program_name" value="{{ old('program_name', $program->program_name) }}" required>
                                         @error('program_name')
                                             <div class="invalid-feedback">{{ $message }}</div>
@@ -84,7 +88,7 @@
 
                     <!-- 하루만 진행, 참가일정 시작일, 참가일정 종료일 -->
                     <div class="board-form-row">
-                        <div class="board-form-col board-form-col-4">
+                        <div class="board-form-col">
                             <div class="board-form-group">
                                 <div class="board-checkbox-item">
                                     <input type="checkbox"
@@ -98,20 +102,24 @@
                                 <small class="board-form-text">체크 시 종료일은 시작일과 동일하게 설정됩니다.</small>
                             </div>
                         </div>
-                        <div class="board-form-col board-form-col-4">
+					</div>
+                    <div class="board-form-row">
+                        <div class="board-form-col">
                             <div class="board-form-group">
-                                <label for="education_start_date" class="board-form-label">참가일정 시작일 <span class="required">*</span></label>
-                                <input type="date" class="board-form-control @error('education_start_date') is-invalid @enderror" 
+                                <label for="education_start_date" class="board-form-label">참가 시작일 <span class="required">*</span></label>
+                                <input type="date" class="board-form-control wauto @error('education_start_date') is-invalid @enderror" 
                                        id="education_start_date" name="education_start_date" value="{{ old('education_start_date', $program->education_start_date ? $program->education_start_date->format('Y-m-d') : '') }}" required>
                                 @error('education_start_date')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
-                        <div class="board-form-col board-form-col-4">
+					</div>
+                    <div class="board-form-row">
+                        <div class="board-form-col">
                             <div class="board-form-group">
-                                <label for="education_end_date" class="board-form-label">참가일정 종료일 <span class="required">*</span></label>
-                                <input type="date" class="board-form-control @error('education_end_date') is-invalid @enderror" 
+                                <label for="education_end_date" class="board-form-label">참가 종료일 <span class="required">*</span></label>
+                                <input type="date" class="board-form-control wauto @error('education_end_date') is-invalid @enderror" 
                                        id="education_end_date" name="education_end_date" value="{{ old('education_end_date', $program->education_end_date ? $program->education_end_date->format('Y-m-d') : '') }}" required>
                                 @error('education_end_date')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -140,7 +148,7 @@
                 <!-- 네이버폼 링크 (신청유형이 네이버폼일 때만 표시) -->
                 <div class="board-form-group" id="naver_form_url_group" style="display: {{ old('reception_type', $program->reception_type) == 'naver_form' ? 'block' : 'none' }};">
                     <label for="naver_form_url" class="board-form-label">네이버폼 링크 <span class="required">*</span></label>
-                    <input type="url" class="board-form-control @error('naver_form_url') is-invalid @enderror" 
+                    <input type="url" class="board-form-control wauto @error('naver_form_url') is-invalid @enderror" 
                            id="naver_form_url" name="naver_form_url" value="{{ old('naver_form_url', $program->naver_form_url) }}" 
                            placeholder="https://naver.me/...">
                     @error('naver_form_url')
@@ -152,7 +160,7 @@
                 <!-- 대기자 신청 링크 (신청유형이 선착순일 때만 표시) -->
                 <div class="board-form-group" id="waitlist_url_group" style="display: {{ old('reception_type', $program->reception_type) == 'first_come' ? 'block' : 'none' }};">
                     <label for="waitlist_url" class="board-form-label">대기자 신청 링크</label>
-                    <input type="url" class="board-form-control @error('waitlist_url') is-invalid @enderror" 
+                    <input type="url" class="board-form-control wauto @error('waitlist_url') is-invalid @enderror" 
                            id="waitlist_url" name="waitlist_url" value="{{ old('waitlist_url', $program->waitlist_url) }}" 
                            placeholder="https://...">
                     @error('waitlist_url')
@@ -166,34 +174,38 @@
                 <div class="program-section">
                     <div class="section-title">접수정보</div>
 
-                    <!-- 신청기간, 신청 정원, 교육비 -->
+                    <!-- 신청기간, 신청 정원, 참가비 -->
                     <div class="board-form-row">
-                        <div class="board-form-col board-form-col-4">
+                        <div class="board-form-col">
                             <div class="board-form-group">
-                                <label for="application_start_date" class="board-form-label">신청 기간 <span class="required">*</span></label>
-                                <input type="date" class="board-form-control @error('application_start_date') is-invalid @enderror" 
-                                       id="application_start_date" name="application_start_date" value="{{ old('application_start_date', $program->application_start_date ? $program->application_start_date->format('Y-m-d') : '') }}" required>
+                                <label for="application_start_date" class="board-form-label">신청 시작일 <span class="required">*</span></label>
+                                <input type="datetime-local" class="board-form-control wauto @error('application_start_date') is-invalid @enderror" 
+                                       id="application_start_date" name="application_start_date" value="{{ old('application_start_date', $program->application_start_date ? $program->application_start_date->format('Y-m-d\TH:i') : '') }}" required>
                                 @error('application_start_date')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
-                        <div class="board-form-col board-form-col-4">
+					</div>
+                    <div class="board-form-row">
+                        <div class="board-form-col">
                             <div class="board-form-group">
                                 <label for="application_end_date" class="board-form-label">신청 종료일 <span class="required">*</span></label>
-                                <input type="date" class="board-form-control @error('application_end_date') is-invalid @enderror" 
-                                       id="application_end_date" name="application_end_date" value="{{ old('application_end_date', $program->application_end_date ? $program->application_end_date->format('Y-m-d') : '') }}" required>
+                                <input type="datetime-local" class="board-form-control wauto @error('application_end_date') is-invalid @enderror" 
+                                       id="application_end_date" name="application_end_date" value="{{ old('application_end_date', $program->application_end_date ? $program->application_end_date->format('Y-m-d\TH:i') : '') }}" required>
                                 @error('application_end_date')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
-                        <div class="board-form-col board-form-col-4">
+					</div>
+                    <div class="board-form-row">
+                        <div class="board-form-col">
                             <div class="board-form-group">
                                 <label for="capacity" class="board-form-label">신청 정원</label>
                                 <div class="board-form-row">
-                                    <div class="board-form-col" style="flex: 1;">
-                                        <input type="number" class="board-form-control @error('capacity') is-invalid @enderror" 
+                                    <div class="board-form-col" style="flex: 0;">
+                                        <input type="number" class="board-form-control wauto @error('capacity') is-invalid @enderror" 
                                                id="capacity" name="capacity" value="{{ old('capacity', $program->capacity) }}" min="1" 
                                                @if(old('is_unlimited_capacity', $program->is_unlimited_capacity) || old('reception_type', $program->reception_type) == 'lottery') disabled @endif>
                                         @error('capacity')
@@ -214,13 +226,13 @@
                         </div>
                     </div>
 
-                    <!-- 교육비 -->
+                    <!-- 참가비 -->
                     <div class="board-form-row">
                         <div class="board-form-col board-form-col-4">
                             <div class="board-form-group">
-                                <label for="education_fee" class="board-form-label">교육비</label>
+                                <label for="education_fee" class="board-form-label">참가비</label>
                                 <div style="display: flex; align-items: center;">
-                                    <input type="number" class="board-form-control @error('education_fee') is-invalid @enderror" 
+                                    <input type="number" class="board-form-control wauto @error('education_fee') is-invalid @enderror" 
                                            id="education_fee" name="education_fee" value="{{ old('education_fee') !== null ? (int) old('education_fee') : ($program->education_fee !== null ? (int) $program->education_fee : '') }}" min="0" step="1"
                                            @if(old('is_free', $program->is_free)) disabled @endif
                                            style="flex: 1;">
@@ -248,10 +260,19 @@
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-save"></i> 저장
                     </button>
+                    <button type="button" class="btn btn-danger" onclick="if(confirm('정말 이 프로그램을 삭제하시겠습니까?\n\n삭제 시 관련된 모든 신청 내역도 함께 삭제되며, 이 작업은 되돌릴 수 없습니다.')) { document.getElementById('delete-form').submit(); }">
+                        <i class="fas fa-trash"></i> 삭제
+                    </button>
                     <a href="{{ route('backoffice.individual-programs.index') }}" class="btn btn-secondary">
                         <i class="fas fa-times"></i> 취소
                     </a>
                 </div>
+            </form>
+            
+            <!-- 삭제 폼 (저장 폼 밖으로 분리) -->
+            <form id="delete-form" action="{{ route('backoffice.individual-programs.destroy', $program) }}" method="POST" style="display: none;">
+                @csrf
+                @method('DELETE')
             </form>
         </div>
     </div>

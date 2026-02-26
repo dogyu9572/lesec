@@ -32,8 +32,8 @@ class ProgramReservation extends Model
     protected $casts = [
         'education_start_date' => 'date',
         'education_end_date' => 'date',
-        'application_start_date' => 'date',
-        'application_end_date' => 'date',
+        'application_start_date' => 'datetime',
+        'application_end_date' => 'datetime',
         'payment_methods' => 'array',
         'applied_count' => 'integer',
         'is_unlimited_capacity' => 'boolean',
@@ -165,7 +165,7 @@ class ProgramReservation extends Model
                 }
 
                 $capacity = $this->capacity ?? 0;
-                $appliedCount = $this->applied_count ?? 0;
+                $appliedCount = $this->applied_count_display ?? 0;
 
                 if ($appliedCount >= $capacity) {
                     return 'closed';
@@ -181,7 +181,7 @@ class ProgramReservation extends Model
         }
 
         $capacity = $this->capacity ?? 0;
-        $appliedCount = $this->applied_count ?? 0;
+        $appliedCount = $this->applied_count_display ?? 0;
 
         if ($appliedCount >= $capacity) {
             return 'closed';
@@ -242,7 +242,7 @@ class ProgramReservation extends Model
         }
 
         $capacity = $this->capacity ?? 0;
-        $appliedCount = $this->applied_count ?? 0;
+        $appliedCount = $this->applied_count_display ?? 0;
 
         return max(0, $capacity - $appliedCount);
     }
@@ -254,12 +254,17 @@ class ProgramReservation extends Model
             return $this->applications()->count();
         }
 
-        // 단체 프로그램은 기존 로직 유지
-        return max(0, $this->applied_count ?? 0);
+        // 단체 프로그램은 실시간으로 신청인원 계산 (승인대기 + 승인완료 모두 포함)
+        return $this->groupApplications()->sum('applicant_count') ?? 0;
     }
 
     public function applications(): HasMany
     {
         return $this->hasMany(IndividualApplication::class, 'program_reservation_id');
+    }
+
+    public function groupApplications(): HasMany
+    {
+        return $this->hasMany(GroupApplication::class, 'program_reservation_id');
     }
 }

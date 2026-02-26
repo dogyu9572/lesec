@@ -22,13 +22,6 @@
         </div>
     @endif
 
-    <div class="board-page-header">
-        <div class="board-page-buttons">
-            <a href="{{ route('backoffice.group-programs.create') }}" class="btn btn-success">
-                <i class="fas fa-plus"></i> 신규등록
-            </a>
-        </div>
-    </div>
 
     <div class="board-card">
 <div class="board-card-body">
@@ -46,7 +39,7 @@
                             </select>
                         </div>
                         <div class="filter-group">
-                            <label for="reception_type" class="filter-label">접수유형</label>
+                            <label for="reception_type" class="filter-label">신청유형</label>
                             <select id="reception_type" name="reception_type" class="filter-select">
                                 <option value="">전체</option>
                                 @foreach($receptionTypes as $key => $name)
@@ -55,22 +48,22 @@
                             </select>
                         </div>
                         <div class="filter-group">
-                            <label for="education_start_date" class="filter-label">교육일정 시작</label>
+                            <label for="education_start_date" class="filter-label">참가 시작일</label>
                             <input type="date" id="education_start_date" name="education_start_date" class="filter-input"
                                 value="{{ request('education_start_date') }}">
                         </div>
                         <div class="filter-group">
-                            <label for="education_end_date" class="filter-label">교육일정 종료</label>
+                            <label for="education_end_date" class="filter-label">참가 종료일</label>
                             <input type="date" id="education_end_date" name="education_end_date" class="filter-input"
                                 value="{{ request('education_end_date') }}">
                         </div>
                         <div class="filter-group">
-                            <label for="application_start_date" class="filter-label">신청기간 시작</label>
+                            <label for="application_start_date" class="filter-label">신청 시작일</label>
                             <input type="date" id="application_start_date" name="application_start_date" class="filter-input"
                                 value="{{ request('application_start_date') }}">
                         </div>
                         <div class="filter-group">
-                            <label for="application_end_date" class="filter-label">신청기간 종료</label>
+                            <label for="application_end_date" class="filter-label">신청 종료일</label>
                             <input type="date" id="application_end_date" name="application_end_date" class="filter-input"
                                 value="{{ request('application_end_date') }}">
                         </div>
@@ -109,9 +102,10 @@
                     <div class="list-info">
                         <span class="list-count">Total : {{ $programs->total() }}</span>
                     </div>
-                    <div class="list-controls">                       
+                    <div class="list-controls">
+                        <a href="{{ route('backoffice.group-programs.create') }}" class="btn btn-success btn-sm"><i class="fas fa-plus"></i> 신규등록</a>                       
                         <form method="GET" action="{{ route('backoffice.group-programs.index') }}" class="per-page-form">
-                            @foreach(request()->except('per_page') as $key => $value)
+                            @foreach(request()->except(['per_page', 'page']) as $key => $value)
                                 <input type="hidden" name="{{ $key }}" value="{{ $value }}">
                             @endforeach
                             <label for="per_page" class="per-page-label">목록 개수:</label>
@@ -126,17 +120,28 @@
 
                 <div class="table-responsive">
                     <table class="board-table">
+						<colgroup>
+							<col width="4%">
+							<col width="6%">
+							<col width="*">
+							<col width="6%">
+							<col width="20%">
+							<col width="20%">
+							<col width="6%">
+							<col width="14%">
+							<col width="6%">
+						</colgroup>
                         <thead>
                             <tr>
                                 <th>번호</th>
                                 <th>교육유형</th>
                                 <th>프로그램명</th>
-                                <th>접수유형</th>
-                                <th>교육일정</th>
+                                <th>신청유형</th>
+                                <th>참가일</th>
                                 <th>신청기간</th>
                                 <th>정원</th>
                                 <th>결제수단</th>
-                                <th style="width: 150px;">관리</th>
+                                <th style="width: 100px;">관리</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -160,7 +165,9 @@
                                     </td>
                                     <td>
                                         @if($program->application_start_date && $program->application_end_date)
-                                            {{ $program->application_start_date->format('Y-m-d') }} 00:00 ~ {{ $program->application_end_date->format('Y-m-d') }} 23:59
+                                            {{ $program->application_start_date->format('Y-m-d H:i') }} ~ {{ $program->application_end_date->format('Y-m-d H:i') }}
+                                        @elseif($program->application_start_date)
+                                            {{ $program->application_start_date->format('Y-m-d H:i') }}
                                         @else
                                             -
                                         @endif
@@ -181,16 +188,10 @@
                                     </td>
                                     <td>
                                         <div class="board-btn-group">
-                                            <a href="{{ route('backoffice.group-programs.edit', $program) }}" class="btn btn-primary btn-sm">
-                                                <i class="fas fa-edit"></i> 수정
+                                            <a href="{{ route('backoffice.group-programs.edit', $program) }}" class="btn btn-info btn-sm">
+                                                <!-- <i class="fas fa-edit"></i> 수정 -->
+												<i class="fas fa-eye"></i> 보기
                                             </a>
-                                            <form action="{{ route('backoffice.group-programs.destroy', $program) }}" method="POST" class="d-inline" onsubmit="return confirm('정말 삭제하시겠습니까?');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-danger btn-sm">
-                                                    <i class="fas fa-trash"></i> 삭제
-                                                </button>
-                                            </form>
                                         </div>
                                     </td>
                                 </tr>

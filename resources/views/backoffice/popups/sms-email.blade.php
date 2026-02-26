@@ -8,10 +8,26 @@
     if (is_string($reservationIds)) {
         $reservationIds = explode(',', $reservationIds);
     }
+    $reservationId = request('reservation_id');
+    $applicationType = request('application_type');
+    $applicationIds = request('application_ids', '');
+    $participantIds = request('participant_ids', '');
 @endphp
 
 <form id="sms-email-form">
     <input type="hidden" id="reservation-ids" value="{{ implode(',', $reservationIds) }}">
+    @if($reservationId)
+        <input type="hidden" id="reservation-id" value="{{ $reservationId }}">
+    @endif
+    @if($applicationType)
+        <input type="hidden" id="application-type" value="{{ $applicationType }}">
+    @endif
+    @if($applicationIds)
+        <input type="hidden" id="application-ids" value="{{ $applicationIds }}">
+    @endif
+    @if($participantIds)
+        <input type="hidden" id="participant-ids" value="{{ $participantIds }}">
+    @endif
     
     <div class="modal-form-group">
         <label class="modal-form-label">발송 유형</label>

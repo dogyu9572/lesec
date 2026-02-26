@@ -228,6 +228,7 @@ class IndividualApplicationService
             'applicant_class',
             'applicant_contact',
             'guardian_contact',
+            'participation_date',
         ];
 
         foreach ($fields as $field) {
@@ -245,6 +246,9 @@ class IndividualApplicationService
                 case 'applicant_grade':
                 case 'applicant_class':
                     $updateData[$field] = $value !== null && $value !== '' ? (int) $value : null;
+                    break;
+                case 'participation_date':
+                    $updateData[$field] = $value !== null && $value !== '' ? Carbon::parse($value)->toDateString() : null;
                     break;
                 default:
                     $updateData[$field] = $value === '' ? null : $value;

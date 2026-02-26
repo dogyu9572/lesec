@@ -140,9 +140,12 @@ class MailSmsService
                 'member_group_id' => $data['member_group_id'] ?? null,
             ]);
 
-            if (!empty($data['member_ids'])) {
-                $this->syncRecipients($message, $data['member_ids']);
-            }
+            // member_ids가 명시적으로 전달된 경우에만 수신자 목록을 동기화
+            // 수신자는 실시간으로 syncRecipientsSelection을 통해 관리되므로
+            // 여기서는 수신자 목록을 변경하지 않음
+            // if (!empty($data['member_ids'])) {
+            //     $this->syncRecipients($message, $data['member_ids']);
+            // }
 
             return $message->fresh(['writer', 'memberGroup', 'recipients']);
         });
@@ -243,33 +246,87 @@ class MailSmsService
                             continue;
                         }
 
-                        Mail::raw($content, function ($mail) use ($email, $message, $recipient) {
-                            $mail->to($email, $recipient->member_name)
-                                ->subject($message->title);
-                        });
+                        try {
+                            Mail::raw($message->content, function ($mail) use ($email, $message, $recipient) {
+                                $mail->to($email, $recipient->member_name)
+                                    ->subject($message->title);
+                            });
 
-                        $logs[] = [
-                            'send_sequence' => $sendSequence,
-                            'mail_sms_message_id' => $message->id,
-                            'mail_sms_message_member_id' => $recipient->id,
-                            'member_id' => $recipient->member_id,
-                            'member_name' => $recipient->member_name,
-                            'member_email' => $email,
-                            'member_contact' => $recipient->member_contact,
-                            'result_status' => 'success',
-                            'sent_at' => $now,
-                            'response_code' => '200',
-                            'response_message' => '이메일 발송 성공',
-                            'created_at' => $now,
-                            'updated_at' => $now,
-                        ];
-                        $successCount++;
+                            $logs[] = [
+                                'send_sequence' => $sendSequence,
+                                'mail_sms_message_id' => $message->id,
+                                'mail_sms_message_member_id' => $recipient->id,
+                                'member_id' => $recipient->member_id,
+                                'member_name' => $recipient->member_name,
+                                'member_email' => $email,
+                                'member_contact' => $recipient->member_contact,
+                                'result_status' => 'success',
+                                'sent_at' => $now,
+                                'response_code' => '200',
+                                'response_message' => '이메일 발송 성공',
+                                'created_at' => $now,
+                                'updated_at' => $now,
+                            ];
+                            $successCount++;
+                        } catch (\Exception $e) {
+                            $logs[] = [
+                                'send_sequence' => $sendSequence,
+                                'mail_sms_message_id' => $message->id,
+                                'mail_sms_message_member_id' => $recipient->id,
+                                'member_id' => $recipient->member_id,
+                                'member_name' => $recipient->member_name,
+                                'member_email' => $email,
+                                'member_contact' => $recipient->member_contact,
+                                'result_status' => 'failure',
+                                'sent_at' => null,
+                                'response_code' => 'EXCEPTION',
+                                'response_message' => '이메일 발송 중 오류가 발생했습니다: ' . $e->getMessage(),
+                                'created_at' => $now,
+                                'updated_at' => $now,
+                            ];
+                            $failureCount++;
+                        }
                     } else {
                         // SMS 또는 카카오 알림톡 발송
                         $phone = $recipient->member_contact;
                         $content = $message->content;
 
-                        if (empty($phone)) {
+                        // 회원 정보에서 보호자 연락처 가져오기
+                        $member = $recipient->member;
+                        $parentPhone = $member ? $member->parent_contact : null;
+
+                        // 학생 연락처 발송
+                        if (!empty($phone)) {
+                            if ($message->message_type === MailSmsMessage::TYPE_SMS) {
+                                $result = $this->smsKakaoApiService->sendSms($phone, $content);
+                            } elseif ($message->message_type === MailSmsMessage::TYPE_KAKAO) {
+                                $result = $this->smsKakaoApiService->sendKakao($phone, $content);
+                            } else {
+                                throw new InvalidArgumentException('지원하지 않는 메시지 타입입니다.');
+                            }
+
+                            $logs[] = [
+                                'send_sequence' => $sendSequence,
+                                'mail_sms_message_id' => $message->id,
+                                'mail_sms_message_member_id' => $recipient->id,
+                                'member_id' => $recipient->member_id,
+                                'member_name' => $recipient->member_name,
+                                'member_email' => $recipient->member_email,
+                                'member_contact' => $phone,
+                                'result_status' => $result['success'] ? 'success' : 'failure',
+                                'sent_at' => $result['success'] ? $now : null,
+                                'response_code' => $result['response_code'],
+                                'response_message' => $result['response_message'],
+                                'created_at' => $now,
+                                'updated_at' => $now,
+                            ];
+
+                            if ($result['success']) {
+                                $successCount++;
+                            } else {
+                                $failureCount++;
+                            }
+                        } else {
                             $logs[] = [
                                 'send_sequence' => $sendSequence,
                                 'mail_sms_message_id' => $message->id,
@@ -286,37 +343,39 @@ class MailSmsService
                                 'updated_at' => $now,
                             ];
                             $failureCount++;
-                            continue;
                         }
 
-                        if ($message->message_type === MailSmsMessage::TYPE_SMS) {
-                            $result = $this->smsKakaoApiService->sendSms($phone, $content);
-                        } elseif ($message->message_type === MailSmsMessage::TYPE_KAKAO) {
-                            $result = $this->smsKakaoApiService->sendKakao($phone, $content);
-                        } else {
-                            throw new InvalidArgumentException('지원하지 않는 메시지 타입입니다.');
-                        }
+                        // 보호자 연락처 발송 (보호자 연락처가 있으면 발송)
+                        if (!empty($parentPhone) && $member) {
+                            if ($message->message_type === MailSmsMessage::TYPE_SMS) {
+                                $parentResult = $this->smsKakaoApiService->sendSms($parentPhone, $content);
+                            } elseif ($message->message_type === MailSmsMessage::TYPE_KAKAO) {
+                                $parentResult = $this->smsKakaoApiService->sendKakao($parentPhone, $content);
+                            } else {
+                                throw new InvalidArgumentException('지원하지 않는 메시지 타입입니다.');
+                            }
 
-                        $logs[] = [
-                            'send_sequence' => $sendSequence,
-                            'mail_sms_message_id' => $message->id,
-                            'mail_sms_message_member_id' => $recipient->id,
-                            'member_id' => $recipient->member_id,
-                            'member_name' => $recipient->member_name,
-                            'member_email' => $recipient->member_email,
-                            'member_contact' => $phone,
-                            'result_status' => $result['success'] ? 'success' : 'failure',
-                            'sent_at' => $result['success'] ? $now : null,
-                            'response_code' => $result['response_code'],
-                            'response_message' => $result['response_message'],
-                            'created_at' => $now,
-                            'updated_at' => $now,
-                        ];
+                            $logs[] = [
+                                'send_sequence' => $sendSequence,
+                                'mail_sms_message_id' => $message->id,
+                                'mail_sms_message_member_id' => $recipient->id,
+                                'member_id' => $recipient->member_id,
+                                'member_name' => $recipient->member_name . ' (보호자)',
+                                'member_email' => $recipient->member_email,
+                                'member_contact' => $parentPhone,
+                                'result_status' => $parentResult['success'] ? 'success' : 'failure',
+                                'sent_at' => $parentResult['success'] ? $now : null,
+                                'response_code' => $parentResult['response_code'],
+                                'response_message' => $parentResult['response_message'],
+                                'created_at' => $now,
+                                'updated_at' => $now,
+                            ];
 
-                        if ($result['success']) {
-                            $successCount++;
-                        } else {
-                            $failureCount++;
+                            if ($parentResult['success']) {
+                                $successCount++;
+                            } else {
+                                $failureCount++;
+                            }
                         }
                     }
                 } catch (\Exception $e) {
@@ -372,8 +431,8 @@ class MailSmsService
             $sequenceMap[$recipient->id] = $index + 1;
         }
 
-        // 이름 순으로 정렬된 쿼리
-        $query = $message->recipients()->orderBy('member_name');
+        // 이름 순으로 정렬된 쿼리 (회원 정보도 함께 로드)
+        $query = $message->recipients()->with('member')->orderBy('member_name');
 
         if ($request->filled('keyword')) {
             $keyword = $request->keyword;
@@ -387,9 +446,15 @@ class MailSmsService
         $perPage = (int) $request->input('per_page', 20);
         $paginator = $query->paginate($perPage)->withQueryString();
 
-        // 각 항목에 순서 번호 추가
+        // 각 항목에 순서 번호 추가 및 보호자 연락처 정보 추가
         $paginator->getCollection()->transform(function ($item) use ($sequenceMap) {
             $item->sequence = $sequenceMap[$item->id] ?? null;
+            // 회원 정보에서 보호자 연락처 가져오기
+            if ($item->member) {
+                $item->parent_contact = $item->member->parent_contact;
+            } else {
+                $item->parent_contact = null;
+            }
             return $item;
         });
 
@@ -401,7 +466,7 @@ class MailSmsService
      */
     public function getLogs(MailSmsMessage $message, Request $request, ?int $sendSequence = null): LengthAwarePaginator
     {
-        $query = $message->logs()->orderByDesc('created_at');
+        $query = $message->logs()->with('member')->orderByDesc('created_at');
 
         $activeSequence = $sendSequence ?? $request->input('send_sequence');
 
@@ -453,7 +518,7 @@ class MailSmsService
      */
     public function searchMembers(Request $request): LengthAwarePaginator
     {
-        $query = Member::query()->select('id', 'name', 'login_id', 'email', 'school_name', 'contact')->orderByDesc('created_at');
+        $query = Member::query()->select('id', 'name', 'login_id', 'email', 'school_name', 'contact', 'parent_contact')->orderByDesc('created_at');
 
         // 회원구분 필터
         $memberType = $request->input('member_type');
@@ -496,12 +561,13 @@ class MailSmsService
         return Member::query()
             ->where('member_group_id', $groupId)
             ->orderBy('name')
-            ->get(['id', 'name', 'email', 'contact'])
+            ->get(['id', 'name', 'email', 'contact', 'parent_contact'])
             ->map(fn(Member $member) => [
                 'id' => $member->id,
                 'name' => $member->name,
                 'email' => $member->email,
                 'contact' => $member->contact,
+                'parent_contact' => $member->parent_contact,
             ])
             ->toArray();
     }
@@ -523,7 +589,7 @@ class MailSmsService
 
         $members = Member::query()
             ->whereIn('id', $uniqueIds)
-            ->get(['id', 'name', 'email', 'contact']);
+            ->get(['id', 'name', 'email', 'contact', 'parent_contact']);
 
         if ($members->count() === 0) {
             throw new InvalidArgumentException('선택한 회원을 찾을 수 없습니다.');

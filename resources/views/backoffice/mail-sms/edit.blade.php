@@ -18,9 +18,6 @@
         data-member-search-url="{{ route('backoffice.mail-sms.search-members') }}"
         data-csrf-token="{{ csrf_token() }}"></div>
     <div class="form-header">
-        <button type="button" class="btn btn-primary btn-sm js-mail-sms-send" style="display: inline-block; margin-right: 10px;">
-            <i class="fas fa-paper-plane"></i> <span class="btn-text">발송</span>
-        </button>
         <a href="{{ route('backoffice.mail-sms.index') }}" class="btn btn-secondary btn-sm">
             <i class="fas fa-arrow-left"></i> <span class="btn-text">목록으로</span>
         </a>
@@ -94,7 +91,7 @@
                                 <div class="form-group">
                                     <label>회원 <span class="text-danger">*</span></label>
                                     <div class="school-search-wrapper">
-                                        <input type="text" id="selected_members_display" value="{{ $selectedMembers->pluck('member_name')->join(', ') }}" readonly placeholder="회원을 선택해주세요">
+                                        <input type="text" id="selected_members_display" value="{{ $selectedMembers->pluck('member_name')->join(', ') }}" readonly placeholder="회원을 선택해주세요" style="display: none;">
                                         <button type="button" id="openMemberSearchBtn" class="btn btn-secondary btn-sm" data-disabled-label="회원 그룹 선택 시 검색을 사용할 수 없습니다.">
                                             <i class="fas fa-search"></i> 검색
                                         </button>
@@ -124,6 +121,7 @@
                                                     <th>이름</th>
                                                     <th>이메일</th>
                                                     <th>연락처</th>
+                                                    <th>학부모 연락처</th>
                                                     <th style="width: 90px;">관리</th>
                                                 </tr>
                                             </thead>
@@ -134,6 +132,7 @@
                                                             <td>{{ $member->member_name }}</td>
                                                             <td>{{ $member->member_email ?? '-' }}</td>
                                                             <td>{{ $member->member_contact ?? '-' }}</td>
+                                                            <td>{{ $member->parent_contact ?? '-' }}</td>
                                                             <td>
                                                                 <div class="board-btn-group">
                                                                     <button type="button" class="btn btn-danger btn-sm selected-member-remove" data-member-id="{{ $member->member_id }}">삭제</button>
@@ -144,7 +143,7 @@
                                                     @endif
                                                 @empty
                                                     <tr class="selected-member-empty">
-                                                        <td colspan="4" class="text-center">선택된 회원이 없습니다.</td>
+                                                        <td colspan="5" class="text-center">선택된 회원이 없습니다.</td>
                                                     </tr>
                                                 @endforelse
                                             </tbody>
@@ -156,7 +155,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="title">제목 <span class="text-danger">*</span></label>
-                                    <input type="text" id="title" name="title" value="{{ old('title', $message->title ?? '') }}" maxlength="255">
+                                    <input type="text" id="title" name="title" value="{{ old('title', $message->title ?? '') }}">
                                     @error('title')
                                         <p class="text-danger">{{ $message }}</p>
                                     @enderror
@@ -164,6 +163,10 @@
                                 <div class="form-group">
                                     <label for="content">내용 <span class="text-danger">*</span></label>
                                     <textarea id="content" name="content" rows="10">{{ old('content', $message->content ?? '') }}</textarea>
+                                    <div class="text-muted small" style="margin-top: 5px; display: flex; justify-content: space-between; align-items: center;">
+                                        <span id="message-type-limit-guide">※ SMS는 최대 200자, 카카오 알림톡은 최대 500자까지 입력 가능합니다.</span>
+                                        <span id="content-char-count" style="font-weight: bold;">0자</span>
+                                    </div>
                                     @error('content')
                                         <p class="text-danger">{{ $message }}</p>
                                     @enderror
@@ -209,6 +212,62 @@
         deleteRecipientUrl: "{{ route('backoffice.mail-sms.recipients.delete', ['mailSmsMessage' => $message, 'recipient' => '__RECIPIENT_ID__']) }}",
         syncRecipientsUrl: "{{ route('backoffice.mail-sms.recipients.sync', $message) }}"
     };
+
+    // 글자 수 카운트 및 제한 체크
+    function updateCharCount() {
+        const content = document.getElementById('content');
+        const charCount = document.getElementById('content-char-count');
+        const guideText = document.getElementById('message-type-limit-guide');
+        
+        if (!content || !charCount) return;
+        
+        const length = content.value.length;
+        const messageType = document.querySelector('input[name="message_type"]:checked')?.value;
+        
+        let maxLength = 0;
+        let limitText = '';
+        
+        if (messageType === 'sms') {
+            maxLength = 200;
+            limitText = '※ SMS는 최대 200자까지 입력 가능합니다.';
+        } else if (messageType === 'kakao') {
+            maxLength = 500;
+            limitText = '※ 카카오 알림톡은 최대 500자까지 입력 가능합니다.';
+        } else {
+            limitText = '※ 이메일은 글자 수 제한이 없습니다.';
+        }
+        
+        if (guideText) {
+            guideText.textContent = limitText;
+        }
+        
+        charCount.textContent = length.toLocaleString() + '자';
+        
+        // 글자 수 초과 시 경고 색상 표시
+        if (maxLength > 0 && length > maxLength) {
+            charCount.style.color = 'red';
+            charCount.textContent = length.toLocaleString() + '자 (최대 ' + maxLength.toLocaleString() + '자 초과)';
+        } else if (maxLength > 0 && length > maxLength * 0.9) {
+            charCount.style.color = 'orange';
+        } else {
+            charCount.style.color = 'inherit';
+        }
+    }
+    
+    // 페이지 로드 시 및 입력 시 글자 수 업데이트
+    document.addEventListener('DOMContentLoaded', function() {
+        const content = document.getElementById('content');
+        const messageTypeInputs = document.querySelectorAll('input[name="message_type"]');
+        
+        if (content) {
+            content.addEventListener('input', updateCharCount);
+            updateCharCount();
+        }
+        
+        messageTypeInputs.forEach(input => {
+            input.addEventListener('change', updateCharCount);
+        });
+    });
 
     let recipientsLoaded = false;
     let currentRecipientsPage = 1;
@@ -291,6 +350,7 @@
         html += '<th>이름</th>';
         html += '<th>이메일</th>';
         html += '<th>연락처</th>';
+        html += '<th>학부모 연락처</th>';
         html += '<th style="width: 90px;">관리</th>';
         html += '</tr></thead><tbody>';
 
@@ -300,6 +360,7 @@
             html += '<td>' + (recipient.member_name || '-') + '</td>';
             html += '<td>' + (recipient.member_email || '-') + '</td>';
             html += '<td>' + (recipient.member_contact || '-') + '</td>';
+            html += '<td>' + (recipient.parent_contact || '-') + '</td>';
             html += '<td>';
             html += '<button type="button" class="btn btn-danger btn-sm delete-recipient-btn" data-recipient-id="' + recipient.id + '" onclick="deleteRecipient(' + recipient.id + ')">';
             html += '<i class="fas fa-trash"></i> 삭제';

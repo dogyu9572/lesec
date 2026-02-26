@@ -133,10 +133,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
             rows.forEach(function(row) {
                 const drawResult = row.getAttribute('data-draw-result');
-                if (filterValue === '' || drawResult === filterValue) {
+                if (filterValue === '') {
+                    // 전체 선택
                     row.style.display = '';
+                } else if (filterValue === 'pending') {
+                    // 대기중: pending 또는 waitlist 또는 null 모두 매칭
+                    if (drawResult === 'pending' || drawResult === 'waitlist' || !drawResult) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
                 } else {
-                    row.style.display = 'none';
+                    // 당첨, 미당첨: 정확히 일치해야 함
+                    if (drawResult === filterValue) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
                 }
             });
         });
@@ -146,7 +159,50 @@ document.addEventListener('DOMContentLoaded', function() {
     if (smsEmailBtn) {
         smsEmailBtn.addEventListener('click', function(e) {
             e.stopPropagation();
-            alert('SMS/메일 발송 기능은 준비 중입니다.');
+            
+            // 선택된 명단 확인
+            const selectedCheckboxes = document.querySelectorAll('.roster-checkbox:checked');
+            
+            if (selectedCheckboxes.length === 0) {
+                alert('발송할 명단을 선택해주세요.');
+                return;
+            }
+            
+            // 선택된 신청자 ID 수집
+            const selectedIds = Array.from(selectedCheckboxes).map(function(checkbox) {
+                return checkbox.value;
+            });
+            
+            // 현재 프로그램의 reservation_id와 application_type
+            const reservationId = programInfo.reservationId;
+            const applicationType = programInfo.applicationType;
+            
+            if (!reservationId) {
+                alert('프로그램 정보를 찾을 수 없습니다. 페이지를 새로고침해주세요.');
+                return;
+            }
+            
+            // 팝업 창 열기 (reservation_id와 선택된 신청자 ID 전달)
+            const params = new URLSearchParams();
+            params.append('reservation_id', reservationId);
+            params.append('application_type', applicationType);
+            if (applicationType === 'individual') {
+                params.append('application_ids', selectedIds.join(','));
+            } else {
+                params.append('participant_ids', selectedIds.join(','));
+            }
+            
+            const url = '/backoffice/popup-windows/sms-email?' + params.toString();
+            const popupWindow = window.open(
+                url,
+                'smsEmailPopup',
+                'width=600,height=700,scrollbars=yes,resizable=yes'
+            );
+            
+            // 팝업 창이 차단되었는지 확인
+            if (!popupWindow || popupWindow.closed || typeof popupWindow.closed === 'undefined') {
+                alert('팝업이 차단되었습니다. 팝업 차단을 해제해주세요.');
+            }
         });
     }
 
@@ -339,6 +395,12 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!tbody) {
             alert('명단 테이블을 찾을 수 없습니다.');
             return;
+        }
+
+        // "등록된 명단이 없습니다" 행 제거
+        const noDataRow = tbody.querySelector('tr.no-data-row');
+        if (noDataRow) {
+            noDataRow.remove();
         }
 
         // 기존 행 개수 확인 (번호 계산용)
@@ -634,7 +696,15 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             if (data) {
                 if (data.success) {
-                    alert(data.message || '저장되었습니다.');
+                    let alertMessage = data.message || '저장되었습니다.';
+                    // 정원이 업데이트된 경우 별도로 강조
+                    if (data.capacity_updated && data.old_capacity !== null && data.new_capacity !== null) {
+                        alertMessage = `정원이 꽉 차서 정원을 자동으로 증가시켰습니다.\n\n` +
+                                     `이전 정원: ${data.old_capacity}명\n` +
+                                     `새 정원: ${data.new_capacity}명\n\n` +
+                                     alertMessage;
+                    }
+                    alert(alertMessage);
                     window.location.reload();
                 } else {
                     alert(data.message || '저장 중 오류가 발생했습니다.');

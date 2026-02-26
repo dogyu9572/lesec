@@ -93,8 +93,17 @@ class RosterService
             ->pluck('total', 'program_reservation_id')
             ->toArray();
 
+        // 단체 프로그램별 명단 등록 인원 계산 (GroupApplicationParticipant 개수)
+        $groupParticipantsCount = GroupApplicationParticipant::query()
+            ->selectRaw('group_applications.program_reservation_id, COUNT(*) as count')
+            ->join('group_applications', 'group_application_participants.group_application_id', '=', 'group_applications.id')
+            ->whereIn('group_applications.program_reservation_id', $groupProgramIds)
+            ->groupBy('group_applications.program_reservation_id')
+            ->pluck('count', 'program_reservation_id')
+            ->toArray();
+
         // 통합 데이터 변환
-        $mergedData = $this->mergePrograms($individualPrograms, $groupPrograms, $individualApplicationsCount, $groupApplicationsCount);
+        $mergedData = $this->mergePrograms($individualPrograms, $groupPrograms, $individualApplicationsCount, $groupApplicationsCount, $groupParticipantsCount);
 
         // 정렬 (참가일 기준 내림차순)
         $mergedData = $mergedData->sortByDesc(function ($item) {
@@ -128,7 +137,8 @@ class RosterService
         Collection $individualPrograms,
         Collection $groupPrograms,
         array $individualApplicationsCount,
-        array $groupApplicationsCount
+        array $groupApplicationsCount,
+        array $groupParticipantsCount = []
     ): Collection {
         $merged = collect();
 
@@ -136,6 +146,8 @@ class RosterService
         /** @var ProgramReservation $program */
         foreach ($individualPrograms as $program) {
             $applicantCount = $individualApplicationsCount[$program->id] ?? 0;
+            // 개인 프로그램은 신청인원 = 명단 등록 인원
+            $participantCount = $applicantCount;
 
             $merged->push([
                 'id' => $program->id,
@@ -148,6 +160,7 @@ class RosterService
                 'capacity' => $program->capacity,
                 'is_unlimited_capacity' => $program->is_unlimited_capacity ?? false,
                 'applicant_count' => $applicantCount,
+                'participant_count' => $participantCount,
                 'edit_url' => route('backoffice.individual-programs.edit', $program->id),
                 'raw' => $program, // 원본 데이터 보관
             ]);
@@ -157,6 +170,7 @@ class RosterService
         /** @var ProgramReservation $program */
         foreach ($groupPrograms as $program) {
             $applicantCount = (int) ($groupApplicationsCount[$program->id] ?? 0);
+            $participantCount = (int) ($groupParticipantsCount[$program->id] ?? 0);
 
             $merged->push([
                 'id' => $program->id,
@@ -169,6 +183,7 @@ class RosterService
                 'capacity' => $program->capacity,
                 'is_unlimited_capacity' => $program->is_unlimited_capacity ?? false,
                 'applicant_count' => $applicantCount,
+                'participant_count' => $participantCount,
                 'edit_url' => route('backoffice.group-programs.edit', $program->id),
                 'raw' => $program, // 원본 데이터 보관
             ]);

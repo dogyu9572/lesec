@@ -72,7 +72,7 @@ class School extends Model
      */
     public function scopeByCity($query, string $city)
     {
-        return $query->where('city', $city);
+        return $query->where('city', 'like', "%{$city}%");
     }
 
     /**
@@ -80,7 +80,7 @@ class School extends Model
      */
     public function scopeByDistrict($query, string $district)
     {
-        return $query->where('district', $district);
+        return $query->where('district', 'like', "%{$district}%");
     }
 
     /**

@@ -113,7 +113,7 @@
 	.header .member a:before {position:relative;}
 	.header .gnb .flex {flex-direction:column; justify-content:flex-start; overflow:auto; max-height:calc(100% - 74px);}
 	.header .gnb .menu {border-bottom:#EBEBEB 1px solid;}
-	.header .gnb .menu > button {position:relative; display:block; font-size:24px; line-height:40px; padding:16px 30px 16px 0; width:100%; text-align:left;}
+	.header .gnb .menu > button {position:relative; display:block; font-size:24px; color:#333; line-height:40px; padding:16px 30px 16px 0; width:100%; text-align:left;}
 	.header .gnb .menu > button i {position:absolute; top:50%; right:8px; width:18px; height:18px; background:#222; mask:url('/images/arrow_gnb.svg') no-repeat 50% 50% / contain; -webkit-mask:url('/images/arrow_gnb.svg') no-repeat 50% 50% / contain; margin-top:-9px; transition:.2s linear;}
 	.header .gnb .menu.on > button {color:#39B54A;}
 	.header .gnb .menu.on > button i {transform:rotate(180deg); background:#39B54A;}
@@ -212,6 +212,9 @@
 	.ctit {font-size:40px; margin-bottom:30px;}
 	.ctit.mb32 {margin-bottom:25px;}
 
+/* LOGIN */
+	.mem_wrap {min-height:calc(100vh - 371px);}
+
 /* 회원가입 */
 	.mem_half > * {border-radius:10px;}
 
@@ -221,6 +224,7 @@
 /* 회원정보 찾기 */
 	.find_end {padding:80px 0 100px;}
 	.find_end .find_box {padding:28px; border-radius:10px; margin:30px auto;}
+	.password-notice.mb {margin-bottom:60px;}
 /* 신청완료 */
 /* svisual */
 	.svisual {height:230px;}
@@ -261,7 +265,7 @@
 	.faq_wrap .on dt button i:after {width:16px;}
 	.faq_wrap dt button i:after {height:16px;}
 	.faq_wrap dt button:before,
-	.faq_wrap dd:before {top:20px; left:20px; font-size:16px;}
+	.faq_wrap dd:before {left:20px; font-size:16px;}
 	.faq_wrap dd .btns {margin-top:20px; padding-top:20px;}
 	.faq_wrap dd .btn_download {font-size:15px; line-height:34px; height:36px; width:100px; padding:0 15px;}
 	.faq_wrap .on {border-radius:10px;}
@@ -377,7 +381,7 @@
 	.mo_vw {display:block !important;}
 /* header */
 	.header {height:54px;}
-	.header .logo {width:270px; height:54px; background:url('/images/logo_m.svg') no-repeat 50% 50% / contain;}
+	.header .logo {width:269px; height:54px; background:url('/images/logo_m.svg') no-repeat 50% 50% / contain;}
 	.header .logo img {display:none;}
 	.header .gnb {padding:74px 20px 20px;}
 	.header .gnb:before {height:54px;}
@@ -456,8 +460,8 @@
 /* 게시판 상단 */
 	.board_top {margin-bottom:12px; flex-wrap:wrap; gap:10px;}
 	.board_top .total {font-size:13px;}
-	.board_top .selects {gap:8px; width:100%;}
-	.board_top .selects select {width:calc((100% - 16px)/3); height:44px; background-position:right 5px center; font-size:13px; padding:0 10px;}
+	.board_top .selects {gap:8px; width:100%; flex-wrap:wrap;}
+	.board_top .selects select {width:calc(50% - 4px); height:44px; background-position:right 5px center; font-size:13px; padding:0 10px;}
 	.board_top .search_wrap select {width:100px; height:44px;}
 	.board_top .search_area {width:calc(100% - 108px); padding-right:40px;}
 	.board_top .search_area input {height:42px; padding:0 12px;}
@@ -499,9 +503,10 @@
 	.board_view .btm .arrow {position:relative; display:block; font-size:13px; line-height:40px; width:100%; border-bottom:#ddd 1px solid;}
 	.board_view .btm .prev {padding-left:70px;}
 	.board_view .btm .prev strong {padding-left:24px;}
+	.board_view .btm .prev strong:before {transform:translateY(-50%) rotate(90deg);}
 	.board_view .btm .next {padding:0 0 0 70px; left:0; right:auto; text-align:left;}
 	.board_view .btm .next strong {padding:0 0 0 24px; left:0; right:auto;}
-	.board_view .btm .next strong:before {left:0; right:auto; transform:translateY(-50%);}
+	.board_view .btm .next strong:before {left:0; right:auto; transform:translateY(-50%) rotate(-90deg);}
 	.board_view .btm .btn_list {font-size:14px; line-height:48px; height:48px; width:150px; margin-top:20px;}
 /* 게시판 쓰기 */
 	.board_write th span {font-size:14px;}
@@ -564,6 +569,8 @@
 	.stit span {padding-left:0; font-size:12px; line-height:20px; width:100%; display:block;}
 	.stit .abso_btns {gap:6px; top:auto; bottom:12px;}
 	.stit .abso_btns .btn {font-size:12px; line-height:28px; height:30px; width:78px;}
+	.stit .abso_btns.mo_long {position:relative; bottom:0; width:100%; margin-top:10px; justify-content:flex-end;}
+	.stit .abso_btns.mo_long .btn {margin:0 !important;}
 	.btit {margin-bottom:24px;}
 	.btit strong {font-size:24px;}
 	.btit p {margin-top:6px;}
@@ -571,7 +578,7 @@
 	.itit:before {width:3px; height:18px; border-top-width:9px; border-bottom-width:9px;}
 
 /* LOGIN */
-	.mem_wrap {padding:40px 0 100px;}
+	.mem_wrap {padding:40px 0 100px; min-height:calc(100vh - 406px);}
 	.login_wrap p.tac {margin:8px 0 20px;}
 	.login_wrap .inputs .text {height:42px; padding:0 14px; font-size:14px;}
 	.login_wrap .inputs .text + .text {margin-top:6px;}
@@ -652,7 +659,10 @@
 	.popup#pop_school .scroll {height:calc(100vh - 212px); max-height:calc(100vh - 212px);}
 	.popup#pop_school .join_wrap {position:relative; padding-bottom:72px;}
 	.popup#pop_school .join_wrap:before {content:""; position:absolute; bottom:0; left:50%; width:100vw; height:72px; background:#fff; border-top:#E0E3EE 1px solid; transform:translateX(-50%);}
-	.popup#pop_school .btn_submit {position:absolute; bottom:0; left:0; width:100%;}
+	.popup#pop_school .btn_submit {position:absolute; bottom:0; left:0; width:100%; margin:0;}
+	.popup#pop_school .btn_submit[disabled] {display:none;}
+	/* .popup#pop_school .btn_group {display:flex; gap:8p;}
+	.popup#pop_school .btn_group .btn_submit {position:relative; width:calc(50% - 4px);} 갑자기 생긴 버튼으로 추가했으나 나중에 쓸 지 몰라 주석 */
 /* 회원정보 찾기 */
 	.find_end {padding:50px 0 100px;}
 	.find_end:before {width:40px; margin-bottom:20px;}
@@ -661,6 +671,7 @@
 	.find_end .find_box strong {font-size:18px;}
 	.find_end .find_box dl {font-size:14px; gap:13px; margin-top:6px;}
 	.find_end .find_box dt:after {right:-7px; height:10px;}
+	.password-notice.mb {margin-bottom:40px;}
 /* 신청완료 */
 	.find_end .gbox {margin:20px 0; padding:16px 20px;}
 	.find_end .gbox dl {font-size:14px; line-height:22px;}
@@ -668,7 +679,12 @@
 	.apply_end_notice:before {width:60px;}
 
 /* svisual */
-	.svisual {height:160px;}
+	.svisual {height:160px; background-size:auto 80%; background-position:45% 100%;}
+	.svisual.g01 {background-color:#e7eefe;}
+	.svisual.g02 {background-color:#eaf8fb;}
+	.svisual.g03 {background-color:#e2f7ee;}
+	.svisual.g04 {background-color:#fefce6;}
+	.svisual.g05 {background-color:#fef5e6;}
 	.svisual strong {font-size:28px;}
 	.svisual .location {gap:6px; margin-top:8px;}
 	.svisual .location i {width:14px; height:14px;}
@@ -741,10 +757,11 @@
 	.schedule_table .table thead th {font-size:12px; line-height:36px;}
 	.schedule_table .table tbody td {padding:4px; height:56px;}
 	.schedule_table .table tbody td span {font-size:12px; line-height:18px; padding:0 2px;}
-	.schedule_table .table tbody td .list {margin-top:2px; display:flex; gap:2px;}
-	.schedule_table .table tbody td .list li {font-size:0; line-height:6px; height:6px; width:6px; padding:0;}
+	.schedule_table .table tbody td .list {position:relative; margin-top:2px; display:flex; gap:2px;}
+	.schedule_table .table tbody td .list li {position:absolute; font-size:0; line-height:6px; height:6px; width:6px; padding:0;}
 	.schedule_table .table tbody td .list li + li {margin-top:0;}
 	.schedule_table .table tbody td .list li.i_impossible {line-height:6px;}
+	.schedule_table .schedule-disabled {word-break:break-word; padding:2px 4px;}
 	.schedule_table:after {content:""; position:absolute; bottom:-32px; left:50%; width:100vw; height:8px; background:#F7F8F9; transform:translateX(-50%);}
 	.nebox p {font-size:12px; line-height:18px; padding-left:16px; background-size:12px;}
 	.schedule_wrap .glbox {border:0 !important;}
@@ -791,7 +808,7 @@
 	.faq_wrap dt button i:after {height:12px;}
 	.faq_wrap dd {line-height:24px;}
 	.faq_wrap dt button:before,
-	.faq_wrap dd:before {top:16px; left:16px; width:24px; height:24px; line-height:22px; font-size:12px;}
+	.faq_wrap dd:before {left:16px; width:24px; height:24px; line-height:22px; font-size:12px;}
 	.faq_wrap dd .btns {margin-top:10px; padding-top:10px;}
 	.faq_wrap dd .btn_download {font-size:13px; line-height:30px; height:32px; width:100px; padding:0 10px; background-size:14px; background-position:right 10px center;}
 	.faq_wrap .on {border-radius:8px;}

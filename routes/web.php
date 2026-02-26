@@ -9,6 +9,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\SubController;
 use App\Http\Controllers\Introduction\GreetingContactController;
 use App\Http\Controllers\ProgramController;
+use App\Http\Controllers\ProgramPaymentController;
 use App\Http\Controllers\Backoffice\PopupController;
 use App\Http\Controllers\Member\MemberAuthController;
 use App\Http\Controllers\Member\MemberRegisterController;
@@ -93,6 +94,16 @@ Route::prefix('program')->name('program.')->group(function () {
 		->where('type', 'middle_semester|middle_vacation|high_semester|high_vacation|special')
 		->name('select.individual');
 
+	Route::post('/{type}/payment/prepare', [ProgramPaymentController::class, 'prepare'])
+		->where('type', 'middle_semester|middle_vacation|high_semester|high_vacation|special')
+		->name('payment.prepare');
+	Route::get('/{type}/payment/success', [ProgramPaymentController::class, 'success'])
+		->where('type', 'middle_semester|middle_vacation|high_semester|high_vacation|special')
+		->name('payment.success');
+	Route::get('/{type}/payment/fail', [ProgramPaymentController::class, 'fail'])
+		->where('type', 'middle_semester|middle_vacation|high_semester|high_vacation|special')
+		->name('payment.fail');
+
 	// 완료 페이지
 	Route::get('/{type}/complete-group', [ProgramController::class, 'completeGroup'])
 		->where('type', 'middle_semester|middle_vacation|high_semester|high_vacation|special')
@@ -148,6 +159,9 @@ Route::prefix('mypage')->name('mypage.')->group(function () {
 	Route::post('/application_write/{id}', [MemberMypageController::class, 'groupApplicationWriteUpdate'])->name('application_write.update');
 	Route::get('/application_write/{id}/sample', [MemberMypageController::class, 'groupApplicationWriteSample'])->name('application_write.sample');
 	Route::post('/application_write/{id}/upload', [MemberMypageController::class, 'groupApplicationWriteUpload'])->name('application_write.upload');
+	Route::post('/application_write/{id}/payment/prepare', [ProgramPaymentController::class, 'prepareGroup'])->name('application_write.payment.prepare');
+	Route::get('/application_write/{id}/payment/success', [ProgramPaymentController::class, 'successGroup'])->name('application_write.payment.success');
+	Route::get('/application_write/{id}/payment/fail', [ProgramPaymentController::class, 'failGroup'])->name('application_write.payment.fail');
 	//신청내역 - 개인
 	Route::get('/application_indi_list', [MemberMypageController::class, 'individualApplicationList'])->name('application_indi_list');
 	Route::get('/application_indi_view/{id}', [MemberMypageController::class, 'individualApplicationShow'])->name('application_indi_view');

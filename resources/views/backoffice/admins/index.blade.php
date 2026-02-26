@@ -68,38 +68,34 @@
                         <span class="list-count">Total : {{ $admins->total() }}</span>
                     </div>
                     <div class="list-controls">
+                        <button type="button" id="bulk-delete-btn-header" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> 선택 삭제</button>
+                        <a href="{{ route('backoffice.admins.create') }}" class="btn btn-success btn-sm"><i class="fas fa-plus"></i> 신규등록</a>
                         <form method="GET" action="{{ route('backoffice.admins.index') }}" class="per-page-form">
-                            @foreach(request()->except('per_page') as $key => $value)
+                            @foreach(request()->except(['per_page', 'page']) as $key => $value)
                                 <input type="hidden" name="{{ $key }}" value="{{ $value }}">
                             @endforeach
                             <label for="per_page" class="per-page-label">목록 개수:</label>
                             <select id="per_page" name="per_page" class="per-page-select" onchange="this.form.submit()">
-                                <option value="10" @selected(request('per_page', 10) == 10)>10</option>
-                                <option value="20" @selected(request('per_page') == 20)>20</option>
-                                <option value="50" @selected(request('per_page') == 50)>50</option>
-                                <option value="100" @selected(request('per_page') == 100)>100</option>
+                                <option value="10" @selected(request('per_page', 10) == 10)>10개</option>
+                                <option value="20" @selected(request('per_page') == 20)>20개</option>
+                                <option value="50" @selected(request('per_page') == 50)>50개</option>
+                                <option value="100" @selected(request('per_page') == 100)>100개</option>
                             </select>
                         </form>
-                        <button type="button" id="bulk-delete-btn-header" class="btn btn-danger btn-sm">
-                            <i class="fas fa-trash"></i> 선택 삭제
-                        </button>
-                        <a href="{{ route('backoffice.admins.create') }}" class="btn btn-success btn-sm">
-                            <i class="fas fa-plus"></i> 등록
-                        </a>
                     </div>
                 </div>
                 <div class="table-responsive">
-                    <table class="board-table">
+                    <table class="board-table tal">
                         <thead>
                             <tr>
-                                <th class="w5 board-checkbox-column">
+                                <th class="board-checkbox-column">
                                     <input type="checkbox" id="select-all" class="form-check-input">
                                 </th>
                                 <th>번호</th>
                                 <th>아이디</th>
                                 <th>이름</th>
                                 <th>권한</th>
-                                <th>관리</th>
+                                <th class="w10">관리</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -129,12 +125,8 @@
                                     </td>
                                     <td>
                                         <div class="board-btn-group">
-                                            <a href="{{ route('backoffice.admins.show', $admin) }}" class="btn btn-info btn-sm">
-                                                <i class="fas fa-eye"></i> 보기
-                                            </a>
-                                            <a href="{{ route('backoffice.admins.edit', $admin) }}" class="btn btn-primary btn-sm">
-                                                <i class="fas fa-edit"></i> 수정
-                                            </a>
+                                            <a href="{{ route('backoffice.admins.show', $admin) }}" class="btn btn-info btn-sm"><i class="fas fa-eye"></i> 보기</a>
+                                            <!-- <a href="{{ route('backoffice.admins.edit', $admin) }}" class="btn btn-primary btn-sm"><i class="fas fa-edit"></i> 수정</a> -->
                                         </div>
                                     </td>
                                 </tr>

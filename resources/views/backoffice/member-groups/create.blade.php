@@ -57,6 +57,8 @@
                                         <tr>
                                             <th>No</th>
                                             <th>이름</th>
+                                            <th>학교</th>
+                                            <th>학년</th>
                                             <th>(학생)연락처</th>
                                             <th>보호자 연락처</th>
                                             <th>이메일</th>
@@ -66,7 +68,7 @@
                                     </thead>
                                     <tbody id="member-list-body">
                                         <tr style="border: none;">
-                                            <td colspan="7" class="text-center" style="padding: 40px 20px; border: none !important; border-bottom: none !important;">등록된 회원이 없습니다.</td>
+                                            <td colspan="9" class="text-center" style="padding: 40px 20px; border: none !important; border-bottom: none !important;">등록된 회원이 없습니다.</td>
                                         </tr>
                                     </tbody>
                                 </table>

@@ -17,8 +17,12 @@ class MailSmsMessagesSeeder extends Seeder
             return;
         }
         $rows = json_decode(file_get_contents($path), true);
+        $validMemberGroupIds = DB::table('member_groups')->pluck('id')->flip()->all();
         DB::table('mail_sms_messages')->delete();
         foreach ($rows as $row) {
+            if (isset($row['member_group_id']) && $row['member_group_id'] !== null && !isset($validMemberGroupIds[$row['member_group_id']])) {
+                $row['member_group_id'] = null;
+            }
             DB::table('mail_sms_messages')->insert($row);
         }
     }

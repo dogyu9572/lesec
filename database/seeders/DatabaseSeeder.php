@@ -18,8 +18,8 @@ class DatabaseSeeder extends Seeder
         $this->call(UserMenuPermissionsSeeder::class);
 
         $this->call(BoardSkinSeeder::class);
-        $this->call(BoardTemplateSeeder::class);
         $this->call(CategorySeeder::class);
+        $this->call(BoardTemplateSeeder::class);
         $this->call(BoardSeeder::class);
 
         $this->call(SettingSeeder::class);

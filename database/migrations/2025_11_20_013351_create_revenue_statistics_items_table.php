@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('revenue_statistics_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('revenue_statistics_id')->constrained('revenue_statistics')->onDelete('cascade')->comment('수익 통계 ID');
-            $table->string('item_name')->comment('항목명');
+            $table->string('school_type', 20)->nullable()->comment('구분(중등/고등)');
+            $table->string('item_name')->nullable()->comment('항목명');
             $table->integer('participants_count')->default(0)->comment('참가인원');
             $table->string('school_name')->nullable()->comment('참가학교');
             $table->integer('revenue')->default(0)->comment('수익');

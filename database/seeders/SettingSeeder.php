@@ -2,20 +2,29 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Setting;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class SettingSeeder extends Seeder
 {
     /**
      * 기본 설정 데이터를 시드합니다.
+     * data/settings.json 이 있으면 해당 데이터로 시딩 (현재 DB와 동일).
      */
     public function run(): void
     {
-        // 기존 데이터 삭제
-        Setting::truncate();
+        $path = database_path('seeders/data/settings.json');
+        if (is_file($path)) {
+            $rows = json_decode(file_get_contents($path), true);
+            Setting::truncate();
+            foreach ($rows as $row) {
+                DB::table('settings')->insert($row);
+            }
+            return;
+        }
 
-        // 기본 설정
+        Setting::truncate();
         Setting::create([
             'id' => 1,
             'site_title' => '홈페이지코리아',

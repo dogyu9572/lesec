@@ -2,19 +2,31 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\BoardTemplate;
 use App\Models\BoardSkin;
 use App\Models\Category;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class BoardTemplateSeeder extends Seeder
 {
     /**
-     * 기본 템플릿 시더
+     * 기본 템플릿 시더.
+     * data/board_templates.json 이 있으면 해당 데이터로 시딩 (현재 DB와 동일).
      */
     public function run(): void
     {
-        // 기본 스킨 가져오기
+        $path = database_path('seeders/data/board_templates.json');
+        if (is_file($path)) {
+            $rows = json_decode(file_get_contents($path), true);
+            BoardTemplate::query()->delete();
+            foreach ($rows as &$row) {
+                $this->normalizeJson($row, ['field_config', 'custom_fields_config']);
+                DB::table('board_templates')->insert($row);
+            }
+            return;
+        }
+
         $defaultSkin = BoardSkin::first();
         
         if (!$defaultSkin) {
@@ -230,5 +242,14 @@ class BoardTemplateSeeder extends Seeder
         }
 
         $this->command->info('✓ 기본 템플릿 6종이 생성되었습니다.');
+    }
+
+    private function normalizeJson(array &$row, array $keys): void
+    {
+        foreach ($keys as $key) {
+            if (isset($row[$key]) && is_array($row[$key])) {
+                $row[$key] = json_encode($row[$key], JSON_UNESCAPED_UNICODE);
+            }
+        }
     }
 }

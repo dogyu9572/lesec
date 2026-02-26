@@ -2,20 +2,34 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\BoardSkin;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class BoardSkinSeeder extends Seeder
 {
     /**
      * 게시판 스킨 데이터를 시드합니다.
+     * data/board_skins.json 이 있으면 해당 데이터로 시딩 (현재 DB와 동일).
      */
     public function run(): void
     {
-        // 기존 데이터 삭제 (외래키 고려)
-        \DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        $path = database_path('seeders/data/board_skins.json');
+        if (is_file($path)) {
+            $rows = json_decode(file_get_contents($path), true);
+            DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+            BoardSkin::query()->delete();
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+            foreach ($rows as $row) {
+                $this->normalizeJson($row, ['options']);
+                DB::table('board_skins')->insert($row);
+            }
+            return;
+        }
+
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         BoardSkin::query()->delete();
-        \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         $skins = [
             [
@@ -61,6 +75,15 @@ class BoardSkinSeeder extends Seeder
                 'is_active' => $skin['is_active'],
                 'is_default' => $skin['is_default'],
             ]);
+        }
+    }
+
+    private function normalizeJson(array &$row, array $keys): void
+    {
+        foreach ($keys as $key) {
+            if (isset($row[$key]) && is_array($row[$key])) {
+                $row[$key] = json_encode($row[$key], JSON_UNESCAPED_UNICODE);
+            }
         }
     }
 }

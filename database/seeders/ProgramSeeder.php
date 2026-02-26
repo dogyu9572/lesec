@@ -9,12 +9,30 @@ class ProgramSeeder extends Seeder
 {
     /**
      * Run the database seeds.
+     * database/seeders/data/programs.json 이 있으면 해당 데이터로 시딩 (현재 DB와 동일).
      */
     public function run(): void
     {
+        $path = database_path('seeders/data/programs.json');
+        if (is_file($path)) {
+            $rows = json_decode(file_get_contents($path), true);
+            foreach ($rows as $row) {
+                unset($row['id'], $row['created_at'], $row['updated_at']);
+                Program::updateOrCreate(
+                    [
+                        'type' => $row['type'],
+                        'application_type' => $row['application_type'] ?? 'individual',
+                    ],
+                    $row
+                );
+            }
+            return;
+        }
+
         $programs = [
             [
                 'type' => 'middle_semester',
+                'application_type' => 'individual',
                 'host' => '서울대학교 농업생명과학대학 농생명과학공동기기원(NICEM)',
                 'period_start' => '2025-09-01',
                 'period_end' => '2025-12-19',
@@ -87,6 +105,7 @@ class ProgramSeeder extends Seeder
             ],
             [
                 'type' => 'middle_vacation',
+                'application_type' => 'individual',
                 'host' => '서울대학교 농업생명과학대학 농생명과학공동기기원(NICEM)',
                 'period_start' => '2025-09-01',
                 'period_end' => '2025-12-19',
@@ -159,6 +178,7 @@ class ProgramSeeder extends Seeder
             ],
             [
                 'type' => 'high_semester',
+                'application_type' => 'individual',
                 'host' => '서울대학교 농업생명과학대학 농생명과학공동기기원(NICEM)',
                 'period_start' => '2025-09-01',
                 'period_end' => '2025-12-19',
@@ -231,6 +251,7 @@ class ProgramSeeder extends Seeder
             ],
             [
                 'type' => 'high_vacation',
+                'application_type' => 'individual',
                 'host' => '서울대학교 농업생명과학대학 농생명과학공동기기원(NICEM)',
                 'period_start' => '2025-09-01',
                 'period_end' => '2025-12-19',
@@ -303,6 +324,7 @@ class ProgramSeeder extends Seeder
             ],
             [
                 'type' => 'special',
+                'application_type' => 'individual',
                 'host' => '서울대학교 농업생명과학대학 농생명과학공동기기원(NICEM)',
                 'period_start' => '2025-09-01',
                 'period_end' => '2025-12-19',
@@ -377,7 +399,10 @@ class ProgramSeeder extends Seeder
 
         foreach ($programs as $programData) {
             Program::updateOrCreate(
-                ['type' => $programData['type']],
+                [
+                    'type' => $programData['type'],
+                    'application_type' => $programData['application_type'],
+                ],
                 $programData
             );
         }

@@ -2,19 +2,36 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\AdminGroup;
-use App\Models\GroupMenuPermission;
 use App\Models\AdminMenu;
+use App\Models\GroupMenuPermission;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class AdminGroupSeeder extends Seeder
 {
     /**
      * 관리자 권한 그룹 데이터를 시드합니다.
+     * data/admin_groups.json, admin_group_menu_permissions.json 이 있으면 해당 데이터로 시딩 (현재 DB와 동일).
      */
     public function run(): void
     {
-        // 기존 그룹 데이터 삭제
+        $groupsPath = database_path('seeders/data/admin_groups.json');
+        $permsPath = database_path('seeders/data/admin_group_menu_permissions.json');
+        if (is_file($groupsPath) && is_file($permsPath)) {
+            DB::table('admin_group_menu_permissions')->delete();
+            DB::table('admin_groups')->delete();
+            $groups = json_decode(file_get_contents($groupsPath), true);
+            foreach ($groups as $row) {
+                DB::table('admin_groups')->insert($row);
+            }
+            $perms = json_decode(file_get_contents($permsPath), true);
+            foreach ($perms as $row) {
+                DB::table('admin_group_menu_permissions')->insert($row);
+            }
+            return;
+        }
+
         AdminGroup::query()->delete();
 
         // 모든 메뉴 ID 가져오기

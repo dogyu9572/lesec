@@ -8,12 +8,22 @@ use Illuminate\Support\Facades\DB;
 class SidoSggCodeSeeder extends Seeder
 {
     /**
-     * Run the database seeds.
+     * 시도/시군구 코드 데이터를 시드합니다.
+     * data/sido_sgg_codes.json 이 있으면 해당 데이터로 시딩 (현재 DB와 동일).
      */
     public function run(): void
     {
-        DB::table('sido_sgg_codes')->truncate();
+        $path = database_path('seeders/data/sido_sgg_codes.json');
+        if (is_file($path)) {
+            $rows = json_decode(file_get_contents($path), true);
+            DB::table('sido_sgg_codes')->truncate();
+            foreach ($rows as $row) {
+                DB::table('sido_sgg_codes')->insert($row);
+            }
+            return;
+        }
 
+        DB::table('sido_sgg_codes')->truncate();
         $codes = [
             // 전체
             ['sido_code' => '00', 'sido_name' => '전체', 'sgg_code' => '00000', 'sgg_name' => '전체'],

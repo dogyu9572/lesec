@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('programs', function (Blueprint $table) {
             $table->id();
             $table->enum('type', ['middle_semester', 'middle_vacation', 'high_semester', 'high_vacation', 'special'])->comment('프로그램 타입');
+            $table->enum('application_type', ['individual', 'group'])->default('individual')->comment('신청유형');
             $table->string('host')->nullable()->comment('주최');
             $table->date('period_start')->nullable()->comment('기간 시작일');
             $table->date('period_end')->nullable()->comment('기간 종료일');
@@ -24,8 +25,8 @@ return new class extends Migration
             $table->boolean('is_active')->default(true)->comment('활성화 여부');
             $table->timestamps();
 
-            // 각 타입당 1개의 레코드만 존재하도록 UNIQUE 제약
-            $table->unique('type');
+            // 타입+신청유형 조합당 1개
+            $table->unique(['type', 'application_type']);
             
             // 인덱스
             $table->index('type');

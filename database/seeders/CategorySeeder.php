@@ -2,25 +2,34 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Category;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class CategorySeeder extends Seeder
 {
     /**
      * 카테고리 데이터를 시드합니다.
+     * data/categories.json 이 있으면 해당 데이터로 시딩 (현재 DB와 동일).
      */
     public function run(): void
     {
-        // 기존 카테고리 삭제 (외래키 고려)
-        \DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-        Category::truncate();
-        \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        $path = database_path('seeders/data/categories.json');
+        if (is_file($path)) {
+            $rows = json_decode(file_get_contents($path), true);
+            DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+            Category::truncate();
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+            foreach ($rows as $row) {
+                DB::table('categories')->insert($row);
+            }
+            return;
+        }
 
-        // ========================================
-        // FAQ 카테고리 그룹
-        // ========================================
-        
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        Category::truncate();
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
         $faqGroup = Category::create([
             'parent_id' => null,
             'code' => 'F001',

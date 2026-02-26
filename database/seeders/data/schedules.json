@@ -1,0 +1,172 @@
+[
+    {
+        "id": 1,
+        "title": "휴일",
+        "start_date": "2025-11-27",
+        "end_date": "2025-11-27",
+        "content": "휴일",
+        "disable_application": 1,
+        "created_at": "2025-11-24 14:51:53",
+        "updated_at": "2025-11-27 15:57:32"
+    },
+    {
+        "id": 2,
+        "title": "크리스마스",
+        "start_date": "2025-12-25",
+        "end_date": "2025-12-25",
+        "content": null,
+        "disable_application": 1,
+        "created_at": "2025-11-25 00:35:43",
+        "updated_at": "2025-11-25 00:35:43"
+    },
+    {
+        "id": 7,
+        "title": "기관 행사",
+        "start_date": "2025-12-22",
+        "end_date": "2025-12-22",
+        "content": "운영계획",
+        "disable_application": 1,
+        "created_at": "2025-12-08 15:26:11",
+        "updated_at": "2025-12-08 15:26:11"
+    },
+    {
+        "id": 8,
+        "title": "설 연휴",
+        "start_date": "2026-02-16",
+        "end_date": "2026-02-18",
+        "content": null,
+        "disable_application": 1,
+        "created_at": "2025-12-08 16:16:06",
+        "updated_at": "2025-12-08 16:16:06"
+    },
+    {
+        "id": 11,
+        "title": "test123",
+        "start_date": "2025-12-17",
+        "end_date": "2025-12-17",
+        "content": null,
+        "disable_application": 0,
+        "created_at": "2025-12-09 15:48:55",
+        "updated_at": "2025-12-09 15:48:55"
+    },
+    {
+        "id": 12,
+        "title": "tete",
+        "start_date": "2025-12-09",
+        "end_date": "2025-12-10",
+        "content": "testsetete",
+        "disable_application": 0,
+        "created_at": "2025-12-09 15:56:09",
+        "updated_at": "2025-12-09 15:56:09"
+    },
+    {
+        "id": 13,
+        "title": "연말",
+        "start_date": "2025-12-24",
+        "end_date": "2025-12-27",
+        "content": null,
+        "disable_application": 0,
+        "created_at": "2025-12-16 14:11:28",
+        "updated_at": "2025-12-16 14:12:50"
+    },
+    {
+        "id": 20,
+        "title": "[테스트] Prog 1. 동식물 DNA 추출",
+        "start_date": "2026-03-02",
+        "end_date": "2026-03-31",
+        "content": "[테스트] 고등 학기 Prog 1. 동식물 DNA 추출",
+        "disable_application": 0,
+        "created_at": "2026-01-19 14:46:37",
+        "updated_at": "2026-01-19 14:46:37"
+    },
+    {
+        "id": 21,
+        "title": "[테스트]Prog 2. 세포와 세포분열 관찰",
+        "start_date": "2026-03-02",
+        "end_date": "2026-03-31",
+        "content": "[테스트]고등 학기 Prog 2. 세포와 세포분열 관찰",
+        "disable_application": 0,
+        "created_at": "2026-01-19 14:46:59",
+        "updated_at": "2026-01-19 14:46:59"
+    },
+    {
+        "id": 22,
+        "title": "[테스트]Prog 4. 기질과 효소",
+        "start_date": "2026-03-02",
+        "end_date": "2026-03-31",
+        "content": "[테스트]고등 학기 Prog 4. 기질과 효소",
+        "disable_application": 0,
+        "created_at": "2026-01-19 14:47:16",
+        "updated_at": "2026-01-19 14:47:16"
+    },
+    {
+        "id": 23,
+        "title": "[테스트] Mid 1. 중학생 기본과정(오전)",
+        "start_date": "2026-03-02",
+        "end_date": "2026-03-31",
+        "content": "[테스트]중등 학기 Mid 1. 중학생 기본과정(오전)",
+        "disable_application": 0,
+        "created_at": "2026-01-19 14:47:46",
+        "updated_at": "2026-01-19 14:47:46"
+    },
+    {
+        "id": 24,
+        "title": "[테스트]Mid 2. 중학생 기본과정(오후)",
+        "start_date": "2026-03-02",
+        "end_date": "2026-03-31",
+        "content": "[테스트]중등 학기 Mid 2. 중학생 기본과정(오후)",
+        "disable_application": 0,
+        "created_at": "2026-01-19 14:48:04",
+        "updated_at": "2026-01-19 14:48:04"
+    },
+    {
+        "id": 25,
+        "title": "[테스트]Mid 3. 분류학으로 보는 생물의 세계(오전)",
+        "start_date": "2026-03-02",
+        "end_date": "2026-03-31",
+        "content": "[테스트]중등 학기 Mid 3. 분류학으로 보는 생물의 세계(오전)",
+        "disable_application": 0,
+        "created_at": "2026-01-19 14:48:24",
+        "updated_at": "2026-01-19 14:49:27"
+    },
+    {
+        "id": 26,
+        "title": "[테스트] 신청불가",
+        "start_date": "2026-04-01",
+        "end_date": "2026-04-01",
+        "content": null,
+        "disable_application": 1,
+        "created_at": "2026-01-19 15:27:55",
+        "updated_at": "2026-01-19 15:27:55"
+    },
+    {
+        "id": 27,
+        "title": "개교기념일",
+        "start_date": "2026-01-21",
+        "end_date": "2026-01-21",
+        "content": null,
+        "disable_application": 0,
+        "created_at": "2026-01-21 13:52:49",
+        "updated_at": "2026-01-21 13:52:55"
+    },
+    {
+        "id": 28,
+        "title": "P4",
+        "start_date": "2026-02-03",
+        "end_date": "2026-02-03",
+        "content": null,
+        "disable_application": 0,
+        "created_at": "2026-01-21 13:54:15",
+        "updated_at": "2026-01-30 12:09:56"
+    },
+    {
+        "id": 29,
+        "title": "[테스트] Prog 1. 동식물 DNA 추출",
+        "start_date": "2026-03-02",
+        "end_date": "2026-03-02",
+        "content": "[테스트] Prog 1. 동식물 DNA 추출",
+        "disable_application": 0,
+        "created_at": "2026-01-23 11:59:30",
+        "updated_at": "2026-01-23 11:59:30"
+    }
+]

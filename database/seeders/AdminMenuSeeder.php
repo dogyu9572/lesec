@@ -2,17 +2,28 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\AdminMenu;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class AdminMenuSeeder extends Seeder
 {
     /**
      * 관리자 메뉴 데이터를 시드합니다.
+     * data/admin_menus.json 이 있으면 해당 데이터로 시딩 (현재 DB와 동일).
      */
     public function run(): void
     {
-        // 기존 데이터 삭제
+        $path = database_path('seeders/data/admin_menus.json');
+        if (is_file($path)) {
+            $rows = json_decode(file_get_contents($path), true);
+            AdminMenu::query()->delete();
+            foreach ($rows as $row) {
+                DB::table('admin_menus')->insert($row);
+            }
+            return;
+        }
+
         AdminMenu::query()->delete();
 
         // 현재 DB 데이터로 최신화된 메뉴 구성 (ID 1번부터 연속)

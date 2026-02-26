@@ -11,61 +11,37 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // 관리자 사용자 시더 실행
         $this->call(AdminUserSeeder::class);
-
-        // 사용자 시더 실행
-        $this->call(UserSeeder::class);
-
-        // 관리자 메뉴 시더 실행
         $this->call(AdminMenuSeeder::class);
+        $this->call(AdminGroupSeeder::class);
+        $this->call(UserSeeder::class);
+        $this->call(UserMenuPermissionsSeeder::class);
 
-        // 게시판 스킨 시더 실행
         $this->call(BoardSkinSeeder::class);
-
-        // 게시판 템플릿 시더 실행 (카테고리보다 먼저)
         $this->call(BoardTemplateSeeder::class);
-
-        // 카테고리 시더 실행 (템플릿 이후)
         $this->call(CategorySeeder::class);
-
-        // 게시판 시더 실행
         $this->call(BoardSeeder::class);
 
-        // 인사말 게시판 시더 실행
-        $this->call(BoardGreetingsSeeder::class);
-
-        // 배너 시더 실행
+        $this->call(SettingSeeder::class);
         $this->call(BannerSeeder::class);
-
-        // 팝업 시더 실행
         $this->call(PopupSeeder::class);
 
-        // 설정 시더 실행
-        $this->call(SettingSeeder::class);
-
-        // 프로그램 시더 실행
         $this->call(ProgramSeeder::class);
-
-        // 단체 프로그램 시더 실행
-        $this->call(GroupProgramSeeder::class);
-
-        // 개인 프로그램 시더 실행
-        $this->call(IndividualProgramSeeder::class);
-
-        // 학교 시더 실행
+        $this->call(ScheduleSeeder::class);
         $this->call(SchoolSeeder::class);
+        $this->call(SidoSggCodeSeeder::class);
 
-        // 회원 그룹 시더 실행
-        $this->call(MemberGroupSeeder::class);
+        $this->call(BoardNoticesSeeder::class);
+        $this->call(BoardLibrarySeeder::class);
+        $this->call(BoardFaqSeeder::class);
+        $this->call(BoardGreetingsSeeder::class);
+        $this->call(BoardContactsSeeder::class);
+        $this->call(BoardPrivacyPolicySeeder::class);
+        $this->call(BoardPurposeSeeder::class);
+        $this->call(BoardCommentsSeeder::class);
 
-        // 회원 시더 실행 (그룹 이후)
-        $this->call(MemberSeeder::class);
-
-        // 개인 신청 시더 실행 (회원, 프로그램 이후)
-        $this->call(IndividualApplicationSeeder::class);
-
-        // 단체 신청 시더 실행 (회원, 프로그램 이후)
-        $this->call(GroupApplicationSeeder::class);
+        $this->call(RevenueStatisticsSeeder::class);
+        $this->call(RevenueStatisticsItemsSeeder::class);
+        $this->call(MailSmsMessagesSeeder::class);
     }
 }

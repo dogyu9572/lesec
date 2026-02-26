@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('mail_sms_messages', function (Blueprint $table) {
             $table->id();
             $table->enum('message_type', ['email', 'sms', 'kakao'])->comment('발송 구분');
-            $table->string('title')->comment('제목');
+            $table->string('title', 512)->comment('제목');
             $table->mediumText('content')->comment('내용');
             $table->foreignId('writer_id')->constrained('users')->comment('작성 관리자');
             $table->foreignId('member_group_id')->nullable()->constrained('member_groups')->nullOnDelete()->comment('선택한 회원 그룹');

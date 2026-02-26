@@ -1,0 +1,134 @@
+[
+    {
+        "id": 1,
+        "parent_id": null,
+        "code": "F001",
+        "name": "FAQ",
+        "depth": 0,
+        "display_order": 0,
+        "is_active": 1,
+        "created_at": "2025-11-25 03:51:34",
+        "updated_at": "2025-11-25 03:51:34"
+    },
+    {
+        "id": 2,
+        "parent_id": 1,
+        "code": "F001",
+        "name": "신청\/입금",
+        "depth": 1,
+        "display_order": 5,
+        "is_active": 1,
+        "created_at": "2025-11-25 03:51:34",
+        "updated_at": "2026-01-30 12:09:12"
+    },
+    {
+        "id": 3,
+        "parent_id": 1,
+        "code": "F003",
+        "name": "수료증",
+        "depth": 1,
+        "display_order": 3,
+        "is_active": 1,
+        "created_at": "2025-11-25 03:51:34",
+        "updated_at": "2026-01-30 12:09:12"
+    },
+    {
+        "id": 4,
+        "parent_id": 1,
+        "code": "F004",
+        "name": "대기자",
+        "depth": 1,
+        "display_order": 2,
+        "is_active": 1,
+        "created_at": "2025-11-25 03:51:34",
+        "updated_at": "2026-01-30 12:09:12"
+    },
+    {
+        "id": 5,
+        "parent_id": 1,
+        "code": "F005",
+        "name": "회원정보",
+        "depth": 1,
+        "display_order": 1,
+        "is_active": 1,
+        "created_at": "2025-11-25 03:51:34",
+        "updated_at": "2026-01-30 12:09:12"
+    },
+    {
+        "id": 6,
+        "parent_id": 1,
+        "code": "F006",
+        "name": "일반",
+        "depth": 1,
+        "display_order": 0,
+        "is_active": 1,
+        "created_at": "2025-11-25 03:51:34",
+        "updated_at": "2026-01-30 12:09:12"
+    },
+    {
+        "id": 8,
+        "parent_id": 1,
+        "code": "F002",
+        "name": "환불",
+        "depth": 1,
+        "display_order": 4,
+        "is_active": 1,
+        "created_at": "2025-12-05 09:49:55",
+        "updated_at": "2026-01-30 12:09:12"
+    },
+    {
+        "id": 9,
+        "parent_id": null,
+        "code": "C001",
+        "name": "테스트 그룹",
+        "depth": 0,
+        "display_order": 0,
+        "is_active": 1,
+        "created_at": "2025-12-19 11:03:03",
+        "updated_at": "2025-12-19 11:03:03"
+    },
+    {
+        "id": 10,
+        "parent_id": 9,
+        "code": "C002",
+        "name": "테스트 테스트 3",
+        "depth": 1,
+        "display_order": 3,
+        "is_active": 1,
+        "created_at": "2025-12-19 11:16:55",
+        "updated_at": "2025-12-19 11:21:47"
+    },
+    {
+        "id": 11,
+        "parent_id": 10,
+        "code": "C003",
+        "name": "테스트 테스트 테스트 6",
+        "depth": 2,
+        "display_order": 1,
+        "is_active": 1,
+        "created_at": "2025-12-19 11:18:36",
+        "updated_at": "2025-12-30 13:54:01"
+    },
+    {
+        "id": 12,
+        "parent_id": 10,
+        "code": "C004",
+        "name": "테스트 테스트 테스트 2",
+        "depth": 2,
+        "display_order": 0,
+        "is_active": 1,
+        "created_at": "2025-12-19 11:22:17",
+        "updated_at": "2025-12-30 13:54:01"
+    },
+    {
+        "id": 13,
+        "parent_id": 1,
+        "code": "C005",
+        "name": "단체",
+        "depth": 1,
+        "display_order": 0,
+        "is_active": 1,
+        "created_at": "2026-02-10 13:53:43",
+        "updated_at": "2026-02-10 13:53:43"
+    }
+]

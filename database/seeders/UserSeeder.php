@@ -2,36 +2,43 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class UserSeeder extends Seeder
 {
     /**
-     * 사용자 데이터를 시드합니다.
+     * 사용자(관리자 포함) 데이터를 시드합니다.
+     * data/users.json 이 있으면 해당 데이터로 시딩 (현재 DB와 동일).
      */
     public function run(): void
     {
-        // 기존 데이터 삭제
-        User::query()->delete();
+        $path = database_path('seeders/data/users.json');
+        if (is_file($path)) {
+            $rows = json_decode(file_get_contents($path), true);
+            User::query()->delete();
+            foreach ($rows as $row) {
+                unset($row['remember_token']);
+                DB::table('users')->insert($row);
+            }
+            return;
+        }
 
-        // 슈퍼 관리자 (홈페이지 관리자)
+        User::query()->delete();
         User::create([
             'login_id' => 'homepage',
             'name' => '홈페이지관리자',
             'email' => 'admin@homepage.com',
-            'password' => Hash::make('homepagekorea'),
+            'password' => bcrypt('homepagekorea'),
             'role' => 'super_admin',
             'is_active' => true,
         ]);
-
-        // 관리자
         User::create([
             'login_id' => 'admin',
             'name' => '관리자',
             'email' => 'admin@example.com',
-            'password' => Hash::make('password'),
+            'password' => bcrypt('password'),
             'role' => 'admin',
             'is_active' => true,
         ]);

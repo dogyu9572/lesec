@@ -26,8 +26,8 @@ class SettingRequest extends FormRequest
             'company_name' => 'nullable|string|max:255',
             'company_address' => 'nullable|string|max:255',
             'company_tel' => 'nullable|string|max:20',
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'favicon' => 'nullable|image|mimes:ico,png,jpg,jpeg|max:1024',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2097152',
+            'favicon' => 'nullable|image|mimes:ico,png,jpg,jpeg|max:2097152',
             'footer_text' => 'nullable|string',
         ];
     }
@@ -50,10 +50,10 @@ class SettingRequest extends FormRequest
             'company_tel.max' => '회사 전화번호는 20자를 초과할 수 없습니다.',
             'logo.image' => '로고는 이미지 파일이어야 합니다.',
             'logo.mimes' => '로고는 JPEG, PNG, JPG, GIF 형식만 가능합니다.',
-            'logo.max' => '로고 파일 크기는 2MB를 초과할 수 없습니다.',
+            'logo.max' => '로고 파일 크기는 2GB를 초과할 수 없습니다.',
             'favicon.image' => '파비콘은 이미지 파일이어야 합니다.',
             'favicon.mimes' => '파비콘은 ICO, PNG, JPG, JPEG 형식만 가능합니다.',
-            'favicon.max' => '파비콘 파일 크기는 1MB를 초과할 수 없습니다.',
+            'favicon.max' => '파비콘 파일 크기는 2GB를 초과할 수 없습니다.',
         ];
     }
 }

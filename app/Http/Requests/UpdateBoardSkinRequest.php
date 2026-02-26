@@ -29,7 +29,7 @@ class UpdateBoardSkinRequest extends FormRequest
                 Rule::unique('board_skins')->ignore($this->route('boardSkin'))
             ],
             'description' => 'nullable|max:255',
-            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2097152',
             'options' => 'nullable|json',
             'is_active' => 'boolean',
             'is_default' => 'boolean',
@@ -51,7 +51,7 @@ class UpdateBoardSkinRequest extends FormRequest
             'description.max' => '설명은 255자를 초과할 수 없습니다.',
             'thumbnail.image' => '썸네일은 이미지 파일이어야 합니다.',
             'thumbnail.mimes' => '썸네일은 jpeg, png, jpg, gif 형식만 지원합니다.',
-            'thumbnail.max' => '썸네일은 2MB 이하여야 합니다.',
+            'thumbnail.max' => '썸네일은 2GB 이하여야 합니다.',
             'options.json' => '옵션은 올바른 JSON 형식이어야 합니다.',
         ];
     }

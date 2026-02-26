@@ -531,7 +531,7 @@ class MemberMypageController extends Controller
         }
 
         $request->validate([
-            'csv_file' => 'required|file|mimes:csv,txt,xlsx,xls|max:2048',
+            'csv_file' => 'required|file|mimes:csv,txt,xlsx,xls|max:2097152',
         ]);
 
         DB::beginTransaction();

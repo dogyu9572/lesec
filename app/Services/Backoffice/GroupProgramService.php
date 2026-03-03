@@ -108,6 +108,14 @@ class GroupProgramService
     }
 
     /**
+     * 교육 일정이 교육신청 불가 기간과 겹치는지 검증 (컨트롤러에서 전체 기간 선검증용)
+     */
+    public function validateEducationScheduleAvailability(?string $startDate, ?string $endDate): void
+    {
+        $this->ensureEducationScheduleIsAvailable($startDate, $endDate);
+    }
+
+    /**
      * 프로그램 생성
      */
     public function createProgram(array $data): ProgramReservation

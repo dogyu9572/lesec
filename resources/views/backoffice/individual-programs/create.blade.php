@@ -132,6 +132,7 @@
                         @endforeach
                     </div>
                     @error('payment_methods')
+                        <input type="text" class="board-form-control is-invalid" aria-hidden="true" style="position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);border:0">
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>

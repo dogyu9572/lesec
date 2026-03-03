@@ -57,6 +57,12 @@ class GroupProgramController extends BaseController
         $data = $request->validated();
         $educationType = $data['education_type'] ?? '';
 
+        // 교육신청 불가 기간 포함 여부를 전체 기간으로 먼저 검증 (학기형 일괄 생성 시 저장 방지)
+        $this->groupProgramService->validateEducationScheduleAvailability(
+            $data['education_start_date'] ?? null,
+            $data['education_end_date'] ?? null
+        );
+
         // 중등학기 또는 고등학기인 경우, 교육 시작일부터 종료일까지 각 날짜별로 프로그램 생성
         if (in_array($educationType, ['middle_semester', 'high_semester'])) {
             $startDate = Carbon::parse($data['education_start_date']);

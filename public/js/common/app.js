@@ -340,9 +340,9 @@ window.FileUploadValidator = {
             return 5 * 1024 * 1024;
         }
         
-        // 첨부파일: 10MB
+        // 첨부파일: 2GB
         if (name.includes('attachments') || id.includes('attachments')) {
-            return 10 * 1024 * 1024;
+            return 2 * 1024 * 1024 * 1024;
         }
         
         // 로고: 2MB

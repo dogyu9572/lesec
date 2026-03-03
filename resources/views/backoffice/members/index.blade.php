@@ -124,38 +124,38 @@
                 </form>
             </div>
 
-            @if($members->count() > 0)
-                <!-- 목록 개수 선택 -->
-                <div class="board-list-header">
-                    <div class="list-info">
-                        <span class="list-count">Total : {{ $members->total() }}</span>
-                    </div>
-                    <div class="list-controls">
-						<div class="board-page-header mb0">
-							<div class="board-page-buttons">
-								<button type="button" id="export-btn" class="btn btn-secondary">
-									<i class="fas fa-download"></i> 엑셀 다운로드
-								</button>
-								<button type="button" id="bulk-delete-btn" class="btn btn-danger"><i class="fas fa-trash"></i> 선택 삭제</button>
-								<a href="{{ route('backoffice.members.create') }}" class="btn btn-success">
-									<i class="fas fa-plus"></i> 신규등록
-								</a>
-							</div>
-						</div>
-                        <form method="GET" action="{{ route('backoffice.members.index') }}" class="per-page-form">
-                            @foreach(request()->except(['per_page', 'page']) as $key => $value)
-                                <input type="hidden" name="{{ $key }}" value="{{ $value }}">
-                            @endforeach
-                            <label for="per_page" class="per-page-label">목록 개수:</label>
-                            <select id="per_page" name="per_page" class="per-page-select" onchange="this.form.submit()">
-                                <option value="20" @selected(request('per_page', 20) == 20)>20개</option>
-                                <option value="50" @selected(request('per_page') == 50)>50개</option>
-                                <option value="100" @selected(request('per_page') == 100)>100개</option>
-                            </select>
-                        </form>
-                    </div>
+            <!-- 목록 개수 선택 (데이터 유무와 관계없이 항상 표시) -->
+            <div class="board-list-header">
+                <div class="list-info">
+                    <span class="list-count">Total : {{ $members->total() }}</span>
                 </div>
+                <div class="list-controls">
+                    <div class="board-page-header mb0">
+                        <div class="board-page-buttons">
+                            <button type="button" id="export-btn" class="btn btn-secondary">
+                                <i class="fas fa-download"></i> 엑셀 다운로드
+                            </button>
+                            <button type="button" id="bulk-delete-btn" class="btn btn-danger"><i class="fas fa-trash"></i> 선택 삭제</button>
+                            <a href="{{ route('backoffice.members.create') }}" class="btn btn-success">
+                                <i class="fas fa-plus"></i> 신규등록
+                            </a>
+                        </div>
+                    </div>
+                    <form method="GET" action="{{ route('backoffice.members.index') }}" class="per-page-form">
+                        @foreach(request()->except(['per_page', 'page']) as $key => $value)
+                            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                        @endforeach
+                        <label for="per_page" class="per-page-label">목록 개수:</label>
+                        <select id="per_page" name="per_page" class="per-page-select" onchange="this.form.submit()">
+                            <option value="20" @selected(request('per_page', 20) == 20)>20개</option>
+                            <option value="50" @selected(request('per_page') == 50)>50개</option>
+                            <option value="100" @selected(request('per_page') == 100)>100개</option>
+                        </select>
+                    </form>
+                </div>
+            </div>
 
+            @if($members->count() > 0)
                 <div class="table-responsive">
                     <table class="board-table">
                         <thead>
@@ -225,36 +225,8 @@
 
                 <x-pagination :paginator="$members" />
             @else
-                <div class="table-responsive">
-                    <table class="board-table">
-                        <thead>
-                            <tr>
-                                <th style="width: 40px;" class="board-checkbox-column">
-                                    <input type="checkbox" id="select-all" class="form-check-input" disabled>
-                                </th>
-                                <th>No</th>
-                                <th style="width: 80px;">회원구분</th>
-                                <th>ID</th>
-                                <th>이름</th>
-                                <th style="width: 40px;">성별</th>
-                                <th>지역</th>
-                                <th>소속학교</th>
-                                <th style="width: 40px;">학년</th>
-                                <th>반</th>
-                                <th>생년월일</th>
-                                <th style="width: 123px;">연락처1</th>
-                                <th style="width: 123px;">연락처2</th>
-                                <th>이메일주소</th>
-                                <th>가입일시</th>
-                                <th style="width: 90px;">관리</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td colspan="16" class="text-center">등록된 회원이 없습니다.</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="no-data">
+                    <p>등록된 회원이 없습니다.</p>
                 </div>
             @endif
         </div>

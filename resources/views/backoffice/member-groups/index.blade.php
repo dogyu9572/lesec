@@ -57,36 +57,36 @@
                 </form>
             </div>
 
-            @if($groups->count() > 0)
-                <!-- 목록 개수 선택 -->
-                <div class="board-list-header">
-                    <div class="list-info">
-                        <span class="list-count">Total : {{ $groups->total() }}</span>
-                    </div>
-                    <div class="list-controls">
-                        <button type="button" id="bulk-delete-btn" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> 선택 삭제</button>
-                        <a href="{{ route('backoffice.member-groups.create') }}" class="btn btn-success btn-sm"><i class="fas fa-plus"></i> 신규등록</a>
-                        <form method="GET" action="{{ route('backoffice.member-groups.index') }}" class="per-page-form">
-                            @foreach(request()->except('per_page') as $key => $value)
-                                <input type="hidden" name="{{ $key }}" value="{{ $value }}">
-                            @endforeach
-                            <label for="per_page" class="per-page-label">목록 개수:</label>
-                            <select id="per_page" name="per_page" class="per-page-select" onchange="this.form.submit()">
-                                <option value="10" @selected(request('per_page', 20) == 10)>10개</option>
-                                <option value="20" @selected(request('per_page', 20) == 20)>20개</option>
-                                <option value="30" @selected(request('per_page') == 30)>30개</option>
-                                <option value="40" @selected(request('per_page') == 40)>40개</option>
-                                <option value="50" @selected(request('per_page') == 50)>50개</option>
-                                <option value="60" @selected(request('per_page') == 60)>60개</option>
-                                <option value="70" @selected(request('per_page') == 70)>70개</option>
-                                <option value="80" @selected(request('per_page') == 80)>80개</option>
-                                <option value="90" @selected(request('per_page') == 90)>90개</option>
-                                <option value="100" @selected(request('per_page') == 100)>100개</option>
-                            </select>
-                        </form>
-                    </div>
+            <!-- 목록 개수 선택 (데이터 유무와 관계없이 항상 표시) -->
+            <div class="board-list-header">
+                <div class="list-info">
+                    <span class="list-count">Total : {{ $groups->total() }}</span>
                 </div>
+                <div class="list-controls">
+                    <button type="button" id="bulk-delete-btn" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> 선택 삭제</button>
+                    <a href="{{ route('backoffice.member-groups.create') }}" class="btn btn-success btn-sm"><i class="fas fa-plus"></i> 신규등록</a>
+                    <form method="GET" action="{{ route('backoffice.member-groups.index') }}" class="per-page-form">
+                        @foreach(request()->except('per_page') as $key => $value)
+                            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                        @endforeach
+                        <label for="per_page" class="per-page-label">목록 개수:</label>
+                        <select id="per_page" name="per_page" class="per-page-select" onchange="this.form.submit()">
+                            <option value="10" @selected(request('per_page', 20) == 10)>10개</option>
+                            <option value="20" @selected(request('per_page', 20) == 20)>20개</option>
+                            <option value="30" @selected(request('per_page') == 30)>30개</option>
+                            <option value="40" @selected(request('per_page') == 40)>40개</option>
+                            <option value="50" @selected(request('per_page') == 50)>50개</option>
+                            <option value="60" @selected(request('per_page') == 60)>60개</option>
+                            <option value="70" @selected(request('per_page') == 70)>70개</option>
+                            <option value="80" @selected(request('per_page') == 80)>80개</option>
+                            <option value="90" @selected(request('per_page') == 90)>90개</option>
+                            <option value="100" @selected(request('per_page') == 100)>100개</option>
+                        </select>
+                    </form>
+                </div>
+            </div>
 
+            @if($groups->count() > 0)
                 <div class="table-responsive">
                     <table class="board-table">
 						<colgroup>

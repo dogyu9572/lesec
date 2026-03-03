@@ -93,28 +93,29 @@
                 </form>
             </div>
 
-            @if($rosters->count() > 0)
-                <div class="board-list-header">
-                    <div class="list-info">
-                        <span class="list-count">Total : {{ $rosters->total() }}</span>
-                    </div>
-                    <div class="list-controls">
-						<button type="button" id="download-btn" class="btn btn-dark btn-sm"><i class="fas fa-download"></i> 다운로드</button>
-						<button type="button" id="sms-email-btn" class="btn btn-info btn-sm"><i class="fas fa-envelope"></i> SMS/메일 발송</button>
-                        <form method="GET" action="{{ route('backoffice.rosters.index') }}" class="per-page-form">
-                            @foreach(request()->except(['per_page', 'page']) as $key => $value)
-                                <input type="hidden" name="{{ $key }}" value="{{ $value }}">
-                            @endforeach
-                            <label for="per_page" class="per-page-label">목록 개수:</label>
-                            <select id="per_page" name="per_page" class="per-page-select" onchange="this.form.submit()">
-                                <option value="20" @selected(request('per_page', 20) == 20)>20개</option>
-                                <option value="50" @selected(request('per_page') == 50)>50개</option>
-                                <option value="100" @selected(request('per_page') == 100)>100개</option>
-                            </select>
-                        </form>
-                    </div>
+            <!-- 목록 개수 선택 (데이터 유무와 관계없이 항상 표시) -->
+            <div class="board-list-header">
+                <div class="list-info">
+                    <span class="list-count">Total : {{ $rosters->total() }}</span>
                 </div>
+                <div class="list-controls">
+                    <button type="button" id="download-btn" class="btn btn-dark btn-sm"><i class="fas fa-download"></i> 다운로드</button>
+                    <button type="button" id="sms-email-btn" class="btn btn-info btn-sm"><i class="fas fa-envelope"></i> SMS/메일 발송</button>
+                    <form method="GET" action="{{ route('backoffice.rosters.index') }}" class="per-page-form">
+                        @foreach(request()->except(['per_page', 'page']) as $key => $value)
+                            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                        @endforeach
+                        <label for="per_page" class="per-page-label">목록 개수:</label>
+                        <select id="per_page" name="per_page" class="per-page-select" onchange="this.form.submit()">
+                            <option value="20" @selected(request('per_page', 20) == 20)>20개</option>
+                            <option value="50" @selected(request('per_page') == 50)>50개</option>
+                            <option value="100" @selected(request('per_page') == 100)>100개</option>
+                        </select>
+                    </form>
+                </div>
+            </div>
 
+            @if($rosters->count() > 0)
                 <div class="table-responsive">
                     <table class="board-table">
                         <thead>

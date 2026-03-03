@@ -119,29 +119,29 @@
                 </form>
             </div>
 
-            @if($applications->count() > 0)
-                <!-- 목록 개수 선택 -->
-                <div class="board-list-header">
-                    <div class="list-info">
-                        <span class="list-count">Total : {{ $applications->total() }}</span>
-                    </div>
-                    <div class="list-controls">
-						<button type="button" id="bulk-upload-btn" class="btn btn-primary btn-sm"><i class="fas fa-upload"></i> 일괄 업로드</button>
-						<a href="{{ route('backoffice.individual-applications.create') }}" class="btn btn-success btn-sm"><i class="fas fa-plus"></i> 신규등록</a>
-                        <form method="GET" action="{{ route('backoffice.individual-applications.index') }}" class="per-page-form">
-                            @foreach(request()->except(['per_page', 'page']) as $key => $value)
-                                <input type="hidden" name="{{ $key }}" value="{{ $value }}">
-                            @endforeach
-                            <label for="per_page" class="per-page-label">목록 개수:</label>
-                            <select id="per_page" name="per_page" class="per-page-select" onchange="this.form.submit()">
-                                <option value="20" @selected(request('per_page', 20) == 20)>20개</option>
-                                <option value="50" @selected(request('per_page') == 50)>50개</option>
-                                <option value="100" @selected(request('per_page') == 100)>100개</option>
-                            </select>
-                        </form>
-                    </div>
+            <!-- 목록 개수 선택 (데이터 유무와 관계없이 항상 표시) -->
+            <div class="board-list-header">
+                <div class="list-info">
+                    <span class="list-count">Total : {{ $applications->total() }}</span>
                 </div>
+                <div class="list-controls">
+                    <button type="button" id="bulk-upload-btn" class="btn btn-primary btn-sm"><i class="fas fa-upload"></i> 일괄 업로드</button>
+                    <a href="{{ route('backoffice.individual-applications.create') }}" class="btn btn-success btn-sm"><i class="fas fa-plus"></i> 신규등록</a>
+                    <form method="GET" action="{{ route('backoffice.individual-applications.index') }}" class="per-page-form">
+                        @foreach(request()->except(['per_page', 'page']) as $key => $value)
+                            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                        @endforeach
+                        <label for="per_page" class="per-page-label">목록 개수:</label>
+                        <select id="per_page" name="per_page" class="per-page-select" onchange="this.form.submit()">
+                            <option value="20" @selected(request('per_page', 20) == 20)>20개</option>
+                            <option value="50" @selected(request('per_page') == 50)>50개</option>
+                            <option value="100" @selected(request('per_page') == 100)>100개</option>
+                        </select>
+                    </form>
+                </div>
+            </div>
 
+            @if($applications->count() > 0)
                 <div class="table-responsive">
                     <table class="board-table">
 						<colgroup>

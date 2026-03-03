@@ -52,27 +52,28 @@
                 </form>
             </div>
 
-            @if($groups->count() > 0)
-                <!-- 목록 개수 선택 -->
-                <div class="admin-list-header">
-                    <div class="list-info">
-                        <span class="list-count">Total : {{ $groups->total() }}</span>
-                    </div>
-                    <div class="list-controls">
-                        <form method="GET" action="{{ route('backoffice.admin-groups.index') }}" class="per-page-form">
-                            @foreach(request()->except(['per_page', 'page']) as $key => $value)
-                                <input type="hidden" name="{{ $key }}" value="{{ $value }}">
-                            @endforeach
-                            <label for="per_page" class="per-page-label">목록 개수:</label>
-                            <select id="per_page" name="per_page" class="per-page-select" onchange="this.form.submit()">
-                                <option value="10" @selected(request('per_page', 10) == 10)>10</option>
-                                <option value="20" @selected(request('per_page') == 20)>20</option>
-                                <option value="50" @selected(request('per_page') == 50)>50</option>
-                                <option value="100" @selected(request('per_page') == 100)>100</option>
-                            </select>
-                        </form>
-                    </div>
+            <!-- 목록 개수 선택 (데이터 유무와 관계없이 항상 표시) -->
+            <div class="admin-list-header">
+                <div class="list-info">
+                    <span class="list-count">Total : {{ $groups->total() }}</span>
                 </div>
+                <div class="list-controls">
+                    <form method="GET" action="{{ route('backoffice.admin-groups.index') }}" class="per-page-form">
+                        @foreach(request()->except(['per_page', 'page']) as $key => $value)
+                            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                        @endforeach
+                        <label for="per_page" class="per-page-label">목록 개수:</label>
+                        <select id="per_page" name="per_page" class="per-page-select" onchange="this.form.submit()">
+                            <option value="10" @selected(request('per_page', 10) == 10)>10</option>
+                            <option value="20" @selected(request('per_page') == 20)>20</option>
+                            <option value="50" @selected(request('per_page') == 50)>50</option>
+                            <option value="100" @selected(request('per_page') == 100)>100</option>
+                        </select>
+                    </form>
+                </div>
+            </div>
+
+            @if($groups->count() > 0)
                 <div class="table-responsive">
                     <table class="board-table">
                         <thead>

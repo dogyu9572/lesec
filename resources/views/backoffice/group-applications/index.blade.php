@@ -96,7 +96,7 @@
                 </form>
             </div>
 
-            @if($applications->count() > 0)
+            <!-- 목록 개수 선택 (데이터 유무와 관계없이 항상 표시) -->
             <div class="board-list-header">
                 <div class="list-info">
                     <span class="list-count">Total : {{ $applications->total() }}</span>
@@ -118,6 +118,7 @@
                 </div>
             </div>
 
+            @if($applications->count() > 0)
             <div class="table-responsive">
                 <table class="board-table">
                     <colgroup>

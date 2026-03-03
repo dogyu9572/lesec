@@ -61,29 +61,30 @@
                 </form>
             </div>
 
-            @if($admins->count() > 0)
-                <!-- 목록 개수 선택 -->
-                <div class="admin-list-header">
-                    <div class="list-info">
-                        <span class="list-count">Total : {{ $admins->total() }}</span>
-                    </div>
-                    <div class="list-controls">
-                        <button type="button" id="bulk-delete-btn-header" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> 선택 삭제</button>
-                        <a href="{{ route('backoffice.admins.create') }}" class="btn btn-success btn-sm"><i class="fas fa-plus"></i> 신규등록</a>
-                        <form method="GET" action="{{ route('backoffice.admins.index') }}" class="per-page-form">
-                            @foreach(request()->except(['per_page', 'page']) as $key => $value)
-                                <input type="hidden" name="{{ $key }}" value="{{ $value }}">
-                            @endforeach
-                            <label for="per_page" class="per-page-label">목록 개수:</label>
-                            <select id="per_page" name="per_page" class="per-page-select" onchange="this.form.submit()">
-                                <option value="10" @selected(request('per_page', 10) == 10)>10개</option>
-                                <option value="20" @selected(request('per_page') == 20)>20개</option>
-                                <option value="50" @selected(request('per_page') == 50)>50개</option>
-                                <option value="100" @selected(request('per_page') == 100)>100개</option>
-                            </select>
-                        </form>
-                    </div>
+            <!-- 목록 개수 선택 (데이터 유무와 관계없이 항상 표시) -->
+            <div class="admin-list-header">
+                <div class="list-info">
+                    <span class="list-count">Total : {{ $admins->total() }}</span>
                 </div>
+                <div class="list-controls">
+                    <button type="button" id="bulk-delete-btn-header" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> 선택 삭제</button>
+                    <a href="{{ route('backoffice.admins.create') }}" class="btn btn-success btn-sm"><i class="fas fa-plus"></i> 신규등록</a>
+                    <form method="GET" action="{{ route('backoffice.admins.index') }}" class="per-page-form">
+                        @foreach(request()->except(['per_page', 'page']) as $key => $value)
+                            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                        @endforeach
+                        <label for="per_page" class="per-page-label">목록 개수:</label>
+                        <select id="per_page" name="per_page" class="per-page-select" onchange="this.form.submit()">
+                            <option value="10" @selected(request('per_page', 10) == 10)>10개</option>
+                            <option value="20" @selected(request('per_page') == 20)>20개</option>
+                            <option value="50" @selected(request('per_page') == 50)>50개</option>
+                            <option value="100" @selected(request('per_page') == 100)>100개</option>
+                        </select>
+                    </form>
+                </div>
+            </div>
+
+            @if($admins->count() > 0)
                 <div class="table-responsive">
                     <table class="board-table tal">
                         <thead>
@@ -135,26 +136,8 @@
                     </table>
                 </div>
             @else
-                <div class="table-responsive">
-                    <table class="board-table">
-                        <thead>
-                            <tr>
-                                <th class="w5 board-checkbox-column">
-                                    <input type="checkbox" id="select-all" class="form-check-input" disabled>
-                                </th>
-                                <th>번호</th>
-                                <th>아이디</th>
-                                <th>성명</th>
-                                <th>권한</th>
-                                <th>관리</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td colspan="6" class="text-center">등록된 관리자가 없습니다.</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="no-data">
+                    <p>등록된 관리자가 없습니다.</p>
                 </div>
             @endif
         </div>

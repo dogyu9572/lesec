@@ -18,9 +18,20 @@ class IndividualProgramService
     public function getFilteredPrograms($request): LengthAwarePaginator
     {
         $query = ProgramReservation::query()
-            ->byApplicationType('individual')
-            ->orderBy('education_start_date', 'desc')
-            ->orderBy('education_end_date', 'desc');
+            ->byApplicationType('individual');
+
+        $sortColumn = $request->input('sort', 'education_start_date');
+        $sortOrder = strtolower($request->input('order', 'desc')) === 'asc' ? 'asc' : 'desc';
+        if (in_array($sortColumn, ['education_start_date', 'education_end_date'], true)) {
+            $query->orderBy($sortColumn, $sortOrder);
+            if ($sortColumn === 'education_start_date') {
+                $query->orderBy('education_end_date', $sortOrder);
+            } else {
+                $query->orderBy('education_start_date', $sortOrder);
+            }
+        } else {
+            $query->orderBy('education_start_date', 'desc')->orderBy('education_end_date', 'desc');
+        }
 
         // 교육유형 필터
         if ($request->filled('education_type')) {

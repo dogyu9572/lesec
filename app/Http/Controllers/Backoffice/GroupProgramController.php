@@ -136,6 +136,34 @@ class GroupProgramController extends BaseController
     }
 
     /**
+     * 단체 프로그램 일괄 삭제
+     */
+    public function bulkDestroy(Request $request)
+    {
+        $request->validate([
+            'program_ids' => 'required|array',
+            'program_ids.*' => 'integer|exists:program_reservations,id',
+        ]);
+
+        $programIds = $request->input('program_ids');
+
+        try {
+            $deletedCount = $this->groupProgramService->bulkDelete($programIds);
+
+            return response()->json([
+                'success' => true,
+                'message' => "선택한 {$deletedCount}건이 삭제되었습니다.",
+                'deleted_count' => $deletedCount,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => '삭제 중 오류가 발생했습니다: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
      * 프로그램명 검색 (모달용)
      */
     public function searchPrograms(Request $request)

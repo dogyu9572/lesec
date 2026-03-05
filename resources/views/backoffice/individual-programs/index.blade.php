@@ -6,6 +6,7 @@
 <link rel="stylesheet" href="{{ asset('css/common/buttons.css') }}">
 <link rel="stylesheet" href="{{ asset('css/backoffice/users.css') }}">
 <link rel="stylesheet" href="{{ asset('css/backoffice/boards.css') }}">
+<link rel="stylesheet" href="{{ asset('css/backoffice/group-programs.css') }}">
 @endsection
 
 @section('content')
@@ -137,7 +138,22 @@
                                 <th>교육유형</th>
                                 <th>프로그램명</th>
                                 <th>신청유형</th>
-                                <th>참가일</th>
+                                <th class="board-table-sortable">
+                                    @php
+                                        $sortParam = request('sort', 'education_start_date');
+                                        $orderParam = request('order', 'desc');
+                                        $isSortByParticipant = ($sortParam === 'education_start_date' || $sortParam === 'education_end_date');
+                                        $isAsc = $orderParam === 'asc';
+                                        $nextOrder = $isSortByParticipant && $isAsc ? 'desc' : 'asc';
+                                        $sortUrl = route('backoffice.individual-programs.index', array_merge(request()->except(['sort', 'order', 'page']), ['sort' => 'education_start_date', 'order' => $nextOrder]));
+                                    @endphp
+                                    <a href="{{ $sortUrl }}" class="board-table-sort-link">
+                                        참가일
+                                        <span class="board-table-sort-arrows">
+                                            <i class="fas fa-arrows-alt-v" title="정렬"></i>
+                                        </span>
+                                    </a>
+                                </th>
                                 <th>신청기간</th>
                                 <th>정원</th>
                                 <th>결제수단</th>

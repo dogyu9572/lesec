@@ -2,6 +2,7 @@
 
 namespace App\Services\Backoffice;
 
+use App\Models\GroupApplication;
 use App\Models\ProgramReservation;
 use App\Services\Backoffice\Concerns\ValidatesScheduleAvailability;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -18,8 +19,20 @@ class GroupProgramService
     public function getFilteredPrograms($request): LengthAwarePaginator
     {
         $query = ProgramReservation::query()
-            ->byApplicationType('group')
-            ->orderBy('created_at', 'desc');
+            ->byApplicationType('group');
+
+        $sortColumn = $request->input('sort', 'education_start_date');
+        $sortOrder = strtolower($request->input('order', 'desc')) === 'asc' ? 'asc' : 'desc';
+        if (in_array($sortColumn, ['education_start_date', 'education_end_date'], true)) {
+            $query->orderBy($sortColumn, $sortOrder);
+            if ($sortColumn === 'education_start_date') {
+                $query->orderBy('education_end_date', $sortOrder);
+            } else {
+                $query->orderBy('education_start_date', $sortOrder);
+            }
+        } else {
+            $query->orderBy('education_start_date', 'desc')->orderBy('education_end_date', 'desc');
+        }
 
         // 교육유형 필터
         if ($request->filled('education_type')) {
@@ -222,6 +235,31 @@ class GroupProgramService
     public function deleteProgram(ProgramReservation $programReservation): bool
     {
         return $programReservation->delete();
+    }
+
+    /**
+     * 단체 프로그램 일괄 삭제 (단체만 대상).
+     * 관련 group_applications(및 참가자)를 먼저 삭제한 뒤 프로그램 삭제.
+     */
+    public function bulkDelete(array $ids): int
+    {
+        $programIds = ProgramReservation::query()
+            ->byApplicationType('group')
+            ->whereIn('id', $ids)
+            ->pluck('id')
+            ->all();
+
+        if (empty($programIds)) {
+            return 0;
+        }
+
+        GroupApplication::query()
+            ->whereIn('program_reservation_id', $programIds)
+            ->delete();
+
+        return ProgramReservation::query()
+            ->whereIn('id', $programIds)
+            ->delete();
     }
 
     /**

@@ -31,3 +31,27 @@
     color: #6c757d;
     cursor: not-allowed;
 }
+
+/* 목록 테이블 참가일 정렬 헤더 (링크/아이콘 검정) */
+.board-table-sortable .board-table-sort-link,
+.board-table-sortable .board-table-sort-link:hover,
+.board-table-sortable .board-table-sort-link:visited,
+.board-table-sortable .board-table-sort-link .board-table-sort-arrows,
+.board-table-sortable .board-table-sort-link .board-table-sort-arrows i {
+    color: #212529 !important;
+}
+.board-table-sortable .board-table-sort-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    text-decoration: none;
+    cursor: pointer;
+}
+.board-table-sortable .board-table-sort-link:hover {
+    text-decoration: none;
+}
+.board-table-sort-arrows {
+    font-size: 0.85em;
+    opacity: 0.9;
+    margin-left: 4px;
+}

@@ -343,6 +343,7 @@ Route::prefix('backoffice')->middleware(['backoffice'])->group(function () {
         Route::get('/', [GroupProgramController::class, 'index'])->name('index');
         Route::get('/create', [GroupProgramController::class, 'create'])->name('create');
         Route::post('/', [GroupProgramController::class, 'store'])->name('store');
+        Route::post('/bulk-destroy', [GroupProgramController::class, 'bulkDestroy'])->name('bulk-destroy');
         Route::get('/search-programs', [GroupProgramController::class, 'searchPrograms'])->name('search-programs');
         Route::get('/{programReservation}/edit', [GroupProgramController::class, 'edit'])->name('edit');
         Route::put('/{programReservation}', [GroupProgramController::class, 'update'])->name('update');

@@ -6,6 +6,7 @@
 <link rel="stylesheet" href="{{ asset('css/common/buttons.css') }}">
 <link rel="stylesheet" href="{{ asset('css/backoffice/users.css') }}">
 <link rel="stylesheet" href="{{ asset('css/backoffice/boards.css') }}">
+<link rel="stylesheet" href="{{ asset('css/backoffice/group-programs.css') }}">
 @endsection
 
 @section('content')
@@ -102,7 +103,8 @@
                     <span class="list-count">Total : {{ $programs->total() }}</span>
                 </div>
                 <div class="list-controls">
-                    <a href="{{ route('backoffice.group-programs.create') }}" class="btn btn-success btn-sm"><i class="fas fa-plus"></i> 신규등록</a>                       
+                    <button type="button" id="bulk-delete-btn" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> 선택 삭제</button>
+                    <a href="{{ route('backoffice.group-programs.create') }}" class="btn btn-success btn-sm"><i class="fas fa-plus"></i> 신규등록</a>
                     <form method="GET" action="{{ route('backoffice.group-programs.index') }}" class="per-page-form">
                         @foreach(request()->except(['per_page', 'page']) as $key => $value)
                             <input type="hidden" name="{{ $key }}" value="{{ $value }}">
@@ -121,6 +123,7 @@
                 <div class="table-responsive">
                     <table class="board-table">
 						<colgroup>
+							<col width="40">
 							<col width="4%">
 							<col width="6%">
 							<col width="*">
@@ -133,11 +136,29 @@
 						</colgroup>
                         <thead>
                             <tr>
+                                <th style="width: 40px;" class="board-checkbox-column">
+                                    <input type="checkbox" id="select-all" class="form-check-input">
+                                </th>
                                 <th>번호</th>
                                 <th>교육유형</th>
                                 <th>프로그램명</th>
                                 <th>신청유형</th>
-                                <th>참가일</th>
+                                <th class="board-table-sortable">
+                                    @php
+                                        $sortParam = request('sort', 'education_start_date');
+                                        $orderParam = request('order', 'desc');
+                                        $isSortByParticipant = ($sortParam === 'education_start_date' || $sortParam === 'education_end_date');
+                                        $isAsc = $orderParam === 'asc';
+                                        $nextOrder = $isSortByParticipant && $isAsc ? 'desc' : 'asc';
+                                        $sortUrl = route('backoffice.group-programs.index', array_merge(request()->except(['sort', 'order', 'page']), ['sort' => 'education_start_date', 'order' => $nextOrder]));
+                                    @endphp
+                                    <a href="{{ $sortUrl }}" class="board-table-sort-link">
+                                        참가일
+                                        <span class="board-table-sort-arrows">
+                                            <i class="fas fa-arrows-alt-v" title="정렬"></i>
+                                        </span>
+                                    </a>
+                                </th>
                                 <th>신청기간</th>
                                 <th>정원</th>
                                 <th>결제수단</th>
@@ -147,6 +168,9 @@
                         <tbody>
                             @foreach($programs as $program)
                                 <tr>
+                                    <td>
+                                        <input type="checkbox" name="program_ids[]" value="{{ $program->id }}" class="form-check-input program-checkbox">
+                                    </td>
                                     <td>{{ $programs->total() - ($programs->currentPage() - 1) * $programs->perPage() - $loop->index }}</td>
                                     <td>{{ $program->education_type_name }}</td>
                                     <td>{{ $program->program_name }}</td>
@@ -209,4 +233,97 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAllCheckbox = document.getElementById('select-all');
+    const programCheckboxes = document.querySelectorAll('.program-checkbox');
+    const bulkDeleteBtn = document.getElementById('bulk-delete-btn');
+
+    if (!selectAllCheckbox || !bulkDeleteBtn) return;
+
+    selectAllCheckbox.addEventListener('change', function() {
+        programCheckboxes.forEach(checkbox => {
+            checkbox.checked = this.checked;
+        });
+        updateBulkDeleteButton();
+    });
+
+    programCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            updateSelectAllCheckbox();
+            updateBulkDeleteButton();
+        });
+    });
+
+    bulkDeleteBtn.addEventListener('click', function() {
+        const selectedIds = Array.from(programCheckboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
+
+        if (selectedIds.length === 0) {
+            alert('삭제할 프로그램을 선택해주세요.');
+            return;
+        }
+
+        if (confirm('선택한 ' + selectedIds.length + '건을 삭제하시겠습니까?')) {
+            bulkDeletePrograms(selectedIds);
+        }
+    });
+
+    updateBulkDeleteButton();
+    if (programCheckboxes.length === 0) {
+        bulkDeleteBtn.disabled = true;
+    }
+});
+
+function updateSelectAllCheckbox() {
+    const selectAllCheckbox = document.getElementById('select-all');
+    const programCheckboxes = document.querySelectorAll('.program-checkbox');
+    const checkedCount = Array.from(programCheckboxes).filter(cb => cb.checked).length;
+    const totalCount = programCheckboxes.length;
+
+    if (selectAllCheckbox && totalCount > 0) {
+        selectAllCheckbox.checked = checkedCount === totalCount;
+    }
+}
+
+function updateBulkDeleteButton() {
+    const bulkDeleteBtn = document.getElementById('bulk-delete-btn');
+    const checkedCount = Array.from(document.querySelectorAll('.program-checkbox')).filter(cb => cb.checked).length;
+
+    if (bulkDeleteBtn) {
+        bulkDeleteBtn.disabled = checkedCount === 0;
+        bulkDeleteBtn.innerHTML = checkedCount > 0 ? '<i class="fas fa-trash"></i> 선택 삭제 (' + checkedCount + ')' : '<i class="fas fa-trash"></i> 선택 삭제';
+    }
+}
+
+function bulkDeletePrograms(programIds) {
+    const formData = new FormData();
+    programIds.forEach(id => formData.append('program_ids[]', id));
+
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+    fetch('{{ route("backoffice.group-programs.bulk-destroy") }}', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': csrfToken,
+            'Accept': 'application/json',
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('삭제 중 오류가 발생했습니다: ' + (data.message || ''));
+        }
+    })
+    .catch(function() {
+        alert('삭제 중 오류가 발생했습니다.');
+    });
+}
+</script>
 @endsection

@@ -166,23 +166,9 @@ Route::prefix('backoffice')->middleware(['backoffice'])->group(function () {
     // 콘텐츠 관리
     // -------------------------------------------------------------------------
 
-    // 이미지 업로드
-    Route::post('upload-image', function (Request $request) {
-        if ($request->hasFile('image')) {
-            $file = $request->file('image');
-            $path = $file->store('uploads/editor', 'public');
-
-            return response()->json([
-                'uploaded' => true,
-                'url' => asset('storage/' . $path)
-            ]);
-        }
-
-        return response()->json([
-            'uploaded' => false,
-            'error' => ['message' => '이미지 업로드에 실패했습니다.']
-        ]);
-    });
+    // 에디터 이미지 업로드 및 서빙 (storage 사용, 심볼릭 링크/서버 설정 불필요)
+    Route::post('upload-image', [BoardPostController::class, 'uploadImage'])->name('upload-image');
+    Route::get('editor-image/{filename}', [BoardPostController::class, 'serveEditorImage'])->name('editor-image')->where('filename', '[a-zA-Z0-9_.-]+');
 
     // 정렬 순서 업데이트
     Route::post('board-posts/update-sort-order', [BoardPostController::class, 'updateSortOrder'])->name('backoffice.board-posts.update-sort-order');

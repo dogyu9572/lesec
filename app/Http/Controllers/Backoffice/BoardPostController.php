@@ -8,6 +8,8 @@ use App\Services\Backoffice\BoardPostService;
 use App\Models\Board;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class BoardPostController extends Controller
 {
@@ -285,5 +287,50 @@ class BoardPostController extends Controller
         }
         
         return null;
+    }
+
+    /**
+     * 에디터 이미지 업로드
+     */
+    public function uploadImage(Request $request)
+    {
+        $request->validate([
+            'image' => 'required|file|image|mimes:jpeg,jpg,png,gif,webp|max:2097152',
+        ], [
+            'image.required' => '이미지 파일을 선택해주세요.',
+            'image.image' => '이미지 파일만 업로드 가능합니다.',
+            'image.mimes' => 'jpeg, jpg, png, gif, webp 형식만 가능합니다.',
+            'image.max' => '이미지는 2GB 이하여야 합니다.',
+        ]);
+
+        $path = $request->file('image')->store('uploads/editor', 'public');
+
+        return response()->json([
+            'uploaded' => true,
+            'url' => url('backoffice/editor-image/' . basename($path)),
+        ]);
+    }
+
+    /**
+     * 에디터 업로드 이미지 서빙 (storage 경로, 심볼릭 링크/서버 설정 불필요)
+     */
+    public function serveEditorImage(string $filename)
+    {
+        if (!preg_match('/^[a-zA-Z0-9_.-]+$/', $filename)) {
+            abort(404);
+        }
+        $path = 'uploads/editor/' . $filename;
+        if (!Storage::disk('public')->exists($path)) {
+            abort(404);
+        }
+        $file = Storage::disk('public')->get($path);
+        $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        $mimes = ['jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'png' => 'image/png', 'gif' => 'image/gif', 'webp' => 'image/webp'];
+        $mime = $mimes[$ext] ?? 'application/octet-stream';
+
+        return response($file, 200, [
+            'Content-Type' => $mime,
+            'Cache-Control' => 'public, max-age=31536000',
+        ]);
     }
 }

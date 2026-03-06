@@ -457,6 +457,10 @@
 	.tbl tbody td {font-size:14px; padding:10px 5px;}
 	.tbl col.w28_6 {width:25%;}
 	.tbl col.w26_8 {width:36%;}
+	/* edit */
+	.g01 ~ main .tbl tbody th,
+	.g01 ~ main .tbl tbody td {word-break:break-word; padding:10px 2px;}
+	.g01 ~ main .tbl tbody td * {font-size:inherit !important;}
 /* 게시판 상단 */
 	.board_top {margin-bottom:12px; flex-wrap:wrap; gap:10px;}
 	.board_top .total {font-size:13px;}

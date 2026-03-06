@@ -292,27 +292,43 @@ function initSummernote() {
     }
 }
 
-// 이미지 업로드 함수
+// 이미지 업로드 함수 (data-upload-image-url 사용, 에러 메시지 표시)
 function uploadImage(file, editor) {
     const formData = new FormData();
     formData.append('image', file);
-    formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
-    
-    fetch('/backoffice/upload-image', {
+    const csrf = document.querySelector('meta[name="csrf-token"]');
+    formData.append('_token', csrf ? csrf.getAttribute('content') : '');
+
+    var uploadUrl = (document.body && document.body.dataset.uploadImageUrl)
+        ? document.body.dataset.uploadImageUrl
+        : '/backoffice/upload-image';
+
+    fetch(uploadUrl, {
         method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
         body: formData
     })
-    .then(response => response.json())
-    .then(result => {
-        if (result.uploaded) {
+    .then(function(response) {
+        return response.text().then(function(text) {
+            var data;
+            try { data = text ? JSON.parse(text) : {}; } catch (e) { throw new Error(response.status + ' ' + (response.statusText || '서버 오류')); }
+            if (!response.ok) {
+                var msg = (data.error && data.error.message) ? data.error.message : (data.message || response.statusText || '업로드 실패');
+                throw new Error(msg);
+            }
+            return data;
+        });
+    })
+    .then(function(result) {
+        if (result.uploaded && result.url) {
             $(editor).summernote('insertImage', result.url);
         } else {
-            alert('이미지 업로드에 실패했습니다.');
+            alert(result.error && result.error.message ? result.error.message : '이미지 업로드에 실패했습니다.');
         }
     })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('이미지 업로드 중 오류가 발생했습니다.');
+    .catch(function(err) {
+        console.error('Editor image upload error:', err);
+        alert('이미지 업로드 실패: ' + (err.message || '오류가 발생했습니다.'));
     });
 }
 

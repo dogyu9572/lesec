@@ -28,7 +28,7 @@
                 </div>
             @endif
 
-            <form action="{{ route('backoffice.board-posts.update', [$board->slug ?? 'notice', $post->id]) }}" method="POST" enctype="multipart/form-data">
+            <form id="board-post-edit-form" action="{{ route('backoffice.board-posts.update', [$board->slug ?? 'notice', $post->id]) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
 
@@ -308,19 +308,18 @@
                 </div>
                 @endif
 
-                <div class="board-form-actions btns_abso">
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> 저장</button>
-                    <a href="{{ route('backoffice.board-posts.index', $board->slug ?? 'notice') }}" class="btn btn-secondary">취소</a>
-					<form
-						action="{{ route('backoffice.board-posts.destroy', [$board->slug ?? 'notice', $post->id]) }}"
-						method="POST" class="d-inline"
-						onsubmit="return confirm('정말 이 게시글을 삭제하시겠습니까?');">
-						@csrf
-						@method('DELETE')
-						<button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> 삭제</button>
-					</form>
-                </div>
             </form>
+                <div class="board-form-actions btns_abso">
+                    <button type="submit" form="board-post-edit-form" class="btn btn-primary"><i class="fas fa-save"></i> 저장</button>
+                    <a href="{{ route('backoffice.board-posts.index', $board->slug ?? 'notice') }}" class="btn btn-secondary">취소</a>
+                    <form action="{{ route('backoffice.board-posts.destroy', [$board->slug ?? 'notice', $post->id]) }}"
+                        method="POST" class="d-inline"
+                        onsubmit="return confirm('정말 이 게시글을 삭제하시겠습니까?');">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> 삭제</button>
+                    </form>
+                </div>
         </div>
     </div>
 </div>

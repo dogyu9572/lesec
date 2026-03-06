@@ -5,7 +5,7 @@
     <link rel="stylesheet" href="{{ asset('css/backoffice/session-timer.css') }}">
     @yield('styles')
 </head>
-<body class="backoffice">
+<body class="backoffice" data-upload-image-url="{{ url('/backoffice/upload-image') }}">
     <!-- 모바일에서 사이드바 활성화 시 표시되는 백드롭 -->
     <div class="backdrop" id="backdrop"></div>
 

@@ -4,6 +4,7 @@ namespace App\Http\Requests\Member;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\Rules\Unique;
 
 class MemberUnderFourteenRegisterRequest extends FormRequest
@@ -27,10 +28,10 @@ class MemberUnderFourteenRegisterRequest extends FormRequest
             'password' => [
                 'required',
                 'string',
-                'min:9',
-                'max:12',
+                'min:8',
+                'max:20',
                 'confirmed',
-                'regex:/^(?!.*[\x{AC00}-\x{D7AF}]).+$/u',
+                Password::min(8)->letters()->numbers()->symbols(),
                 'different:login_id',
             ],
             'name' => ['required', 'string', 'max:255'],
@@ -63,9 +64,12 @@ class MemberUnderFourteenRegisterRequest extends FormRequest
             'login_id_verified.required' => '아이디 중복 확인을 해주세요.',
             'login_id_verified.in' => '아이디 중복 확인을 해주세요.',
             'password.required' => '비밀번호를 입력해주세요.',
-            'password.min' => '비밀번호는 9자 이상 입력해주세요.',
-            'password.max' => '비밀번호는 12자 이하로 입력해주세요.',
-            'password.regex' => '한글을 제외한 영문/숫자/특수문자로 9~12자리로 입력해주세요.',
+            'password.min' => '비밀번호는 8자 이상 입력해주세요.',
+            'password.max' => '비밀번호는 20자 이하로 입력해주세요.',
+            'password.password' => '비밀번호는 영문, 숫자, 특수문자를 모두 포함해 8~20자로 입력해주세요.',
+            'password.letters' => '비밀번호는 영문, 숫자, 특수문자를 모두 포함해 8~20자로 입력해주세요.',
+            'password.numbers' => '비밀번호는 영문, 숫자, 특수문자를 모두 포함해 8~20자로 입력해주세요.',
+            'password.symbols' => '비밀번호는 영문, 숫자, 특수문자를 모두 포함해 8~20자로 입력해주세요.',
             'password.confirmed' => '비밀번호 확인이 일치하지 않습니다.',
             'password.different' => '아이디와 동일한 비밀번호는 사용할 수 없습니다.',
             'name.required' => '이름을 입력해주세요.',

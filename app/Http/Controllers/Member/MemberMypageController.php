@@ -355,7 +355,8 @@ class MemberMypageController extends Controller
 
         $request->validate([
             'payment_method' => 'nullable|in:bank_transfer,on_site_card,online_card',
-            'participants' => 'required|array|max:' . $application->applicant_count,
+            // 명단은 선택 입력(결제방법만 저장 가능), 신청인원 범위만 제한
+            'participants' => 'nullable|array|max:' . $application->applicant_count,
             'participants.*.name' => 'required|string|max:50',
             'participants.*.grade' => 'required|integer|min:1|max:3',
             'participants.*.class' => 'required|string|max:20',
@@ -601,18 +602,20 @@ class MemberMypageController extends Controller
                 return response()->json(['success' => false, 'message' => '업로드할 명단이 없습니다.'], 400);
             }
 
-            // 기존 명단은 유지하고 새 명단을 추가로 삽입
+            // 기존 명단 전체 삭제 후 업로드 파일 기준으로 다시 생성
+            GroupApplicationParticipant::where('group_application_id', $application->id)->delete();
+
             foreach ($participants as $participant) {
                 GroupApplicationParticipant::create($participant);
             }
 
-            // 신청 인원은 변경하지 않음 (원래 신청 시 정해진 값 유지)
+            $application->update(['applicant_count' => count($participants)]);
 
             DB::commit();
 
             return response()->json([
                 'success' => true,
-                'message' => count($participants) . '명의 명단이 추가로 업로드되었습니다.',
+                'message' => '기존 명단을 삭제하고 ' . count($participants) . '명의 명단을 업로드했습니다.',
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -792,7 +795,7 @@ class MemberMypageController extends Controller
 
         $programName = optional($application->reservation)->program_name ?? '';
         $applicantCount = (int) ($application->applicant_count ?? 0);
-        $unitPrice = (int) ($application->participation_fee ?? 0);
+        $unitPrice = $application->fee_per_person;
         $amount = $applicantCount * $unitPrice;
         $vat = (int) floor($amount * 0.1);
         $total = $amount + $vat;

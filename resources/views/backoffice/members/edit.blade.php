@@ -13,7 +13,7 @@
 <div class="admin-form-container">
     <div class="form-header">      
         <div>
-            <a href="{{ route('backoffice.members.index') }}" class="btn btn-secondary btn-sm">
+            <a href="{{ $backUrl ?? route('backoffice.members.index') }}" class="btn btn-secondary btn-sm">
             <i class="fas fa-arrow-left"></i> <span class="btn-text">목록으로</span>
         </a>
             <button type="submit" form="memberForm" class="btn btn-primary btn-sm">

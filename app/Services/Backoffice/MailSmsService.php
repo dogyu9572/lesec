@@ -214,7 +214,7 @@ class MailSmsService
                 'send_started_at' => $now,
             ]);
 
-            $recipients = $message->recipients()->get();
+            $recipients = $message->recipients()->with('member')->get();
             $sendSequence = (int) $message->logs()->max('send_sequence') + 1;
             $logs = [];
             $successCount = 0;
@@ -222,10 +222,12 @@ class MailSmsService
 
             foreach ($recipients as $recipient) {
                 try {
+                    // 발송 시점에 회원 최신 연락처/이메일 사용 (명단 등록 후 회원정보 변경 반영)
+                    $email = ($recipient->member ? $recipient->member->email : null) ?? $recipient->member_email;
+                    $phone = ($recipient->member ? $recipient->member->contact : null) ?? $recipient->member_contact;
+
                     if ($message->message_type === MailSmsMessage::TYPE_EMAIL) {
                         // 이메일 발송
-                        $email = $recipient->member_email;
-
                         if (empty($email)) {
                             $logs[] = [
                                 'send_sequence' => $sendSequence,
@@ -234,7 +236,7 @@ class MailSmsService
                                 'member_id' => $recipient->member_id,
                                 'member_name' => $recipient->member_name,
                                 'member_email' => $email,
-                                'member_contact' => $recipient->member_contact,
+                                'member_contact' => $phone,
                                 'result_status' => 'failure',
                                 'sent_at' => null,
                                 'response_code' => 'NO_EMAIL',
@@ -259,7 +261,7 @@ class MailSmsService
                                 'member_id' => $recipient->member_id,
                                 'member_name' => $recipient->member_name,
                                 'member_email' => $email,
-                                'member_contact' => $recipient->member_contact,
+                                'member_contact' => $phone,
                                 'result_status' => 'success',
                                 'sent_at' => $now,
                                 'response_code' => '200',
@@ -276,7 +278,7 @@ class MailSmsService
                                 'member_id' => $recipient->member_id,
                                 'member_name' => $recipient->member_name,
                                 'member_email' => $email,
-                                'member_contact' => $recipient->member_contact,
+                                'member_contact' => $phone,
                                 'result_status' => 'failure',
                                 'sent_at' => null,
                                 'response_code' => 'EXCEPTION',
@@ -287,8 +289,7 @@ class MailSmsService
                             $failureCount++;
                         }
                     } else {
-                        // SMS 또는 카카오 알림톡 발송
-                        $phone = $recipient->member_contact;
+                        // SMS 또는 카카오 알림톡 발송 (학생 연락처는 위에서 회원 기준으로 설정된 $phone 사용)
                         $content = $message->content;
 
                         // 회원 정보에서 보호자 연락처 가져오기
@@ -311,7 +312,7 @@ class MailSmsService
                                 'mail_sms_message_member_id' => $recipient->id,
                                 'member_id' => $recipient->member_id,
                                 'member_name' => $recipient->member_name,
-                                'member_email' => $recipient->member_email,
+                                'member_email' => $email,
                                 'member_contact' => $phone,
                                 'result_status' => $result['success'] ? 'success' : 'failure',
                                 'sent_at' => $result['success'] ? $now : null,
@@ -333,7 +334,7 @@ class MailSmsService
                                 'mail_sms_message_member_id' => $recipient->id,
                                 'member_id' => $recipient->member_id,
                                 'member_name' => $recipient->member_name,
-                                'member_email' => $recipient->member_email,
+                                'member_email' => $email,
                                 'member_contact' => $phone,
                                 'result_status' => 'failure',
                                 'sent_at' => $now,
@@ -361,7 +362,7 @@ class MailSmsService
                                 'mail_sms_message_member_id' => $recipient->id,
                                 'member_id' => $recipient->member_id,
                                 'member_name' => $recipient->member_name . ' (보호자)',
-                                'member_email' => $recipient->member_email,
+                                'member_email' => $email,
                                 'member_contact' => $parentPhone,
                                 'result_status' => $parentResult['success'] ? 'success' : 'failure',
                                 'sent_at' => $parentResult['success'] ? $now : null,
@@ -392,8 +393,8 @@ class MailSmsService
                         'mail_sms_message_member_id' => $recipient->id,
                         'member_id' => $recipient->member_id,
                         'member_name' => $recipient->member_name,
-                        'member_email' => $recipient->member_email,
-                        'member_contact' => $recipient->member_contact,
+                        'member_email' => $email,
+                        'member_contact' => $phone,
                         'result_status' => 'failure',
                         'sent_at' => null,
                         'response_code' => 'EXCEPTION',

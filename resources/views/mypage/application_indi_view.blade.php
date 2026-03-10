@@ -97,7 +97,7 @@
 					</tr>
 					<tr>
 						<th>추첨결과</th>
-						<td>{{ $application->draw_result_label }}</td>
+						<td>{{ $application->draw_result_label === '대기중' ? '-' : $application->draw_result_label }}</td>
 					</tr>
 				</tbody>
 			</table>

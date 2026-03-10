@@ -64,7 +64,7 @@
 								<span>{{ $dayData['day'] }}</span>
 								@if($isDisabledDate)
 								<div class="schedule-disabled">{{ $disabledDateTitle ?? '예약불가' }}</div>
-								@elseif(!$dayData['disabled'] && count($dayData['programs']) > 0)
+								@elseif(count($dayData['programs']) > 0)
 								<ul class="list">
 									@foreach($dayData['programs'] as $program)
 									@php
@@ -155,9 +155,9 @@
 					<div class="count">
 						<strong>신청 인원수</strong>
 						<div class="flex">
-							<button class="btn minus" @if(!$canApply) disabled @endif>-</button>
+							<button type="button" class="btn minus" @if(!$canApply) disabled @endif>-</button>
 							<input type="text" value="0" readonly>
-							<button class="btn plus" @if(!$canApply) disabled @endif>+</button>
+							<button type="button" class="btn plus" @if(!$canApply) disabled @endif>+</button>
 						</div>
 					</div>
 					<div class="btns">

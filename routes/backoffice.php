@@ -38,6 +38,8 @@ Route::prefix('backoffice')->name('backoffice.')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::get('/logout', [AuthController::class, 'logout'])
         ->name('logout');
+    // 게시판 본문 이미지 조회 (비로그인 사용자도 FAQ 등에서 이미지 노출 가능)
+    Route::get('editor-image/{filename}', [BoardPostController::class, 'serveEditorImage'])->name('editor-image')->where('filename', '[a-zA-Z0-9_.-]+');
 });
 
 // =============================================================================
@@ -166,9 +168,8 @@ Route::prefix('backoffice')->middleware(['backoffice'])->group(function () {
     // 콘텐츠 관리
     // -------------------------------------------------------------------------
 
-    // 에디터 이미지 업로드 및 서빙 (storage 사용, 심볼릭 링크/서버 설정 불필요)
+    // 에디터 이미지 업로드 (서빙은 위 인증 없음 그룹에서 처리)
     Route::post('upload-image', [BoardPostController::class, 'uploadImage'])->name('upload-image');
-    Route::get('editor-image/{filename}', [BoardPostController::class, 'serveEditorImage'])->name('editor-image')->where('filename', '[a-zA-Z0-9_.-]+');
 
     // 정렬 순서 업데이트
     Route::post('board-posts/update-sort-order', [BoardPostController::class, 'updateSortOrder'])->name('backoffice.board-posts.update-sort-order');

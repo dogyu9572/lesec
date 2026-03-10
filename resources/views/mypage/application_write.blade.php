@@ -207,7 +207,7 @@
 
 		<div class="btns_tac">
 			<button type="submit" class="btn_submit btn_wbb" id="group-application-submit-btn" {{ $application->application_status !== 'approved' ? 'disabled' : '' }}>저장하기</button>
-			<a href="{{ route('mypage.application_list') }}" class="btn btn_kwy">신청취소</a>
+			<a href="{{ route('mypage.application_list') }}" class="btn btn_kwy">취소</a>
 		</div>
 
 		</form>

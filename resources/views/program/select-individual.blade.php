@@ -32,7 +32,7 @@
 	
 
 		<div class="board_top">
-			<div class="total">TOTAL <strong>{{ $programs->count() }}</strong></div>
+			<div class="total">TOTAL <strong>{{ $totalPrograms }}</strong></div>
 			<form id="individual-filter-form" method="GET" action="{{ route('program.select.individual', $type) }}" class="selects">
 				<select name="month" id="filter_month">
 					<option value="">월 전체</option>
@@ -87,7 +87,7 @@
 				<tbody>
 					@forelse($programs as $index => $program)
 					<tr>
-						<td class="num">{{ $programs->count() - $index }}</td>
+						<td class="num">{{ $totalPrograms - (($programs->currentPage() - 1) * $programs->perPage()) - $index }}</td>
 						<td class="edu02">
 							<div class="statebox_tb {{ $program->reception_type }}">{{ $program->reception_type_name }}</div>
 						</td>

@@ -450,6 +450,9 @@ class GroupApplicationService
 
         $rows = 0;
 
+        // 기존 참가자 명단 전체 삭제 후 업로드된 파일 기준으로 다시 생성
+        GroupApplicationParticipant::where('group_application_id', $application->id)->delete();
+
         if ($extension === 'csv') {
             // CSV 파일 처리
             $handle = fopen($filePath, 'r');
@@ -492,6 +495,9 @@ class GroupApplicationService
         } else {
             throw new InvalidArgumentException('지원하지 않는 파일 형식입니다. CSV 또는 엑셀 파일을 사용해주세요.');
         }
+
+        // 업로드된 명단 수를 신청 인원(applicant_count)에 반영
+        $application->update(['applicant_count' => $rows]);
 
         return $rows;
     }

@@ -150,8 +150,8 @@ class ProgramController extends Controller
         $year = $request->input('year', now()->year);
         $month = $request->input('month', now()->month);
 
-        // 프로그램 조회
-        $programs = $this->programReservationService->getProgramsByMonth($type, 'group', $year, $month);
+        // 프로그램 조회 (캘린더에 보이는 전체 기간: 이전/다음 달 overflow 포함)
+        $programs = $this->programReservationService->getProgramsForCalendarView($type, 'group', $year, $month);
 
         // 날짜별 그룹화
         $programsByDate = $this->programReservationService->groupProgramsByDate($programs);
@@ -221,6 +221,7 @@ class ProgramController extends Controller
         if ($member && $member instanceof Member && $member->member_type === 'student') {
             $applications = IndividualApplication::query()
                 ->where('member_id', $member->id)
+                ->where('payment_status', '!=', 'cancelled')
                 ->get(['program_reservation_id', 'program_name']);
 
             $appliedPrefixes = $applications

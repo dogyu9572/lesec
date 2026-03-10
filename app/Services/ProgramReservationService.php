@@ -36,6 +36,32 @@ class ProgramReservationService
     }
 
     /**
+     * 캘린더 그리드에 보이는 전체 기간(이전/다음 달 overflow 포함)으로 프로그램 조회
+     */
+    public function getProgramsForCalendarView(string $educationType, string $applicationType, int $year, int $month): Collection
+    {
+        $firstDay = mktime(0, 0, 0, $month, 1, $year);
+        $daysInMonth = (int) date('t', $firstDay);
+        $dayOfWeek = (int) date('w', $firstDay);
+
+        $calendarStart = Carbon::create($year, $month, 1)->subDays($dayOfWeek)->startOfDay();
+        $remainder = ($dayOfWeek + $daysInMonth) % 7;
+        $nextMonthDays = $remainder === 0 ? 7 : (7 - $remainder);
+        $calendarEnd = Carbon::create($year, $month, 1)->endOfMonth()->addDays($nextMonthDays);
+
+        $programs = ProgramReservation::query()
+            ->byEducationType($educationType)
+            ->byApplicationType($applicationType)
+            ->active()
+            ->whereDate('education_start_date', '<=', $calendarEnd)
+            ->whereDate('education_end_date', '>=', $calendarStart)
+            ->orderBy('education_start_date', 'asc')
+            ->get();
+
+        return $this->filterProgramsBySchedule($programs);
+    }
+
+    /**
      * 개인 신청 프로그램 전체 조회
      */
     public function getIndividualPrograms(string $educationType): Collection
@@ -272,18 +298,24 @@ class ProgramReservationService
         foreach ($programs as $program) {
             $startDate = $program->education_start_date;
             $endDate = $program->education_end_date;
+            if (!$startDate || !$endDate) {
+                continue;
+            }
 
-            // 시작일부터 종료일까지 모든 날짜에 프로그램 추가
-            $currentDate = Carbon::parse($startDate);
-            $endDateCarbon = Carbon::parse($endDate);
+            // Y-m-d 문자열만 사용해 시간대/객체 참조 영향 제거
+            $startStr = Carbon::parse($startDate)->format('Y-m-d');
+            $endStr = Carbon::parse($endDate)->format('Y-m-d');
+            if ($startStr > $endStr) {
+                continue;
+            }
 
-            while ($currentDate <= $endDateCarbon) {
-                $dateKey = $currentDate->format('Y-m-d');
-                if (!isset($programsByDate[$dateKey])) {
-                    $programsByDate[$dateKey] = [];
+            $cursor = $startStr;
+            while ($cursor <= $endStr) {
+                if (!isset($programsByDate[$cursor])) {
+                    $programsByDate[$cursor] = [];
                 }
-                $programsByDate[$dateKey][] = $program;
-                $currentDate->addDay();
+                $programsByDate[$cursor][] = $program;
+                $cursor = Carbon::parse($cursor)->addDay()->format('Y-m-d');
             }
         }
 
@@ -313,11 +345,13 @@ class ProgramReservationService
         $daysInPrevMonth = date('t', mktime(0, 0, 0, $prevMonth, 1, $prevYear));
 
         for ($i = 0; $i < $dayOfWeek; $i++) {
+            $prevDay = $daysInPrevMonth - ($dayOfWeek - $i - 1);
+            $prevDateKey = sprintf('%d-%02d-%02d', $prevYear, $prevMonth, $prevDay);
             $week[] = [
-                'day' => $daysInPrevMonth - ($dayOfWeek - $i - 1),
+                'day' => $prevDay,
                 'disabled' => true,
                 'is_disabled_date' => false,
-                'programs' => []
+                'programs' => $programsByDate[$prevDateKey] ?? []
             ];
         }
 
@@ -343,13 +377,20 @@ class ProgramReservationService
         }
 
         // 다음 달 날짜로 채우기
+        $nextMonth = $month + 1;
+        $nextYear = $year;
+        if ($nextMonth > 12) {
+            $nextMonth = 1;
+            $nextYear++;
+        }
         $nextDay = 1;
         while (count($week) < 7) {
+            $nextDateKey = sprintf('%d-%02d-%02d', $nextYear, $nextMonth, $nextDay);
             $week[] = [
                 'day' => $nextDay,
                 'disabled' => true,
                 'is_disabled_date' => false,
-                'programs' => []
+                'programs' => $programsByDate[$nextDateKey] ?? []
             ];
             $nextDay++;
         }

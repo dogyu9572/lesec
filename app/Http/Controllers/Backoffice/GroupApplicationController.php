@@ -170,7 +170,7 @@ class GroupApplicationController extends BaseController
 
         return response()->json([
             'success' => true,
-            'message' => "{$rows}명의 명단을 추가했습니다.",
+            'message' => "기존 명단을 삭제하고 {$rows}명의 명단을 업로드했습니다.",
         ]);
     }
 

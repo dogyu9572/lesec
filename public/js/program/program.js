@@ -471,13 +471,33 @@
       const isUnlimited = programInfo && programInfo.isUnlimited;
 
       if (status === "신청가능") {
-        // 방학 프로그램이고 정원이 있으면 정원을 모두 채워야 함
+        // 중등방학·고등방학: 신청 시작값 20으로 고정
         if (isVacation && !isUnlimited && programInfo.total > 0) {
-          return programInfo.total;
+          return 20;
         }
         return 10;
       } else if (status === "잔여석 신청 가능") {
         // 방학 프로그램이고 정원이 있으면 잔여석을 모두 채워야 함
+        if (isVacation && !isUnlimited && programInfo.remaining > 0) {
+          return programInfo.remaining;
+        }
+        return 4;
+      }
+      return 0;
+    }
+
+    /** minus 버튼으로 내려갈 수 있는 최소값(바닥). 방학 신청가능은 시작 20, 최소도 20. */
+    function getMinimumCount(status, programInfo) {
+      const isVacation = programInfo && programInfo.isVacation;
+      const isUnlimited = programInfo && programInfo.isUnlimited;
+
+      if (status === "신청가능") {
+        if (isVacation && !isUnlimited && programInfo.total > 0) {
+          return 20;
+        }
+        return 10;
+      }
+      if (status === "잔여석 신청 가능") {
         if (isVacation && !isUnlimited && programInfo.remaining > 0) {
           return programInfo.remaining;
         }
@@ -516,7 +536,7 @@
       };
     }
 
-    // + 버튼 활성화/비활성화 업데이트 함수
+    // + 버튼 활성화/비활성화 업데이트
     function updatePlusButtonState() {
       const $plusBtn = $wrap.find(".btn.plus");
       const programInfo = getSelectedProgramInfo();
@@ -525,30 +545,51 @@
 
       if (!programInfo || !programInfo.status) {
         $plusBtn.prop("disabled", true);
+        updateMinusButtonState();
         return;
       }
 
-      // 제한없음인 경우
       if (programInfo.isUnlimited) {
         $plusBtn.prop("disabled", false);
+        updateMinusButtonState();
         return;
       }
 
-      // 방학 프로그램인 경우 정원을 모두 채워야 하므로 + 버튼 비활성화
       if (programInfo.isVacation && programInfo.total > 0) {
         if (currentValue >= programInfo.total) {
           $plusBtn.prop("disabled", true);
         } else {
           $plusBtn.prop("disabled", false);
         }
+        updateMinusButtonState();
         return;
       }
 
-      // 정원이 있는 경우: 현재 값이 잔여석보다 작으면 활성화
       if (currentValue < programInfo.remaining) {
         $plusBtn.prop("disabled", false);
       } else {
         $plusBtn.prop("disabled", true);
+      }
+      updateMinusButtonState();
+    }
+
+    // − 버튼: 현재값이 최소값보다 클 때만 활성화 (클릭 가능하도록)
+    function updateMinusButtonState() {
+      const $minusBtn = $wrap.find(".btn.minus");
+      const programInfo = getSelectedProgramInfo();
+      const $input = $wrap.find(".count input");
+      const currentValue = parseInt($input.val(), 10) || 0;
+
+      if (!programInfo || !programInfo.status) {
+        $minusBtn.prop("disabled", true);
+        return;
+      }
+
+      const minimumCount = getMinimumCount(programInfo.status, programInfo);
+      if (currentValue <= minimumCount) {
+        $minusBtn.prop("disabled", true);
+      } else {
+        $minusBtn.prop("disabled", false);
       }
     }
 
@@ -598,16 +639,16 @@
 
       const $input = $wrap.find(".count input");
       const currentValue = parseInt($input.val(), 10) || 0;
-      const initialCount = getInitialCount(programInfo.status, programInfo);
+      const minimumCount = getMinimumCount(programInfo.status, programInfo);
 
-      if (currentValue <= initialCount) {
-        $input.val(initialCount);
+      if (currentValue <= minimumCount) {
+        $input.val(minimumCount);
         updatePlusButtonState();
         return;
       }
 
       const newValue = currentValue - 1;
-      if (newValue >= initialCount) {
+      if (newValue >= minimumCount) {
         $input.val(newValue);
         updatePlusButtonState();
       }
@@ -1057,6 +1098,7 @@
 
               programMap[programId].push({
                 $el: $li,
+                $td: $li.closest("td"),
                 tdIndex: tdIndex,
               });
             });
@@ -1082,6 +1124,10 @@
         // 2. 이후 항목 off 처리
         for (let i = 1; i < items.length; i++) {
           items[i].$el.addClass("off");
+          // overflow(disabled) 셀의 회색 배경이 앞 셀 막대를 가리지 않도록 배경 투명화
+          if (items[i].$td.hasClass("disabled")) {
+            items[i].$td.css("background-color", "transparent");
+          }
         }
       });
     });

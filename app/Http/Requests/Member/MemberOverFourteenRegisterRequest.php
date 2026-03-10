@@ -2,8 +2,11 @@
 
 namespace App\Http\Requests\Member;
 
+use App\Models\Member;
+use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\Rules\Unique;
 
 class MemberOverFourteenRegisterRequest extends FormRequest
@@ -29,14 +32,17 @@ class MemberOverFourteenRegisterRequest extends FormRequest
             'password' => [
                 'required',
                 'string',
-                'min:9',
-                'max:12',
+                'min:8',
+                'max:20',
                 'confirmed',
-                'regex:/^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).+$/',
+                Password::min(8)->letters()->numbers()->symbols(),
                 'different:login_id',
             ],
             'name' => ['required', 'string', 'max:255'],
-            'birth_date' => ['required', 'date_format:Ymd', 'before:today'],
+            'birth_date' => array_merge(
+                ['required', 'date_format:Ymd', 'before:today'],
+                $memberType === 'student' ? ['after:' . Carbon::today()->subYears(30)->format('Ymd')] : []
+            ),
             'gender' => ['required', 'in:male,female'],
             'contact' => ['required', 'string', 'max:50', $this->uniqueContactRule()],
             'contact_verified' => ['required', 'in:1'],
@@ -71,15 +77,19 @@ class MemberOverFourteenRegisterRequest extends FormRequest
             'login_id_verified.required' => '아이디 중복 확인을 해주세요.',
             'login_id_verified.in' => '아이디 중복 확인을 해주세요.',
             'password.required' => '비밀번호를 입력해주세요.',
-            'password.min' => '비밀번호는 9자 이상 입력해주세요.',
-            'password.max' => '비밀번호는 12자 이하로 입력해주세요.',
-            'password.regex' => '한글을 제외한 영문/숫자/특수문자로 9~12자리로 입력해주세요.',
+            'password.min' => '비밀번호는 8자 이상 입력해주세요.',
+            'password.max' => '비밀번호는 20자 이하로 입력해주세요.',
+            'password.password' => '비밀번호는 영문, 숫자, 특수문자를 모두 포함해 8~20자로 입력해주세요.',
+            'password.letters' => '비밀번호는 영문, 숫자, 특수문자를 모두 포함해 8~20자로 입력해주세요.',
+            'password.numbers' => '비밀번호는 영문, 숫자, 특수문자를 모두 포함해 8~20자로 입력해주세요.',
+            'password.symbols' => '비밀번호는 영문, 숫자, 특수문자를 모두 포함해 8~20자로 입력해주세요.',
             'password.confirmed' => '비밀번호 확인이 일치하지 않습니다.',
             'password.different' => '아이디와 동일한 비밀번호는 사용할 수 없습니다.',
             'name.required' => '이름을 입력해주세요.',
             'birth_date.required' => '생년월일을 입력해주세요.',
             'birth_date.date_format' => '생년월일은 YYYYMMDD 형식으로 입력해주세요.',
             'birth_date.before' => '미래 날짜는 입력할 수 없습니다.',
+            'birth_date.after' => '학생 회원가입은 만 30세 이하만 가능합니다.',
             'gender.required' => '성별을 선택해주세요.',
             'contact.required' => '연락처를 입력해주세요.',
             'contact.unique' => '이미 등록된 연락처입니다.',
@@ -201,7 +211,13 @@ class MemberOverFourteenRegisterRequest extends FormRequest
     {
         $validator->after(function ($validator) {
             $memberType = $this->session()->get('member_registration.member_type');
-            
+            $contactDigits = $this->input('contact');
+
+            // 학생·교사 공통: 다른 회원의 보호자 연락처로 등록된 번호는 본인 연락처로 사용 불가
+            if ($contactDigits && Member::where('parent_contact', $contactDigits)->exists()) {
+                $validator->errors()->add('contact', '이미 등록된 연락처입니다.');
+            }
+
             // 학생인 경우에만 학생 연락처와 보호자 연락처가 같은지 확인
             if ($memberType === 'student') {
                 $studentContact = preg_replace('/[^0-9]/', '', (string) $this->input('student_contact', ''));

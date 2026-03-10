@@ -125,6 +125,7 @@
                         <col width="40">
                         <col width="40">
                         <col width="7%">
+                        <col width="7%">
                         <col width="5%">
                         <col width="5%">
                         <col width="7%">
@@ -135,7 +136,6 @@
                         <col width="7%">
                         <col width="100">
                         <col width="100">
-                        <col width="130">
                         <col width="80">
                     </colgroup>
                     <thead>
@@ -143,6 +143,7 @@
                             <th style="width: 40px;"><input type="checkbox" id="select-all-checkbox"></th>
                             <th>No</th>
                             <th>신청번호</th>
+                            <th>참가일</th>
                             <th>신청상태</th>
                             <th>신청자명</th>
                             <th>학교명</th>
@@ -152,7 +153,6 @@
                             <th>명단등록인원</th>
                             <th>결제방법</th>
                             <th>참가비</th>
-                            <th>참가일</th>
                             <th>신청일시</th>
                             <th style="width:80px;">관리</th>
                         </tr>
@@ -163,20 +163,6 @@
                             <td><input type="checkbox" class="application-checkbox" value="{{ data_get($application, 'id', 0) }}"></td>
                             <td>{{ $applications->total() - ($applications->currentPage() - 1) * $applications->perPage() - $loop->index }}</td>
                             <td>{{ data_get($application, 'application_number', '-') }}</td>
-                            <td>{{ data_get($application, 'application_status_label', '-') }}</td>
-                            <td>{{ data_get($application, 'applicant_name', '-') }}</td>
-                            <td>{{ data_get($application, 'school_name', '-') }}</td>
-                            <td>{{ data_get($application, 'education_type_label', '-') }}</td>
-                            <td>{{ data_get($application, 'program_name_label', '-') }}</td>
-                            <td>{{ data_get($application, 'applicant_count', '-') }}</td>
-                            <td>{{ count(data_get($application, 'participants', [])) }}</td>
-                            <td>{{ data_get($application, 'payment_method_label', '-') }}</td>
-                            <td>
-                                @php
-                                $fee = data_get($application, 'participation_fee');
-                                @endphp
-                                {{ $fee !== null && $fee !== '' ? number_format((int) $fee) : '-' }}
-                            </td>
                             <td>
                                 @php
                                 $reservation = data_get($application, 'reservation');
@@ -206,6 +192,18 @@
                                 @else
                                 -
                                 @endif
+                            </td>
+                            <td>{{ data_get($application, 'application_status_label', '-') }}</td>
+                            <td>{{ data_get($application, 'applicant_name', '-') }}</td>
+                            <td>{{ data_get($application, 'school_name', '-') }}</td>
+                            <td>{{ data_get($application, 'education_type_label', '-') }}</td>
+                            <td>{{ data_get($application, 'program_name_label', '-') }}</td>
+                            <td>{{ data_get($application, 'applicant_count', '-') }}</td>
+                            <td>{{ count(data_get($application, 'participants', [])) }}</td>
+                            <td>{{ data_get($application, 'payment_method_label', '-') }}</td>
+                            <td>
+                                @php $unitFee = $application->fee_per_person; @endphp
+                                {{ $unitFee > 0 ? number_format($unitFee) . '원' : '-' }}
                             </td>
                             <td>{{ data_get($application, 'applied_at_formatted', data_get($application, 'applied_at', '-')) }}</td>
                             <td>

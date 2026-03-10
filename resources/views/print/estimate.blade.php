@@ -67,16 +67,12 @@
 								<td>서울특별시 관악구 관악로1</td>
 							</tr>
 							<tr>
-								<th>담당자</th>
-								<td>김학진</td>
-							</tr>
-							<tr>
 								<th>TEL</th>
 								<td>02-888-0932</td>
 							</tr>
 							<tr>
 								<th>EMAIL</th>
-								<td>test1234@naver.com</td>
+								<td>nicemedu@snu.ac.kr</td>
 							</tr>
 						</table>
 					</div>

@@ -117,7 +117,16 @@ class GroupProgramController extends BaseController
      */
     public function update(Request $request, ProgramReservation $programReservation)
     {
-        // TODO: Form Request로 유효성 검사 추가 예정
+        // 결제수단은 등록 화면과 동일하게 최소 1개 이상 필수
+        $request->validate([
+            'payment_methods' => ['required', 'array', 'min:1'],
+            'payment_methods.*' => ['in:bank_transfer,on_site_card,online_card'],
+        ], [
+            'payment_methods.required' => '결제수단을 최소 1개 이상 선택해주세요.',
+            'payment_methods.array' => '결제수단을 올바르게 선택해주세요.',
+            'payment_methods.min' => '결제수단을 최소 1개 이상 선택해주세요.',
+        ]);
+
         $this->groupProgramService->updateProgram($programReservation, $request->all());
 
         return redirect()->route('backoffice.group-programs.index')

@@ -182,8 +182,7 @@
                                         $applicantCount = data_get($application, 'applicant_count', 0);
                                     @endphp
                                     <div style="margin-bottom: 5px; color: #666; font-size: 0.9em;">신청명단: {{ $participantsCount }}명</div>
-                                    <input type="text" id="applicant_count_display" value="{{ $applicantCount }}" readonly style="background-color: #f5f5f5;">
-                                    <input type="hidden" id="applicant_count" name="applicant_count" value="{{ $applicantCount }}">
+                                    <input type="number" id="applicant_count" name="applicant_count" value="{{ $applicantCount }}" min="1" class="form-control">
                                 </div>
                                 <div class="form-group">
                                     <label for="applied_at">신청일시</label>

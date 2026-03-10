@@ -9,6 +9,7 @@ use App\Models\SidoSggCode;
 use App\Models\IndividualApplication;
 use App\Models\GroupApplication;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
@@ -98,7 +99,7 @@ class MemberController extends BaseController
             'password' => 'required|min:4|confirmed',
             'member_type' => 'required|in:teacher,student',
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:members,email',
+            'email' => 'required|email',
             'contact' => 'nullable|string|max:50',
             'grade' => 'nullable|integer|between:1,3',
             'class_number' => 'nullable|integer|between:1,20',
@@ -140,7 +141,7 @@ class MemberController extends BaseController
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Member $member)
+    public function edit(Request $request, Member $member)
     {
         $memberGroups = MemberGroup::active()->ordered()->get();
 
@@ -156,7 +157,25 @@ class MemberController extends BaseController
             ->orderBy('applied_at', 'desc')
             ->get();
 
-        return view('backoffice.members.edit', compact('member', 'memberGroups', 'individualApplications', 'groupApplications'));
+        // 이전 페이지가 회원 목록이면 필터/페이지 정보가 포함된 URL을 세션에 저장
+        $previousUrl = url()->previous();
+        if (
+            $previousUrl &&
+            Str::contains($previousUrl, '/backoffice/members') &&
+            !Str::contains($previousUrl, '/backoffice/members/' . $member->id . '/edit')
+        ) {
+            $request->session()->put('backoffice.members.return_url', $previousUrl);
+        }
+
+        $backUrl = $request->session()->get('backoffice.members.return_url', route('backoffice.members.index'));
+
+        return view('backoffice.members.edit', compact(
+            'member',
+            'memberGroups',
+            'individualApplications',
+            'groupApplications',
+            'backUrl'
+        ));
     }
 
     /**
@@ -177,7 +196,7 @@ class MemberController extends BaseController
             'password' => 'nullable|min:4',
             'member_type' => 'required|in:teacher,student',
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:members,email,' . $member->id,
+            'email' => 'required|email',
             'contact' => 'nullable|string|max:50',
             'grade' => 'nullable|integer|between:1,3',
             'class_number' => 'nullable|integer|between:1,20',
@@ -185,7 +204,7 @@ class MemberController extends BaseController
 
         try {
             $this->memberService->updateMember($member, $request->all());
-            return redirect()->route('backoffice.members.index')
+            return redirect()->route('backoffice.members.edit', $member)
                 ->with('success', '회원 정보가 수정되었습니다.');
         } catch (\Exception $e) {
             return redirect()->back()

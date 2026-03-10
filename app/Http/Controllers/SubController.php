@@ -64,21 +64,24 @@ class SubController extends Controller
     {
         $gNum = "02"; $sNum = "02"; $gName = "게시판"; $sName = "FAQ";
         $board = $this->boardContentService->getBoard('faq');
+        $categoryOptions = $board->getCategoryOptions();
         $filters = [
             'keyword' => $request->input('keyword'),
             'search_type' => $request->input('search_type'),
             'category' => $request->input('category'),
         ];
         $posts = $this->boardContentService->getPostPaginator($board, $filters);
-        $categories = collect([
-            //'신청/입금/환불',
-			'신청/입금',
-			'환불',
-            '수료증',
-            '대기자',
-            '회원정보',
-            '일반',
-        ]);
+        $categories = $categoryOptions->isNotEmpty()
+            ? $categoryOptions->pluck('name')
+            : collect([
+                //'신청/입금/환불',
+				'신청/입금',
+				'환불',
+                '수료증',
+                '대기자',
+                '회원정보',
+                '일반',
+            ]);
 
         return view('board.faq', [
             'gNum' => $gNum,

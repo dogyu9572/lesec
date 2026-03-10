@@ -370,14 +370,24 @@ class MemberRegisterController extends Controller
             }
         }
 
+        // 이메일은 중복 검사하지 않음
+        if ($field === 'email') {
+            return response()->json([
+                'success' => true,
+                'message' => '사용 가능한 이메일 입니다.',
+            ]);
+        }
+
         $exists = Member::query()
             ->when($field === 'contact', function ($query) use ($value) {
                 $query->where(function ($nested) use ($value) {
-                    $nested->where('contact', $value);
+                    $nested->where('contact', $value)
+                        ->orWhere('parent_contact', $value);
 
                     $formatted = $this->registerService->formatContactForDisplay($value);
                     if ($formatted !== null) {
-                        $nested->orWhere('contact', $formatted);
+                        $nested->orWhere('contact', $formatted)
+                            ->orWhere('parent_contact', $formatted);
                     }
                 });
             }, function ($query) use ($field, $value) {

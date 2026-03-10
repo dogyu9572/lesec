@@ -12,11 +12,11 @@
 				@endif
 				<form method="POST" action="{{ route('member.find_pw_change.submit') }}">
 					@csrf
-					<input type="password" name="password" class="text" placeholder="새 비밀번호">
+					<input type="password" name="password" class="text" placeholder="새 비밀번호" autocomplete="off">
 					@error('password')
 					<p class="error_alert">{{ $message }}</p>
 					@enderror
-					<input type="password" name="password_confirmation" class="text mt16" placeholder="새 비밀번호 확인">
+					<input type="password" name="password_confirmation" class="text mt16" placeholder="새 비밀번호 확인" autocomplete="off">
 					<p class="c_green">* 영문/숫자/특수문자를 포함하여 8자리~20자리로 입력해주세요.</p>
 					<button type="submit" class="btn btn_wbb mt4">변경</button>
 				</form>

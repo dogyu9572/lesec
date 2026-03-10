@@ -36,8 +36,8 @@
 						<dt>현재 비밀번호<span>*</span></dt>
 						<dd>
 							<div class="password-wrap">
-								<input type="password" name="current_password" class="text w100p password-input" placeholder="안전한 정보 수정을 위해 현재 사용 중인 비밀번호를 입력해주세요.">
-								<button type="button" class="btn-eye toggle-password r16"><img src="/images/icon_eye.svg" alt="보기"></button>
+								<input type="password" name="current_password" class="text w100p password-input" placeholder="안전한 정보 수정을 위해 현재 사용 중인 비밀번호를 입력해주세요." autocomplete="off">
+								<button type="button" class="btn-eye toggle-password r16" aria-label="비밀번호 보기"><img src="/images/icon_eye.svg" alt="보기"></button>
 							</div>
 						</dd>
 					</dl>
@@ -45,8 +45,8 @@
 						<dt>새 비밀번호</dt>
 						<dd>
 							<div class="password-wrap password-wrap_add">
-								<input type="password" name="password" class="text w100p now_pw password-input password-input_add" placeholder="변경할 비밀번호를 입력해주세요. (변경하지 않으려면 비워두세요)">
-								<button type="button" class="btn-eye toggle-password toggle-password_add r16"><img src="/images/icon_eye.svg" alt="보기"></button>
+								<input type="password" name="password" class="text w100p now_pw password-input password-input_add" placeholder="변경할 비밀번호를 입력해주세요. (변경하지 않으려면 비워두세요)" autocomplete="off">
+								<button type="button" class="btn-eye toggle-password toggle-password_add r16" aria-label="비밀번호 보기"><img src="/images/icon_eye.svg" alt="보기"></button>
 							</div>
 							@error('password')
 							<p class="error_alert">{{ $message }}</p>
@@ -56,7 +56,7 @@
 					<dl class="password-fields" style="display:none;">
 						<dt>새 비밀번호 확인</dt>
 						<dd>
-							<input type="password" name="password_confirmation" class="text w100p now_pw_check" placeholder="입력한 비밀번호를 다시 한번 입력해 주세요.">
+							<input type="password" name="password_confirmation" class="text w100p now_pw_check" placeholder="입력한 비밀번호를 다시 한번 입력해 주세요." autocomplete="off">
 							<p class="error_alert" style="display:none;">* 동일한 비밀번호가 아닙니다.</p>
 						</dd>
 					</dl>

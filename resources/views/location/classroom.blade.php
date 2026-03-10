@@ -4,7 +4,7 @@
     
 	<div class="inner">
 		<div class="classroom_wrap">
-			<div class="img flex_center"><img src="/images/img_classroom.svg" alt=""></div>
+			<div class="img flex_center"><img src="/images/img_classroom.svg" alt="강의실 안내"></div>
 			<div class="txt">
 				<div class="tit">강의실 위치 안내 (6층)</div>
 				<ul>

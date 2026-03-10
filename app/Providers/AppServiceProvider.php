@@ -33,6 +33,11 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
 
+        // Host Header Injection 방지: 링크/리다이렉트가 요청 Host가 아닌 APP_URL 기준으로 생성되도록 고정
+        if (is_string($applicationUrl) && $applicationUrl !== '') {
+            URL::forceRootUrl($applicationUrl);
+        }
+
         // 백오피스 경로에서 현재 메뉴 정보를 뷰에 공유
         if (Request::is('backoffice*')) {
             View::composer('*', function ($view) {

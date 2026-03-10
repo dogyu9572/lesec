@@ -49,3 +49,5 @@ setup-*-server.sh.backup
 
 public/temp/
 docs/
+
+deploy/

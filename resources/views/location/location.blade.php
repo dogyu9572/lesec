@@ -17,7 +17,7 @@
 		</div>
 		<div class="inner map_text_wrap">
 			<div class="map_text flex">
-				<div class="logo"><img src="/images/img_logo.svg" alt=""><span>생명∙환경과학교육센터</span></div>
+				<div class="logo"><img src="/images/img_logo.svg" alt="센터 로고"><span>생명∙환경과학교육센터</span></div>
 				<div class="address"><strong>주소</strong><p>서울특별시 관악구 관악로 1 서울대학교 농생명과학공동기기원</p></div>
 			</div>
 
@@ -38,7 +38,7 @@
 							</li>
 						</ul>
 					</div>
-					<div class="img"><img src="/images/img_moving_guide01.jpg" alt=""></div>
+					<div class="img"><img src="/images/img_moving_guide01.jpg" alt="이동 안내 1"></div>
 				</div>
 				<div class="box type_public_transport">
 					<div class="txt">
@@ -58,7 +58,7 @@
 							</li>
 						</ul>
 					</div>
-					<div class="img"><img src="/images/img_moving_guide02.jpg" alt=""></div>
+					<div class="img"><img src="/images/img_moving_guide02.jpg" alt="이동 안내 2"></div>
 				</div>
 			</div>
 		</div>

@@ -18,8 +18,8 @@
 				<form method="POST" action="{{ route('member.login.submit') }}" class="js-member-form">
 					@csrf
 					<div class="password-wrap">
-						<input type="text" name="login_id" class="text" placeholder="아이디를 입력해주세요." value="{{ old('login_id', $savedLoginId ?? '') }}">
-						<button type="button" class="btn-clear clear-password">
+						<input type="text" name="login_id" class="text" placeholder="아이디를 입력해주세요." value="{{ old('login_id', $savedLoginId ?? '') }}" aria-label="아이디">
+						<button type="button" class="btn-clear clear-password" aria-label="삭제">
 							<img src="/images/icon_clear.svg" alt="삭제">
 						</button>
 					</div>
@@ -31,11 +31,11 @@
 						<p class="error_alert">{{ $message }}</p>
 					@enderror -->
 					<div class="password-wrap mt16">
-						<input type="password" name="password" class="text password-input" placeholder="비밀번호를 입력해주세요.">
-						<button type="button" class="btn-eye toggle-password">
+						<input type="password" name="password" class="text password-input" placeholder="비밀번호를 입력해주세요." aria-label="비밀번호" autocomplete="off">
+						<button type="button" class="btn-eye toggle-password" aria-label="비밀번호 보기">
 							<img src="/images/icon_eye.svg" alt="보기">
 						</button>
-						<button type="button" class="btn-clear clear-password">
+						<button type="button" class="btn-clear clear-password" aria-label="삭제">
 							<img src="/images/icon_clear.svg" alt="삭제">
 						</button>
 					</div>

@@ -33,7 +33,7 @@
 						<dt>아이디<span>*</span></dt>
 						<dd>
 							<div class="flex inbtn">
-								<input type="text" name="login_id" value="{{ old('login_id') }}" placeholder="아이디를 입력해주세요." data-original-login-id="{{ old('login_id') }}">
+								<input type="text" name="login_id" value="{{ old('login_id') }}" placeholder="아이디를 입력해주세요." data-original-login-id="{{ old('login_id') }}" aria-label="아이디">
 								<button type="button"
 									class="btn btn_wkk btn_error js-duplicate-check"
 									data-field="login_id"
@@ -52,8 +52,8 @@
 						<dt>비밀번호<span>*</span></dt>
 						<dd>
 							<div class="password-wrap">
-								<input type="password" name="password" class="text w100p password-input" value="{{ old('password') }}" placeholder="영문/숫자/특수문자를 포함하여 8자리~20자리로 입력해주세요">
-								<button type="button" class="btn-eye toggle-password r16"><img src="/images/icon_eye.svg" alt="보기"></button>
+								<input type="password" name="password" class="text w100p password-input" value="{{ old('password') }}" placeholder="영문/숫자/특수문자를 포함하여 8자리~20자리로 입력해주세요" aria-label="비밀번호">
+								<button type="button" class="btn-eye toggle-password r16" aria-label="비밀번호 보기"><img src="/images/icon_eye.svg" alt="보기"></button>
 							</div>
 							<input type="hidden" name="password_temp" class="password-temp" value="{{ old('password_temp', old('password')) }}">
 							@error('password')
@@ -65,8 +65,8 @@
 						<dt>비밀번호 확인<span>*</span></dt>
 						<dd>
 							<div class="password-wrap password-wrap_add">
-								<input type="password" name="password_confirmation" class="text w100p password-input password-input_add" value="{{ old('password_confirmation') }}" placeholder="비밀번호를 다시 입력해주세요.">
-								<button type="button" class="btn-eye toggle-password toggle-password_add r16"><img src="/images/icon_eye.svg" alt="보기"></button>
+								<input type="password" name="password_confirmation" class="text w100p password-input password-input_add" value="{{ old('password_confirmation') }}" placeholder="비밀번호를 다시 입력해주세요." aria-label="비밀번호 확인">
+								<button type="button" class="btn-eye toggle-password toggle-password_add r16" aria-label="비밀번호 보기"><img src="/images/icon_eye.svg" alt="보기"></button>
 							</div>
 							<input type="hidden" name="password_confirmation_temp" class="password-confirmation-temp" value="{{ old('password_confirmation_temp', old('password_confirmation')) }}">
 						</dd>
@@ -74,7 +74,7 @@
 					<dl>
 						<dt>이름<span>*</span></dt>
 						<dd>
-							<input type="text" name="name" class="text w100p" value="{{ old('name') }}" placeholder="이름을 입력해주세요.">
+							<input type="text" name="name" class="text w100p" value="{{ old('name') }}" placeholder="이름을 입력해주세요." aria-label="이름">
 							@error('name')
 							<p class="error_alert">{{ $message }}</p>
 							@enderror
@@ -83,7 +83,7 @@
 					<dl>
 						<dt>생년월일<span>*</span></dt>
 						<dd>
-							<input type="text" name="birth_date" class="text w100p" value="{{ old('birth_date') }}" placeholder="20010101">
+							<input type="text" name="birth_date" class="text w100p" value="{{ old('birth_date') }}" placeholder="20010101" aria-label="생년월일">
 							@error('birth_date')
 							<p class="error_alert">{{ $message }}</p>
 							@enderror
@@ -115,6 +115,7 @@
 								       data-phone-input
 								       inputmode="tel"
 								       autocomplete="tel"
+								       aria-label="연락처"
 								       data-original-contact="{{ preg_replace('/[^0-9]/', '', old('student_contact', $verifiedPhoneDisplay) ?? '') }}"
 								       @if(!empty($verifiedPhoneDisplay)) readonly @endif>
 								<button type="button"
@@ -136,7 +137,7 @@
 					<dl>
 						<dt>보호자 연락처<span>*</span></dt>
 						<dd>
-							<input type="text" name="parent_contact" class="w100p" value="{{ old('parent_contact') }}" placeholder="휴대폰번호를 입력해주세요." data-phone-input inputmode="tel" autocomplete="tel">
+							<input type="text" name="parent_contact" class="w100p" value="{{ old('parent_contact') }}" placeholder="휴대폰번호를 입력해주세요." data-phone-input inputmode="tel" autocomplete="tel" aria-label="보호자 연락처">
 							@error('parent_contact')
 							<p class="error_alert">{{ $message }}</p>
 							@enderror
@@ -147,7 +148,7 @@
 						<dt>이메일<span>*</span></dt>
 						<dd>
 							<div class="flex email">
-								<input type="text" name="email_id" value="{{ old('email_id') }}" placeholder="이메일을 입력해주세요.">
+								<input type="text" name="email_id" value="{{ old('email_id') }}" placeholder="이메일을 입력해주세요." aria-label="이메일 아이디">
 								<span>@</span>
 								<select name="email_domain" class="email-domain-select">
 									<option value="">이메일 주소 선택</option>
@@ -158,7 +159,7 @@
 									<option value="custom" @selected(old('email_domain') === 'custom')>직접 입력</option>
 								</select>
 							</div>
-						<input type="text" name="email_domain_custom" value="{{ old('email_domain_custom') }}" class="text w100p mt8 email-domain-custom" placeholder="직접 입력 시 도메인을 입력해 주세요." @if(old('email_domain') !== 'custom') style="display:none;" @endif>
+						<input type="text" name="email_domain_custom" value="{{ old('email_domain_custom') }}" class="text w100p mt8 email-domain-custom" placeholder="직접 입력 시 도메인을 입력해 주세요." aria-label="이메일 도메인 직접 입력" @if(old('email_domain') !== 'custom') style="display:none;" @endif>
 						@error('email')
 						<p class="error_alert">{{ $message }}</p>
 						@enderror
@@ -199,7 +200,7 @@
 						<dt>학교명<span>*</span></dt>
 						<dd>
 							<div class="flex inbtn">
-								<input type="text" name="school_name" class="input_school" value="{{ old('school_name') }}" placeholder="학교명을 검색해주세요." readonly>
+								<input type="text" name="school_name" class="input_school" value="{{ old('school_name') }}" placeholder="학교명을 검색해주세요." readonly aria-label="학교명">
 								<button type="button" class="btn btn_wkk" onclick="layerShow('pop_school')">학교 검색</button>
 							</div>
 							<input type="hidden" name="school_id" class="input_school_id" value="{{ old('school_id') }}">

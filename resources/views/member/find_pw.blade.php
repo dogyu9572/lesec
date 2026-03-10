@@ -18,15 +18,15 @@
 				@endif
 				<form method="POST" action="{{ route('member.find_pw.submit') }}" class="js-member-form">
 					@csrf
-					<input type="text" name="name" class="text" value="{{ old('name') }}" placeholder="이름을 입력해 주세요.">
+					<input type="text" name="name" class="text" value="{{ old('name') }}" placeholder="이름을 입력해 주세요." aria-label="이름">
 					@error('name')
 					<p class="error_alert">{{ $message }}</p>
 					@enderror
-					<input type="text" name="contact" class="text mt16" value="{{ old('contact') }}" placeholder="휴대폰번호를 입력해 주세요." data-phone-input inputmode="tel" autocomplete="tel">
+					<input type="text" name="contact" class="text mt16" value="{{ old('contact') }}" placeholder="휴대폰번호를 입력해 주세요." data-phone-input inputmode="tel" autocomplete="tel" aria-label="휴대폰번호">
 					@error('contact')
 					<p class="error_alert">{{ $message }}</p>
 					@enderror
-					<input type="text" name="login_id" class="text mt16" value="{{ old('login_id') }}" placeholder="아이디를 입력해 주세요.">
+					<input type="text" name="login_id" class="text mt16" value="{{ old('login_id') }}" placeholder="아이디를 입력해 주세요." aria-label="아이디">
 					@error('login_id')
 					<p class="error_alert">{{ $message }}</p>
 					@enderror

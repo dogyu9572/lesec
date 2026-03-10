@@ -14,7 +14,7 @@
 
 		<div class="top">
 			<div class="tit">견적서</div>
-			<div class="logo"><img src="/images/logo_print.png" alt=""></div>
+			<div class="logo"><img src="/images/logo_print.png" alt="인쇄용 로고"></div>
 		</div>
 
 		<div class="con">
@@ -140,7 +140,7 @@
 			<div class="print_btm">
 				<p>상기 견적의 유효기간은 견적일로 부터 1개월 입니다.</p>
 				<div class="date">{{ $estimate['print_date'] ?? '' }}</div>
-				<div class="copy">서울대학교 농생명과학공동기기원 생명·환경과학교육센터<div class="stamp"><img src="/images/img_stamp.png" alt=""></div></div>
+				<div class="copy">서울대학교 농생명과학공동기기원 생명·환경과학교육센터<div class="stamp"><img src="/images/img_stamp.png" alt="직인"></div></div>
 			</div>
 			<div class="tbl row etc">
 				<table>

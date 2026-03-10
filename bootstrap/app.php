@@ -5,6 +5,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use App\Http\Middleware\BackOfficeAuth;
 use App\Http\Middleware\TrackVisitor;
+//use App\Http\Middleware\SecurityHeaders;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -20,6 +21,9 @@ return Application::configure(basePath: dirname(__DIR__))
         
         // 방문자 추적 미들웨어를 전역에 등록
         $middleware->append(TrackVisitor::class);
+
+        // 보안 헤더 (X-Frame-Options, Referrer-Policy) 전역 적용
+        //$middleware->append(SecurityHeaders::class);
         
     })
     ->withSchedule(function ($schedule) {

@@ -17,7 +17,7 @@
 	<meta property="og:image" content="/images/og_image.jpg" />
 	<meta name="author" content="http://">
 	<link rel="canonical" href="http://" />
-	<meta name="viewport" content="width=device-width initial-scale=1.0 maximum-scale=1.0 user-scalable=yes">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5, user-scalable=yes">
 
 	<link rel="icon" href="/images/favicon.png" type="image/x-icon"/>
 
@@ -28,17 +28,18 @@
 	<link rel="stylesheet" href="{{ asset('/css/reactive.css') }}">
     @yield('styles')
     
-    <!-- jQuery -->
-    <script src="//code.jquery.com/jquery-3.7.1.min.js"></script>
-	<script src="/js/com.js"></script>
+    <!-- jQuery (SRI: 외부 리소스 무결성 검증) -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+	<script src="/js/com.js" integrity="sha384-WBiMKtnlzd9VMWQH+RsIzcolPXj4tpx56SNEEh3oKdPExz+h4EGwXkvdhclWo32M" crossorigin="anonymous"></script>
 </head>
 <body>
+	<a href="#main-content" class="skip-link">본문 바로가기</a>
 	@if(isset($gNum) && $gNum !== 'print')
     <header class="header">
 		<div class="bg"><div class="inner"></div></div>
 		<div class="inner">
 			<a href="/" class="logo"><img src="/images/logo_new.svg" alt="logo"><h1>서울대학교 농생명과학공동기기원 생명·환경과학교육센터</h1></a>
-			<a href="javascript:void(0);" class="btn_menu">
+			<a href="javascript:void(0);" class="btn_menu" aria-label="메뉴 열기">
 				<p class="t"></p>
 				<p class="m"></p>
 				<p class="b"></p>
@@ -46,7 +47,7 @@
 			@php
 				$isMemberLoggedIn = Auth::guard('member')->check();
 			@endphp
-			<nav class="gnb">
+			<nav class="gnb" aria-label="주 메뉴">
 				<div class="mo_vw member flex_center">
 					@if ($isMemberLoggedIn)
 					<a href="{{ route('member.logout') }}" class="login" onclick="event.preventDefault();document.getElementById('member-logout-form').submit();">로그아웃</a>
@@ -116,7 +117,7 @@
 					</div>
 				</div>
 			</nav>
-			<nav class="member flex_center pc_vw">
+			<nav class="member flex_center pc_vw" aria-label="회원 메뉴">
 				@if ($isMemberLoggedIn)
 				<a href="{{ route('member.logout') }}" class="login" onclick="event.preventDefault();document.getElementById('member-logout-form').submit();">로그아웃</a>
 				@else
@@ -133,7 +134,7 @@
     </header>
 	@endif
 
-	<div class="container @if(isset($gNum) && $gNum == 'print') print_wrap pt0 @endif @if(isset($gNum) && $gNum == 'terms') terms_wrap @endif">
+	<div id="main-content" class="container @if(isset($gNum) && $gNum == 'print') print_wrap pt0 @endif @if(isset($gNum) && $gNum == 'terms') terms_wrap @endif">
 		@if(isset($gNum) && $gNum !== 'main' && $gNum !== '00' && $gNum !== 'print')
 		<div class="svisual g{{$gNum}}"><div class="inner"><strong>{{ !empty($sName) ? $sName : $gName }}</strong><div class="location"><i></i><em></em><span>{{$gName}}</span>@if(!empty($sName))<em></em><span>{{$sName}}</span>@endif</div></div></div>
 
@@ -218,7 +219,7 @@
     @yield('popups')
     
     <!-- 스크립트 -->
-    <script src="{{ asset('js/popup.js') }}"></script>
+    <script src="{{ asset('js/popup.js') }}" integrity="sha384-4Pq2nQgfCDlAQX66AB/N1GIiiQ5RYLCO30PJhCmjR/E1QdaC6re5iF8n9hSXhASY" crossorigin="anonymous"></script>
     @stack('scripts')
 	@endif
 </body>

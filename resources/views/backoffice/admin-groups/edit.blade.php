@@ -67,7 +67,7 @@
                 <div class="form-section">
                     <h3>메뉴 접근 권한</h3>
                     <div class="permission-simple-list">
-                        @foreach($menus as $menu)
+                        @forelse($menus as $menu)
                             <div class="permission-simple-item">
                                 <label class="permission-main-menu">
                                     <input type="checkbox" name="permissions[{{ $menu->id }}]" value="1" @checked(in_array($menu->id, $groupPermissions))>
@@ -85,26 +85,28 @@
                                     </div>
                                 @endif
                             </div>
-                        @endforeach
+                        @empty
+                            <p class="text-muted" style="margin: 0; padding: 12px 0;">권한으로 지정할 메뉴가 없습니다. <a href="{{ route('backoffice.admin-menus.index') }}">기본설정 &gt; 메뉴 관리</a>에서 상위 메뉴가 활성화되어 있는지 확인해주세요.</p>
+                        @endforelse
                     </div>
                 </div>
 
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> 저장
-                    </button>
-                    <a href="{{ route('backoffice.admin-groups.index') }}" class="btn btn-secondary">
-                        <i class="fas fa-times"></i> 취소
-                    </a>
-					<form action="{{ route('backoffice.admin-groups.destroy', $group) }}" method="POST" class="d-inline" onsubmit="return confirm('이 권한 그룹을 삭제하시겠습니까?');">
-						@csrf
-						@method('DELETE')
-						<button type="submit" class="btn btn-danger btn-sm">
-							<i class="fas fa-trash"></i> 삭제
-						</button>
-					</form>
-                </div>
             </form>
+            <div class="form-actions">
+                <button type="submit" form="adminGroupForm" class="btn btn-primary">
+                    <i class="fas fa-save"></i> 저장
+                </button>
+                <a href="{{ route('backoffice.admin-groups.index') }}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> 취소
+                </a>
+                <form action="{{ route('backoffice.admin-groups.destroy', $group) }}" method="POST" class="d-inline" style="display: inline;" onsubmit="return confirm('이 권한 그룹을 삭제하시겠습니까?');">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger btn-sm">
+                        <i class="fas fa-trash"></i> 삭제
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 </div>

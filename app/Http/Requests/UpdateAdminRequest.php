@@ -44,7 +44,7 @@ class UpdateAdminRequest extends FormRequest
             'password' => [
                 'nullable',
                 'string',
-                'min:10',
+                'min:8',
                 'confirmed',
                 function ($attribute, $value, $fail) {
                     if (!empty($value)) {
@@ -55,7 +55,7 @@ class UpdateAdminRequest extends FormRequest
                         if (preg_match('/[@$!%*?&#]/', $value)) $types++;
                         
                         if ($types < 2) {
-                            $fail('비밀번호는 영문 대소문자, 숫자, 특수문자 중 2종류 이상 조합하여 10자리 이상으로 입력해주세요.');
+                            $fail('비밀번호는 영문 대소문자, 숫자, 특수문자 중 2종류 이상 조합하여 8자리 이상으로 입력해주세요.');
                         }
                     }
                 },

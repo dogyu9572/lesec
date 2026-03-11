@@ -797,8 +797,6 @@ class MemberMypageController extends Controller
         $applicantCount = (int) ($application->applicant_count ?? 0);
         $unitPrice = $application->fee_per_person;
         $amount = $applicantCount * $unitPrice;
-        $vat = (int) floor($amount * 0.1);
-        $total = $amount + $vat;
 
         $recipientName = $application->applicant_name ?? '';
         $schoolName = $application->school_name ?? '';
@@ -821,8 +819,7 @@ class MemberMypageController extends Controller
                 'amount' => $amount,
             ]],
             'subtotal' => $amount,
-            'vat' => $vat,
-            'total' => $total,
+            'total' => $amount,
             'print_date' => now()->format('Y년 m월 d일'),
             'note' => $application->estimate_note ?? '',
         ];

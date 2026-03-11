@@ -249,9 +249,9 @@ class ProgramReservation extends Model
 
     public function getAppliedCountDisplayAttribute(): int
     {
-        // 개인 프로그램인 경우 실제 신청 레코드 수를 반환
+        // 개인 프로그램인 경우 취소 제외한 신청 건수로 표시
         if ($this->application_type === 'individual') {
-            return $this->applications()->count();
+            return $this->applications()->where('payment_status', '!=', IndividualApplication::PAYMENT_STATUS_CANCELLED)->count();
         }
 
         // 단체 프로그램은 실시간으로 신청인원 계산 (승인대기 + 승인완료 모두 포함)

@@ -124,10 +124,6 @@
 							<th>소계</th>
 							<td>{{ isset($estimate['subtotal']) ? number_format($estimate['subtotal']) . '원' : '0원' }}</td>
 						</tr>
-						<tr>
-							<th>부가세</th>
-							<td>{{ isset($estimate['vat']) ? number_format($estimate['vat']) . '원' : '0원' }}</td>
-						</tr>
 					</tbody>
 					<tfoot>
 						<tr>
@@ -140,7 +136,7 @@
 			<div class="print_btm">
 				<p>상기 견적의 유효기간은 견적일로 부터 1개월 입니다.</p>
 				<div class="date">{{ $estimate['print_date'] ?? '' }}</div>
-				<div class="copy">서울대학교 농생명과학공동기기원 생명·환경과학교육센터<div class="stamp"><img src="/images/img_stamp.png" alt="직인"></div></div>
+				<div class="copy">서울대학교 농생명과학공동기기원<div class="stamp"><img src="/images/img_stamp.png" alt="직인"></div></div>
 			</div>
 			<div class="tbl row etc">
 				<table>

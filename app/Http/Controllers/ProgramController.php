@@ -270,7 +270,7 @@ class ProgramController extends Controller
         $totalCount = $programs->count();
 
         // 페이지네이션 적용
-        $perPage = 10;
+        $perPage = 20;
         $currentPage = $request->get('page', 1);
         $items = $programs->forPage($currentPage, $perPage);
         $programsPaginated = new LengthAwarePaginator(

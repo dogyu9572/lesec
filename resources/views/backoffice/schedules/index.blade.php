@@ -75,41 +75,43 @@
                                         $dayPrograms = $dayData['programs'] ?? [];
                                     @endphp
                                     <td @if($dayData['disabled']) class="disabled" @endif data-date="{{ $dateStr }}" class="calendar-day @if(!$dayData['disabled']) clickable @endif @if($isSelected) selected @endif">
-                                        <span>{{ $dayData['day'] }}</span>
-                                        @if($isDisabledDate && $disabledDateTitle)
-                                        <div class="schedule-disabled">{{ $disabledDateTitle }}</div>
-                                        @elseif(!$dayData['disabled'] && $disabledScheduleTitle)
-                                        <div class="schedule-disabled">{{ $disabledScheduleTitle }}</div>
-                                        @elseif(!$dayData['disabled'] && count($dayPrograms) > 0)
-                                        <ul class="list">
-                                            @foreach($dayPrograms as $program)
-                                            @php
-                                                $appliedCount = $program->applied_count ?? 0;
-                                                $capacity = $program->capacity ?? 0;
-                                                $isUnlimited = $program->is_unlimited_capacity ?? false;
-                                                
-                                                // reservation-calendar와 동일한 로직으로 마감 여부 확인
-                                                $isClosed = false;
-                                                $today = now();
-                                                if ($program->application_end_date) {
-                                                    $applicationEndDate = \Carbon\Carbon::parse($program->application_end_date);
-                                                    if ($applicationEndDate->lt($today)) {
+                                        <div class="schedule-cell-inner">
+                                            <span>{{ $dayData['day'] }}</span>
+                                            @if($isDisabledDate && $disabledDateTitle)
+                                            <div class="schedule-disabled">{{ $disabledDateTitle }}</div>
+                                            @elseif(!$dayData['disabled'])
+                                            @if(count($dayPrograms) > 0)
+                                            <ul class="list">
+                                                @foreach($dayPrograms as $program)
+                                                @php
+                                                    $appliedCount = $program->applied_count ?? 0;
+                                                    $capacity = $program->capacity ?? 0;
+                                                    $isUnlimited = $program->is_unlimited_capacity ?? false;
+                                                    $isClosed = false;
+                                                    $today = now();
+                                                    if ($program->application_end_date) {
+                                                        $applicationEndDate = \Carbon\Carbon::parse($program->application_end_date);
+                                                        if ($applicationEndDate->lt($today)) {
+                                                            $isClosed = true;
+                                                        }
+                                                    }
+                                                    if (!$isClosed && !$isUnlimited && $capacity && $appliedCount >= $capacity) {
                                                         $isClosed = true;
                                                     }
-                                                }
-                                                if (!$isClosed && !$isUnlimited && $capacity && $appliedCount >= $capacity) {
-                                                    $isClosed = true;
-                                                }
-                                                
-                                                $statusClass = $isClosed ? 'i_impossible' : 'i_possible';
-                                            @endphp
-                                            <li class="{{ $statusClass }}" 
-                                                data-applied="{{ $appliedCount }}" 
-                                                data-total="{{ $capacity }}"
-                                                title="{{ $program->program_name }}">{{ $program->program_name }}</li>
-                                            @endforeach
-                                        </ul>
-                                        @endif
+                                                    $statusClass = $isClosed ? 'i_impossible' : 'i_possible';
+                                                @endphp
+                                                <li class="{{ $statusClass }}"
+                                                    data-applied="{{ $appliedCount }}"
+                                                    data-total="{{ $capacity }}"
+                                                    title="{{ $program->program_name }}">{{ $program->program_name }}</li>
+                                                @endforeach
+                                            </ul>
+                                            @endif
+                                            @if($disabledScheduleTitle)
+                                            <div class="schedule-disabled">{{ $disabledScheduleTitle }}</div>
+                                            @endif
+                                            @endif
+                                        </div>
                                     </td>
                                     @endforeach
                                 </tr>

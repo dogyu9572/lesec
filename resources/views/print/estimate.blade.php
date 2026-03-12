@@ -136,7 +136,7 @@
             <div class="print_btm">
                 <p>상기 견적의 유효기간은 견적일로 부터 3개월 입니다.</p>
 				<div class="date">{{ $estimate['print_date'] ?? '' }}</div>
-				<div class="copy">서울대학교 농생명과학공동기기원<div class="stamp"><img src="/images/img_stamp.png" alt="직인"></div></div>
+				<div class="copy">서울대학교 농생명과학공동기기원<div class="stamp"><img src="/images/img_stamp.jpg" alt="직인"></div></div>
 			</div>
 			<div class="tbl row etc">
 				<table>

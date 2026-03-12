@@ -27,8 +27,7 @@ class GroupApplicationService
     public function getFilteredApplications(Request $request): LengthAwarePaginator
     {
         $query = GroupApplication::query()
-            ->with(['reservation', 'participants'])
-            ->orderByDesc('created_at');
+            ->with(['reservation', 'participants']);
 
         if ($request->filled('application_status')) {
             $query->where('application_status', $request->input('application_status'));
@@ -79,6 +78,22 @@ class GroupApplicationService
                         });
                 }
             });
+        }
+
+        // 정렬 설정
+        $sort = $request->input('sort', 'applied_at'); // 기본: 신청일시
+        $order = $request->input('order', 'desc') === 'asc' ? 'asc' : 'desc';
+
+        if ($sort === 'application_number') {
+            $query->orderBy('application_number', $order);
+        } elseif ($sort === 'participation_date') {
+            // 참가일 정렬: 우선 reservation의 education_start_date, 없으면 participation_date
+            $query->leftJoin('program_reservations as pr', 'group_applications.program_reservation_id', '=', 'pr.id')
+                ->orderByRaw('COALESCE(pr.education_start_date, group_applications.participation_date) ' . $order)
+                ->select('group_applications.*');
+        } else {
+            // 기본: 신청일시
+            $query->orderBy('applied_at', $order);
         }
 
         $perPage = (int) $request->input('per_page', 20);

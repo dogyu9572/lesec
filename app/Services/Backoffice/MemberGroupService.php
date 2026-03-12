@@ -124,6 +124,7 @@ class MemberGroupService
 
         $group = MemberGroup::findOrFail($groupId);
         $addedCount = 0;
+        $affectedGroupIds = [$groupId];
         
         foreach ($memberIds as $memberId) {
             $member = Member::find($memberId);
@@ -134,29 +135,45 @@ class MemberGroupService
                 'current_group_id' => $member ? $member->member_group_id : null,
             ]);
             
-            if ($member && !$member->member_group_id) {
-                $member->member_group_id = $groupId;
-                if ($member->save()) {
-                    $addedCount++;
-                    Log::info('회원 추가 성공', [
-                        'member_id' => $memberId,
-                        'group_id' => $groupId,
-                    ]);
-                } else {
-                    Log::error('회원 저장 실패', [
-                        'member_id' => $memberId,
-                        'group_id' => $groupId,
-                    ]);
-                }
-            } else {
-                Log::warning('회원 추가 스킵', [
+            if (!$member) {
+                Log::warning('회원 추가 스킵 - 회원을 찾을 수 없음', [
                     'member_id' => $memberId,
-                    'reason' => $member ? '이미 그룹에 속함 (member_group_id: ' . $member->member_group_id . ')' : '회원을 찾을 수 없음',
+                    'group_id' => $groupId,
+                ]);
+                continue;
+            }
+
+            $previousGroupId = $member->member_group_id;
+            if ($previousGroupId && $previousGroupId !== $groupId) {
+                $affectedGroupIds[] = $previousGroupId;
+            }
+
+            // 다른 그룹에 있더라도 현재 그룹으로 이동 (member_group_id 변경)
+            $member->member_group_id = $groupId;
+            if ($member->save()) {
+                $addedCount++;
+                Log::info('회원 그룹 이동/추가 성공', [
+                    'member_id' => $memberId,
+                    'from_group_id' => $previousGroupId,
+                    'to_group_id' => $groupId,
+                ]);
+            } else {
+                Log::error('회원 저장 실패', [
+                    'member_id' => $memberId,
+                    'from_group_id' => $previousGroupId,
+                    'to_group_id' => $groupId,
                 ]);
             }
         }
         
-        $this->updateMemberCount($group);
+        // 영향받은 모든 그룹의 회원 수를 재계산
+        $affectedGroupIds = array_unique(array_filter($affectedGroupIds));
+        foreach ($affectedGroupIds as $affectedGroupId) {
+            $affectedGroup = MemberGroup::find($affectedGroupId);
+            if ($affectedGroup) {
+                $this->updateMemberCount($affectedGroup);
+            }
+        }
         
         Log::info('=== addMembersToGroup 완료 ===', [
             'group_id' => $groupId,

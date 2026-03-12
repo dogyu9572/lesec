@@ -6,6 +6,7 @@
 <link rel="stylesheet" href="{{ asset('css/common/buttons.css') }}">
 <link rel="stylesheet" href="{{ asset('css/backoffice/users.css') }}">
 <link rel="stylesheet" href="{{ asset('css/backoffice/boards.css') }}">
+<link rel="stylesheet" href="{{ asset('css/backoffice/group-programs.css') }}">
 @endsection
 
 @section('content')
@@ -142,8 +143,38 @@
                         <tr>
                             <th style="width: 40px;"><input type="checkbox" id="select-all-checkbox"></th>
                             <th>No</th>
-                            <th>신청번호</th>
-                            <th>참가일</th>
+                            <th class="board-table-sortable">
+                                @php
+                                    $sortParam = request('sort', 'applied_at');
+                                    $orderParam = request('order', 'desc');
+                                    $isSortByApplicationNumber = ($sortParam === 'application_number');
+                                    $isAsc = $orderParam === 'asc';
+                                    $nextOrder = $isSortByApplicationNumber && $isAsc ? 'desc' : 'asc';
+                                    $sortUrl = route('backoffice.group-applications.index', array_merge(request()->except(['sort', 'order', 'page']), ['sort' => 'application_number', 'order' => $nextOrder]));
+                                @endphp
+                                <a href="{{ $sortUrl }}" class="board-table-sort-link">
+                                    신청번호
+                                    <span class="board-table-sort-arrows">
+                                        <i class="fas fa-arrows-alt-v" title="정렬"></i>
+                                    </span>
+                                </a>
+                            </th>
+                            <th class="board-table-sortable">
+                                @php
+                                    $sortParam = request('sort', 'applied_at');
+                                    $orderParam = request('order', 'desc');
+                                    $isSortByParticipation = ($sortParam === 'participation_date');
+                                    $isAsc = $orderParam === 'asc';
+                                    $nextOrder = $isSortByParticipation && $isAsc ? 'desc' : 'asc';
+                                    $sortUrl = route('backoffice.group-applications.index', array_merge(request()->except(['sort', 'order', 'page']), ['sort' => 'participation_date', 'order' => $nextOrder]));
+                                @endphp
+                                <a href="{{ $sortUrl }}" class="board-table-sort-link">
+                                    참가일
+                                    <span class="board-table-sort-arrows">
+                                        <i class="fas fa-arrows-alt-v" title="정렬"></i>
+                                    </span>
+                                </a>
+                            </th>
                             <th>신청상태</th>
                             <th>신청자명</th>
                             <th>학교명</th>

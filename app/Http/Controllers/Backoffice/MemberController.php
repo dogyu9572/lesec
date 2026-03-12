@@ -345,7 +345,8 @@ class MemberController extends BaseController
             '이름',
             '성별',
             '생년월일',
-            '연락처',
+            '연락처1',
+            '연락처2',
             '학년',
             '반',
             '지역',
@@ -367,6 +368,7 @@ class MemberController extends BaseController
 
         // 연락처 포맷팅
         $contact = $this->formatPhoneNumber($member->contact);
+        $parentContact = $this->formatPhoneNumber($member->parent_contact);
 
         return [
             $no,
@@ -376,6 +378,7 @@ class MemberController extends BaseController
             $member->gender === 'male' ? '남' : '여',
             $birthDate,
             $contact ?? '-',
+            $parentContact ?? '-',
             $member->grade ?? '-',
             $member->class_number ?? '-',
             $region,

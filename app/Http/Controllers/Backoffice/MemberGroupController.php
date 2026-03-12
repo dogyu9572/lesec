@@ -106,28 +106,20 @@ class MemberGroupController extends BaseController
         ]);
 
         $memberIds = $request->input('member_ids');
-        
-        // 이미 다른 그룹에 속한 회원 확인
+
+        // 이제는 다른 그룹에 속해 있어도 현재 그룹으로 이동 가능하므로,
+        // 항상 success=true로 응답하고, 참고용으로 기존 그룹 정보를 전달한다.
         $existingGroupMembers = Member::whereIn('id', $memberIds)
             ->whereNotNull('member_group_id')
-            ->get();
-
-        if ($existingGroupMembers->isEmpty()) {
-            return response()->json([
-                'success' => true,
-                'message' => '모든 회원을 추가할 수 있습니다.',
-            ]);
-        }
-
-        $memberNames = $existingGroupMembers->pluck('name')->toArray();
-        $memberIds = $existingGroupMembers->pluck('id')->toArray();
+            ->get(['id', 'name', 'member_group_id']);
 
         return response()->json([
-            'success' => false,
-            'message' => '다음 회원들은 이미 다른 그룹에 속해 있어 추가할 수 없습니다: ' . implode(', ', $memberNames),
-            'member_names' => $memberNames,
-            'member_ids' => $memberIds,
-        ], 422);
+            'success' => true,
+            'message' => $existingGroupMembers->isEmpty()
+                ? '모든 회원을 추가할 수 있습니다.'
+                : '일부 회원은 다른 그룹에서 현재 그룹으로 이동됩니다.',
+            'existing_group_members' => $existingGroupMembers,
+        ]);
     }
 
     /**
@@ -169,21 +161,6 @@ class MemberGroupController extends BaseController
                 
                 // 삭제할 회원 (기존에 있던 회원 중 제거된 회원)
                 $memberIdsToRemove = array_diff($existingMemberIds, $newMemberIds);
-                
-                // 추가할 회원 검증 (이미 다른 그룹에 속한 회원 확인)
-                if (!empty($memberIdsToAdd)) {
-                    $existingGroupMembers = Member::whereIn('id', $memberIdsToAdd)
-                        ->whereNotNull('member_group_id')
-                        ->where('member_group_id', '!=', $memberGroup->id)
-                        ->get();
-                    
-                    if ($existingGroupMembers->isNotEmpty()) {
-                        $memberNames = $existingGroupMembers->pluck('name')->implode(', ');
-                        return redirect()->back()
-                            ->withInput()
-                            ->with('error', '다음 회원들은 이미 다른 그룹에 속해 있어 추가할 수 없습니다: ' . $memberNames);
-                    }
-                }
                 
                 // 회원 추가
                 if (!empty($memberIdsToAdd)) {

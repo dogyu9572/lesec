@@ -511,8 +511,10 @@ class GroupApplicationService
             throw new InvalidArgumentException('지원하지 않는 파일 형식입니다. CSV 또는 엑셀 파일을 사용해주세요.');
         }
 
-        // 업로드된 명단 수를 신청 인원(applicant_count)에 반영
-        $application->update(['applicant_count' => $rows]);
+        // 업로드된 명단 수가 기존 신청인원보다 많다면 신청인원을 증가시킴
+        if ($rows > (int) $application->applicant_count) {
+            $application->update(['applicant_count' => $rows]);
+        }
 
         return $rows;
     }
@@ -571,6 +573,12 @@ class GroupApplicationService
             'class' => $data['class'],
             'birthday' => $birthday,
         ]);
+
+        // 참가자 추가로 실제 명단 인원이 신청인원보다 많아진 경우 신청인원을 올려준다
+        $actualCount = GroupApplicationParticipant::where('group_application_id', $application->id)->count();
+        if ($actualCount > (int) $application->applicant_count) {
+            $application->update(['applicant_count' => $actualCount]);
+        }
     }
 
     public function updateParticipant(int $applicationId, int $participantId, array $data): void

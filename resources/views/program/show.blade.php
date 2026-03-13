@@ -8,8 +8,17 @@
 			<a href="{{ route('program.apply.group', $type) }}" class="c1" data-check-school-level="group">
 				<span class="tit">단체</span>
 				<p>학교 또는 기관 단위로 신청하는 경우 선택해 주세요.</p>
-				<p class="s">20인 이상 신청 가능하며, 4~20인 미만의 소규모 단체의 경우 전화 연락 바랍니다.
-					4명 미만은 개인 신청 바랍니다.</p>
+				<p class="s">
+					@if(in_array($type, ['middle_vacation', 'high_vacation']))
+						{{-- 방학 --}}
+						단체 신청 가능 인원은 최소 20명입니다.<br>
+						잔여석이 있을 경우 4명 이상 단체도 신청 가능합니다.
+					@else
+						{{-- 학기 (중등학기, 고등학기, 특별) --}}
+						단체 신청 가능 인원은 최소 10명입니다.<br>
+						잔여석이 있을 경우 4명 이상 단체도 신청 가능합니다.
+					@endif
+				</p>
 			</a>
 			<a href="{{ route('program.apply.individual', $type) }}" class="c2" data-check-school-level="individual">
 				<span class="tit">개인</span>

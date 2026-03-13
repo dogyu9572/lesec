@@ -68,7 +68,7 @@
                                                 @php
                                                     $statusClass = ($reservation['is_closed'] ?? false) ? 'i_impossible' : 'i_possible';
                                                 @endphp
-                                                <li class="{{ $statusClass }}">
+                                                <li class="{{ $statusClass }}" data-reservation-id="{{ $reservation['program_reservation_id'] ?? '' }}" data-total="{{ $reservation['capacity'] ?? '' }}" title="{{ e($reservation['program_name'] ?? '') }}">
                                                     {{ \Illuminate\Support\Str::limit($reservation['program_name'], 30) }}
                                                 </li>
                                                 @endforeach
@@ -76,7 +76,7 @@
                                                 @php
                                                     $statusClass = ($reservation['is_closed'] ?? false) ? 'i_impossible' : 'i_possible';
                                                 @endphp
-                                                <li class="{{ $statusClass }}">
+                                                <li class="{{ $statusClass }}" data-reservation-id="{{ $reservation['program_reservation_id'] ?? '' }}" data-total="{{ $reservation['capacity'] ?? '' }}" title="{{ e($reservation['program_name'] ?? '') }}">
                                                     {{ \Illuminate\Support\Str::limit($reservation['program_name'], 30) }}
                                                 </li>
                                                 @endforeach

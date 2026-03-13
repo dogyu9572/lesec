@@ -357,9 +357,9 @@ class MemberMypageController extends Controller
             'payment_method' => 'nullable|in:bank_transfer,on_site_card,online_card',
             // 명단은 선택 입력(결제방법만 저장 가능), 신청인원 범위만 제한
             'participants' => 'nullable|array|max:' . $application->applicant_count,
-            'participants.*.name' => 'required|string|max:50',
-            'participants.*.grade' => 'required|integer|min:1|max:3',
-            'participants.*.class' => 'required|string|max:20',
+            'participants.*.name' => 'nullable|string|max:50',
+            'participants.*.grade' => 'nullable|integer|min:1|max:3',
+            'participants.*.class' => 'nullable|string|max:20',
             'participants.*.birthday' => 'nullable|string|max:8',
             'privacy_agree' => 'required',
         ]);
@@ -535,7 +535,6 @@ class MemberMypageController extends Controller
             'csv_file' => 'required|file|mimes:csv,txt,xlsx,xls|max:2097152',
         ]);
 
-        DB::beginTransaction();
         try {
             $file = $request->file('csv_file');
             $extension = strtolower($file->getClientOriginalExtension());
@@ -544,19 +543,16 @@ class MemberMypageController extends Controller
             $participants = [];
 
             if ($extension === 'csv') {
-                // CSV 파일 처리
                 $handle = fopen($filePath, 'r');
                 if (!$handle) {
                     throw new \Exception('파일을 읽을 수 없습니다.');
                 }
 
-                // UTF-8 BOM 제거
                 $bom = fread($handle, 3);
                 if ($bom !== chr(0xEF) . chr(0xBB) . chr(0xBF)) {
                     rewind($handle);
                 }
 
-                // 첫 번째 줄(헤더) 건너뛰기
                 fgetcsv($handle);
 
                 while (($data = fgetcsv($handle)) !== false) {
@@ -572,7 +568,6 @@ class MemberMypageController extends Controller
 
                 fclose($handle);
             } elseif (in_array($extension, ['xlsx', 'xls'])) {
-                // 엑셀 파일 처리
                 if (!class_exists(\PhpOffice\PhpSpreadsheet\IOFactory::class)) {
                     throw new \Exception('엑셀 파일 처리를 위해 PhpSpreadsheet가 필요합니다.');
                 }
@@ -581,7 +576,6 @@ class MemberMypageController extends Controller
                 $worksheet = $spreadsheet->getActiveSheet();
                 $excelRows = $worksheet->toArray();
 
-                // 헤더 제거
                 array_shift($excelRows);
 
                 foreach ($excelRows as $row) {
@@ -598,27 +592,33 @@ class MemberMypageController extends Controller
             }
 
             if (empty($participants)) {
-                DB::rollBack();
                 return response()->json(['success' => false, 'message' => '업로드할 명단이 없습니다.'], 400);
             }
 
-            // 기존 명단 전체 삭제 후 업로드 파일 기준으로 다시 생성
-            GroupApplicationParticipant::where('group_application_id', $application->id)->delete();
-
-            foreach ($participants as $participant) {
-                GroupApplicationParticipant::create($participant);
-            }
-
-            $application->update(['applicant_count' => count($participants)]);
-
-            DB::commit();
+            // DB 저장 없이 파싱 결과만 반환. 저장은 폼 제출(저장하기) 시에만 수행
+            $rowsForForm = array_map(function ($p) {
+                $birthdayYmd = '';
+                if (!empty($p['birthday'])) {
+                    try {
+                        $birthdayYmd = \Carbon\Carbon::parse($p['birthday'])->format('Ymd');
+                    } catch (\Exception $e) {
+                        $birthdayYmd = '';
+                    }
+                }
+                return [
+                    'name' => $p['name'],
+                    'grade' => (int) $p['grade'],
+                    'class' => $p['class'],
+                    'birthday' => $birthdayYmd,
+                ];
+            }, $participants);
 
             return response()->json([
                 'success' => true,
-                'message' => '기존 명단을 삭제하고 ' . count($participants) . '명의 명단을 업로드했습니다.',
+                'message' => count($rowsForForm) . '명의 명단을 불러왔습니다. 저장하기 버튼을 눌러 저장해주세요.',
+                'participants' => $rowsForForm,
             ]);
         } catch (\Exception $e) {
-            DB::rollBack();
             return response()->json([
                 'success' => false,
                 'message' => '파일 처리 중 오류가 발생했습니다: ' . $e->getMessage(),

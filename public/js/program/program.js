@@ -363,22 +363,24 @@
         !programInfo.isUnlimited &&
         programInfo.total > 0
       ) {
-        // 신청가능 상태면 정원을 모두 채워야 하고, 잔여석 신청 가능 상태면 잔여석을 모두 채워야 함
         if (programInfo.status === "신청가능") {
+          // 방학: 최소 20명부터 정원까지 신청 가능
           $info.text(
-            `방학 프로그램은 정원(${programInfo.total}명)을 모두 채워야 신청 가능합니다.`
+            "단체 신청 가능 인원은 최소 20명입니다. 정원 이내에서 신청 가능합니다."
           );
         } else if (programInfo.status === "잔여석 신청 가능") {
+          // 방학 잔여석: 최소 4명부터 잔여석까지 신청 가능
           $info.text(
-            `방학 프로그램은 잔여석(${programInfo.remaining}명)을 모두 채워야 신청 가능합니다.`
+            `잔여석이 있을 경우 4명 이상 단체도 신청 가능합니다. (잔여석 ${programInfo.remaining}명)`
           );
         } else {
           $info.text(
-            `방학 프로그램은 정원(${programInfo.total}명)을 모두 채워야 신청 가능합니다.`
+            "단체 신청 가능 인원은 최소 20명입니다. 정원 이내에서 신청 가능합니다."
           );
         }
       } else {
-        $info.text("단체 신청 가능 인원은 최소 10명입니다.");
+        // 학기 등 일반 프로그램: 상단 안내 문구 사용
+        $info.text("");
       }
     }
 
@@ -469,41 +471,49 @@
     function getInitialCount(status, programInfo) {
       const isVacation = programInfo && programInfo.isVacation;
       const isUnlimited = programInfo && programInfo.isUnlimited;
+      const total = (programInfo && programInfo.total) || 0;
+      const remaining = (programInfo && programInfo.remaining) || 0;
 
       if (status === "신청가능") {
-        // 중등방학·고등방학: 신청 시작값 20으로 고정
-        if (isVacation && !isUnlimited && programInfo.total > 0) {
-          return 20;
+        if (isUnlimited) {
+          // 제한없음: 방학 20, 그 외 10
+          return isVacation ? 20 : 10;
         }
-        return 10;
-      } else if (status === "잔여석 신청 가능") {
-        // 방학 프로그램이고 정원이 있으면 잔여석을 모두 채워야 함
-        if (isVacation && !isUnlimited && programInfo.remaining > 0) {
-          return programInfo.remaining;
+
+        if (isVacation) {
+          // 방학: 최소 20명, 단 정원보다 클 수는 없음
+          if (total <= 0) {
+            return 20;
+          }
+          return Math.min(20, total);
         }
-        return 4;
+
+        // 학기/기타: 최소 10명, 단 정원보다 클 수는 없음
+        if (total <= 0) {
+          return 10;
+        }
+        return Math.min(10, total);
       }
+
+      if (status === "잔여석 신청 가능") {
+        if (isUnlimited) {
+          return 4;
+        }
+
+        if (remaining <= 0) {
+          return 4;
+        }
+
+        // 잔여석 신청: 최소 4명, 단 잔여석보다 클 수는 없음
+        return Math.min(4, remaining);
+      }
+
       return 0;
     }
 
-    /** minus 버튼으로 내려갈 수 있는 최소값(바닥). 방학 신청가능은 시작 20, 최소도 20. */
+    // minus 버튼으로 내려갈 수 있는 최소값(바닥)은 시작값과 동일하게 맞춘다.
     function getMinimumCount(status, programInfo) {
-      const isVacation = programInfo && programInfo.isVacation;
-      const isUnlimited = programInfo && programInfo.isUnlimited;
-
-      if (status === "신청가능") {
-        if (isVacation && !isUnlimited && programInfo.total > 0) {
-          return 20;
-        }
-        return 10;
-      }
-      if (status === "잔여석 신청 가능") {
-        if (isVacation && !isUnlimited && programInfo.remaining > 0) {
-          return programInfo.remaining;
-        }
-        return 4;
-      }
-      return 0;
+      return getInitialCount(status, programInfo);
     }
 
     function getSelectedProgramInfo() {
@@ -751,29 +761,18 @@
       const applicantCount =
         parseInt($wrap.find(".count input").val(), 10) || defaultCount;
 
-      // 방학 프로그램인 경우 정원을 모두 채워야 함
-      if (
-        selectedInfo.isVacation &&
-        !selectedInfo.isUnlimited &&
-        selectedInfo.total > 0
-      ) {
-        // 신청가능 상태면 정원을 모두 채워야 하고, 잔여석 신청 가능 상태면 잔여석을 모두 채워야 함
-        const requiredCount =
-          selectedInfo.status === "신청가능"
-            ? selectedInfo.total
-            : selectedInfo.remaining;
-        if (applicantCount !== requiredCount) {
-          const statusText =
-            selectedInfo.status === "신청가능" ? "정원" : "잔여석";
+      // 최소 인원(절대 하한): 4명
+      if (applicantCount < 4) {
+        alert("단체 신청은 최소 4명 이상이어야 합니다.");
+        return;
+      }
+
+      // 정원/잔여석 초과만 막는다.
+      if (!selectedInfo.isUnlimited && selectedInfo.remaining > 0) {
+        if (applicantCount > selectedInfo.remaining) {
           alert(
-            `방학 프로그램은 ${statusText}(${requiredCount}명)을 모두 채워야 신청 가능합니다.`
+            "신청 인원은 정원(또는 잔여석)보다 많을 수 없습니다."
           );
-          return;
-        }
-      } else {
-        // 일반 프로그램은 최소 4명
-        if (applicantCount < 4) {
-          alert("단체 신청은 최소 4명 이상이어야 합니다.");
           return;
         }
       }

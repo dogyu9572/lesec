@@ -2,8 +2,7 @@
 
 namespace App\Services\Backoffice;
 
-use App\Models\IndividualApplication;
-use App\Models\GroupApplication;
+use App\Models\ProgramReservation;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
@@ -17,14 +16,28 @@ class ReservationCalendarService
     }
 
     /**
-     * 월별 예약 내역 조회 (개인/단체 신청 기준)
+     * 월별 예약 내역 조회 (ProgramReservation 기준, 사용자 캘린더와 동일)
+     * - 신청 유무와 관계없이 해당 월에 교육 시작일이 있는 전체 프로그램 표시
+     * - 단체는 한 날짜씩 따로 등록되므로 education_start_date 기준으로만 배치 (기간 연속 표시 안 함)
      */
     public function getMonthlyReservations(int $year, int $month): array
     {
-        $startOfMonth = Carbon::create($year, $month, 1)->startOfDay();
-        $endOfMonth = (clone $startOfMonth)->endOfMonth();
+        $firstDay = Carbon::create($year, $month, 1);
+        $daysInMonth = $firstDay->daysInMonth;
+        $dayOfWeek = $firstDay->dayOfWeek;
+        $calendarStart = (clone $firstDay)->subDays($dayOfWeek)->startOfDay();
+        $remainder = ($dayOfWeek + $daysInMonth) % 7;
+        $nextMonthDays = $remainder === 0 ? 7 : (7 - $remainder);
+        $calendarEnd = (clone $firstDay)->endOfMonth()->addDays($nextMonthDays);
 
-        return $this->buildReservationMap($startOfMonth, $endOfMonth);
+        $programs = ProgramReservation::query()
+            ->active()
+            ->whereDate('education_start_date', '<=', $calendarEnd)
+            ->whereDate('education_end_date', '>=', $calendarStart)
+            ->orderBy('education_start_date')
+            ->get();
+
+        return $this->buildReservationMapFromPrograms($programs, $calendarStart, $calendarEnd);
     }
 
     /**
@@ -103,58 +116,66 @@ class ReservationCalendarService
     }
 
     /**
-     * 특정 날짜의 예약 내역 조회
+     * 특정 날짜의 예약 내역 조회 (해당 날짜를 교육 시작일로 하는 프로그램만)
      */
     public function getReservationsByDate(string $date): array
     {
         $dateCarbon = Carbon::parse($date)->startOfDay();
-        $map = $this->buildReservationMap($dateCarbon, (clone $dateCarbon)->endOfDay());
         $dateKey = $dateCarbon->format('Y-m-d');
-        $data = $map[$dateKey] ?? ['individual' => [], 'group' => []];
+
+        $programs = ProgramReservation::query()
+            ->active()
+            ->whereDate('education_start_date', $dateKey)
+            ->orderBy('education_start_date')
+            ->get();
+
+        $individual = [];
+        $group = [];
+
+        foreach ($programs as $program) {
+            $row = $this->programToCalendarRow($program);
+            if ($program->application_type === 'individual') {
+                $individual[] = $row;
+            } else {
+                $group[] = $row;
+            }
+        }
 
         return [
-            'individual' => $data['individual'],
-            'group' => $data['group'],
+            'individual' => $individual,
+            'group' => $group,
         ];
     }
 
     /**
-     * 지정 범위의 예약 내역을 날짜별로 정리
+     * ProgramReservation 목록을 날짜별 맵으로 구성 (교육 시작일 당일만 배치, 연속 기간 미표시)
      */
-    protected function buildReservationMap(Carbon $start, Carbon $end): array
+    protected function buildReservationMapFromPrograms(Collection $programs, Carbon $rangeStart, Carbon $rangeEnd): array
     {
         $reservationsByDate = [];
 
-        $individualApplications = IndividualApplication::query()
-            ->with(['reservation'])
-            ->whereHas('reservation', function ($query) use ($start, $end) {
-                $query->whereDate('education_start_date', '<=', $end->format('Y-m-d'))
-                    ->whereDate('education_end_date', '>=', $start->format('Y-m-d'));
-            })
-            ->get();
+        foreach ($programs as $program) {
+            $startDate = $program->education_start_date;
+            if (!$startDate) {
+                continue;
+            }
 
-        $groupApplications = GroupApplication::query()
-            ->with(['reservation'])
-            ->whereHas('reservation', function ($query) use ($start, $end) {
-                $query->whereDate('education_start_date', '<=', $end->format('Y-m-d'))
-                    ->whereDate('education_end_date', '>=', $start->format('Y-m-d'));
-            })
-            ->get();
+            $dateKey = $startDate instanceof Carbon
+                ? $startDate->format('Y-m-d')
+                : Carbon::parse($startDate)->format('Y-m-d');
 
-        $individualSummaries = $this->formatIndividualReservations($individualApplications);
-        foreach ($individualSummaries as $summary) {
-            $this->spreadReservationAcrossDates($reservationsByDate, 'individual', $summary, $start, $end);
-        }
+            if ($dateKey < $rangeStart->format('Y-m-d') || $dateKey > $rangeEnd->format('Y-m-d')) {
+                continue;
+            }
 
-        $groupSummaries = $this->formatGroupReservations($groupApplications);
-        foreach ($groupSummaries as $summary) {
-            $this->spreadReservationAcrossDates($reservationsByDate, 'group', $summary, $start, $end);
+            $reservationsByDate[$dateKey] = $reservationsByDate[$dateKey] ?? ['individual' => [], 'group' => []];
+            $type = $program->application_type === 'individual' ? 'individual' : 'group';
+            $reservationsByDate[$dateKey][$type][] = $this->programToCalendarRow($program);
         }
 
         foreach ($reservationsByDate as $dateKey => &$data) {
             $individual = $data['individual'] ?? [];
             $group = $data['group'] ?? [];
-
             $data['individual'] = $individual;
             $data['group'] = $group;
             $data['summary'] = [
@@ -169,113 +190,27 @@ class ReservationCalendarService
         return $reservationsByDate;
     }
 
-    protected function formatIndividualReservations(Collection $applications): array
+    /**
+     * ProgramReservation 한 건을 캘린더/우측 패널용 배열로 변환
+     */
+    protected function programToCalendarRow(ProgramReservation $program): array
     {
-        return $applications
-            ->groupBy('program_reservation_id')
-            ->map(function (Collection $apps) {
-                $firstApplication = $apps->first();
-                $reservation = $firstApplication->relationLoaded('reservation') ? $firstApplication->reservation : null;
-                $startDate = $reservation?->education_start_date ?? $firstApplication->participation_date;
-                $endDate = $reservation?->education_end_date ?? $firstApplication->participation_date;
-                $startDate = $startDate ? Carbon::parse($startDate) : null;
-                $endDate = $endDate ? Carbon::parse($endDate) : $startDate;
+        $applicantCount = $program->applied_count_display ?? 0;
+        $capacity = $program->capacity ?? null;
+        $isUnlimited = (bool) ($program->is_unlimited_capacity ?? false);
 
-                $applicantCount = $apps->count();
-                $isUnlimited = (bool) ($reservation->is_unlimited_capacity ?? false);
-                $capacity = $reservation->capacity ?? null;
-
-                return [
-                    'data' => [
-                        'id' => $firstApplication->id,
-                        'program_reservation_id' => $firstApplication->program_reservation_id,
-                        'type' => 'individual',
-                        'date' => optional($firstApplication->participation_date)->format('Y-m-d') ?? '',
-                        'education_start_date' => $startDate ? $startDate->format('Y-m-d') : null,
-                        'education_end_date' => $endDate ? $endDate->format('Y-m-d') : null,
-                        'program_name' => $firstApplication->program_name,
-                        'applicant_count' => $applicantCount,
-                        'capacity' => $capacity,
-                        'is_unlimited' => $isUnlimited,
-                        'is_closed' => $this->isReservationClosed($reservation, $applicantCount),
-                        'applicant_name' => $firstApplication->applicant_name,
-                        'application_number' => $firstApplication->application_number,
-                    ],
-                    'start_date' => $startDate,
-                    'end_date' => $endDate,
-                ];
-            })
-            ->values()
-            ->toArray();
-    }
-
-    protected function formatGroupReservations(Collection $applications): array
-    {
-        return $applications
-            ->groupBy('program_reservation_id')
-            ->map(function (Collection $apps) {
-                $firstApplication = $apps->first();
-                $reservation = $firstApplication->relationLoaded('reservation') ? $firstApplication->reservation : null;
-                $totalApplicantCount = $apps->sum(function ($application) {
-                    return $application->applicant_count ?? 0;
-                });
-                $startDate = $reservation?->education_start_date ?? $firstApplication->participation_date;
-                $endDate = $reservation?->education_end_date ?? $firstApplication->participation_date;
-                $startDate = $startDate ? Carbon::parse($startDate) : null;
-                $endDate = $endDate ? Carbon::parse($endDate) : $startDate;
-
-                $isUnlimited = (bool) ($reservation->is_unlimited_capacity ?? false);
-                $capacity = $reservation->capacity ?? null;
-
-                return [
-                    'data' => [
-                        'id' => $firstApplication->id,
-                        'program_reservation_id' => $firstApplication->program_reservation_id,
-                        'type' => 'group',
-                        'date' => optional($firstApplication->participation_date)->format('Y-m-d') ?? '',
-                        'education_start_date' => $startDate ? $startDate->format('Y-m-d') : null,
-                        'education_end_date' => $endDate ? $endDate->format('Y-m-d') : null,
-                        'program_name' => $reservation->program_name ?? '',
-                        'applicant_count' => $totalApplicantCount,
-                        'capacity' => $capacity,
-                        'is_unlimited' => $isUnlimited,
-                        'is_closed' => $this->isReservationClosed($reservation, $totalApplicantCount),
-                        'applicant_name' => $firstApplication->applicant_name,
-                        'application_number' => $firstApplication->application_number,
-                    ],
-                    'start_date' => $startDate,
-                    'end_date' => $endDate,
-                ];
-            })
-            ->values()
-            ->toArray();
-    }
-
-    protected function spreadReservationAcrossDates(array &$map, string $type, array $reservation, Carbon $rangeStart, Carbon $rangeEnd): void
-    {
-        $startDate = $reservation['start_date'];
-        $endDate = $reservation['end_date'];
-
-        if (!$startDate instanceof Carbon || !$endDate instanceof Carbon) {
-            return;
-        }
-
-        $current = $startDate->copy()->startOfDay();
-        $end = $endDate->copy()->endOfDay();
-
-        while ($current <= $end) {
-            if ($current < $rangeStart || $current > $rangeEnd) {
-                $current->addDay();
-                continue;
-            }
-
-            $dateKey = $current->format('Y-m-d');
-            $map[$dateKey] = $map[$dateKey] ?? ['individual' => [], 'group' => []];
-
-            $map[$dateKey][$type][] = $reservation['data'];
-
-            $current->addDay();
-        }
+        return [
+            'program_reservation_id' => $program->id,
+            'type' => $program->application_type,
+            'date' => $program->education_start_date ? Carbon::parse($program->education_start_date)->format('Y-m-d') : '',
+            'education_start_date' => $program->education_start_date ? Carbon::parse($program->education_start_date)->format('Y-m-d') : null,
+            'education_end_date' => $program->education_end_date ? Carbon::parse($program->education_end_date)->format('Y-m-d') : null,
+            'program_name' => $program->program_name ?? '',
+            'applicant_count' => $applicantCount,
+            'capacity' => $capacity,
+            'is_unlimited' => $isUnlimited,
+            'is_closed' => $this->isReservationClosed($program, $applicantCount),
+        ];
     }
 
     protected function isReservationClosed($reservation, int $applicantCount): bool

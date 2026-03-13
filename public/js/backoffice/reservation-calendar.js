@@ -290,13 +290,14 @@
             const scheduleData = {};    // appid -> { startIdx, count, element }
             const globalOrder = [];     // 이 주(row)에 등장하는 appid 순서
 
-            // 1. 데이터 파악: 어느 일정이 어디서 시작해서 며칠간 이어지는지 계산
+            // 1. 데이터 파악: 예약 ID별로만 병합 (같은 날짜 연속이어도 단체는 날짜별로 끊어서 표시)
             cells.forEach((td, colIdx) => {
                 const items = td.querySelectorAll('.list li:not(.dummy)');
                 items.forEach(li => {
+                    const reservationId = li.dataset.reservationId || '';
                     const title = li.getAttribute('title') || li.textContent.trim();
                     const total = li.dataset.total || '';
-                    const key = `${title}|${total}`;
+                    const key = `${reservationId}|${title}|${total}`;
 
                     if (!appIdMap.has(key)) {
                         appIdMap.set(key, appIdCounter++);
@@ -309,7 +310,6 @@
                         };
                     } else {
                         const appid = appIdMap.get(key);
-                        // 연속된 날짜인지 확인하여 count 증가
                         if (scheduleData[appid].start + scheduleData[appid].count === colIdx) {
                             scheduleData[appid].count++;
                         }

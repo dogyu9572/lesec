@@ -129,7 +129,7 @@ class GroupProgramController extends BaseController
 
         $this->groupProgramService->updateProgram($programReservation, $request->all());
 
-        return redirect()->route('backoffice.group-programs.index')
+        return redirect()->route('backoffice.group-programs.edit', $programReservation)
             ->with('success', '단체 프로그램이 수정되었습니다.');
     }
 

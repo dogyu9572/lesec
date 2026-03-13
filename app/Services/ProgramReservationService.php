@@ -583,26 +583,6 @@ class ProgramReservationService
                 if ($remainingCapacity < $requestedCount) {
                     throw new \InvalidArgumentException('잔여 정원이 부족합니다. (잔여: ' . $remainingCapacity . '명)');
                 }
-
-                // 방학 프로그램인 경우 정원을 모두 채워야 함
-                $isVacation = in_array($reservation->education_type, ['middle_vacation', 'high_vacation'], true);
-                if ($isVacation) {
-                    $capacity = (int) ($reservation->capacity ?? 0);
-                    $applied = (int) ($reservation->applied_count ?? 0);
-                    // 신청가능 상태면 정원을 모두 채워야 하고, 잔여석 신청 가능 상태면 잔여석을 모두 채워야 함
-                    if ($applied === 0) {
-                        // 신청가능 상태: 정원을 모두 채워야 함
-                        if ($capacity > 0 && $requestedCount !== $capacity) {
-                            throw new \InvalidArgumentException('방학 프로그램은 정원(' . $capacity . '명)을 모두 채워야 신청 가능합니다.');
-                        }
-                    } else {
-                        // 잔여석 신청 가능 상태: 잔여석을 모두 채워야 함
-                        $remaining = $capacity - $applied;
-                        if ($remaining > 0 && $requestedCount !== $remaining) {
-                            throw new \InvalidArgumentException('방학 프로그램은 잔여석(' . $remaining . '명)을 모두 채워야 신청 가능합니다.');
-                        }
-                    }
-                }
             }
 
             $applicationNumber = $this->generateGroupApplicationNumber($reservation);

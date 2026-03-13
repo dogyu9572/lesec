@@ -117,7 +117,7 @@
 				</div>
 
 				<div class="nebox">
-					<p id="group-application-info">단체 신청 가능 인원은 최소 10명입니다.</p>
+					<p id="group-application-info">단체 신청 가능 인원은 최소 20명입니다.</p>
 					<p>잔여석이 있을 경우 4명 이상 단체도 신청 가능합니다.</p>
 				</div>
 			</div>

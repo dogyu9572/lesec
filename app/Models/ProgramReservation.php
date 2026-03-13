@@ -254,8 +254,10 @@ class ProgramReservation extends Model
             return $this->applications()->where('payment_status', '!=', IndividualApplication::PAYMENT_STATUS_CANCELLED)->count();
         }
 
-        // 단체 프로그램은 실시간으로 신청인원 계산 (승인대기 + 승인완료 모두 포함)
-        return $this->groupApplications()->sum('applicant_count') ?? 0;
+        // 단체 프로그램은 취소 제외한 신청만 합산 (승인대기 + 승인완료)
+        return $this->groupApplications()
+            ->where('payment_status', '!=', 'cancelled')
+            ->sum('applicant_count') ?? 0;
     }
 
     public function applications(): HasMany

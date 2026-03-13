@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Member;
 
+use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
@@ -186,5 +187,40 @@ class MemberUnderFourteenRegisterRequest extends FormRequest
         }
 
         return $digits;
+    }
+
+    /**
+     * 검증 후 추가 검증: 생년월일 기준 허용 학년(기대 학년 ±1)
+     */
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            $birthDate = $this->input('birth_date');
+            $grade = $this->filled('grade') ? (int) $this->input('grade') : null;
+            if ($birthDate && strlen($birthDate) >= 4 && $grade !== null) {
+                $allowed = $this->getAllowedGradesByBirthDate($birthDate);
+                if ($allowed !== null && !in_array($grade, $allowed, true)) {
+                    $validator->errors()->add('grade', '생년월일 기준 선택 가능한 학년은 ' . implode(', ', array_map(fn ($g) => $g . '학년', $allowed)) . '입니다.');
+                }
+            }
+        });
+    }
+
+    /**
+     * 생년월일(Ymd) 기준 현재 시점에서 선택 가능한 중학교 학년(1~3) 목록 (기대 학년 ±1)
+     */
+    protected function getAllowedGradesByBirthDate(string $birthDateYmd): ?array
+    {
+        $birthYear = (int) substr($birthDateYmd, 0, 4);
+        $now = Carbon::now();
+        $currentSchoolYear = $now->month >= 3 ? $now->year : $now->year - 1;
+        $expected = $currentSchoolYear - $birthYear - 12;
+        $min = max(1, $expected - 1);
+        $max = min(3, $expected + 1);
+        if ($min > $max) {
+            $min = max(1, min(3, $expected));
+            $max = $min;
+        }
+        return array_values(range($min, $max));
     }
 }

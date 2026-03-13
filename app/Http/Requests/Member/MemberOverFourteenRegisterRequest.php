@@ -218,15 +218,42 @@ class MemberOverFourteenRegisterRequest extends FormRequest
                 $validator->errors()->add('contact', '이미 등록된 연락처입니다.');
             }
 
-            // 학생인 경우에만 학생 연락처와 보호자 연락처가 같은지 확인
             if ($memberType === 'student') {
+                // 학생: 연락처와 보호자 연락처가 같은지 확인
                 $studentContact = preg_replace('/[^0-9]/', '', (string) $this->input('student_contact', ''));
                 $parentContact = preg_replace('/[^0-9]/', '', (string) $this->input('parent_contact', ''));
-                
                 if (!empty($studentContact) && !empty($parentContact) && $studentContact === $parentContact) {
                     $validator->errors()->add('parent_contact', '학생 연락처와 보호자 연락처는 같을 수 없습니다.');
                 }
+
+                // 학생: 생년월일 기준 허용 학년(기대 학년 ±1) 검증
+                $birthDate = $this->input('birth_date');
+                $grade = $this->filled('grade') ? (int) $this->input('grade') : null;
+                if ($birthDate && strlen($birthDate) >= 4 && $grade !== null) {
+                    $allowed = $this->getAllowedGradesByBirthDate($birthDate);
+                    if ($allowed !== null && !in_array($grade, $allowed, true)) {
+                        $validator->errors()->add('grade', '생년월일 기준 선택 가능한 학년은 ' . implode(', ', array_map(fn ($g) => $g . '학년', $allowed)) . '입니다.');
+                    }
+                }
             }
         });
+    }
+
+    /**
+     * 생년월일(Ymd) 기준 현재 시점에서 선택 가능한 중학교 학년(1~3) 목록 (기대 학년 ±1)
+     */
+    protected function getAllowedGradesByBirthDate(string $birthDateYmd): ?array
+    {
+        $birthYear = (int) substr($birthDateYmd, 0, 4);
+        $now = Carbon::now();
+        $currentSchoolYear = $now->month >= 3 ? $now->year : $now->year - 1;
+        $expected = $currentSchoolYear - $birthYear - 12;
+        $min = max(1, $expected - 1);
+        $max = min(3, $expected + 1);
+        if ($min > $max) {
+            $min = max(1, min(3, $expected));
+            $max = $min;
+        }
+        return array_values(range($min, $max));
     }
 }

@@ -96,6 +96,7 @@
 			@if($application->application_status !== 'approved')
 			<div style="color: #ff0000; margin-bottom: 10px; font-weight: bold;">승인 완료 후 명단을 입력할 수 있습니다.</div>
 			@endif
+			<div style="margin-bottom: 10px; font-size: 16px; font-weight: 500; line-height: 20px;">참여할 모든 학생의 명단을 한 번에 업로드 해주세요. 참여 3일 전까지는 수정 가능합니다.</div>
 			<div class="abso_btns mo_long">
 				<a href="{{ route('mypage.application_write.sample', $application->id) }}" class="btn btn_kwy">샘플파일 받기</a>
 				<label for="csv_upload" class="btn btn_kwy {{ $application->application_status !== 'approved' ? 'disabled' : '' }}" style="cursor: {{ $application->application_status === 'approved' ? 'pointer' : 'not-allowed' }}; margin-left: 5px; {{ $application->application_status !== 'approved' ? 'opacity: 0.5; pointer-events: none;' : '' }}">일괄 업로드</label>
@@ -131,10 +132,10 @@
 								<td>{{ $loop->iteration }}</td>
 								<td>
 									<input type="hidden" name="participants[{{ $loop->index }}][id]" value="{{ $participant->id }}">
-									<input type="text" name="participants[{{ $loop->index }}][name]" class="w100p" placeholder="이름을 입력해주세요." value="{{ $participant->name ?? '' }}" required {{ $application->application_status !== 'approved' ? 'disabled' : '' }}>
+									<input type="text" name="participants[{{ $loop->index }}][name]" class="w100p" placeholder="이름을 입력해주세요." value="{{ $participant->name ?? '' }}" {{ $application->application_status !== 'approved' ? 'disabled' : '' }}>
 								</td>
 								<td>
-									<select name="participants[{{ $loop->index }}][grade]" class="w100p" required {{ $application->application_status !== 'approved' ? 'disabled' : '' }}>
+									<select name="participants[{{ $loop->index }}][grade]" class="w100p" {{ $application->application_status !== 'approved' ? 'disabled' : '' }}>
 										<option value="">학년을 선택해주세요.</option>
 										@for($i = 1; $i <= 3; $i++)
 										<option value="{{ $i }}" {{ $participant->grade == $i ? 'selected' : '' }}>{{ $i }}학년</option>
@@ -142,7 +143,7 @@
 									</select>
 								</td>
 								<td>
-									<select name="participants[{{ $loop->index }}][class]" class="w100p" required {{ $application->application_status !== 'approved' ? 'disabled' : '' }}>
+									<select name="participants[{{ $loop->index }}][class]" class="w100p" {{ $application->application_status !== 'approved' ? 'disabled' : '' }}>
 										<option value="">반을 선택해주세요.</option>
 										@for($i = 1; $i <= 20; $i++)
 										<option value="{{ $i }}" {{ $participant->class == $i ? 'selected' : '' }}>{{ $i }}반</option>
@@ -157,9 +158,9 @@
 							@empty
 							<tr>
 								<td>1</td>
-								<td><input type="text" name="participants[0][name]" class="w100p" placeholder="이름을 입력해주세요." required {{ $application->application_status !== 'approved' ? 'disabled' : '' }}></td>
+								<td><input type="text" name="participants[0][name]" class="w100p" placeholder="이름을 입력해주세요." {{ $application->application_status !== 'approved' ? 'disabled' : '' }}></td>
 								<td>
-									<select name="participants[0][grade]" class="w100p" required {{ $application->application_status !== 'approved' ? 'disabled' : '' }}>
+									<select name="participants[0][grade]" class="w100p" {{ $application->application_status !== 'approved' ? 'disabled' : '' }}>
 										<option value="">학년을 선택해주세요.</option>
 										@for($i = 1; $i <= 3; $i++)
 										<option value="{{ $i }}">{{ $i }}학년</option>
@@ -167,7 +168,7 @@
 									</select>
 								</td>
 								<td>
-									<select name="participants[0][class]" class="w100p" required {{ $application->application_status !== 'approved' ? 'disabled' : '' }}>
+									<select name="participants[0][class]" class="w100p" {{ $application->application_status !== 'approved' ? 'disabled' : '' }}>
 										<option value="">반을 선택해주세요.</option>
 										@for($i = 1; $i <= 20; $i++)
 										<option value="{{ $i }}">{{ $i }}반</option>
@@ -448,15 +449,15 @@ $(document).ready(function () {
 		const newRow = `
 		<tr>
 			<td>${currentRows + 1}</td>   <!-- 번호 자동 증가 -->
-			<td><input type="text" name="participants[${currentRows}][name]" class="w100p" placeholder="이름을 입력해주세요." required></td>
+			<td><input type="text" name="participants[${currentRows}][name]" class="w100p" placeholder="이름을 입력해주세요."></td>
 			<td>
-				<select name="participants[${currentRows}][grade]" class="w100p" required>
+				<select name="participants[${currentRows}][grade]" class="w100p">
 					<option value="">학년을 선택해주세요.</option>
 					${gradeOptions}
 				</select>
 			</td>
 			<td>
-				<select name="participants[${currentRows}][class]" class="w100p" required>
+				<select name="participants[${currentRows}][class]" class="w100p">
 					<option value="">반을 선택해주세요.</option>
 					${classOptions}
 				</select>
@@ -549,9 +550,32 @@ $(document).ready(function () {
 				processData: false,
 				contentType: false,
 				success: function(response) {
-					if (response.success) {
-						alert('명단이 업로드되었습니다.');
-						location.reload();
+					if (response.success && response.participants && response.participants.length > 0) {
+						const $tbody = $('.board_apply_list tbody');
+						$tbody.empty();
+
+						response.participants.forEach(function(p, idx) {
+							const gradeSelected = (p.grade >= 1 && p.grade <= 3) ? ' selected' : '';
+							const gradeOpts = '<option value="">학년을 선택해주세요.</option>' +
+								[1,2,3].map(function(i) { return '<option value="' + i + '"' + (p.grade == i ? ' selected' : '') + '>' + i + '학년</option>'; }).join('');
+							const classOpts = '<option value="">반을 선택해주세요.</option>' +
+								Array.from({length:20}, function(_, i) { var v = i + 1; return '<option value="' + v + '"' + (p.class == v ? ' selected' : '') + '>' + v + '반</option>'; }).join('');
+
+							const row = '<tr><td>' + (idx + 1) + '</td>' +
+								'<td><input type="text" name="participants[' + idx + '][name]" class="w100p" placeholder="이름을 입력해주세요." value="' + (p.name || '').replace(/"/g, '&quot;') + '"></td>' +
+								'<td><select name="participants[' + idx + '][grade]" class="w100p">' + gradeOpts + '</select></td>' +
+								'<td><select name="participants[' + idx + '][class]" class="w100p">' + classOpts + '</select></td>' +
+								'<td><input type="text" name="participants[' + idx + '][birthday]" class="w100p" placeholder="20010101" value="' + (p.birthday || '') + '"></td>' +
+								'<td><button type="button" class="btn btn_gray btn_delete_participant" style="width: 100%; padding: 5px;">삭제</button></td></tr>';
+							$tbody.append(row);
+						});
+
+						updatePlaceholders();
+						updateRowNumbers();
+						checkAddButtonState();
+						alert(response.message || '명단을 불러왔습니다. 저장하기 버튼을 눌러 저장해주세요.');
+					} else if (response.success) {
+						alert(response.message || '명단을 불러왔습니다. 저장하기 버튼을 눌러 저장해주세요.');
 					} else {
 						alert(response.message || '업로드 중 오류가 발생했습니다.');
 					}
@@ -565,6 +589,7 @@ $(document).ready(function () {
 				}
 			});
 		}
+		$(this).val('');
 	});
 
 	// 토스 결제 모달 "결제하기" 버튼 클릭

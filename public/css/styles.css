@@ -619,6 +619,7 @@
 	.schedule_top .info li:before {content:""; position:absolute; top:50%; left:0; width:14px; height:14px; border-radius:2px; transform:translateY(-50%);}
 	.schedule_top .info li.i_select:before {border:#283891 2px solid;}
 	.schedule_top .info li.i_possible:before {background:#39B54A;}
+	/* 사용자 예약 캘린더: 예약불가(마감) 색상은 백오피스와 동일한 분홍색 사용 */
 	.schedule_top .info li.i_impossible:before {background:#F8B4C5; border:#F1839A 1px solid;}
 	.schedule_table .table {border:#ddd 1px solid; border-radius:12px; overflow:hidden;}
 	.schedule_table .table th,
@@ -628,9 +629,9 @@
 	.schedule_table .table th:last-child,
 	.schedule_table .table td:last-child {border-right:0; color:#283891;}
 	.schedule_table .table thead th {font-size:16px; color:#333; line-height:48px;}
-.schedule_table .schedule-disabled {display:block; margin-top:6px; font-size:12px; font-weight:600; text-align:center; color:#7a1f2d; background:#FAD4DD; border:#F1839A 1px solid; border-radius:4px; padding:4px 8px;}
+.schedule_table .schedule-disabled {display:block; margin-top:6px; font-size:12px; font-weight:600; text-align:center; color:#fff; background:#DC2626; border-radius:4px; padding:4px 8px;}
 	.schedule_table .table tbody td {position:relative; border-top:#ddd 1px solid; padding:4px; height:120px; vertical-align:top; cursor:pointer;}
-	.schedule_table .table tbody td.disabled {pointer-events:none; background:#FDF2F4;}
+	.schedule_table .table tbody td.disabled {pointer-events:none; background:#F7F8F9;}
 	.schedule_table .table tbody td.disabled span {opacity:.6;}
 	.schedule_table .table tbody td.select:before {content:""; position:absolute; top:0; left:0; width:100%; height:100%; border:#283891 2px solid;}
 	.schedule_table .table tbody td span {display:block; font-size:14px; color:inherit; line-height:26px; padding:0 4px;}
@@ -638,6 +639,7 @@
 	.schedule_table .table tbody td .list li {font-size:12px; font-weight:600; line-height:18px; padding:2px 6px; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; border-radius:2px;}
 	.schedule_table .table tbody td .list li + li {margin-top:2px;}
 	.schedule_table .table tbody td .list li.i_possible {color:#fff; background:#39B54A;}
+	/* 개별 프로그램 예약마감(예약불가) 뱃지 색상 - 백오피스와 동일한 분홍색 */
 	.schedule_table .table tbody td .list li.i_impossible {color:#7a1f2d; line-height:16px; background:#FAD4DD; border:#F1839A 1px solid;}
 	.schedule_table .table tbody td .list li.off {opacity:0; font-size:0;}
 	.schedule_table .table tbody td .list li .schedule_count {display:none;}

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Member;
 
+use App\Models\School;
 use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -190,37 +191,88 @@ class MemberUnderFourteenRegisterRequest extends FormRequest
     }
 
     /**
-     * 검증 후 추가 검증: 생년월일 기준 허용 학년(기대 학년 ±1)
+     * 검증 후 추가 검증: 생년월일 + 선택 학교급 기준 허용 학년
      */
     public function withValidator($validator): void
     {
         $validator->after(function ($validator) {
             $birthDate = $this->input('birth_date');
             $grade = $this->filled('grade') ? (int) $this->input('grade') : null;
+            $schoolId = $this->filled('school_id') ? (int) $this->input('school_id') : null;
             if ($birthDate && strlen($birthDate) >= 4 && $grade !== null) {
-                $allowed = $this->getAllowedGradesByBirthDate($birthDate);
-                if ($allowed !== null && !in_array($grade, $allowed, true)) {
-                    $validator->errors()->add('grade', '생년월일 기준 선택 가능한 학년은 ' . implode(', ', array_map(fn ($g) => $g . '학년', $allowed)) . '입니다.');
+                $result = $this->getAllowedGradesByBirthDate($birthDate, $schoolId);
+                $allowed = $result['allowed'];
+                $schoolLevelLabel = $result['school_level_label'] ?? null;
+                if ($allowed !== null && $allowed !== []) {
+                    if (!in_array($grade, $allowed, true)) {
+                        $validator->errors()->add('grade', '생년월일 기준 선택 가능한 학년은 ' . implode(', ', array_map(fn ($g) => $g . '학년', $allowed)) . '입니다.');
+                    }
+                } elseif ($allowed === []) {
+                    $validator->errors()->add('grade', $schoolLevelLabel
+                        ? "생년월일 기준 선택한 학교급({$schoolLevelLabel}) 재학 대상이 아닙니다."
+                        : '생년월일 기준 해당 학교급 재학 대상이 아닙니다.');
                 }
             }
         });
     }
 
     /**
-     * 생년월일(Ymd) 기준 현재 시점에서 선택 가능한 중학교 학년(1~3) 목록 (기대 학년 ±1)
+     * 생년월일 + 선택 학교(school_id)의 학교급에 따라 허용 학년 계산 (기대 학년 ±1)
+     * 초등학교: 만6세=초1 기준, 기대 학년 ±1 (폼은 1~3학년만, 초4 이상이면 재학 대상 아님)
+     * 중학교: 만12세=중1 기준, 기대 학년 ±1
+     * 고등학교: 만15세=고1 기준, 기대 학년 ±1
+     * 기대 학년 < 1 또는 (초등이고 기대 > 3) 이면 해당 학교급 재학 대상 아님 → 허용 [] 반환
+     * 학교 미선택 시 고등학교 기준 적용
+     *
+     * @return array{allowed: list<int>|null, school_level_label: string|null}
      */
-    protected function getAllowedGradesByBirthDate(string $birthDateYmd): ?array
+    protected function getAllowedGradesByBirthDate(string $birthDateYmd, ?int $schoolId = null): array
     {
         $birthYear = (int) substr($birthDateYmd, 0, 4);
         $now = Carbon::now();
         $currentSchoolYear = $now->month >= 3 ? $now->year : $now->year - 1;
-        $expected = $currentSchoolYear - $birthYear - 12;
+
+        $schoolLevel = null;
+        $schoolLevelLabel = null;
+        if ($schoolId) {
+            $school = School::find($schoolId);
+            $schoolLevel = $school?->school_level;
+            $schoolLevelLabel = $school?->school_level_name;
+        }
+        if ($schoolLevelLabel === null && $schoolLevel !== null) {
+            $schoolLevelLabel = match ($schoolLevel) {
+                'elementary' => '초등학교',
+                'middle' => '중학교',
+                'high' => '고등학교',
+                default => $schoolLevel,
+            };
+        }
+
+        if ($schoolLevel === 'elementary') {
+            $expected = $currentSchoolYear - $birthYear - 6;
+        } elseif ($schoolLevel === 'middle') {
+            $expected = $currentSchoolYear - $birthYear - 12;
+        } else {
+            $expected = $currentSchoolYear - $birthYear - 15;
+        }
+
+        if ($expected < 0) {
+            return ['allowed' => [], 'school_level_label' => $schoolLevelLabel];
+        }
+        if ($expected === 0) {
+            return ['allowed' => [1], 'school_level_label' => $schoolLevelLabel];
+        }
+        if ($schoolLevel === 'elementary' && $expected > 3) {
+            return ['allowed' => [], 'school_level_label' => $schoolLevelLabel];
+        }
+
         $min = max(1, $expected - 1);
         $max = min(3, $expected + 1);
+
         if ($min > $max) {
             $min = max(1, min(3, $expected));
             $max = $min;
         }
-        return array_values(range($min, $max));
+        return ['allowed' => array_values(range($min, $max)), 'school_level_label' => $schoolLevelLabel];
     }
 }

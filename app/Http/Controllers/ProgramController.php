@@ -221,27 +221,48 @@ class ProgramController extends Controller
         if ($member && $member instanceof Member && $member->member_type === 'student') {
             $applications = IndividualApplication::query()
                 ->where('member_id', $member->id)
-                ->where('payment_status', '!=', 'cancelled')
-                ->get(['program_reservation_id', 'program_name']);
-
-            $appliedPrefixes = $applications
-                ->map(function (IndividualApplication $application) {
-                    return Str::upper(Str::substr($application->program_name, 0, 2));
-                })
-                ->filter()
-                ->unique();
+                ->where('payment_status', '!=', IndividualApplication::PAYMENT_STATUS_CANCELLED)
+                ->with('reservation')
+                ->get();
 
             $appliedReservationIds = $applications
                 ->pluck('program_reservation_id')
                 ->filter()
                 ->unique();
 
-            $programs = $programs->map(function (ProgramReservation $program) use ($appliedPrefixes, $appliedReservationIds) {
-                $prefix = Str::upper(Str::substr($program->program_name, 0, 2));
+            $appliedProgramNames = $applications
+                ->map(function (IndividualApplication $application) {
+                    return $application->program_name;
+                })
+                ->filter()
+                ->unique();
 
+            $appliedPeriodKeys = $applications
+                ->map(function (IndividualApplication $application) {
+                    $reservation = $application->reservation;
+                    $date = $reservation?->education_start_date ?? $application->participation_date;
+
+                    return app(\App\Services\ProgramReservationService::class)
+                        ->getPeriodKey($application->education_type, $date);
+                })
+                ->filter()
+                ->unique();
+
+            $programs = $programs->map(function (ProgramReservation $program) use ($appliedReservationIds, $appliedProgramNames, $appliedPeriodKeys) {
                 if ($appliedReservationIds->contains($program->id)) {
                     $program->application_status = 'applied';
-                } elseif ($appliedPrefixes->contains($prefix)) {
+                    return $program;
+                }
+
+                if ($appliedProgramNames->contains($program->program_name)) {
+                    $program->application_status = 'blocked';
+                    return $program;
+                }
+
+                $periodKey = app(\App\Services\ProgramReservationService::class)
+                    ->getPeriodKey($program->education_type, $program->education_start_date);
+
+                if ($periodKey !== null && $appliedPeriodKeys->contains($periodKey)) {
                     $program->application_status = 'blocked';
                 } else {
                     $program->application_status = 'available';

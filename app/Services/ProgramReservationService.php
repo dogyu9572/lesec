@@ -76,6 +76,54 @@ class ProgramReservationService
         return $this->filterProgramsBySchedule($programs);
     }
 
+    /**
+     * 교육유형 + 날짜 기준 학기/방학 구간 키 반환
+     * - middle_semester, high_semester: 1학기(3~7월), 2학기(8~12월)
+     * - middle_vacation, high_vacation: 여름방학(7~8월), 겨울방학(1~2월)
+     * - special 등은 학기/방학 구간 제한 없음 → null
+     */
+    public function getPeriodKey(string $educationType, $date): ?string
+    {
+        if ($date === null) {
+            return null;
+        }
+
+        if (!$date instanceof Carbon) {
+            try {
+                $date = Carbon::parse($date);
+            } catch (\Throwable) {
+                return null;
+            }
+        }
+
+        $month = (int) $date->month;
+
+        // 학기형: 1학기(3~7월), 2학기(8~12월)
+        if ($educationType === 'middle_semester' || $educationType === 'high_semester') {
+            if ($month >= 3 && $month <= 7) {
+                return $educationType . '_1';
+            }
+            if ($month >= 8 && $month <= 12) {
+                return $educationType . '_2';
+            }
+            return null;
+        }
+
+        // 방학형: 여름(7~8월), 겨울(1~2월)
+        if ($educationType === 'middle_vacation' || $educationType === 'high_vacation') {
+            if ($month === 7 || $month === 8) {
+                return $educationType . '_summer';
+            }
+            if ($month === 1 || $month === 2) {
+                return $educationType . '_winter';
+            }
+            return null;
+        }
+
+        // 특별 등 기타 유형은 구간 제한 없음
+        return null;
+    }
+
     public function getIndividualProgramById(int $id): ?ProgramReservation
     {
         return ProgramReservation::query()
@@ -226,25 +274,6 @@ class ProgramReservationService
             $memberModel = Member::find($data['member_id']);
         }
 
-        if ($memberModel && $memberModel->member_type === 'student') {
-            $programPrefix = Str::upper(Str::substr($reservation->program_name, 0, 2));
-
-            $existingApplication = IndividualApplication::query()
-                ->where('member_id', $memberModel->id)
-                ->where('payment_status', '!=', 'cancelled') // 취소된 신청 제외
-                ->with('reservation')
-                ->get()
-                ->contains(function (IndividualApplication $application) use ($programPrefix) {
-                    $programName = $application->program_name; // accessor가 reservation에서 가져옴
-                    $existingPrefix = Str::upper(Str::substr($programName, 0, 2));
-                    return $existingPrefix === $programPrefix;
-                });
-
-            if ($existingApplication) {
-                throw new \InvalidArgumentException('이미 동일한 프로그램을 신청하셨습니다. 다른 프로그램을 선택해주세요.');
-            }
-        }
-
         $applicantContact = $this->normalizeContactNumber($data['applicant_contact'] ?? '');
         if ($applicantContact === null) {
             throw new \InvalidArgumentException('신청자 연락처를 정확히 입력해주세요.');
@@ -257,6 +286,41 @@ class ProgramReservationService
         $programNameValue = $reservation->program_name;
         $participationDateValue = $reservation->education_start_date;
         $participationFeeValue = $reservation->education_fee;
+
+        if ($memberModel && $memberModel->member_type === 'student' && !$allowAdminOverride) {
+            // 동일 프로그램명(전체 일치) 중복 신청 차단
+            $existingApplications = IndividualApplication::query()
+                ->where('member_id', $memberModel->id)
+                ->where('payment_status', '!=', IndividualApplication::PAYMENT_STATUS_CANCELLED) // 취소된 신청 제외
+                ->with('reservation')
+                ->get();
+
+            $programNameDuplicated = $existingApplications->contains(function (IndividualApplication $application) use ($programNameValue) {
+                $existingName = $application->program_name; // accessor가 reservation에서 가져옴
+                return $existingName === $programNameValue;
+            });
+
+            if ($programNameDuplicated) {
+                throw new \InvalidArgumentException('이미 동일한 프로그램을 신청하셨습니다. 다른 프로그램을 선택해주세요.');
+            }
+
+            // 학기/방학 구간(period)별 1회만 신청 가능
+            $currentPeriodKey = $this->getPeriodKey($reservation->education_type, $participationDateValue);
+
+            if ($currentPeriodKey !== null) {
+                $hasSamePeriodApplication = $existingApplications->contains(function (IndividualApplication $application) use ($currentPeriodKey) {
+                    $reservation = $application->reservation;
+                    $date = $reservation?->education_start_date ?? $application->participation_date;
+                    $periodKey = $this->getPeriodKey($application->education_type, $date);
+
+                    return $periodKey !== null && $periodKey === $currentPeriodKey;
+                });
+
+                if ($hasSamePeriodApplication) {
+                    throw new \InvalidArgumentException('해당 학기/방학에는 이미 다른 프로그램을 신청하셨습니다. (1학기/2학기/여름방학/겨울방학 구간당 1회만 신청 가능합니다.)');
+                }
+            }
+        }
 
         return DB::transaction(function () use ($reservation, $data, $requestedCount, $applicantContact, $guardianContact, $memberModel, $programNameValue, $participationDateValue, $participationFeeValue) {
             $application = IndividualApplication::create([

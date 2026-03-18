@@ -165,7 +165,8 @@ class ProgramReservation extends Model
                 }
 
                 $capacity = $this->capacity ?? 0;
-                $appliedCount = $this->applied_count_display ?? 0;
+                // 개인 프로그램은 once-full 정책을 위해 DB의 applied_count(누적 신청수)를 기준으로 마감 여부 판단
+                $appliedCount = $this->applied_count ?? 0;
 
                 if ($appliedCount >= $capacity) {
                     return 'closed';
@@ -181,7 +182,12 @@ class ProgramReservation extends Model
         }
 
         $capacity = $this->capacity ?? 0;
-        $appliedCount = $this->applied_count_display ?? 0;
+        // 단체는 표시 기준(applied_count_display)을, 개인은 once-full 정책용으로 누적(applied_count)을 사용
+        if ($this->application_type === 'individual') {
+            $appliedCount = $this->applied_count ?? 0;
+        } else {
+            $appliedCount = $this->applied_count_display ?? 0;
+        }
 
         if ($appliedCount >= $capacity) {
             return 'closed';

@@ -699,11 +699,6 @@ class MemberMypageController extends Controller
         $application->payment_status = 'cancelled';
         $application->save();
 
-        // 신청 취소 시 프로그램 신청 인원 감소
-        if ($application->reservation && !$application->reservation->is_unlimited_capacity) {
-            $application->reservation->decrement('applied_count', 1);
-        }
-
         return redirect()->route('mypage.application_indi_list')
             ->with('success', '신청이 취소되었습니다.');
     }

@@ -107,7 +107,7 @@
 			<a href="{{ route('mypage.application_indi_list') }}" class="btn btn_wbb">목록</a>
 			@if($application->payment_status === 'cancelled')
 				<a href="javascript:void(0);" class="btn btn_gray">취소 완료</a>
-			@elseif($application->draw_result !== 'fail' && $application->payment_status !== 'refunded')
+			@elseif($application->draw_result !== 'fail' && $application->payment_status !== 'refunded' && $application->payment_status !== 'paid')
 				<form method="POST" action="{{ route('mypage.application_indi_cancel', $application->id) }}" style="display: inline;" onsubmit="return confirm('정말 신청을 취소하시겠습니까?');">
 					@csrf
 					<button type="submit" class="btn btn_bwb">신청취소</button>

@@ -683,6 +683,12 @@ class MemberMypageController extends Controller
                 ->withErrors(['cancel' => '이미 취소된 신청입니다.']);
         }
 
+        // 입금완료 상태는 취소 불가
+        if ($application->payment_status === 'paid') {
+            return redirect()->route('mypage.application_indi_list')
+                ->withErrors(['cancel' => '입금완료된 신청은 취소할 수 없습니다.']);
+        }
+
         // 취소 불가능한 상태 체크
         if ($application->draw_result === 'fail' || $application->payment_status === 'refunded') {
             return redirect()->route('mypage.application_indi_list')
@@ -722,6 +728,12 @@ class MemberMypageController extends Controller
         if ($application->payment_status === 'cancelled') {
             return redirect()->route('mypage.application_list')
                 ->withErrors(['cancel' => '이미 취소된 신청입니다.']);
+        }
+
+        // 입금완료 상태는 취소 불가
+        if ($application->payment_status === 'paid') {
+            return redirect()->route('mypage.application_list')
+                ->withErrors(['cancel' => '입금완료된 신청은 취소할 수 없습니다.']);
         }
 
         // 신청 취소 처리 (상태 변경)

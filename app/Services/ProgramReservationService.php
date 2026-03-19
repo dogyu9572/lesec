@@ -262,12 +262,6 @@ class ProgramReservationService
         }
 
         $requestedCount = 1;
-        if (!$reservation->is_unlimited_capacity) {
-            $remaining = $reservation->remaining_capacity;
-            if ($remaining < $requestedCount) {
-                throw new \InvalidArgumentException('잔여 정원이 부족합니다.');
-            }
-        }
 
         $memberModel = $member;
         if (!$memberModel && !empty($data['member_id'])) {
@@ -322,13 +316,35 @@ class ProgramReservationService
             }
         }
 
-        return DB::transaction(function () use ($reservation, $data, $requestedCount, $applicantContact, $guardianContact, $memberModel, $programNameValue, $participationDateValue, $participationFeeValue) {
+        return DB::transaction(function () use ($reservation, $data, $requestedCount, $applicantContact, $guardianContact, $memberModel, $programNameValue, $participationDateValue, $participationFeeValue, $allowAdminOverride) {
+            /** @var ProgramReservation $lockedReservation */
+            $lockedReservation = ProgramReservation::query()
+                ->whereKey($reservation->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if (!$lockedReservation->is_unlimited_capacity) {
+                $remaining = $lockedReservation->remaining_capacity;
+
+                if ($remaining < $requestedCount) {
+                    if (!$allowAdminOverride) {
+                        throw new \InvalidArgumentException('잔여 정원이 부족합니다.');
+                    }
+
+                    $capacity = (int) ($lockedReservation->capacity ?? 0);
+                    $needToAdd = $requestedCount - $remaining;
+                    $lockedReservation->update([
+                        'capacity' => $capacity + $needToAdd,
+                    ]);
+                }
+            }
+
             $application = IndividualApplication::create([
-                'program_reservation_id' => $reservation->id,
+                'program_reservation_id' => $lockedReservation->id,
                 'member_id' => $memberModel?->id ?? $data['member_id'] ?? null,
-                'application_number' => $this->generateIndividualApplicationNumber($reservation, $memberModel),
-                'education_type' => $reservation->education_type,
-                'reception_type' => $reservation->reception_type ?? 'first_come',
+                'application_number' => $this->generateIndividualApplicationNumber($lockedReservation, $memberModel),
+                'education_type' => $lockedReservation->education_type,
+                'reception_type' => $lockedReservation->reception_type ?? 'first_come',
                 'program_name' => $programNameValue,
                 'participation_date' => $participationDateValue,
                 'participation_fee' => $participationFeeValue,
@@ -344,8 +360,8 @@ class ProgramReservationService
                 'applied_at' => now(),
             ]);
 
-            if (!$reservation->is_unlimited_capacity) {
-                $reservation->increment('applied_count', $requestedCount);
+            if (!$lockedReservation->is_unlimited_capacity) {
+                $lockedReservation->increment('applied_count', $requestedCount);
             }
 
             return $application;

@@ -707,7 +707,16 @@ class IndividualApplicationService
 
         $applicationNumber = sprintf('%s%s%04d', $prefix, $year, $nextSequence);
 
-        return IndividualApplication::create([
+        // 백오피스(일괄 업로드)에서도 정원 초과 등록을 허용하되, 등록한 만큼 정원(capacity)을 자동 증가
+        if (!$reservation->is_unlimited_capacity) {
+            $remaining = $reservation->remaining_capacity;
+            if ($remaining < 1) {
+                $capacity = (int) ($reservation->capacity ?? 0);
+                $reservation->update(['capacity' => $capacity + 1]);
+            }
+        }
+
+        $application = IndividualApplication::create([
             'program_reservation_id' => $reservation->id,
             'member_id' => $data['member_id'] ?? null,
             'application_number' => $applicationNumber,
@@ -727,6 +736,12 @@ class IndividualApplicationService
             'guardian_contact' => $data['guardian_contact'],
             'applied_at' => now(),
         ]);
+
+        if (!$reservation->is_unlimited_capacity) {
+            $reservation->increment('applied_count', 1);
+        }
+
+        return $application;
     }
 
     /**

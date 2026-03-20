@@ -247,3 +247,8 @@ Route::prefix('error')->name('error.')->group(function () {
 
 // 백오피스 라우트 (관리자 전용)
 require __DIR__ . '/backoffice.php';
+
+// 비정상 경로 등 미매칭 요청은 공통 404 뷰로 처리 (스캐너 탐지 대응)
+Route::fallback(function () {
+    abort(404);
+});

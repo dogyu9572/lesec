@@ -28,8 +28,8 @@
 	<link rel="stylesheet" href="{{ asset('/css/reactive.css') }}">
     @yield('styles')
     
-    <!-- jQuery (SRI: 외부 리소스 무결성 검증) -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <!-- jQuery (로컬 호스팅, SRI 무결성 검증 — CSP script-src 'self'와 일치) -->
+    <script src="{{ asset('js/jquery-3.7.1.min.js') }}" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 	<script src="/js/com.js" integrity="sha384-WBiMKtnlzd9VMWQH+RsIzcolPXj4tpx56SNEEh3oKdPExz+h4EGwXkvdhclWo32M" crossorigin="anonymous"></script>
 </head>
 <body>

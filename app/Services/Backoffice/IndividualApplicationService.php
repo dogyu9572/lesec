@@ -283,10 +283,8 @@ class IndividualApplicationService
      */
     public function deleteApplication(IndividualApplication $application): bool
     {
-        // 신청 삭제 시 프로그램 신청 인원 감소
-        if ($application->reservation && !$application->reservation->is_unlimited_capacity) {
-            $application->reservation->decrement('applied_count', 1);
-        }
+        // 개인 프로그램 once-full 정책:
+        // applied_count는 대기자 전환 여부 판단을 위한 누적값이므로 삭제 시 감소시키지 않는다.
 
         return $application->delete();
     }

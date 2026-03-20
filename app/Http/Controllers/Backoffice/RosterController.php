@@ -678,11 +678,6 @@ class RosterController extends BaseController
                 $deletedCount = IndividualApplication::where('program_reservation_id', $reservation->id)
                     ->whereIn('id', $memberIds)  // application_id로 삭제
                     ->delete();
-
-                // applied_count 감소
-                if (!$reservation->is_unlimited_capacity && $deletedCount > 0) {
-                    $reservation->decrement('applied_count', $deletedCount);
-                }
             } else {
                 // 단체 신청 삭제
                 // 명단에서 participant_id를 받음 (data-member-id에 participant id가 들어있음)

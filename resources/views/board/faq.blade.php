@@ -30,7 +30,12 @@
 			@forelse($posts as $post)
 			<dl>
 				<dt>
-					<button type="button">
+					<button
+						type="button"
+						class="faq-toggle-button"
+						aria-expanded="false"
+						aria-controls="faq-content-{{ $post->id }}"
+					>
 						@if(!empty($post->category))
 						[{{ $post->category }}]
 						@endif
@@ -38,7 +43,7 @@
 						<i></i>
 					</button>
 				</dt>
-				<dd>
+				<dd id="faq-content-{{ $post->id }}">
 					{!! $post->content !!}
 					@if(!empty($post->attachments))
 					<div class="btns">
@@ -53,8 +58,12 @@
 			</dl>
 			@empty
 			<dl>
-				<dt><button type="button">등록된 FAQ가 없습니다.<i></i></button></dt>
-				<dd>등록된 FAQ가 없습니다.</dd>
+				<dt>
+					<button type="button" class="faq-toggle-button" aria-expanded="false">
+						등록된 FAQ가 없습니다.<i></i>
+					</button>
+				</dt>
+				<dd id="faq-content-empty">등록된 FAQ가 없습니다.</dd>
 			</dl>
 			@endforelse
 		</div>
@@ -81,11 +90,7 @@
 	</div>
 
 </main>
-
-<script>
-$(".faq_wrap dt button").click(function(){
-	$(this).parent().next("dd").stop(false,true).slideToggle("fast").parent().stop(false,true).toggleClass("on").siblings().removeClass("on").children("dd").slideUp("fast");
-});
-</script>
-
+@push('scripts')
+<script src="{{ asset('js/board-faq.js') }}"></script>
+@endpush
 @endsection

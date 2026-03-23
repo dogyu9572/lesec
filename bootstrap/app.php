@@ -18,6 +18,8 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->prependToGroup('web', TrustHosts::class);
 
+        $middleware->appendToGroup('web', SecurityHeaders::class);
+
         // 백오피스 경로에 대해 BackOfficeAuth 미들웨어 등록
         $middleware->group('backoffice', [
             BackOfficeAuth::class,

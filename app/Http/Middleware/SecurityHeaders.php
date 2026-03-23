@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * Sparrow 웹 취약점 점검 대응: 보안 헤더 추가
  * - X-Frame-Options, Referrer-Policy, X-Content-Type-Options, X-XSS-Protection
+ * - Content-Security-Policy (응답에 이미 있으면 생략 — nginx 등과 이중 헤더 방지)
  */
 class SecurityHeaders
 {
@@ -21,6 +22,29 @@ class SecurityHeaders
         $response->headers->set('X-Content-Type-Options', 'nosniff');
         $response->headers->set('X-XSS-Protection', '1; mode=block');
 
+        if (!$response->headers->has('Content-Security-Policy')) {
+            $response->headers->set('Content-Security-Policy', $this->contentSecurityPolicy());
+        }
+
         return $response;
+    }
+
+    /**
+     * 사용자·백오피스 공통 CSP (인라인 이벤트·레거시 스크립트·CDN·토스 위젯 대응).
+     */
+    private function contentSecurityPolicy(): string
+    {
+        return implode(' ', [
+            "default-src 'self'",
+            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
+            "font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com",
+            "img-src 'self' data: blob: https:",
+            "connect-src 'self' https://api.tosspayments.com https://log.tosspayments.com https://*.tosspayments.com",
+            "frame-src 'self' https://*.tosspayments.com",
+            "form-action 'self' https://*.tosspayments.com",
+            "object-src 'none'",
+            "base-uri 'self'",
+        ]);
     }
 }

@@ -159,7 +159,7 @@
 									<option value="custom" @selected(old('email_domain') === 'custom')>직접 입력</option>
 								</select>
 							</div>
-						<input type="text" name="email_domain_custom" value="{{ old('email_domain_custom') }}" class="text w100p mt8 email-domain-custom" placeholder="직접 입력 시 도메인을 입력해 주세요." aria-label="이메일 도메인 직접 입력" @if(old('email_domain') !== 'custom') style="display:none;" @endif>
+						<input type="text" name="email_domain_custom" value="{{ old('email_domain_custom') }}" class="text w100p mt8 email-domain-custom @if(old('email_domain') !== 'custom') is-hidden @endif" placeholder="직접 입력 시 도메인을 입력해 주세요." aria-label="이메일 도메인 직접 입력">
 						@error('email')
 						<p class="error_alert">{{ $message }}</p>
 						@enderror
@@ -201,7 +201,7 @@
 						<dd>
 							<div class="flex inbtn">
 								<input type="text" name="school_name" class="input_school" value="{{ old('school_name') }}" placeholder="학교명을 검색해주세요." readonly aria-label="학교명">
-								<button type="button" class="btn btn_wkk" onclick="layerShow('pop_school')">학교 검색</button>
+								<button type="button" class="btn btn_wkk" data-layer-open="pop_school">학교 검색</button>
 							</div>
 							<input type="hidden" name="school_id" class="input_school_id" value="{{ old('school_id') }}">
 							@error('school_name')
@@ -259,7 +259,7 @@
 						<label class="check"><input type="checkbox" name="privacy_agree" value="1" @checked(old('privacy_agree'))><i></i><strong>(필수)</strong>개인정보 처리방침에 동의합니다.</label>
 					</div>
 					@error('privacy_agree')
-					<p class="error_alert" style="margin-top: 8px; color: #dc3545;">{{ $message }}</p>
+					<p class="error_alert notice-red">{{ $message }}</p>
 					@enderror
 				</div>
 			
@@ -269,7 +269,7 @@
 						<label class="check"><input type="checkbox" name="notification_agree" value="1" @checked(old('notification_agree'))><i></i><strong>(필수)</strong>이메일 / SMS / 카카오 알림톡</label>
 					</div>
 					@error('notification_agree')
-					<p class="error_alert" style="margin-top: 8px; color: #dc3545;">{{ $message }}</p>
+					<p class="error_alert notice-red">{{ $message }}</p>
 					@enderror
 				</div>
 
@@ -281,9 +281,9 @@
 </main>
 
 <div class="popup" id="pop_school" data-search-url="{{ route('member.schools.search') }}">
-	<div class="dm" onclick="layerHide('pop_school')"></div>
+	<div class="dm" data-layer-close="pop_school"></div>
 	<div class="inbox">
-		<button type="button" class="btn_close" onclick="layerHide('pop_school')"></button>
+		<button type="button" class="btn_close" data-layer-close="pop_school"></button>
 		<div class="tit">학교 검색</div>
 		<div class="join_wrap">
 			<div class="scroll">
@@ -316,7 +316,7 @@
 								<input type="text" class="search_keyword" placeholder="학교명을 검색해주세요.">
 								<button type="button" class="btn btn_wkk btn_search_school">학교 검색</button>
 							</div>
-							<p class="search_result_message c_green mt8" style="display:none;"></p>
+							<p class="search_result_message c_green mt8 is-hidden"></p>
 						</dd>
 					</dl>
 				</div>
@@ -342,14 +342,14 @@
 					</table>
 				</div>
 				<div class="board_bottom">
-					<div class="paging school_pagination" style="display:none;">
+					<div class="paging school_pagination school-pagination-hidden">
 						<!-- 페이지네이션은 JavaScript로 동적 생성 -->
 					</div>
 				</div>
 			</div>
-			<div class="btn_group mt4" style="display: flex; gap: 8px;">
-				<button type="button" class="btn_submit btn_wbb btn_select_school" style="flex: 1;">확인</button>
-				<button type="button" class="btn_submit btn_wkk btn_input_school" style="flex: 1;" disabled>입력</button>
+			<div class="btn_group mt4 flex-gap-8">
+				<button type="button" class="btn_submit btn_wbb btn_select_school flex-1">확인</button>
+				<button type="button" class="btn_submit btn_wkk btn_input_school flex-1" disabled>입력</button>
 			</div>
 		</div>
 	</div>

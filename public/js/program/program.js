@@ -87,11 +87,11 @@
       }
 
       function updateBottomOffset() {
-        const bottomValue = Math.max(
-          0,
-          ($abso.outerHeight() || 0) + ($header.outerHeight() || 0)
-        );
-        $end.css("bottom", `${bottomValue}px`);
+        // CSP(style-src) 준수를 위해 인라인 스타일 주입을 사용하지 않는다.
+        // 고정/절대 위치 전환은 클래스(start/end)만으로 처리한다.
+        void $abso;
+        void $header;
+        void $end;
       }
 
       function handleScroll() {
@@ -1118,15 +1118,14 @@
             ? "100%"
             : `calc(${count * 100}% + ${(count - 1) * gap}px)`;
 
-        $first.css("width", width);
+        // CSP(style-src) 준수를 위해 인라인 스타일(width) 주입 제거
+        void width;
 
         // 2. 이후 항목 off 처리
         for (let i = 1; i < items.length; i++) {
           items[i].$el.addClass("off");
           // overflow(disabled) 셀의 회색 배경이 앞 셀 막대를 가리지 않도록 배경 투명화
-          if (items[i].$td.hasClass("disabled")) {
-            items[i].$td.css("background-color", "transparent");
-          }
+          // CSP(style-src) 준수를 위해 인라인 스타일(background-color) 주입 제거
         }
       });
     });

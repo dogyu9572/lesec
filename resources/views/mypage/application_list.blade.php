@@ -107,7 +107,7 @@
 							@elseif($application->application_status === 'approved' || $application->payment_status === 'paid')
 								<a href="javascript:void(0);" class="btn btn_gray btn_impossible">불가</a>
 							@else
-								<form method="POST" action="{{ route('mypage.application_cancel', $application->id) }}" style="display: inline;" onsubmit="return confirm('정말 신청을 취소하시겠습니까?');">
+								<form method="POST" action="{{ route('mypage.application_cancel', $application->id) }}" class="inline-center-form js-confirm-submit" data-confirm-message="정말 신청을 취소하시겠습니까?">
 									@csrf
 									<button type="submit" class="btn btn_kwk">취소</button>
 								</form>
@@ -160,16 +160,16 @@
 @endif
 
 <div class="popup pop_info" id="pop_cannot">
-	<div class="dm" onclick="layerHide('pop_cannot')"></div>
+	<div class="dm" data-layer-close="pop_cannot"></div>
 	<div class="inbox">
-		<button type="button" class="btn_close" onclick="layerHide('pop_cannot')"></button>
+		<button type="button" class="btn_close" data-layer-close="pop_cannot"></button>
 		<div class="tit mb0">수정 불가</div>
 		<p>참가자 명단은 참가일 기준 <strong class="c_blue">3일 전</strong>까지만 변경가능합니다.</p>
 		<div class="gbox flex_center colm">
 			<p>수정을 원할 경우 연락주세요.</p>
 			<p class="tel">02-888-0932~3, 02-880-4948</p>
 		</div>
-		<button type="button" class="btn_check btn btn_wkk" onclick="layerHide('pop_cannot')">확인</button>
+		<button type="button" class="btn_check btn btn_wkk" data-layer-close="pop_cannot">확인</button>
 	</div>
 </div>
 

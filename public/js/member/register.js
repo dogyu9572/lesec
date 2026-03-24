@@ -198,9 +198,9 @@
       }
 
       if ($select.val() === "custom") {
-        $custom.show().focus();
+        $custom.removeClass("is-hidden").show().focus();
       } else {
-        $custom.hide().val("");
+        $custom.addClass("is-hidden").hide().val("");
       }
     }
   };
@@ -567,6 +567,7 @@
     this.$modal.on("change", 'input[name="selected_school"]', function () {
       var $row = $(this).closest("tr");
       self.selectedSchoolId = $row.data("id");
+      self.$modal.find(".btn_input_school").prop("disabled", false);
       self.updateResultMessage(null, $row.data("name"));
     });
 
@@ -587,7 +588,7 @@
       function (event) {
         event.preventDefault();
         var $link = $(this);
-        if ($link.hasClass("on") || $link.attr("onclick") === "return false;") {
+        if ($link.hasClass("on") || $link.hasClass("is-disabled")) {
           return;
         }
         var page = parseInt($link.data("page"), 10);
@@ -649,7 +650,7 @@
     // 로딩 중 표시
     var $tbody = this.$modal.find(".school_results");
     $tbody.html(
-      '<tr><td colspan="3" style="text-align:center;padding:40px 0;color:#999;">학교 정보를 불러오는 중입니다...</td></tr>'
+      '<tr><td colspan="3" class="school-loading-row">학교 정보를 불러오는 중입니다...</td></tr>'
     );
     this.$modal.addClass("loading");
 
@@ -725,6 +726,8 @@
   MemberRegister.prototype.renderSchools = function (list) {
     var $tbody = this.$modal.find(".school_results");
     var $inputBtn = this.$modal.find(".btn_input_school");
+    var self = this;
+    var hasSelectedSchool = false;
     $tbody.empty();
 
     if (!list.length) {
@@ -736,10 +739,18 @@
       return;
     }
 
-    // 검색 결과가 있을 때 입력 버튼 비활성화
-    $inputBtn.prop("disabled", true);
+    list.forEach(function (school) {
+      if (
+        self.selectedSchoolId &&
+        String(self.selectedSchoolId) === String(school.id)
+      ) {
+        hasSelectedSchool = true;
+      }
+    });
 
-    var self = this;
+    // 선택된 학교가 있으면 활성화, 없으면 비활성화
+    $inputBtn.prop("disabled", !hasSelectedSchool);
+
     list.forEach(function (school) {
       var isSelected =
         self.selectedSchoolId &&
@@ -796,7 +807,7 @@
     // 맨끝 (첫 페이지)
     if (currentPage === 1) {
       html +=
-        '<a href="#" class="arrow two first" data-page="1" onclick="return false;">맨끝</a>';
+        '<a href="#" class="arrow two first is-disabled" data-page="1">맨끝</a>';
     } else {
       html += '<a href="#" class="arrow two first" data-page="1">맨끝</a>';
     }
@@ -804,7 +815,7 @@
     // 이전
     if (currentPage === 1) {
       html +=
-        '<a href="#" class="arrow one prev" data-page="1" onclick="return false;">이전</a>';
+        '<a href="#" class="arrow one prev is-disabled" data-page="1">이전</a>';
     } else {
       html +=
         '<a href="#" class="arrow one prev" data-page="' +
@@ -816,9 +827,9 @@
     for (var page = start; page <= end; page++) {
       if (page === currentPage) {
         html +=
-          '<a href="#" class="on" data-page="' +
+          '<a href="#" class="on is-disabled" data-page="' +
           page +
-          '" onclick="return false;">' +
+          '">' +
           page +
           "</a>";
       } else {
@@ -829,9 +840,9 @@
     // 다음
     if (currentPage >= lastPage) {
       html +=
-        '<a href="#" class="arrow one next" data-page="' +
+        '<a href="#" class="arrow one next is-disabled" data-page="' +
         lastPage +
-        '" onclick="return false;">다음</a>';
+        '">다음</a>';
     } else {
       html +=
         '<a href="#" class="arrow one next" data-page="' +
@@ -842,9 +853,9 @@
     // 맨끝 (마지막 페이지)
     if (currentPage >= lastPage) {
       html +=
-        '<a href="#" class="arrow two last" data-page="' +
+        '<a href="#" class="arrow two last is-disabled" data-page="' +
         lastPage +
-        '" onclick="return false;">맨끝</a>';
+        '">맨끝</a>';
     } else {
       html +=
         '<a href="#" class="arrow two last" data-page="' +
@@ -1004,6 +1015,20 @@
   };
 
   MemberRegister.prototype.inputSchoolName = function () {
+    var $checked = this.$modal.find('input[name="selected_school"]:checked');
+    if ($checked.length) {
+      var $row = $checked.closest("tr");
+      this.selectedSchoolId = $row.data("id");
+      this.applySchool({
+        id: $row.data("id"),
+        name: $row.data("name"),
+        city: $row.data("city"),
+        district: $row.data("district"),
+      });
+      this.closeModal();
+      return;
+    }
+
     var schoolName = this.$modal.find(".search_keyword").val().trim();
     if (!schoolName) {
       window.alert("학교명을 입력해주세요.");

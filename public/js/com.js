@@ -80,19 +80,62 @@ $(document).ready(function(){
 		asideToggle();
 	});
 
-//브라우저 사이즈
-	let vh = window.innerHeight * 0.01; 
-	document.documentElement.style.setProperty('--vh', `${vh}px`);
-//화면 리사이즈시 변경 
-	window.addEventListener('resize', () => {
-		let vh = window.innerHeight * 0.01; 
-		document.documentElement.style.setProperty('--vh', `${vh}px`);
+	$(document).on("click", "[data-layer-open]", function (event) {
+		event.preventDefault();
+		var targetId = $(this).data("layerOpen");
+		if (targetId) {
+			window.layerShow(targetId);
+		}
 	});
-	window.addEventListener('touchend', () => {
-		let vh = window.innerHeight * 0.01;
-		document.documentElement.style.setProperty('--vh', `${vh}px`);
+
+	$(document).on("click", "[data-layer-close]", function (event) {
+		event.preventDefault();
+		var targetId = $(this).data("layerClose");
+		if (targetId) {
+			window.layerHide(targetId);
+		}
+	});
+
+	$(document).on("submit", "form.js-confirm-submit", function (event) {
+		var message = $(this).data("confirmMessage") || "정말 진행하시겠습니까?";
+		if (!window.confirm(message)) {
+			event.preventDefault();
+		}
+	});
+
+	$(document).on("click", ".js-member-logout", function (event) {
+		event.preventDefault();
+		var formId = $(this).data("logoutForm") || "member-logout-form";
+		var form = document.getElementById(formId);
+		if (form) {
+			form.submit();
+		}
 	});
 });
+
+if (typeof window.layerShow !== "function") {
+	window.layerShow = function (id) {
+		var target = document.getElementById(id);
+		if (!target) {
+			return;
+		}
+		$(target).fadeIn(300, function () {
+			$(target).trigger("popup:show");
+		});
+	};
+}
+
+if (typeof window.layerHide !== "function") {
+	window.layerHide = function (id) {
+		var target = document.getElementById(id);
+		if (!target) {
+			return;
+		}
+		$(target).fadeOut(300, function () {
+			$(target).trigger("popup:hide");
+		});
+	};
+}
 
 //비밀번호 암호화 해제
 document.addEventListener('DOMContentLoaded', function () {

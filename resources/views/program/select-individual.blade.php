@@ -138,16 +138,14 @@
                                 @endphp
                                 @if($applicationStatus === 'applied')
                                     <button type="button"
-                                        class="btn btn_kwk disabled"
-                                        data-layer-open="pop_restriction"
-                                        style="pointer-events: auto;">
+                                        class="btn btn_kwk disabled program-apply-lock-btn"
+                                        data-layer-open="pop_restriction">
                                         신청 완료
                                     </button>
                                 @elseif($applicationStatus === 'blocked')
                                     <button type="button"
-                                        class="btn btn_kwk disabled"
-                                        data-layer-open="pop_restriction"
-                                        style="pointer-events: auto;">
+                                        class="btn btn_kwk disabled program-apply-lock-btn"
+                                        data-layer-open="pop_restriction">
                                         신청 불가
                                     </button>
                                 @else
@@ -174,7 +172,6 @@
                                             <form method="POST"
                                                 action="{{ route('program.apply.individual.submit', $type) }}"
                                                 class="inline-form js-individual-apply-form"
-                                                style="display:inline"
                                                 data-program-reservation-id="{{ $program->id }}"
                                                 data-participation-date="{{ optional($program->education_start_date)->format('Y-m-d') }}"
                                                 data-education-fee="{{ $program->education_fee ?? 0 }}"
@@ -190,7 +187,6 @@
                                         <form method="POST"
                                             action="{{ route('program.apply.individual.submit', $type) }}"
                                             class="inline-form js-individual-apply-form"
-                                            style="display:inline"
                                             data-program-reservation-id="{{ $program->id }}"
                                             data-participation-date="{{ optional($program->education_start_date)->format('Y-m-d') }}"
                                             data-education-fee="{{ $program->education_fee ?? 0 }}"
@@ -209,7 +205,7 @@
 					</tr>
 					@empty
 					<tr>
-						<td colspan="7" class="text-center" style="padding: 40px;">등록된 프로그램이 없습니다.</td>
+						<td colspan="7" class="text-center program-empty-row">등록된 프로그램이 없습니다.</td>
 					</tr>
 					@endforelse
 				</tbody>

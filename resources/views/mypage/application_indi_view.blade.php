@@ -108,7 +108,7 @@
 			@if($application->payment_status === 'cancelled')
 				<a href="javascript:void(0);" class="btn btn_gray">취소 완료</a>
 			@elseif($application->draw_result !== 'fail' && $application->payment_status !== 'refunded' && $application->payment_status !== 'paid')
-				<form method="POST" action="{{ route('mypage.application_indi_cancel', $application->id) }}" style="display: inline;" onsubmit="return confirm('정말 신청을 취소하시겠습니까?');">
+				<form method="POST" action="{{ route('mypage.application_indi_cancel', $application->id) }}" class="inline-center-form js-confirm-submit" data-confirm-message="정말 신청을 취소하시겠습니까?">
 					@csrf
 					<button type="submit" class="btn btn_bwb">신청취소</button>
 				</form>
@@ -120,9 +120,9 @@
 </main>
 
 <div class="popup pop_info" id="pop_cancel">
-	<div class="dm" onclick="layerHide('pop_cancel')"></div>
+	<div class="dm" data-layer-close="pop_cancel"></div>
 	<div class="inbox">
-		<button type="button" class="btn_close" onclick="layerHide('pop_cancel')"></button>
+		<button type="button" class="btn_close" data-layer-close="pop_cancel"></button>
 		<div class="tit mb0">신청 취소</div>
 		<p>참여가 어려울 경우 빠른 취소 부탁드리며, <br/>부득이하게 취소수수료가 발생하는 점 양해 바랍니다.<br/>취소를 원하실 경우 전화<strong class="c_blue">(02-880-4948)</strong><br/>혹은 <strong class="c_blue">이메일(nicemedu@snu.ac.kr)</strong> 로 연락주시기 바랍니다.</p>
 		<div class="tbl mt">
@@ -153,7 +153,7 @@
 				</tbody>
 			</table>
 		</div>
-		<button type="button" class="btn_check" onclick="layerHide('pop_cancel')">확인</button>
+		<button type="button" class="btn_check" data-layer-close="pop_cancel">확인</button>
 	</div>
 </div>
 

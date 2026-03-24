@@ -388,8 +388,6 @@
     </div>
 </div>
 
-@include('backoffice.modals.school-search')
-
 @endsection
 
 @section('scripts')

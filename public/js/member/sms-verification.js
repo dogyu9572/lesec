@@ -102,9 +102,11 @@
             const btnStart = document.getElementById('btnStartSmsVerification');
             
             if (form) {
+                form.classList.remove('is-hidden');
                 form.style.display = 'block';
             }
             if (btnStart) {
+                btnStart.classList.add('is-hidden');
                 btnStart.style.display = 'none';
             }
         },
@@ -159,6 +161,7 @@
                 if (data.success) {
                     // 성공 시 인증번호 입력 필드 표시
                     if (codeInputGroup) {
+                        codeInputGroup.classList.remove('is-hidden');
                         codeInputGroup.style.display = 'block';
                     }
                     

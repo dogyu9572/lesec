@@ -24,27 +24,27 @@
 					
 					<button type="button" class="btn btn_wkk" id="btnStartSmsVerification">SMS 인증하기</button>
 					
-					<div class="sms-verification-form" id="smsVerificationForm" style="display: none;">
+					<div class="sms-verification-form is-hidden" id="smsVerificationForm">
 							<div class="verification-input-group">
 								<label for="phone_number" class="verification-label">휴대폰 번호</label>
 								<div class="flex inbtn">
 									<input type="text" id="phone_number" name="phone" class="text w100p" placeholder="010-1234-5678" data-phone-input inputmode="tel" autocomplete="tel">
 									<button type="button" class="btn btn_wkk" id="btnSendVerificationCode">인증번호 발송</button>
 								</div>
-								<p class="error-message" id="phoneError" style="display: none; color: #dc3545; font-size: 14px; margin-top: 5px;"></p>
+								<p class="error-message error-inline-sm" id="phoneError"></p>
 							</div>
 							
-							<div class="verification-input-group" id="codeInputGroup" style="display: none;">
+							<div class="verification-input-group is-hidden" id="codeInputGroup">
 								<label for="verification_code" class="verification-label">인증번호</label>
 								<div class="flex inbtn">
 									<input type="text" id="verification_code" name="code" class="text w100p" placeholder="6자리 숫자 입력" maxlength="6" inputmode="numeric" pattern="[0-9]*">
 									<button type="button" class="btn btn_wkk" id="btnVerifyCode">인증 확인</button>
 								</div>
 								<div class="verification-info">
-									<p class="error-message" id="codeError" style="display: none; color: #dc3545; font-size: 14px; margin-top: 5px;"></p>
-									<p class="success-message" id="codeSuccess" style="display: none; color: #28a745; font-size: 14px; margin-top: 5px;"></p>
-									<p class="timer-info" id="resendTimer" style="display: none; color: #666; font-size: 13px; margin-top: 5px;"></p>
-									<button type="button" class="btn-link" id="btnResendCode" style="display: none; color: #007bff; background: none; border: none; cursor: pointer; font-size: 13px; margin-top: 5px; text-decoration: underline;">인증번호 재발송</button>
+									<p class="error-message error-inline-sm" id="codeError"></p>
+									<p class="success-message success-inline-sm" id="codeSuccess"></p>
+									<p class="timer-info timer-inline-sm" id="resendTimer"></p>
+									<button type="button" class="btn-link resend-link-hidden" id="btnResendCode">인증번호 재발송</button>
 								</div>
 							</div>
 							

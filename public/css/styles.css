@@ -88,6 +88,32 @@
 	.c_blue {color:#283891 !important;}
 	.c_green {color:#39B54A !important;}
 	.c_red {color:#f00 !important;}
+	.mt16 {margin-top:16px;}
+	.is-hidden {display:none;}
+	.inline-form {display:inline;}
+	.flex-gap-8 {display:flex; gap:8px;}
+	.flex-1 {flex:1;}
+	.notice-red {color:#dc3545; margin-top:8px;}
+	.notice-muted-sm {color:#666; font-size:14px;}
+	.error-inline-sm {display:none; color:#dc3545; font-size:14px; margin-top:5px;}
+	.success-inline-sm {display:none; color:#28a745; font-size:14px; margin-top:5px;}
+	.timer-inline-sm {display:none; color:#666; font-size:13px; margin-top:5px;}
+	.resend-link-hidden {display:none;}
+	.program-empty-row {padding:40px;}
+	.program-apply-lock-btn {pointer-events:auto;}
+	.inline-center-form {display:inline;}
+	.btn_delete_participant {width:100%; padding:5px;}
+	.password-notice-hidden {display:none; color:#dc3545;}
+	.password-field-hidden {display:none;}
+	.submit-button-hidden {display:none;}
+	.email-domain-custom.is-hidden {display:none;}
+	.school-pagination-hidden {display:none;}
+	.school-loading-row {text-align:center; padding:40px 0; color:#999;}
+	.application-warning-text {color:#f00; margin-bottom:10px; font-weight:700;}
+	.application-guide-text {margin-bottom:10px; font-size:16px; font-weight:500; line-height:20px;}
+	.csv-upload-label {margin-left:5px;}
+	.csv-upload-label-enabled {cursor:pointer;}
+	.csv-upload-label-disabled {cursor:not-allowed; opacity:.5; pointer-events:none;}
 /* 팝업 */
 	.popup,
 	.popup .dm {position:fixed; top:0; left:0; width:100%; height:100%;}
@@ -492,11 +518,9 @@
 	.join_wrap .inputs .city select {width:calc(50% - 4px);}
 	.inputs [readonly] {background-color:#F7F8F9; color:#666 !important; border-color:#ddd !important;}
 	.inputs [readonly]::placeholder {color:#666 !important;}
-	.inputs [readonly] + .btn {pointer-events:none;}
-	.inputs [readonly] + .btn[onclick*="layerShow"], 
-	.inputs [readonly] + .js-school-search-btn,
-	.inbtn [readonly] + .btn[onclick*="layerShow"],
-	.inbtn [readonly] + .js-school-search-btn {pointer-events:auto !important; cursor:pointer !important;}
+	/* 안정화: readonly 입력 옆 버튼 차단은 회귀를 유발하므로 비활성화는 disabled 속성으로만 제어 */
+	.inputs [readonly] + .btn,
+	.inbtn [readonly] + .btn {pointer-events:auto; cursor:pointer;}
 	.term_area {border-top:#222 1px solid;}
 	.term_area .textarea {background:#F7F8F9; border-bottom:#E0E3EE 1px solid; padding:16px 10px 16px 24px; font-size:16px; color:#666; line-height:1.75;}
 	.term_area .textarea .scroll {padding-right:10px; height:170px; overflow:auto;}

@@ -23,7 +23,7 @@ class SecurityHeaders
         $response->headers->set('X-XSS-Protection', '1; mode=block');
 
         if (!$response->headers->has('Content-Security-Policy')) {
-            $response->headers->set('Content-Security-Policy', $this->contentSecurityPolicy());
+            $response->headers->set('Content-Security-Policy', $this->contentSecurityPolicy($request));
         }
 
         return $response;
@@ -31,16 +31,32 @@ class SecurityHeaders
 
     /**
      * 사용자·백오피스 공통 CSP (인라인 이벤트·레거시 스크립트·CDN·토스 위젯 대응).
+     * 프론트 style-src에 unsafe-inline: 다음·카카오 로드맵/지도 SDK가 JS로 style 속성·CSSOM 인라인 적용함.
      */
-    private function contentSecurityPolicy(): string
+    private function contentSecurityPolicy(Request $request): string
     {
-        return implode(' ', [
+        if ($request->is('backoffice') || $request->is('backoffice/*')) {
+            return implode('; ', [
+                "default-src 'self'",
+                "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
+                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
+                "font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com",
+                "img-src 'self' data: blob: https:",
+                "connect-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://api.tosspayments.com https://log.tosspayments.com https://*.tosspayments.com",
+                "frame-src 'self' https://*.tosspayments.com",
+                "form-action 'self' https://*.tosspayments.com",
+                "object-src 'none'",
+                "base-uri 'self'",
+            ]);
+        }
+
+        return implode('; ', [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
-            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
+            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://ssl.daumcdn.net https://*.daumcdn.net https://*.kakaocdn.net",
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://*.kakaocdn.net",
             "font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com",
             "img-src 'self' data: blob: https:",
-            "connect-src 'self' https://api.tosspayments.com https://log.tosspayments.com https://*.tosspayments.com",
+            "connect-src 'self' https://api.tosspayments.com https://log.tosspayments.com https://*.tosspayments.com https://*.daumcdn.net https://*.kakao.com",
             "frame-src 'self' https://*.tosspayments.com",
             "form-action 'self' https://*.tosspayments.com",
             "object-src 'none'",

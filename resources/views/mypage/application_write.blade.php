@@ -94,13 +94,13 @@
 		
 		<div class="stit nbd_b mt">명단 입력<span class="c_green">* 는 필수 입력 사항입니다.</span>
 			@if($application->application_status !== 'approved')
-			<div style="color: #ff0000; margin-bottom: 10px; font-weight: bold;">승인 완료 후 명단을 입력할 수 있습니다.</div>
+			<div class="application-warning-text">승인 완료 후 명단을 입력할 수 있습니다.</div>
 			@endif
-			<div style="margin-bottom: 10px; font-size: 16px; font-weight: 500; line-height: 20px;">참여할 모든 학생의 명단을 한 번에 업로드 해주세요. 참여 3일 전까지는 수정 가능합니다.</div>
+			<div class="application-guide-text">참여할 모든 학생의 명단을 한 번에 업로드 해주세요. 참여 3일 전까지는 수정 가능합니다.</div>
 			<div class="abso_btns mo_long">
 				<a href="{{ route('mypage.application_write.sample', $application->id) }}" class="btn btn_kwy">샘플파일 받기</a>
-				<label for="csv_upload" class="btn btn_kwy {{ $application->application_status !== 'approved' ? 'disabled' : '' }}" style="cursor: {{ $application->application_status === 'approved' ? 'pointer' : 'not-allowed' }}; margin-left: 5px; {{ $application->application_status !== 'approved' ? 'opacity: 0.5; pointer-events: none;' : '' }}">일괄 업로드</label>
-				<input type="file" id="csv_upload" name="csv_file" accept=".csv,.xlsx,.xls" style="display: none;" {{ $application->application_status !== 'approved' ? 'disabled' : '' }}>
+				<label for="csv_upload" class="btn btn_kwy csv-upload-label {{ $application->application_status !== 'approved' ? 'disabled csv-upload-label-disabled' : 'csv-upload-label-enabled' }}">일괄 업로드</label>
+				<input type="file" id="csv_upload" name="csv_file" accept=".csv,.xlsx,.xls" class="is-hidden" {{ $application->application_status !== 'approved' ? 'disabled' : '' }}>
 				<button type="button" class="btn btn_wkk btn_add" {{ ($application->application_status !== 'approved' || ($application->applicant_count > 0 && count($application->participants) >= $application->applicant_count)) ? 'disabled' : '' }}>추가</button>
 			</div>
 		</div>
@@ -152,7 +152,7 @@
 								</td>
 								<td><input type="text" name="participants[{{ $loop->index }}][birthday]" class="w100p" placeholder="20010101" value="{{ $participant->birthday ? $participant->birthday->format('Ymd') : '' }}" {{ $application->application_status !== 'approved' ? 'disabled' : '' }}></td>
 								<td>
-									<button type="button" class="btn btn_gray btn_delete_participant" style="width: 100%; padding: 5px;" {{ $application->application_status !== 'approved' ? 'disabled' : '' }}>삭제</button>
+									<button type="button" class="btn btn_gray btn_delete_participant" {{ $application->application_status !== 'approved' ? 'disabled' : '' }}>삭제</button>
 								</td>
 							</tr>
 							@empty
@@ -177,7 +177,7 @@
 								</td>
 								<td><input type="text" name="participants[0][birthday]" class="w100p" placeholder="20010101" {{ $application->application_status !== 'approved' ? 'disabled' : '' }}></td>
 								<td>
-									<button type="button" class="btn btn_gray btn_delete_participant" style="width: 100%; padding: 5px;" {{ $application->application_status !== 'approved' ? 'disabled' : '' }}>삭제</button>
+									<button type="button" class="btn btn_gray btn_delete_participant" {{ $application->application_status !== 'approved' ? 'disabled' : '' }}>삭제</button>
 								</td>
 							</tr>
 							@endforelse
@@ -464,7 +464,7 @@ $(document).ready(function () {
 			</td>
 			<td><input type="text" name="participants[${currentRows}][birthday]" class="w100p" placeholder="20010101"></td>
 			<td>
-				<button type="button" class="btn btn_gray btn_delete_participant" style="width: 100%; padding: 5px;">삭제</button>
+				<button type="button" class="btn btn_gray btn_delete_participant">삭제</button>
 			</td>
 		</tr>
 	`;
@@ -566,7 +566,7 @@ $(document).ready(function () {
 								'<td><select name="participants[' + idx + '][grade]" class="w100p">' + gradeOpts + '</select></td>' +
 								'<td><select name="participants[' + idx + '][class]" class="w100p">' + classOpts + '</select></td>' +
 								'<td><input type="text" name="participants[' + idx + '][birthday]" class="w100p" placeholder="20010101" value="' + (p.birthday || '') + '"></td>' +
-								'<td><button type="button" class="btn btn_gray btn_delete_participant" style="width: 100%; padding: 5px;">삭제</button></td></tr>';
+								'<td><button type="button" class="btn btn_gray btn_delete_participant">삭제</button></td></tr>';
 							$tbody.append(row);
 						});
 

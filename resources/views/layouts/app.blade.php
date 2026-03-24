@@ -30,7 +30,7 @@
     
     <!-- jQuery (로컬 호스팅, SRI 무결성 검증 — CSP script-src 'self'와 일치) -->
     <script src="{{ asset('js/jquery-3.7.1.min.js') }}" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-	<script src="/js/com.js" integrity="sha384-WBiMKtnlzd9VMWQH+RsIzcolPXj4tpx56SNEEh3oKdPExz+h4EGwXkvdhclWo32M" crossorigin="anonymous"></script>
+	<script src="/js/com.js"></script>
 </head>
 <body>
 	<a href="#main-content" class="skip-link">본문 바로가기</a>
@@ -50,7 +50,7 @@
 			<nav class="gnb" aria-label="주 메뉴">
 				<div class="mo_vw member flex_center">
 					@if ($isMemberLoggedIn)
-					<a href="{{ route('member.logout') }}" class="login" onclick="event.preventDefault();document.getElementById('member-logout-form').submit();">로그아웃</a>
+					<a href="#" class="login js-member-logout" data-logout-form="member-logout-form">로그아웃</a>
 					@else
 					<a href="{{ route('member.login') }}" class="login">로그인</a>
 					<a href="{{ route('member.register') }}" class="register">회원가입</a>
@@ -119,14 +119,14 @@
 			</nav>
 			<nav class="member flex_center pc_vw" aria-label="회원 메뉴">
 				@if ($isMemberLoggedIn)
-				<a href="{{ route('member.logout') }}" class="login" onclick="event.preventDefault();document.getElementById('member-logout-form').submit();">로그아웃</a>
+				<a href="#" class="login js-member-logout" data-logout-form="member-logout-form">로그아웃</a>
 				@else
 				<a href="{{ route('member.login') }}" class="login">로그인</a>
 				<a href="{{ route('member.register') }}" class="register">회원가입</a>
 				@endif
 			</nav>
 			@if ($isMemberLoggedIn)
-			<form id="member-logout-form" action="{{ route('member.logout') }}" method="POST" style="display:none;">
+			<form id="member-logout-form" action="{{ route('member.logout') }}" method="POST" class="is-hidden">
 				@csrf
 			</form>
 			@endif

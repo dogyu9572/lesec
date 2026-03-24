@@ -4,9 +4,9 @@
 
 	<div class="inner">
 		<div class="mem_wrap join_wrap">
-			<p class="error_alert password-notice mb tac" style="display:none; color:#dc3545;">* 안전한 정보 수정을 위해 현재 사용 중인 비밀번호를 입력해주세요.</p>
+			<p class="error_alert password-notice password-notice-hidden mb tac">* 안전한 정보 수정을 위해 현재 사용 중인 비밀번호를 입력해주세요.</p>
 
-			<p class="edit-notice mb tac" style="color:#666; font-size:14px;">정보 수정을 위해 '수정' 버튼을 클릭해 주세요.</p>
+			<p class="edit-notice notice-muted-sm mb tac">정보 수정을 위해 '수정' 버튼을 클릭해 주세요.</p>
 
 			@if ($errors->has('auth'))
 			<div class="alert alert-error mb16">
@@ -32,7 +32,7 @@
 							<input type="text" value="{{ $member->login_id }}" readonly class="text w100p">
 						</dd>
 					</dl>
-					<dl class="password-fields" style="display:none;">
+					<dl class="password-fields password-field-hidden">
 						<dt>현재 비밀번호<span>*</span></dt>
 						<dd>
 							<div class="password-wrap">
@@ -41,7 +41,7 @@
 							</div>
 						</dd>
 					</dl>
-					<dl class="password-fields" style="display:none;">
+					<dl class="password-fields password-field-hidden">
 						<dt>새 비밀번호</dt>
 						<dd>
 							<div class="password-wrap password-wrap_add">
@@ -53,11 +53,11 @@
 							@enderror
 						</dd>
 					</dl>
-					<dl class="password-fields" style="display:none;">
+					<dl class="password-fields password-field-hidden">
 						<dt>새 비밀번호 확인</dt>
 						<dd>
 							<input type="password" name="password_confirmation" class="text w100p now_pw_check" placeholder="입력한 비밀번호를 다시 한번 입력해 주세요." autocomplete="off">
-							<p class="error_alert" style="display:none;">* 동일한 비밀번호가 아닙니다.</p>
+							<p class="error_alert is-hidden">* 동일한 비밀번호가 아닙니다.</p>
 						</dd>
 					</dl>
 					<dl>
@@ -119,7 +119,7 @@
 									<option value="custom" @selected(old('email_domain', $emailParts['domain'] ?? '' )==='custom' )>직접 입력</option>
 								</select>
 							</div>
-							<input type="text" name="email_domain_custom" value="{{ old('email_domain_custom', $emailParts['custom_domain'] ?? '') }}" class="text w100p mt8 email-domain-custom js-editable-field" placeholder="직접 입력 시 도메인을 입력해 주세요." disabled @if(old('email_domain', $emailParts['domain'] ?? '' ) !=='custom' ) style="display:none;" @endif>
+							<input type="text" name="email_domain_custom" value="{{ old('email_domain_custom', $emailParts['custom_domain'] ?? '') }}" class="text w100p mt8 email-domain-custom js-editable-field @if(old('email_domain', $emailParts['domain'] ?? '' ) !=='custom' ) is-hidden @endif" placeholder="직접 입력 시 도메인을 입력해 주세요." disabled>
 							@error('email')
 							<p class="error_alert">{{ $message }}</p>
 							@enderror
@@ -162,7 +162,7 @@
 						<dd>
 							<div class="flex inbtn">
 								<input type="text" name="school_name" class="input_school js-editable-field" value="{{ old('school_name', $member->school_name) }}" placeholder="학교명을 검색해주세요." readonly>
-								<button type="button" class="btn btn_wkk js-school-search-btn" onclick="layerShow('pop_school')" disabled>학교 검색</button>
+								<button type="button" class="btn btn_wkk js-school-search-btn" data-layer-open="pop_school" disabled>학교 검색</button>
 							</div>
 							<input type="hidden" name="school_id" class="input_school_id" value="{{ old('school_id', $member->school_id) }}">
 							@error('school_name')
@@ -214,8 +214,8 @@
 
 				<div class="btns_tac">
 					<button type="button" class="btn_submit btn_wbb js-edit-btn">수정</button>
-					<button type="submit" class="btn_submit btn_wbb js-submit-btn" style="display:none;">수정 완료</button>
-					<button type="button" class="btn btn_kwy" onclick="layerShow('pop_secession')">회원 탈퇴</button>
+					<button type="submit" class="btn_submit btn_wbb js-submit-btn submit-button-hidden">수정 완료</button>
+					<button type="button" class="btn btn_kwy" data-layer-open="pop_secession">회원 탈퇴</button>
 				</div>
 			</form>
 
@@ -224,9 +224,9 @@
 </main>
 
 <div class="popup" id="pop_school" data-search-url="{{ route('member.schools.search') }}">
-	<div class="dm" onclick="layerHide('pop_school')"></div>
+	<div class="dm" data-layer-close="pop_school"></div>
 	<div class="inbox">
-		<button type="button" class="btn_close" onclick="layerHide('pop_school')"></button>
+		<button type="button" class="btn_close" data-layer-close="pop_school"></button>
 		<div class="tit">학교 검색</div>
 		<div class="join_wrap">
 			<div class="scroll">
@@ -259,7 +259,7 @@
 								<input type="text" class="search_keyword" placeholder="학교명을 검색해주세요.">
 								<button type="button" class="btn btn_wkk btn_search_school">학교 검색</button>
 							</div>
-							<p class="search_result_message c_green mt8" style="display:none;"></p>
+							<p class="search_result_message c_green mt8 is-hidden"></p>
 						</dd>
 					</dl>
 				</div>
@@ -285,23 +285,23 @@
 					</table>
 				</div>
 				<div class="board_bottom">
-					<div class="paging school_pagination" style="display:none;">
+					<div class="paging school_pagination school-pagination-hidden">
 						<!-- 페이지네이션은 JavaScript로 동적 생성 -->
 					</div>
 				</div>
 			</div>
-			<div class="btn_group mt4" style="display: flex; gap: 8px;">
-				<button type="button" class="btn_submit btn_wbb btn_select_school" style="flex: 1;">확인</button>
-				<button type="button" class="btn_submit btn_wkk btn_input_school" style="flex: 1;" disabled>입력</button>
+			<div class="btn_group mt4 flex-gap-8">
+				<button type="button" class="btn_submit btn_wbb btn_select_school flex-1">확인</button>
+				<button type="button" class="btn_submit btn_wkk btn_input_school flex-1" disabled>입력</button>
 			</div>
 		</div>
 	</div>
 </div>
 
 <div class="popup pop_info" id="pop_secession">
-	<div class="dm" onclick="layerHide('pop_secession')"></div>
+	<div class="dm" data-layer-close="pop_secession"></div>
 	<div class="inbox">
-		<button type="button" class="btn_close" onclick="layerHide('pop_secession')"></button>
+		<button type="button" class="btn_close" data-layer-close="pop_secession"></button>
 		<div class="tit mb0">회원 탈퇴</div>
 		<p><strong class="c_blue">회원 탈퇴</strong>를 진행하시겠습니까?</p>
 		<div class="gbox flex_center colm">
@@ -315,7 +315,7 @@
 					<i></i>위의 내용을 모두 읽었으며, 내용에 동의합니다.
 				</label>
 			</div>
-			<button type="button" class="btn_check btn btn_kwy" onclick="confirmSecession()">탈퇴하기</button>
+			<button type="button" class="btn_check btn btn_kwy js-confirm-secession">탈퇴하기</button>
 		</form>
 	</div>
 </div>
@@ -572,6 +572,10 @@
 			$('#secessionForm').trigger('submit');
 		}
 	}
+
+	$(document).on('click', '.js-confirm-secession', function () {
+		confirmSecession();
+	});
 </script>
 @endpush
 

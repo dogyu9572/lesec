@@ -145,7 +145,7 @@
 							</thead>
 							<tbody>
 								<tr>
-									<td colspan="5" class="text-center" style="padding: 40px;">날짜를 선택하세요</td>
+									<td colspan="5" class="text-center program-empty-row">날짜를 선택하세요</td>
 								</tr>
 							</tbody>
 						</table>

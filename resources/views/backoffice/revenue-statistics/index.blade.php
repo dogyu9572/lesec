@@ -113,6 +113,7 @@
                                 </th>
                                 <th>번호</th>
                                 <th>제목</th>
+                                <th>수익</th>
                                 <th>등록일</th>
                                 <th style="width: 150px;">관리</th>
                             </tr>
@@ -125,6 +126,11 @@
                                     </td>
                                     <td>{{ $statistics->total() - ($statistics->currentPage() - 1) * $statistics->perPage() - $loop->index }}</td>
                                     <td>{{ $stat->title }}</td>
+                                    <td>
+                                        @if($stat->items_sum_revenue !== null)
+                                            {{ number_format((int) $stat->items_sum_revenue) }}
+                                        @endif
+                                    </td>
                                     <td>{{ $stat->created_at->format('Y.m.d') }}</td>
                                     <td>
                                         <div class="board-btn-group">

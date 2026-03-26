@@ -52,7 +52,7 @@
             <div class="member-stats-section">
                 <div class="section-header">
                     <h5>학교급 통계</h5>
-                    <p class="section-description">학년 구분 값이 없거나 교사 회원은 ‘기타’ 항목으로 분류됩니다.</p>
+                    <p class="section-description">학교급 정보가 없으면 소속학교명으로 추론하며, 판별되지 않으면 기타로 분류됩니다.</p>
                 </div>
                 <div class="member-stats-table member-stats-table--wide mo_colm">
                     <div class="member-stats-row member-stats-row--labels">

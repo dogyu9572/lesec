@@ -77,19 +77,43 @@
                                     <tbody id="items-body">
                                         @if($statistics->items && $statistics->items->count() > 0)
                                             @foreach($statistics->items as $index => $item)
-                                                <tr data-item-index="{{ $index }}">
+                                                @php
+                                                    $rowSchoolType = old("items.{$index}.school_type", $item->school_type);
+                                                    $rowItemName = old("items.{$index}.item_name", $item->item_name);
+                                                    $rowParticipants = old("items.{$index}.participants_count", $item->participants_count);
+                                                    $rowRevenue = old("items.{$index}.revenue", $item->revenue);
+                                                    $itemEditorError = $errors->has("items.{$index}.school_type")
+                                                        || $errors->has("items.{$index}.item_name")
+                                                        || $errors->has("items.{$index}.participants_count")
+                                                        || $errors->has("items.{$index}.revenue");
+                                                    $isEditing = $itemEditorError;
+                                                    $schoolTypeLabel = match ($rowSchoolType) {
+                                                        'middle' => '중등',
+                                                        'high' => '고등',
+                                                        'custom' => $rowItemName ?: '직접입력',
+                                                        default => '',
+                                                    };
+                                                @endphp
+                                                <tr data-item-index="{{ $index }}" data-row-editing="{{ $isEditing ? '1' : '0' }}">
                                                     <td>
-                                                        <select name="items[{{ $index }}][school_type]" class="form-control" required>
-                                                            <option value="">선택하세요</option>
-                                                            <option value="middle" {{ old("items.{$index}.school_type", $item->school_type) === 'middle' ? 'selected' : '' }}>중등</option>
-                                                            <option value="high" {{ old("items.{$index}.school_type", $item->school_type) === 'high' ? 'selected' : '' }}>고등</option>
-                                                        </select>
+                                                        <div class="school-type-readonly" @if($isEditing) style="display: none;" @endif>{{ $schoolTypeLabel }}</div>
+                                                        <div class="school-type-editor" @if(!$isEditing) style="display: none;" @endif>
+                                                            <select name="items[{{ $index }}][school_type]" class="form-control school-type-select" required>
+                                                                <option value="">선택하세요</option>
+                                                                <option value="middle" {{ $rowSchoolType === 'middle' ? 'selected' : '' }}>중등</option>
+                                                                <option value="high" {{ $rowSchoolType === 'high' ? 'selected' : '' }}>고등</option>
+                                                                <option value="custom" {{ $rowSchoolType === 'custom' ? 'selected' : '' }}>직접입력</option>
+                                                            </select>
+                                                            <input type="text" name="items[{{ $index }}][item_name]" class="form-control school-type-custom-input mt-2" placeholder="구분명을 입력하세요" maxlength="100" value="{{ $rowItemName }}" @if($rowSchoolType !== 'custom') style="display:none;" @endif>
+                                                        </div>
                                                     </td>
                                                     <td>
-                                                        <input type="number" name="items[{{ $index }}][participants_count]" class="form-control participants-count" value="{{ old("items.{$index}.participants_count", $item->participants_count) }}" min="0" data-index="{{ $index }}">
+                                                        <div class="participants-readonly" @if($isEditing) style="display: none;" @endif>{{ $rowParticipants }}</div>
+                                                        <input type="number" name="items[{{ $index }}][participants_count]" class="form-control participants-count" value="{{ $rowParticipants }}" min="0" data-index="{{ $index }}" @if(!$isEditing) style="display: none;" @endif>
                                                     </td>
                                                     <td>
-                                                        <input type="number" name="items[{{ $index }}][revenue]" class="form-control revenue-input" value="{{ old("items.{$index}.revenue", $item->revenue) }}" min="0" data-index="{{ $index }}">
+                                                        <div class="revenue-readonly" @if($isEditing) style="display: none;" @endif>{{ number_format((int) $rowRevenue) }}</div>
+                                                        <input type="number" name="items[{{ $index }}][revenue]" class="form-control revenue-input" value="{{ $rowRevenue }}" min="0" data-index="{{ $index }}" @if(!$isEditing) style="display: none;" @endif>
                                                     </td>
                                                     <td>
                                                         <div class="board-btn-group">

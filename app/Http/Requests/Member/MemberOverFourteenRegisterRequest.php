@@ -48,7 +48,11 @@ class MemberOverFourteenRegisterRequest extends FormRequest
             'contact' => ['required', 'string', 'max:50', $this->uniqueContactRule()],
             'contact_verified' => ['required', 'in:1'],
             'parent_contact' => $memberType === 'student'
-                ? ['required', 'string', 'max:50']
+                ? ['required', 'string', 'max:50', function ($attribute, $value, $fail) {
+                    if (!$this->isValidMobileNumber($value)) {
+                        $fail('보호자 연락처는 올바른 휴대폰 번호 형식으로 입력해주세요.');
+                    }
+                }]
                 : ['nullable', 'string', 'max:50'],
             'email' => ['required', 'string', 'email', 'max:255'],
             'city' => ['nullable', 'string', 'max:100'],
@@ -203,6 +207,20 @@ class MemberOverFourteenRegisterRequest extends FormRequest
         }
 
         return $digits;
+    }
+
+    private function isValidMobileNumber(?string $number): bool
+    {
+        if (empty($number)) {
+            return false;
+        }
+
+        $digits = preg_replace('/[^0-9]/', '', (string) $number);
+        if (!$digits) {
+            return false;
+        }
+
+        return preg_match('/^01[0-9]{8,9}$/', $digits) === 1;
     }
 
     /**

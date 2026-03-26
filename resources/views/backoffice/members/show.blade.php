@@ -317,6 +317,46 @@
             </div>
         </div>
     </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="admin-card">
+                <div class="admin-card-body">
+                    <div class="program-section">
+                        <div class="section-title">교육 취소 내역</div>
+                        @if($cancelledApplications && $cancelledApplications->count() > 0)
+                            <div class="table-responsive">
+                                <table class="board-table">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 60px;">No</th>
+                                            <th>신청번호</th>
+                                            <th>신청유형</th>
+                                            <th>취소일시</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($cancelledApplications as $index => $app)
+                                            <tr>
+                                                <td>{{ $index + 1 }}</td>
+                                                <td>{{ $app['application_number'] ?? '-' }}</td>
+                                                <td>{{ $app['type'] ?? '-' }}</td>
+                                                <td>{{ $app['cancelled_at_display'] ?? '-' }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @else
+                            <div class="no-data">
+                                <p>취소 내역이 없습니다.</p>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection
 

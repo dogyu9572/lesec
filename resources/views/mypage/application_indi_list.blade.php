@@ -97,7 +97,9 @@
 						<td class="appli10">
 							@if($application->payment_status === 'cancelled')
 								<a href="javascript:void(0);" class="btn btn_gray">취소 완료</a>
-							@elseif($application->draw_result === 'fail' || $application->payment_status === 'refunded' || $application->payment_status === 'paid')
+							@elseif($application->payment_status === 'paid')
+								<a href="javascript:void(0);" class="btn btn_gray btn_refund_info">불가</a>
+							@elseif($application->draw_result === 'fail' || $application->payment_status === 'refunded')
 								<a href="javascript:void(0);" class="btn btn_gray btn_impossible">불가</a>
 							@else
 								<form method="POST" action="{{ route('mypage.application_indi_cancel', $application->id) }}" class="inline-center-form js-confirm-submit" data-confirm-message="정말 신청을 취소하시겠습니까?">
@@ -166,6 +168,18 @@
 	</div>
 </div>
 
+<div class="popup pop_info" id="pop_refund_guide">
+	<div class="dm" data-layer-close="pop_refund_guide"></div>
+	<div class="inbox">
+		<button type="button" class="btn_close" data-layer-close="pop_refund_guide"></button>
+		<div class="tit mb0">환불 신청 안내</div>
+		<div class="gbox flex_center colm">
+			<p>전화(02-880-4948) 혹은 이메일(nicemedu@snu.ac.kr)로 환불 신청 바랍니다.</p>
+		</div>
+		<button type="button" class="btn_check btn btn_wkk" data-layer-close="pop_refund_guide">확인</button>
+	</div>
+</div>
+
 <script>
 //팝업
 function layerShow(id) {
@@ -174,6 +188,11 @@ function layerShow(id) {
 function layerHide(id) {
 	$("#" + id).fadeOut(300);
 }
+
+$(document).on('click', '.btn_refund_info', function(e) {
+	e.preventDefault();
+	layerShow('pop_refund_guide');
+});
 </script>
 
 @endsection

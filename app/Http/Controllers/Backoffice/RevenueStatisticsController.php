@@ -43,13 +43,22 @@ class RevenueStatisticsController extends BaseController
         $request->validate([
             'title' => 'required|string|max:255',
             'items' => 'nullable|array',
-            'items.*.school_type' => 'required_with:items|in:middle,high',
+            'items.*.school_type' => 'required_with:items|in:middle,high,custom',
+            'items.*.item_name' => 'nullable|string|max:100',
             'items.*.participants_count' => 'nullable|integer|min:0',
             'items.*.revenue' => 'nullable|integer|min:0',
         ], [
             'items.*.school_type.required_with' => '구분을 선택해주세요.',
-            'items.*.school_type.in' => '구분은 중등 또는 고등만 선택 가능합니다.',
+            'items.*.school_type.in' => '구분 값이 올바르지 않습니다.',
         ]);
+
+        foreach ($request->input('items', []) as $index => $item) {
+            if (($item['school_type'] ?? '') === 'custom' && trim((string) ($item['item_name'] ?? '')) === '') {
+                throw ValidationException::withMessages([
+                    "items.{$index}.item_name" => ['직접입력 구분명을 입력해주세요.'],
+                ]);
+            }
+        }
 
         try {
             // title을 "2026년 1월" 형식으로 변환
@@ -86,13 +95,22 @@ class RevenueStatisticsController extends BaseController
         $request->validate([
             'title' => 'required|string|max:255',
             'items' => 'nullable|array',
-            'items.*.school_type' => 'required_with:items|in:middle,high',
+            'items.*.school_type' => 'required_with:items|in:middle,high,custom',
+            'items.*.item_name' => 'nullable|string|max:100',
             'items.*.participants_count' => 'nullable|integer|min:0',
             'items.*.revenue' => 'nullable|integer|min:0',
         ], [
             'items.*.school_type.required_with' => '구분을 선택해주세요.',
-            'items.*.school_type.in' => '구분은 중등 또는 고등만 선택 가능합니다.',
+            'items.*.school_type.in' => '구분 값이 올바르지 않습니다.',
         ]);
+
+        foreach ($request->input('items', []) as $index => $item) {
+            if (($item['school_type'] ?? '') === 'custom' && trim((string) ($item['item_name'] ?? '')) === '') {
+                throw ValidationException::withMessages([
+                    "items.{$index}.item_name" => ['직접입력 구분명을 입력해주세요.'],
+                ]);
+            }
+        }
 
         try {
             // title을 "2026년 1월" 형식으로 변환

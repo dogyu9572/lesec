@@ -34,6 +34,7 @@ class GroupApplication extends Model
         'participation_fee' => 'integer',
         'participation_date' => 'date',
         'applied_at' => 'datetime',
+        'cancelled_at' => 'datetime',
     ];
 
     public const EDUCATION_TYPE_LABELS = [

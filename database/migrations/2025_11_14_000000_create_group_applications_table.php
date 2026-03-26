@@ -30,6 +30,7 @@ return new class extends Migration
             $table->unsignedInteger('participation_fee')->nullable()->comment('참가비');
             $table->date('participation_date')->nullable()->comment('참가일');
             $table->timestamp('applied_at')->nullable()->comment('신청일시');
+            $table->timestamp('cancelled_at')->nullable()->comment('취소일시');
             $table->timestamps();
 
             $table->index('program_reservation_id');

@@ -54,6 +54,8 @@ class MemberController extends BaseController
      */
     public function index(Request $request)
     {
+        $request->session()->put('backoffice.members.filters', $request->query());
+
         $members = $this->memberService->getMembersWithFilters($request);
         $memberGroups = MemberGroup::active()->ordered()->get();
         $cities = SidoSggCode::select('sido_name')
@@ -135,7 +137,44 @@ class MemberController extends BaseController
             ->orderBy('applied_at', 'desc')
             ->get();
 
-        return view('backoffice.members.show', compact('member', 'memberGroups', 'individualApplications', 'groupApplications'));
+        // 교육 취소 내역(취소일시 기준)
+        $cancelledApplications = collect();
+
+        foreach ($individualApplications as $application) {
+            if ($application->payment_status !== \App\Models\IndividualApplication::PAYMENT_STATUS_CANCELLED) {
+                continue;
+            }
+
+            $cancelledAt = $application->cancelled_at ?? $application->updated_at;
+
+            $cancelledApplications->push([
+                'type' => '개인',
+                'application_number' => $application->application_number ?? '-',
+                'cancelled_at_display' => $cancelledAt ? $cancelledAt->format('Y-m-d H:i:s') : '-',
+                'cancelled_at_ts' => $cancelledAt?->getTimestamp() ?? 0,
+            ]);
+        }
+
+        foreach ($groupApplications as $application) {
+            if ($application->payment_status !== 'cancelled') {
+                continue;
+            }
+
+            $cancelledAt = $application->cancelled_at ?? $application->updated_at;
+
+            $cancelledApplications->push([
+                'type' => '단체',
+                'application_number' => $application->application_number ?? '-',
+                'cancelled_at_display' => $cancelledAt ? $cancelledAt->format('Y-m-d H:i:s') : '-',
+                'cancelled_at_ts' => $cancelledAt?->getTimestamp() ?? 0,
+            ]);
+        }
+
+        $cancelledApplications = $cancelledApplications
+            ->sortByDesc('cancelled_at_ts')
+            ->values();
+
+        return view('backoffice.members.show', compact('member', 'memberGroups', 'individualApplications', 'groupApplications', 'cancelledApplications'));
     }
 
     /**

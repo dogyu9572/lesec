@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Carbon;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -87,11 +88,11 @@ class MemberMypageController extends Controller
         $data = $updateRequest->validated();
 
         // validation 실패 시 자동으로 리다이렉트되므로, 여기까지 오면 validation 통과
-        \Log::info('회원 정보 수정 시작', ['member_id' => $member->id]);
+        Log::info('회원 정보 수정 시작', ['member_id' => $member->id]);
 
         try {
 
-            \Log::info('회원 정보 수정 시작', ['member_id' => $member->id, 'data_keys' => array_keys($data)]);
+            Log::info('회원 정보 수정 시작', ['member_id' => $member->id, 'data_keys' => array_keys($data)]);
 
             if (!empty($data['password'])) {
                 $data['password'] = \Illuminate\Support\Facades\Hash::make($data['password']);
@@ -109,7 +110,7 @@ class MemberMypageController extends Controller
 
             unset($data['current_password'], $data['password_confirmation']);
 
-            \Log::info('fill 전 데이터', ['original_city' => $member->city, 'original_district' => $member->district, 'new_city' => $data['city'] ?? null, 'new_district' => $data['district'] ?? null]);
+            Log::info('fill 전 데이터', ['original_city' => $member->city, 'original_district' => $member->district, 'new_city' => $data['city'] ?? null, 'new_district' => $data['district'] ?? null]);
 
             // school_id가 없고 school_name이 있으면 학교 자동 생성 (회원가입과 동일)
             if (empty($data['school_id']) && !empty($data['school_name'])) {
@@ -149,20 +150,20 @@ class MemberMypageController extends Controller
                 }
             }
 
-            \Log::info('할당 후 변경사항', ['isDirty' => $member->isDirty(), 'dirty' => $member->getDirty()]);
+            Log::info('할당 후 변경사항', ['isDirty' => $member->isDirty(), 'dirty' => $member->getDirty()]);
 
             // 변경사항이 있으면 저장
             if ($member->isDirty()) {
                 $saved = $member->save();
-                \Log::info('회원 정보 저장 완료', ['saved' => $saved]);
+                Log::info('회원 정보 저장 완료', ['saved' => $saved]);
             } else {
-                \Log::warning('변경된 데이터가 없어 저장하지 않음', ['data' => $data]);
+                Log::warning('변경된 데이터가 없어 저장하지 않음', ['data' => $data]);
             }
 
             return redirect()->route('mypage.member')
                 ->with('success', '회원 정보가 수정되었습니다.');
         } catch (\Exception $e) {
-            \Log::error('회원 정보 수정 오류', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            Log::error('회원 정보 수정 오류', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             return redirect()->route('mypage.member')
                 ->withErrors(['error' => '회원 정보 수정 중 오류가 발생했습니다: ' . $e->getMessage()])
                 ->withInput();
@@ -191,7 +192,7 @@ class MemberMypageController extends Controller
             // 백오피스와 동일한 로직 사용
             $this->memberService->deleteMember($member);
         } catch (\Exception $e) {
-            \Log::error('회원 탈퇴(삭제) 오류', ['error' => $e->getMessage(), 'member_id' => $member->id ?? null]);
+            Log::error('회원 탈퇴(삭제) 오류', ['error' => $e->getMessage(), 'member_id' => $member->id ?? null]);
             return redirect()->route('mypage.member')
                 ->withErrors(['error' => '회원 탈퇴 처리 중 오류가 발생했습니다.']);
         }
@@ -697,6 +698,7 @@ class MemberMypageController extends Controller
 
         // 신청 취소 처리 (상태 변경)
         $application->payment_status = 'cancelled';
+        $application->cancelled_at = now();
         $application->save();
 
         return redirect()->route('mypage.application_indi_list')
@@ -733,6 +735,7 @@ class MemberMypageController extends Controller
 
         // 신청 취소 처리 (상태 변경)
         $application->payment_status = 'cancelled';
+        $application->cancelled_at = now();
         $application->save();
 
         // 신청 취소 시 프로그램 신청 인원 감소

@@ -43,7 +43,10 @@ class RevenueStatisticsService
         $perPage = $request->get('per_page', 20);
         $perPage = in_array($perPage, [20, 50, 100]) ? $perPage : 20;
 
-        return $query->withCount('items')->orderBy('created_at', 'desc')->paginate($perPage);
+        return $query
+            ->withSum('items', 'revenue')
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage);
     }
 
     /**
@@ -128,7 +131,7 @@ class RevenueStatisticsService
         // 다운로드 데이터 변환
         $data = $items->map(function ($item) {
             return [
-                'school_type' => $item->school_type === 'middle' ? '중등' : ($item->school_type === 'high' ? '고등' : '-'),
+                'school_type' => $item->categoryLabelForDisplay(),
                 'participants_count' => $item->participants_count ?? 0,
                 'revenue' => $item->revenue ?? 0,
             ];
@@ -207,9 +210,16 @@ class RevenueStatisticsService
                 continue; // 구분이 없으면 건너뛰기
             }
 
+            $schoolType = $item['school_type'];
+            $itemName = null;
+            if ($schoolType === 'custom') {
+                $itemName = isset($item['item_name']) ? trim((string) $item['item_name']) : '';
+            }
+
             RevenueStatisticsItem::create([
                 'revenue_statistics_id' => $statisticsId,
-                'school_type' => $item['school_type'],
+                'school_type' => $schoolType,
+                'item_name' => $itemName,
                 'participants_count' => $item['participants_count'] ?? null,
                 'revenue' => $item['revenue'] ?? null,
                 'sort_order' => $index,

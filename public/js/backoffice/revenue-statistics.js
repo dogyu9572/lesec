@@ -2,23 +2,133 @@ document.addEventListener('DOMContentLoaded', function() {
     const addItemBtn = document.getElementById('add-item-btn');
     const itemsBody = document.getElementById('items-body');
     const itemsTable = document.getElementById('items-table');
-    
-    // itemIndex는 edit 페이지에서 전역 변수로 설정됨, create 페이지에서는 0부터 시작
+
     if (typeof window.itemIndex === 'undefined') {
         window.itemIndex = 0;
     }
 
-    // 항목 추가 버튼 클릭
+    function toggleSchoolTypeCustomInput(selectEl) {
+        const row = selectEl.closest('tr');
+        if (!row) {
+            return;
+        }
+        const input = row.querySelector('.school-type-custom-input');
+        if (!input) {
+            return;
+        }
+        if (selectEl.value === 'custom') {
+            input.style.display = '';
+            input.setAttribute('required', 'required');
+        } else {
+            input.style.display = 'none';
+            input.removeAttribute('required');
+            input.value = '';
+        }
+    }
+
+    function schoolTypeLabel(selectEl, customInputEl) {
+        if (!selectEl) {
+            return '';
+        }
+        if (selectEl.value === 'middle') {
+            return '중등';
+        }
+        if (selectEl.value === 'high') {
+            return '고등';
+        }
+        if (selectEl.value === 'custom') {
+            return customInputEl && customInputEl.value ? customInputEl.value : '직접입력';
+        }
+        return '';
+    }
+
+    function setRowEditingState(row, isEditing) {
+        if (!row) {
+            return;
+        }
+
+        row.setAttribute('data-row-editing', isEditing ? '1' : '0');
+
+        const schoolReadonly = row.querySelector('.school-type-readonly');
+        const editor = row.querySelector('.school-type-editor');
+        const schoolSelect = row.querySelector('.school-type-select');
+        const customInput = row.querySelector('.school-type-custom-input');
+        const participantsReadonly = row.querySelector('.participants-readonly');
+        const participantsInput = row.querySelector('.participants-count');
+        const revenueReadonly = row.querySelector('.revenue-readonly');
+        const revenueInput = row.querySelector('.revenue-input');
+
+        if (isEditing) {
+            if (schoolReadonly) {
+                schoolReadonly.style.display = 'none';
+            }
+            if (editor) {
+                editor.style.display = '';
+            }
+            if (participantsReadonly) {
+                participantsReadonly.style.display = 'none';
+            }
+            if (participantsInput) {
+                participantsInput.style.display = '';
+            }
+            if (revenueReadonly) {
+                revenueReadonly.style.display = 'none';
+            }
+            if (revenueInput) {
+                revenueInput.style.display = '';
+            }
+            if (schoolSelect) {
+                toggleSchoolTypeCustomInput(schoolSelect);
+            }
+            return;
+        }
+
+        if (schoolReadonly) {
+            schoolReadonly.textContent = schoolTypeLabel(schoolSelect, customInput);
+            schoolReadonly.style.display = '';
+        }
+        if (editor) {
+            editor.style.display = 'none';
+        }
+        if (participantsReadonly) {
+            participantsReadonly.textContent = participantsInput && participantsInput.value ? participantsInput.value : '0';
+            participantsReadonly.style.display = '';
+        }
+        if (participantsInput) {
+            participantsInput.style.display = 'none';
+        }
+        if (revenueReadonly) {
+            const revenueValue = revenueInput && revenueInput.value ? parseInt(revenueInput.value, 10) : 0;
+            revenueReadonly.textContent = Number.isNaN(revenueValue) ? '0' : revenueValue.toLocaleString();
+            revenueReadonly.style.display = '';
+        }
+        if (revenueInput) {
+            revenueInput.style.display = 'none';
+        }
+    }
+
+    function schoolTypeSelectHtml(index) {
+        return `
+            <div class="school-type-editor">
+                <select name="items[${index}][school_type]" class="form-control school-type-select" required>
+                    <option value="">선택하세요</option>
+                    <option value="middle">중등</option>
+                    <option value="high">고등</option>
+                    <option value="custom">직접입력</option>
+                </select>
+                <input type="text" name="items[${index}][item_name]" class="form-control school-type-custom-input mt-2" placeholder="구분명을 입력하세요" maxlength="100" autocomplete="off" style="display:none;">
+            </div>
+        `;
+    }
+
     if (addItemBtn) {
         addItemBtn.addEventListener('click', function() {
             addItemRow();
         });
     }
 
-    // 테이블 내부 이벤트 위임
     if (itemsBody) {
         itemsBody.addEventListener('click', function(e) {
-            // 삭제 버튼
             if (e.target.closest('.remove-item-btn')) {
                 const row = e.target.closest('tr');
                 if (row) {
@@ -26,30 +136,44 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
 
-            // 수정 버튼 (현재는 추가/수정이 동일하게 작동하므로 필요시 확장 가능)
             if (e.target.closest('.edit-item-btn')) {
-                // 수정 로직은 필요시 구현
-                console.log('수정 버튼 클릭');
+                const row = e.target.closest('tr');
+                if (row) {
+                    const isEditing = row.getAttribute('data-row-editing') === '1';
+                    setRowEditingState(row, !isEditing);
+                }
             }
         });
 
-            // 입력 필드 변경 감지 (필요시)
         itemsBody.addEventListener('change', function(e) {
+            if (e.target.classList.contains('school-type-select')) {
+                toggleSchoolTypeCustomInput(e.target);
+                const row = e.target.closest('tr');
+                if (row && row.getAttribute('data-row-editing') !== '1') {
+                    setRowEditingState(row, false);
+                }
+            }
             if (e.target.tagName === 'INPUT') {
-                // 입력 값 변경 처리
                 updateEmptyRowVisibility();
             }
         });
-        
-        // 수익 입력 필드 변경 시 합계 계산
+
         itemsBody.addEventListener('input', function(e) {
             if (e.target.classList.contains('revenue-input')) {
                 calculateTotalRevenue();
             }
         });
+
+        itemsBody.querySelectorAll('tr:not(.empty-row)').forEach(function(row) {
+            const schoolSelect = row.querySelector('.school-type-select');
+            if (schoolSelect) {
+                toggleSchoolTypeCustomInput(schoolSelect);
+            }
+            const isEditing = row.getAttribute('data-row-editing') === '1';
+            setRowEditingState(row, isEditing);
+        });
     }
 
-    // 항목 행 추가
     function addItemRow() {
         const emptyRow = itemsBody.querySelector('.empty-row');
         if (emptyRow) {
@@ -59,18 +183,18 @@ document.addEventListener('DOMContentLoaded', function() {
         const currentIndex = window.itemIndex;
         const newRow = document.createElement('tr');
         newRow.setAttribute('data-item-index', currentIndex);
+        newRow.setAttribute('data-row-editing', '1');
         newRow.innerHTML = `
             <td>
-                <select name="items[${currentIndex}][school_type]" class="form-control" required>
-                    <option value="">선택하세요</option>
-                    <option value="middle">중등</option>
-                    <option value="high">고등</option>
-                </select>
+            <div class="school-type-readonly" style="display:none;"></div>
+            ${schoolTypeSelectHtml(currentIndex)}
             </td>
             <td>
+                <div class="participants-readonly" style="display:none;">0</div>
                 <input type="number" name="items[${currentIndex}][participants_count]" class="form-control participants-count" placeholder="0" min="0" value="0" data-index="${currentIndex}">
             </td>
             <td>
+                <div class="revenue-readonly" style="display:none;">0</div>
                 <input type="number" name="items[${currentIndex}][revenue]" class="form-control revenue-input" placeholder="0" min="0" value="0" data-index="${currentIndex}">
             </td>
             <td>
@@ -87,34 +211,34 @@ document.addEventListener('DOMContentLoaded', function() {
 
         itemsBody.appendChild(newRow);
         window.itemIndex++;
-        updateEmptyRowVisibility();
-        
-        // 수익 입력 필드에 이벤트 리스너 추가
+
+        const sel = newRow.querySelector('.school-type-select');
+        if (sel) {
+            toggleSchoolTypeCustomInput(sel);
+        }
+        setRowEditingState(newRow, true);
+
         const revenueInput = newRow.querySelector('.revenue-input');
         if (revenueInput) {
             revenueInput.addEventListener('input', calculateTotalRevenue);
         }
+
+        updateEmptyRowVisibility();
     }
 
-    // 항목 행 삭제
     function removeItemRow(row) {
         if (confirm('이 항목을 삭제하시겠습니까?')) {
             row.remove();
             updateEmptyRowVisibility();
-            
-            // 인덱스 재정렬 (선택사항, 필요시 구현)
             reindexRows();
-            
-            // 합계 재계산
             calculateTotalRevenue();
         }
     }
 
-    // 빈 행 표시 여부 업데이트
     function updateEmptyRowVisibility() {
         const rows = itemsBody.querySelectorAll('tr:not(.empty-row)');
         const emptyRow = itemsBody.querySelector('.empty-row');
-        
+
         if (rows.length === 0 && emptyRow) {
             emptyRow.style.display = '';
         } else if (emptyRow) {
@@ -122,29 +246,33 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // 행 인덱스 재정렬 (선택사항)
     function reindexRows() {
         const rows = itemsBody.querySelectorAll('tr:not(.empty-row)');
         rows.forEach((row, index) => {
             row.setAttribute('data-item-index', index);
-            
-            // input name 속성 재설정
-            const inputs = row.querySelectorAll('input');
-            inputs.forEach(input => {
-                const name = input.name;
-                if (name) {
-                    const match = name.match(/items\[(\d+)\]\[(.+)\]/);
-                    if (match) {
-                        input.name = `items[${index}][${match[2]}]`;
-                    }
+
+            row.querySelectorAll('input, select').forEach(function(field) {
+                const name = field.name;
+                if (!name) {
+                    return;
+                }
+                const match = name.match(/items\[\d+\]\[(.+)\]/);
+                if (match) {
+                    field.name = 'items[' + index + '][' + match[1] + ']';
                 }
             });
         });
-        
+
         window.itemIndex = rows.length;
+
+        rows.forEach(function(row) {
+            const sel = row.querySelector('.school-type-select');
+            if (sel) {
+                toggleSchoolTypeCustomInput(sel);
+            }
+        });
     }
 
-    // 폼 제출 전 유효성 검사
     const form = document.getElementById('revenueStatisticsForm');
     if (form) {
         form.addEventListener('submit', function(e) {
@@ -156,19 +284,31 @@ document.addEventListener('DOMContentLoaded', function() {
                 return false;
             }
 
-            // 항목 유효성 검사
             const itemRows = itemsBody.querySelectorAll('tr:not(.empty-row)');
             let hasError = false;
-            
-            itemRows.forEach((row, index) => {
+
+            itemRows.forEach(function(row, index) {
+                if (hasError) {
+                    return;
+                }
                 const schoolTypeSelect = row.querySelector('select[name*="[school_type]"]');
                 if (schoolTypeSelect && !schoolTypeSelect.value) {
+                    setRowEditingState(row, true);
                     hasError = true;
-                    alert(`${index + 1}번째 항목의 구분을 선택해주세요.`);
-                    if (schoolTypeSelect) {
-                        schoolTypeSelect.focus();
+                    alert((index + 1) + '번째 항목의 구분을 선택해주세요.');
+                    schoolTypeSelect.focus();
+                    return;
+                }
+                if (schoolTypeSelect && schoolTypeSelect.value === 'custom') {
+                    const customInput = row.querySelector('.school-type-custom-input');
+                    if (!customInput || !customInput.value.trim()) {
+                        setRowEditingState(row, true);
+                        hasError = true;
+                        alert((index + 1) + '번째 항목: 직접입력 구분명을 입력해주세요.');
+                        if (customInput) {
+                            customInput.focus();
+                        }
                     }
-                    return false;
                 }
             });
 
@@ -179,38 +319,29 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // 다운로드 버튼 처리
     const downloadBtn = document.getElementById('download-btn');
     if (downloadBtn && downloadBtn.tagName === 'A') {
-        downloadBtn.addEventListener('click', function(e) {
-            // 다운로드는 기본 동작 사용
-            // 필요시 AJAX로 처리할 수 있음
-        });
+        downloadBtn.addEventListener('click', function() {});
     } else if (downloadBtn) {
-        // create 페이지의 버튼은 비활성화 상태
         downloadBtn.disabled = true;
     }
 
-    // 초기 빈 행 표시 여부 설정
     updateEmptyRowVisibility();
-    
-    // 수익 합계 계산 함수
+
     function calculateTotalRevenue() {
         const revenueInputs = document.querySelectorAll('.revenue-input');
         let total = 0;
-        
-        revenueInputs.forEach(input => {
+
+        revenueInputs.forEach(function(input) {
             const value = parseFloat(input.value) || 0;
             total += value;
         });
-        
+
         const totalRevenueCell = document.getElementById('total-revenue');
         if (totalRevenueCell) {
             totalRevenueCell.textContent = total.toLocaleString();
         }
     }
-    
-    // 페이지 로드 시 합계 계산
+
     calculateTotalRevenue();
 });
-

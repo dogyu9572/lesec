@@ -64,6 +64,7 @@ class IndividualApplication extends Model
         'applicant_grade' => 'integer',
         'applicant_class' => 'integer',
         'applied_at' => 'datetime',
+        'cancelled_at' => 'datetime',
     ];
 
     public const PAYMENT_STATUS_UNPAID = 'unpaid';

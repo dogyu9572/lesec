@@ -39,7 +39,7 @@
 		<div class="bg"><div class="inner"></div></div>
 		<div class="inner">
 			<a href="/" class="logo"><img src="/images/logo_new.svg" alt="logo"><h1>서울대학교 농생명과학공동기기원 생명·환경과학교육센터</h1></a>
-			<a href="javascript:void(0);" class="btn_menu" aria-label="메뉴 열기">
+			<a href="#" class="btn_menu" aria-label="메뉴 열기">
 				<p class="t"></p>
 				<p class="m"></p>
 				<p class="b"></p>
@@ -128,6 +128,7 @@
 			@if ($isMemberLoggedIn)
 			<form id="member-logout-form" action="{{ route('member.logout') }}" method="POST" class="is-hidden">
 				@csrf
+				<input type="hidden" name="CSRFToken" value="{{ csrf_token() }}">
 			</form>
 			@endif
 		</div>

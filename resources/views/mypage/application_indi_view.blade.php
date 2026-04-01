@@ -106,7 +106,7 @@
 		<div class="btns_tac">
 			<a href="{{ route('mypage.application_indi_list') }}" class="btn btn_wbb">목록</a>
 			@if($application->payment_status === 'cancelled')
-				<a href="javascript:void(0);" class="btn btn_gray">취소 완료</a>
+				<a href="#" class="btn btn_gray">취소 완료</a>
 			@elseif($application->draw_result !== 'fail' && $application->payment_status !== 'refunded' && $application->payment_status !== 'paid')
 				<form method="POST" action="{{ route('mypage.application_indi_cancel', $application->id) }}" class="inline-center-form js-confirm-submit" data-confirm-message="정말 신청을 취소하시겠습니까?">
 					@csrf
@@ -157,7 +157,7 @@
 	</div>
 </div>
 
-<script>
+<script nonce="{{ $cspNonce }}">
 //팝업
 function layerShow(id) {
 	$("#" + id).fadeIn(300);

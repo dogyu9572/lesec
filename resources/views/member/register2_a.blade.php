@@ -58,7 +58,7 @@
 
 @push('scripts')
 <script src="{{ asset('js/member/sms-verification.js') }}"></script>
-<script>
+<script nonce="{{ $cspNonce }}">
 // 14세 미만은 register3_a로 이동
 (function() {
     const originalVerifyCode = window.SmsVerification?.verifyCode;

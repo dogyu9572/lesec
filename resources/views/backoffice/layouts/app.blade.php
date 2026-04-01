@@ -49,7 +49,7 @@
     @include('backoffice.layouts.footer')
 
     <!-- 세션 타이머 구성 및 로그아웃 URL -->
-    <script>
+    <script nonce="{{ $cspNonce }}">
         // 전역 변수로 설정
         window.sessionConfig = {
             lifetime: {{ config('session.lifetime', 120) }} // 세션 타임아웃(분 단위)

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $popup->title }}</title>
-    <style>
+    <style nonce="{{ $cspNonce }}">
         * {
             margin: 0;
             padding: 0;
@@ -127,26 +127,23 @@
                 <input type="checkbox" class="popup-today-close" id="todayClose">
                 1일 동안 보지 않음
             </label>
-            <button type="button" class="popup-close-btn" onclick="closePopup()">닫기</button>
+            <button type="button" class="popup-close-btn" id="popupCloseBtn">닫기</button>
         </div>
     </div>
 
-    <script>
+    <script nonce="{{ $cspNonce }}">
         function closePopup() {
-            // 오늘 하루 보지 않기 체크 확인
-            const todayClose = document.getElementById('todayClose').checked;
+            const todayCloseEl = document.getElementById('todayClose');
+            const todayClose = todayCloseEl ? todayCloseEl.checked : false;
             if (todayClose) {
-                // 쿠키 설정 (자정까지)
                 const expires = new Date();
                 expires.setHours(23, 59, 59, 999);
                 document.cookie = 'popup_hide_{{ $popup->id }}=true; expires=' + expires.toUTCString() + '; path=/';
             }
-            
-            // 팝업 창 닫기
             window.close();
         }
-        
-        // ESC 키로 팝업 닫기
+
+        document.getElementById('popupCloseBtn').addEventListener('click', closePopup);
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 closePopup();

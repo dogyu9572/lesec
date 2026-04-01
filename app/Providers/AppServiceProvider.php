@@ -27,6 +27,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        View::share('cspNonce', '');
+
         // HTTPS 강제 (.env의 APP_URL이 https://로 시작하는 경우)
         $applicationUrl = config('app.url');
         if (is_string($applicationUrl) && str_starts_with($applicationUrl, 'https://')) {

@@ -88,10 +88,10 @@
 
 							{{-- 신청 취소 상태: 불가 --}}
 							@if($application->payment_status === 'cancelled')
-								<a href="javascript:void(0);" class="btn btn_gray">불가</a>
+								<a href="#" class="btn btn_gray">불가</a>
 							{{-- 승인대기: 불가 버튼만 표시 --}}
 							@elseif($application->application_status === 'pending')
-								<a href="javascript:void(0);" class="btn btn_gray">불가</a>
+								<a href="#" class="btn btn_gray">불가</a>
 							{{-- 승인완료: 수정 버튼 --}}
 							@elseif($application->application_status === 'approved')
 								<a href="{{ route('mypage.application_write', $application->id) }}" class="btn btn_wkk">입력</a>
@@ -103,9 +103,9 @@
 
 						<td class="appli10">
 							@if($application->payment_status === 'cancelled')
-								<a href="javascript:void(0);" class="btn btn_gray">취소 완료</a>
+								<a href="#" class="btn btn_gray">취소 완료</a>
 							@elseif($application->application_status === 'approved' || $application->payment_status === 'paid')
-								<a href="javascript:void(0);" class="btn btn_gray btn_impossible">불가</a>
+								<a href="#" class="btn btn_gray btn_impossible">불가</a>
 							@else
 								<form method="POST" action="{{ route('mypage.application_cancel', $application->id) }}" class="inline-center-form js-confirm-submit" data-confirm-message="정말 신청을 취소하시겠습니까?">
 									@csrf
@@ -148,13 +148,13 @@
 </main>
 
 @if(session('success'))
-<script>
+<script nonce="{{ $cspNonce }}">
 	alert('{{ session('success') }}');
 </script>
 @endif
 
 @if($errors->has('cancel'))
-<script>
+<script nonce="{{ $cspNonce }}">
 	alert('{{ $errors->first('cancel') }}');
 </script>
 @endif
@@ -173,7 +173,7 @@
 	</div>
 </div>
 
-<script>
+<script nonce="{{ $cspNonce }}">
 //팝업
 function layerShow(id) {
 	$("#" + id).fadeIn(300);

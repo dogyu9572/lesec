@@ -238,7 +238,7 @@
 @endsection
 
 @section('scripts')
-<script>
+<script nonce="{{ $cspNonce }}">
     // 선택된 그룹 ID를 전역 변수로 설정
     window.selectedGroupId = {{ $selectedGroupId ?? 'null' }};
 </script>

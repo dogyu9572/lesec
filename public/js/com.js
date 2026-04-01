@@ -13,10 +13,14 @@ $(document).ready(function(){
 	$(".header .gnb .menu").mouseleave(function(){
 		$(".header").stop(false,true).removeClass("hover")
 	});
-	$(".btn_menu").click(function(){
+	$(".btn_menu").click(function(e){
+		e.preventDefault();
 		$("html,body").stop(false,true).toggleClass("over_h");
 		$(".header").stop(false,true).toggleClass("on");
 		$(".sitemap").stop(false,true).fadeToggle("fast");
+	});
+	$(document).on('click', 'a.btn_gray[href="#"]', function(e) {
+		e.preventDefault();
 	});
 	$(".header .gnb .menu button").click(function(){
 		$(this).next(".snb").stop(false,true).slideToggle("fast").parent().stop(false,true).toggleClass("open").siblings().removeClass("open").removeClass("on").children(".snb").slideUp("fast");

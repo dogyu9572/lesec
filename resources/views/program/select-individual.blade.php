@@ -125,7 +125,7 @@
 							@elseif($isWrongLevel)
 								<button type="button" class="btn btn_kwk disabled" disabled>학교급 불일치</button>
 							@elseif($program->individual_action_type === 'closed')
-								<a href="javascript:void(0);" class="btn btn_gray">마감</a>
+								<a href="#" class="btn btn_gray">마감</a>
 							@elseif($program->individual_action_type === 'waitlist')
 								<a href="{{ $program->waitlist_url }}" target="_blank" class="btn btn_kwk">대기자 신청</a>
 							@elseif($program->individual_action_type === 'scheduled')
@@ -161,9 +161,9 @@
                                         $hasOnlineCard = in_array('online_card', $pm, true);
                                     @endphp
                                     @if($isBeforeApplicationPeriod)
-                                        <a href="javascript:void(0);" class="btn btn_gray">접수예정</a>
+                                        <a href="#" class="btn btn_gray">접수예정</a>
                                     @elseif($isAfterApplicationPeriod)
-                                        <a href="javascript:void(0);" class="btn btn_gray">마감</a>
+                                        <a href="#" class="btn btn_gray">마감</a>
                                     @elseif($isFirstComeFull)
                                         {{-- 선착순 정원 마감 시 대기자 신청 --}}
                                         @if($program->waitlist_url)
@@ -177,6 +177,7 @@
                                                 data-education-fee="{{ $program->education_fee ?? 0 }}"
                                                 data-has-online-card="{{ $hasOnlineCard ? '1' : '0' }}">
                                                 @csrf
+                                                <input type="hidden" name="CSRFToken" value="{{ csrf_token() }}">
                                                 <input type="hidden" name="program_reservation_id" value="{{ $program->id }}">
                                                 <input type="hidden" name="participation_date" value="{{ optional($program->education_start_date)->format('Y-m-d') }}">
                                                 <button type="submit" class="btn btn_kwk js-individual-apply-btn">대기자 신청</button>
@@ -192,6 +193,7 @@
                                             data-education-fee="{{ $program->education_fee ?? 0 }}"
                                             data-has-online-card="{{ $hasOnlineCard ? '1' : '0' }}">
                                             @csrf
+                                            <input type="hidden" name="CSRFToken" value="{{ csrf_token() }}">
                                             <input type="hidden" name="program_reservation_id" value="{{ $program->id }}">
                                             <input type="hidden" name="participation_date" value="{{ optional($program->education_start_date)->format('Y-m-d') }}">
                                             <button type="submit" class="btn btn_wkk js-individual-apply-btn">신청하기</button>

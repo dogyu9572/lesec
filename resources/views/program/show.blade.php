@@ -31,7 +31,7 @@
 
 @once
 @push('scripts')
-<script>
+<script nonce="{{ $cspNonce }}">
 $(function() {
 	// 개인 신청 링크 클릭 시 학교급 체크
 	$(document).on('click', '[data-check-school-level]', function(e) {

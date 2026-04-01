@@ -123,7 +123,7 @@
 
 @endsection
 @section('scripts')
-<script>
+<script nonce="{{ $cspNonce }}">
 var groupId = {{ $group->id }};
 </script>
 <script src="{{ asset('js/backoffice/member-groups.js') }}"></script>

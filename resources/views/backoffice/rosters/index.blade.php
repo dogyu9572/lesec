@@ -182,7 +182,7 @@
 @endsection
 
 @section('scripts')
-<script>
+<script nonce="{{ $cspNonce }}">
 document.addEventListener('DOMContentLoaded', function() {
     // 전체 선택 체크박스
     const selectAllCheckbox = document.getElementById('select-all-checkbox');

@@ -18,6 +18,7 @@
 				@endif
 				<form method="POST" action="{{ route('member.find_pw.submit') }}" class="js-member-form">
 					@csrf
+					<input type="hidden" name="CSRFToken" value="{{ csrf_token() }}">
 					<input type="text" name="name" class="text" value="{{ old('name') }}" placeholder="이름을 입력해 주세요." aria-label="이름">
 					@error('name')
 					<p class="error_alert">{{ $message }}</p>

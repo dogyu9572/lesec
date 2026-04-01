@@ -233,7 +233,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ $cspNonce }}">
 function withdrawMember(memberId) {
     if (confirm('이 회원을 탈퇴 처리하시겠습니까?')) {
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');

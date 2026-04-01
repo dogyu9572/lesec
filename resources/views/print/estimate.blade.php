@@ -155,7 +155,7 @@
 
 </main>
 
-<script>
+<script nonce="{{ $cspNonce }}">
 $(function() {
 	setTimeout(function() {
 		try {

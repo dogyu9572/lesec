@@ -96,11 +96,11 @@
 						</td>
 						<td class="appli10">
 							@if($application->payment_status === 'cancelled')
-								<a href="javascript:void(0);" class="btn btn_gray">취소 완료</a>
+								<a href="#" class="btn btn_gray">취소 완료</a>
 							@elseif($application->payment_status === 'paid')
-								<a href="javascript:void(0);" class="btn btn_gray btn_refund_info">불가</a>
+								<a href="#" class="btn btn_gray btn_refund_info">불가</a>
 							@elseif($application->draw_result === 'fail' || $application->payment_status === 'refunded')
-								<a href="javascript:void(0);" class="btn btn_gray btn_impossible">불가</a>
+								<a href="#" class="btn btn_gray btn_impossible">불가</a>
 							@else
 								<form method="POST" action="{{ route('mypage.application_indi_cancel', $application->id) }}" class="inline-center-form js-confirm-submit" data-confirm-message="정말 신청을 취소하시겠습니까?">
 									@csrf
@@ -143,13 +143,13 @@
 </main>
 
 @if(session('success'))
-<script>
+<script nonce="{{ $cspNonce }}">
 	alert('{{ session('success') }}');
 </script>
 @endif
 
 @if($errors->has('cancel'))
-<script>
+<script nonce="{{ $cspNonce }}">
 	alert('{{ $errors->first('cancel') }}');
 </script>
 @endif
@@ -180,7 +180,7 @@
 	</div>
 </div>
 
-<script>
+<script nonce="{{ $cspNonce }}">
 //팝업
 function layerShow(id) {
 	$("#" + id).fadeIn(300);

@@ -127,7 +127,7 @@
 @endsection
 
 @section('scripts')
-<script>
+<script nonce="{{ $cspNonce }}">
 document.addEventListener('DOMContentLoaded', function() {
     const citySelect = document.getElementById('city');
     const districtSelect = document.getElementById('district');

@@ -6,7 +6,7 @@
 		<div class="map_wrap">
 			<div id="daumRoughmapContainer1761096711855" class="root_daum_roughmap root_daum_roughmap_landing"></div>
 			<script charset="UTF-8" class="daum_roughmap_loader_script" src="https://ssl.daumcdn.net/dmaps/map_js_init/roughmapLoader.js"></script>
-			<script charset="UTF-8">
+			<script charset="UTF-8" nonce="{{ $cspNonce }}">
 				new daum.roughmap.Lander({
 					"timestamp" : "1761096711855",
 					"key" : "yewgtasywjg",

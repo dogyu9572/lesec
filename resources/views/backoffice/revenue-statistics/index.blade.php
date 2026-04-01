@@ -23,7 +23,7 @@
     @endif
 
     @if(session('debug_queries'))
-        <script>
+        <script nonce="{{ $cspNonce }}">
         console.log('=== 실행된 SQL 쿼리 ===');
         @foreach(session('debug_queries', []) as $query)
             console.log({!! json_encode($query) !!});
@@ -162,7 +162,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ $cspNonce }}">
 document.addEventListener('DOMContentLoaded', function() {
     const selectAllCheckbox = document.getElementById('select-all');
     const statisticsCheckboxes = document.querySelectorAll('.statistics-checkbox');

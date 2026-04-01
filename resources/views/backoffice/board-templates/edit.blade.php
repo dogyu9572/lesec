@@ -314,7 +314,7 @@
 @section('scripts')
 <script src="{{ asset('js/backoffice/board-templates.js') }}"></script>
 @unless($boardTemplate->is_system)
-<script>
+<script nonce="{{ $cspNonce }}">
     // 기존 커스텀 필드 로드
     document.addEventListener('DOMContentLoaded', function() {
         const customFields = @json($boardTemplate->custom_fields_config ?? []);

@@ -78,7 +78,7 @@
 
 </main>
 
-<script>
+<script nonce="{{ $cspNonce }}">
 $(".main_type_link dt button").click(function(){
 	$(this).parent().parent().addClass("on").siblings().removeClass("on");
 });
@@ -91,7 +91,7 @@ $(".main_type_link dt button").click(function(){
     @foreach($popups as $popup)
         @if($popup->popup_display_type === 'normal')
             {{-- 일반팝업 (새창) --}}
-            <script>
+            <script nonce="{{ $cspNonce }}">
                 document.addEventListener('DOMContentLoaded', function() {
                     // 쿠키 체크 함수
                     function getCookie(name) {

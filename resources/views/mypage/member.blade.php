@@ -322,7 +322,7 @@
 
 @push('scripts')
 <script src="{{ asset('js/member/register.js') }}?v={{ time() }}"></script>
-<script>
+<script nonce="{{ $cspNonce }}">
 	$(function() {
 		// 저장 완료 알럿 표시 (성공 시에만 필드 비활성화)
 		@if(session('success'))

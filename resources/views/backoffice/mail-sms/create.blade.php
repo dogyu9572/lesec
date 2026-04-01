@@ -189,7 +189,7 @@
 @endsection
 
 @section('scripts')
-<script>
+<script nonce="{{ $cspNonce }}">
     window.mailSmsFormConfig = {
         searchUrl: "{{ route('backoffice.mail-sms.search-members') }}",
         csrfToken: "{{ csrf_token() }}",

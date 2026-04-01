@@ -142,7 +142,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ $cspNonce }}">
 document.addEventListener('DOMContentLoaded', function() {
     const selectAllCheckbox = document.getElementById('select-all');
     const groupCheckboxes = document.querySelectorAll('.group-checkbox');

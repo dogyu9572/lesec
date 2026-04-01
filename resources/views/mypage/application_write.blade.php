@@ -219,13 +219,13 @@
 @include('partials.toss-payment-modal')
 
 @if(session('success'))
-<script>
+<script nonce="{{ $cspNonce }}">
 	alert('{{ session('success') }}');
 </script>
 @endif
 
 @if($errors->has('error'))
-<script>
+<script nonce="{{ $cspNonce }}">
 	alert('{{ $errors->first('error') }}');
 </script>
 @endif
@@ -236,7 +236,7 @@
 	@endpush
 @endonce
 
-<script>
+<script nonce="{{ $cspNonce }}">
 $(document).ready(function () {
 	var currentTossPayment = null;
 

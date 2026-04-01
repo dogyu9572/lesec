@@ -138,7 +138,7 @@
 
 @section('scripts')
 <script src="{{ asset('js/backoffice/icon-picker.js') }}"></script>
-<script>
+<script nonce="{{ $cspNonce }}">
     document.addEventListener('DOMContentLoaded', function() {
         // URL 자동 완성 기능
         const urlPrefixSelect = document.getElementById('url_prefix');

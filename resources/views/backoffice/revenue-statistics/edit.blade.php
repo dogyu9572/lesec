@@ -161,7 +161,7 @@
 @endsection
 
 @section('scripts')
-<script>
+<script nonce="{{ $cspNonce }}">
 window.itemIndex = {{ ($statistics->items && $statistics->items->count() > 0) ? $statistics->items->count() : 0 }};
 </script>
 <script src="{{ asset('js/backoffice/revenue-statistics.js') }}"></script>

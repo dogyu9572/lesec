@@ -12,6 +12,7 @@
 				@endif
 				<form method="POST" action="{{ route('member.find_pw_change.submit') }}">
 					@csrf
+					<input type="hidden" name="CSRFToken" value="{{ csrf_token() }}">
 					<input type="password" name="password" class="text" placeholder="새 비밀번호" autocomplete="off">
 					@error('password')
 					<p class="error_alert">{{ $message }}</p>

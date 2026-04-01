@@ -329,7 +329,7 @@
 @endsection
 
 @section('scripts')
-<script>
+<script nonce="{{ $cspNonce }}">
     // JS 파일 로드 전에 config 설정 (순서 중요!)
     window.rosterDetailConfig = {
         reservationId: {{ $program['id'] }},

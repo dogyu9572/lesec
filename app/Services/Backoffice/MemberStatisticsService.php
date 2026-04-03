@@ -211,7 +211,10 @@ class MemberStatisticsService
                         ->orWhere('name', 'like', "%{$searchKeyword}%")
                         ->orWhere('school_name', 'like', "%{$searchKeyword}%")
                         ->orWhere('email', 'like', "%{$searchKeyword}%")
-                        ->orWhere('contact', 'like', "%{$normalizedKeyword}%")
+                        ->orWhere(function ($contactQ) use ($normalizedKeyword) {
+                            Member::applyWhereDeterministicFieldMatches($contactQ, 'contact', $normalizedKeyword);
+                            $contactQ->orWhere('contact', 'like', "%{$normalizedKeyword}%");
+                        })
                         ->orWhere('city', 'like', "%{$searchKeyword}%")
                         ->orWhere('grade', 'like', "%{$searchKeyword}%");
 
@@ -225,7 +228,10 @@ class MemberStatisticsService
                 });
             } else {
                 if ($searchType === 'contact') {
-                    $query->where('contact', 'like', "%{$normalizedKeyword}%");
+                    $query->where(function ($contactQ) use ($normalizedKeyword) {
+                        Member::applyWhereDeterministicFieldMatches($contactQ, 'contact', $normalizedKeyword);
+                        $contactQ->orWhere('contact', 'like', "%{$normalizedKeyword}%");
+                    });
                 } elseif ($searchType === 'grade') {
                     if (is_numeric($searchKeyword)) {
                         $query->where('grade', (int) $searchKeyword);

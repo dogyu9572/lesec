@@ -22,9 +22,9 @@ return new class extends Migration
             $table->enum('reception_status', ['application', 'in_progress', 'completed', 'cancelled'])->default('application')->comment('접수 상태');
             $table->string('applicant_name', 50)->comment('신청자명');
             $table->foreignId('member_id')->nullable()->constrained('members')->cascadeOnUpdate()->nullOnDelete()->comment('회원 ID');
-            $table->string('applicant_contact', 30)->nullable()->comment('신청자 연락처');
+            $table->text('applicant_contact')->nullable()->comment('신청자 연락처(암호화 저장)');
             $table->string('school_level', 50)->nullable()->comment('학교급');
-            $table->string('school_name', 100)->nullable()->comment('학교명');
+            $table->text('school_name')->nullable()->comment('학교명(암호화 저장)');
             $table->unsignedInteger('applicant_count')->default(0)->comment('신청 인원');
             $table->enum('payment_status', ['unpaid', 'paid', 'cancelled'])->default('unpaid')->comment('결제 상태');
             $table->unsignedInteger('participation_fee')->nullable()->comment('참가비');

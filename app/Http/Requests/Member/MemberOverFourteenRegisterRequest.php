@@ -6,9 +6,7 @@ use App\Models\Member;
 use App\Models\School;
 use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
-use Illuminate\Validation\Rules\Unique;
 
 class MemberOverFourteenRegisterRequest extends FormRequest
 {
@@ -45,7 +43,20 @@ class MemberOverFourteenRegisterRequest extends FormRequest
                 $memberType === 'student' ? ['after:' . Carbon::today()->subYears(30)->format('Ymd')] : []
             ),
             'gender' => ['required', 'in:male,female'],
-            'contact' => ['required', 'string', 'max:50', $this->uniqueContactRule()],
+            'contact' => ['required', 'string', 'max:50', function (string $attribute, mixed $value, \Closure $fail): void {
+                $digits = preg_replace('/[^0-9]/', '', (string) $value);
+                if ($digits === '') {
+                    return;
+                }
+                $exists = Member::query()
+                    ->where(function ($q) use ($digits) {
+                        Member::applyWhereDeterministicFieldMatches($q, 'contact', $digits);
+                    })
+                    ->exists();
+                if ($exists) {
+                    $fail('이미 등록된 연락처입니다.');
+                }
+            }],
             'contact_verified' => ['required', 'in:1'],
             'parent_contact' => $memberType === 'student'
                 ? ['required', 'string', 'max:50', function ($attribute, $value, $fail) {
@@ -178,37 +189,6 @@ class MemberOverFourteenRegisterRequest extends FormRequest
         ]);
     }
 
-    private function uniqueContactRule(): Unique
-    {
-        $contactDigits = preg_replace('/[^0-9]/', '', (string) $this->input('contact'));
-
-        return Rule::unique('members', 'contact')->where(function ($query) use ($contactDigits) {
-            $query->where('contact', $contactDigits);
-
-            $formatted = $this->formatContactForDisplay($contactDigits);
-            if ($formatted !== null) {
-                $query->orWhere('contact', $formatted);
-            }
-        });
-    }
-
-    private function formatContactForDisplay(?string $digits): ?string
-    {
-        if (empty($digits)) {
-            return null;
-        }
-
-        if (strlen($digits) === 11) {
-            return preg_replace('/(\d{3})(\d{4})(\d{4})/', '$1-$2-$3', $digits);
-        }
-
-        if (strlen($digits) === 10) {
-            return preg_replace('/(\d{3})(\d{3})(\d{4})/', '$1-$2-$3', $digits);
-        }
-
-        return $digits;
-    }
-
     private function isValidMobileNumber(?string $number): bool
     {
         if (empty($number)) {
@@ -233,7 +213,11 @@ class MemberOverFourteenRegisterRequest extends FormRequest
             $contactDigits = $this->input('contact');
 
             // 학생·교사 공통: 다른 회원의 보호자 연락처로 등록된 번호는 본인 연락처로 사용 불가
-            if ($contactDigits && Member::where('parent_contact', $contactDigits)->exists()) {
+            if ($contactDigits && Member::query()
+                ->where(function ($q) use ($contactDigits) {
+                    Member::applyWhereDeterministicFieldMatches($q, 'parent_contact', $contactDigits);
+                })
+                ->exists()) {
                 $validator->errors()->add('contact', '이미 등록된 연락처입니다.');
             }
 

@@ -381,14 +381,11 @@ class MemberRegisterController extends Controller
         $exists = Member::query()
             ->when($field === 'contact', function ($query) use ($value) {
                 $query->where(function ($nested) use ($value) {
-                    $nested->where('contact', $value)
-                        ->orWhere('parent_contact', $value);
-
-                    $formatted = $this->registerService->formatContactForDisplay($value);
-                    if ($formatted !== null) {
-                        $nested->orWhere('contact', $formatted)
-                            ->orWhere('parent_contact', $formatted);
-                    }
+                    $nested->where(function ($q) use ($value) {
+                        Member::applyWhereDeterministicFieldMatches($q, 'contact', $value);
+                    })->orWhere(function ($q) use ($value) {
+                        Member::applyWhereDeterministicFieldMatches($q, 'parent_contact', $value);
+                    });
                 });
             }, function ($query) use ($field, $value) {
                 $query->where($field, $value);
@@ -602,12 +599,7 @@ class MemberRegisterController extends Controller
             if ($normalized !== null) {
                 $exists = Member::query()
                     ->where(function ($query) use ($normalized) {
-                        $query->where('contact', $normalized);
-
-                        $formatted = $this->registerService->formatContactForDisplay($normalized);
-                        if ($formatted !== null) {
-                            $query->orWhere('contact', $formatted);
-                        }
+                        Member::applyWhereDeterministicFieldMatches($query, 'contact', $normalized);
                     })
                     ->exists();
 

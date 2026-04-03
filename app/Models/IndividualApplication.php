@@ -59,6 +59,9 @@ class IndividualApplication extends Model
     ];
 
     protected $casts = [
+        'applicant_school_name' => 'encrypted',
+        'applicant_contact' => 'encrypted',
+        'guardian_contact' => 'encrypted',
         'participation_date' => 'date',
         'participation_fee' => 'integer',
         'applicant_grade' => 'integer',

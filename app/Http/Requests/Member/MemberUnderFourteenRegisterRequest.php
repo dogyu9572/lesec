@@ -5,9 +5,7 @@ namespace App\Http\Requests\Member;
 use App\Models\School;
 use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
-use Illuminate\Validation\Rules\Unique;
 
 class MemberUnderFourteenRegisterRequest extends FormRequest
 {
@@ -157,37 +155,6 @@ class MemberUnderFourteenRegisterRequest extends FormRequest
             'login_id_verified' => $this->input('login_id_verified', '0'),
             'contact_verified' => $this->input('contact_verified', '0'),
         ]);
-    }
-
-    private function uniqueContactRule(): Unique
-    {
-        $contactDigits = preg_replace('/[^0-9]/', '', (string) $this->input('contact'));
-
-        return Rule::unique('members', 'contact')->where(function ($query) use ($contactDigits) {
-            $query->where('contact', $contactDigits);
-
-            $formatted = $this->formatContactForDisplay($contactDigits);
-            if ($formatted !== null) {
-                $query->orWhere('contact', $formatted);
-            }
-        });
-    }
-
-    private function formatContactForDisplay(?string $digits): ?string
-    {
-        if (empty($digits)) {
-            return null;
-        }
-
-        if (strlen($digits) === 11) {
-            return preg_replace('/(\d{3})(\d{4})(\d{4})/', '$1-$2-$3', $digits);
-        }
-
-        if (strlen($digits) === 10) {
-            return preg_replace('/(\d{3})(\d{3})(\d{4})/', '$1-$2-$3', $digits);
-        }
-
-        return $digits;
     }
 
     /**

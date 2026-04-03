@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Casts\DeterministicEncryptedString;
+use App\Casts\EncryptedDate;
+use App\Support\Formatting;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -58,7 +61,11 @@ class Member extends Authenticatable
      * 타입 캐스팅
      */
     protected $casts = [
-        'birth_date' => 'date',
+        'email' => DeterministicEncryptedString::class,
+        'birth_date' => EncryptedDate::class,
+        'contact' => DeterministicEncryptedString::class,
+        'parent_contact' => DeterministicEncryptedString::class,
+        'school_name' => 'encrypted',
         'joined_at' => 'datetime',
         'last_login_at' => 'datetime',
         'withdrawal_at' => 'datetime',
@@ -124,6 +131,36 @@ class Member extends Authenticatable
     public function school()
     {
         return $this->belongsTo(School::class, 'school_id');
+    }
+
+    /**
+     * 결정적 암호화 컬럼(email, contact, parent_contact)을 평문·레거시 포맷·암호문과 동시에 조회할 때 사용
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder  $query
+     */
+    public static function applyWhereDeterministicFieldMatches($query, string $column, string $plain): void
+    {
+        if (! in_array($column, ['email', 'contact', 'parent_contact'], true)) {
+            return;
+        }
+
+        $cipher = DeterministicEncryptedString::encryptForQuery($column, $plain);
+        $normalized = DeterministicEncryptedString::normalizePlaintext($column, $plain);
+
+        $query->where(function ($q) use ($column, $cipher, $normalized) {
+            if ($cipher !== null && $cipher !== '') {
+                $q->where($column, $cipher);
+            }
+            if ($normalized !== '') {
+                $q->orWhere($column, $normalized);
+            }
+            if (($column === 'contact' || $column === 'parent_contact') && $normalized !== '') {
+                $formatted = Formatting::formatPhone($normalized);
+                if ($formatted !== null && $formatted !== $normalized) {
+                    $q->orWhere($column, $formatted);
+                }
+            }
+        });
     }
 
     /**

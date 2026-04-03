@@ -22,16 +22,16 @@ return new class extends Migration
             
             // 개인 정보
             $table->string('name')->comment('이름');
-            $table->string('email')->comment('이메일');
-            $table->date('birth_date')->nullable()->comment('생년월일');
+            $table->text('email')->comment('이메일(암호화 저장)');
+            $table->text('birth_date')->nullable()->comment('생년월일(암호화 저장, Y-m-d 평문)');
             $table->enum('gender', ['male', 'female'])->nullable()->comment('성별');
-            $table->string('contact', 50)->nullable()->comment('연락처');
-            $table->string('parent_contact', 50)->nullable()->comment('보호자 연락처');
+            $table->text('contact')->nullable()->comment('연락처(암호화 저장)');
+            $table->text('parent_contact')->nullable()->comment('보호자 연락처(암호화 저장)');
             
             // 소속 정보
             $table->string('city', 100)->nullable()->comment('시/도');
             $table->string('district', 100)->nullable()->comment('시/군/구');
-            $table->string('school_name')->nullable()->comment('학교명');
+            $table->text('school_name')->nullable()->comment('학교명(암호화 저장)');
             $table->unsignedBigInteger('school_id')->nullable()->comment('학교 ID');
             $table->tinyInteger('grade')->nullable()->comment('학년');
             $table->tinyInteger('class_number')->nullable()->comment('반');

@@ -55,11 +55,11 @@ return new class extends Migration
             $table->enum('payment_status', ['unpaid', 'paid', 'refunded', 'cancelled'])->default('unpaid')->comment('결제상태');
             $table->enum('draw_result', ['pending', 'win', 'waitlist', 'fail'])->default('pending')->comment('추첨결과');
             $table->string('applicant_name', 50)->comment('신청자명');
-            $table->string('applicant_school_name', 100)->nullable()->comment('학교명');
+            $table->text('applicant_school_name')->nullable()->comment('학교명(암호화 저장)');
             $table->unsignedTinyInteger('applicant_grade')->nullable()->comment('학년');
             $table->unsignedTinyInteger('applicant_class')->nullable()->comment('반');
-            $table->string('applicant_contact', 20)->comment('신청자 연락처');
-            $table->string('guardian_contact', 20)->nullable()->comment('보호자 연락처');
+            $table->text('applicant_contact')->comment('신청자 연락처(암호화 저장)');
+            $table->text('guardian_contact')->nullable()->comment('보호자 연락처(암호화 저장)');
             $table->timestamp('applied_at')->useCurrent()->comment('신청일시');
             $table->timestamp('cancelled_at')->nullable()->comment('취소일시');
             $table->timestamps();

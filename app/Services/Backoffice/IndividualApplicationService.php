@@ -851,9 +851,11 @@ class IndividualApplicationService
             return null;
         }
 
-        // 연락처로 회원 검색 (contact 필드)
-        $member = Member::where('contact', $digits)
-            ->orWhere('contact', 'like', '%' . $digits . '%')
+        $member = Member::query()
+            ->where(function ($q) use ($digits) {
+                Member::applyWhereDeterministicFieldMatches($q, 'contact', $digits);
+                $q->orWhere('contact', 'like', '%' . $digits . '%');
+            })
             ->first();
 
         return $member?->id;

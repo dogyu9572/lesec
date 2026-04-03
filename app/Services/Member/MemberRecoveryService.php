@@ -4,6 +4,7 @@ namespace App\Services\Member;
 
 use App\Models\Member;
 use App\Support\Formatting;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Hash;
 
 class MemberRecoveryService
@@ -25,9 +26,8 @@ class MemberRecoveryService
     public function findMemberByNameAndContact(string $name, string $contact): ?Member
     {
         return Member::where('name', $name)
-            ->where(function ($query) use ($contact) {
-                $query->where('contact', $contact)
-                    ->orWhere('contact', Formatting::formatPhone($contact) ?? $contact);
+            ->where(function (Builder $query) use ($contact) {
+                Member::applyWhereDeterministicFieldMatches($query, 'contact', $contact);
             })
             ->first();
     }
@@ -36,9 +36,8 @@ class MemberRecoveryService
     {
         return Member::where('login_id', $loginId)
             ->where('name', $name)
-            ->where(function ($query) use ($contact) {
-                $query->where('contact', $contact)
-                    ->orWhere('contact', Formatting::formatPhone($contact) ?? $contact);
+            ->where(function (Builder $query) use ($contact) {
+                Member::applyWhereDeterministicFieldMatches($query, 'contact', $contact);
             })
             ->first();
     }

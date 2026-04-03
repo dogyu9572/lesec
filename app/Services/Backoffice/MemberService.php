@@ -91,7 +91,10 @@ class MemberService
                         ->orWhere('name', 'like', "%{$searchKeyword}%")
                         ->orWhere('school_name', 'like', "%{$searchKeyword}%")
                         ->orWhere('email', 'like', "%{$searchKeyword}%")
-                        ->orWhere('contact', 'like', "%{$normalizedKeyword}%")
+                        ->orWhere(function ($contactQ) use ($normalizedKeyword) {
+                            Member::applyWhereDeterministicFieldMatches($contactQ, 'contact', $normalizedKeyword);
+                            $contactQ->orWhere('contact', 'like', "%{$normalizedKeyword}%");
+                        })
                         ->orWhere('city', 'like', "%{$searchKeyword}%")
                         ->orWhere('grade', 'like', "%{$searchKeyword}%");
 
@@ -106,8 +109,10 @@ class MemberService
             } else {
                 // 특정 필드 검색
                 if ($searchType === 'contact') {
-                    // 연락처 검색 시 하이픈 제거하여 검색 (DB에는 하이픈 없는 값으로 저장됨)
-                    $query->where('contact', 'like', "%{$normalizedKeyword}%");
+                    $query->where(function ($contactQ) use ($normalizedKeyword) {
+                        Member::applyWhereDeterministicFieldMatches($contactQ, 'contact', $normalizedKeyword);
+                        $contactQ->orWhere('contact', 'like', "%{$normalizedKeyword}%");
+                    });
                 } elseif ($searchType === 'grade') {
                     // 학년 검색 시 숫자로 변환하여 정확한 일치 검색
                     if (is_numeric($searchKeyword)) {

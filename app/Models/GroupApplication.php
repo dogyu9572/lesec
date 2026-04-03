@@ -30,6 +30,8 @@ class GroupApplication extends Model
     ];
 
     protected $casts = [
+        'applicant_contact' => 'encrypted',
+        'school_name' => 'encrypted',
         'payment_methods' => 'array',
         'participation_fee' => 'integer',
         'participation_date' => 'date',

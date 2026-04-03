@@ -25,12 +25,6 @@ class MemberUpdateRequest extends FormRequest
         $passwordValue = trim((string) $this->input('password'));
         $hasPassword = $this->filled('password') && $passwordValue !== '';
 
-        \Log::info('rules() 체크', [
-            'filled_password' => $this->filled('password'),
-            'password_value_length' => strlen($passwordValue),
-            'has_password' => $hasPassword,
-        ]);
-
         if ($hasPassword) {
             $passwordRules = array_merge($passwordRules, [
                 'min:8',
@@ -41,7 +35,7 @@ class MemberUpdateRequest extends FormRequest
         }
 
         $rules = [
-            'current_password' => $hasPassword ? ['required'] : ['nullable'],
+            'current_password' => ['required', 'string'],
             'password' => $passwordRules,
             'email' => ['required', 'string', 'email', 'max:255'],
             'city' => ['nullable', 'string', 'max:100'],
@@ -109,19 +103,6 @@ class MemberUpdateRequest extends FormRequest
             'class_number' => $this->filled('class_number') ? (int) $this->input('class_number') : null,
             'notification_agree' => $this->boolean('notification_agree'),
         ]);
-
-        \Log::info('prepareForValidation 완료', [
-            'city' => $this->input('city'),
-            'district' => $this->input('district'),
-            'school_name' => $this->input('school_name'),
-            'school_id' => $this->input('school_id'),
-            'email' => $email,
-            'password' => $this->input('password') ? '***' : null, // 보안을 위해 마스킹
-            'password_confirmation' => $this->input('password_confirmation') ? '***' : null,
-            'current_password' => $this->input('current_password') ? '***' : null,
-            'has_password' => $this->filled('password'),
-            'password_length' => $this->input('password') ? strlen($this->input('password')) : 0,
-        ]);
     }
 
     /**
@@ -136,42 +117,14 @@ class MemberUpdateRequest extends FormRequest
                 return;
             }
 
-            $newPassword = trim((string) $this->input('password'));
-            $currentPassword = $this->input('current_password');
+            $currentPassword = (string) $this->input('current_password', '');
 
-            \Log::info('withValidator password 체크', [
-                'new_password_length' => strlen($newPassword),
-                'has_new_password' => !empty($newPassword),
-                'has_current_password' => !empty($currentPassword),
-            ]);
-
-            // 비밀번호를 변경하는 경우에만 current_password 검증
-            if (!empty($newPassword)) {
-                if (empty($currentPassword)) {
-                    $validator->errors()->add('current_password', '비밀번호를 변경하려면 현재 비밀번호를 입력해주세요.');
-                    \Log::warning('회원 정보 수정 validation 실패: current_password 없음');
-                    return;
-                }
-
-                if (!password_verify($currentPassword, $member->password)) {
-                    $validator->errors()->add('current_password', '현재 비밀번호가 올바르지 않습니다.');
-                    \Log::warning('회원 정보 수정 validation 실패: current_password 불일치');
-                    return;
-                }
+            if ($currentPassword === '') {
+                return;
             }
 
-            // validation 에러가 있으면 로그 기록
-            if ($validator->errors()->any()) {
-                \Log::warning('회원 정보 수정 validation 실패', [
-                    'errors' => $validator->errors()->toArray(),
-                    'input' => $this->except(['current_password', 'password', 'password_confirmation']),
-                    'password_info' => [
-                        'has_password' => $this->filled('password'),
-                        'password_length' => $this->input('password') ? strlen($this->input('password')) : 0,
-                        'has_password_confirmation' => $this->filled('password_confirmation'),
-                        'has_current_password' => $this->filled('current_password'),
-                    ]
-                ]);
+            if (!password_verify($currentPassword, $member->password)) {
+                $validator->errors()->add('current_password', '현재 비밀번호가 올바르지 않습니다.');
             }
         });
     }

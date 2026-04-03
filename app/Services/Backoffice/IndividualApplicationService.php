@@ -35,8 +35,7 @@ class IndividualApplicationService
     public function getFilteredApplications(Request $request): LengthAwarePaginator
     {
         $query = IndividualApplication::query()
-            ->with(['reservation', 'member'])
-            ->orderBy('created_at', 'desc');
+            ->with(['reservation', 'member']);
 
         // 신청유형 필터
         if ($request->filled('reception_type')) {
@@ -80,9 +79,19 @@ class IndividualApplicationService
             $searchType = $request->input('search_type', '');
 
             if ($searchType === 'applicant_name') {
-                $query->where('applicant_name', 'like', "%{$keyword}%");
+                $query->where(function ($q) use ($keyword) {
+                    $q->where('applicant_name', 'like', "%{$keyword}%")
+                        ->orWhereHas('member', function ($subQ) use ($keyword) {
+                            $subQ->where('name', 'like', "%{$keyword}%");
+                        });
+                });
             } elseif ($searchType === 'school_name') {
-                $query->where('applicant_school_name', 'like', "%{$keyword}%");
+                $query->where(function ($q) use ($keyword) {
+                    $q->where('applicant_school_name', 'like', "%{$keyword}%")
+                        ->orWhereHas('member', function ($subQ) use ($keyword) {
+                            $subQ->where('school_name', 'like', "%{$keyword}%");
+                        });
+                });
             } elseif ($searchType === 'program_name') {
                 $query->whereHas('reservation', function ($q) use ($keyword) {
                     $q->where('program_name', 'like', "%{$keyword}%");
@@ -94,6 +103,10 @@ class IndividualApplicationService
                 $query->where(function ($q) use ($keyword) {
                     $q->where('applicant_name', 'like', "%{$keyword}%")
                         ->orWhere('applicant_school_name', 'like', "%{$keyword}%")
+                        ->orWhereHas('member', function ($subQ) use ($keyword) {
+                            $subQ->where('name', 'like', "%{$keyword}%")
+                                ->orWhere('school_name', 'like', "%{$keyword}%");
+                        })
                         ->orWhere('application_number', 'like', "%{$keyword}%")
                         ->orWhereHas('reservation', function ($subQ) use ($keyword) {
                             $subQ->where('program_name', 'like', "%{$keyword}%");
@@ -102,7 +115,24 @@ class IndividualApplicationService
             }
         }
 
-        $perPage = $request->input('per_page', 20);
+        // 정렬 (단체 신청 목록과 동일한 sort/order 규칙)
+        $sort = $request->input('sort', 'applied_at');
+        $order = $request->input('order', 'desc') === 'asc' ? 'asc' : 'desc';
+
+        if ($sort === 'application_number') {
+            $query->orderBy('application_number', $order);
+        } elseif ($sort === 'participation_date') {
+            $query->leftJoin('program_reservations as pr', 'individual_applications.program_reservation_id', '=', 'pr.id')
+                ->orderByRaw('COALESCE(pr.education_start_date, individual_applications.participation_date) ' . $order)
+                ->select('individual_applications.*');
+        } elseif ($sort === 'applied_at') {
+            $query->orderBy('applied_at', $order);
+        } else {
+            $query->orderBy('applied_at', 'desc');
+        }
+
+        $perPage = (int) $request->input('per_page', 20);
+
         return $query->paginate($perPage)->withQueryString();
     }
 

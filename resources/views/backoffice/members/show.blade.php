@@ -153,6 +153,7 @@
                                         <th>No</th>
                                         <th>신청 번호</th>
                                         <th>신청 상태</th>
+                                        <th>결제상태</th>
                                         <th>신청자명</th>
                                         <th>학교명</th>
                                         <th>교육 유형</th>
@@ -190,8 +191,9 @@
                                                 'id' => $app->id,
                                                 'application_number' => $app->application_number,
                                                 'application_status' => $app->draw_result_label,
-                                                'applicant_name' => $app->applicant_name,
-                                                'school_name' => $app->applicant_school_name ?? '-',
+                                                'payment_status' => data_get($app, 'payment_status_label', '-'),
+                                                'applicant_name' => ($member->name ?? '-'),
+                                                'school_name' => ($member->school_name ?? '-'),
                                                 'education_type' => $app->education_type_label,
                                                 'program_name' => $app->program_name,
                                                 'applicant_count' => 1,
@@ -224,8 +226,9 @@
                                                 'id' => $app->id,
                                                 'application_number' => $app->application_number,
                                                 'application_status' => $app->application_status_label,
-                                                'applicant_name' => $app->applicant_name,
-                                                'school_name' => $app->school_name ?? '-',
+                                                'payment_status' => data_get($app, 'payment_status_label', '-'),
+                                                'applicant_name' => ($member->name ?? '-'),
+                                                'school_name' => ($member->school_name ?? '-'),
                                                 'education_type' => $app->education_type_label,
                                                 'program_name' => $app->program_name_label,
                                                 'applicant_count' => $app->applicant_count ?? 0,
@@ -250,6 +253,7 @@
                                                 <td>{{ $allApplications->count() - $index }}</td>
                                                 <td>{{ $app['application_number'] }}</td>
                                                 <td>{{ $app['application_status'] }}</td>
+                                                <td>{{ $app['payment_status'] }}</td>
                                                 <td>{{ $app['applicant_name'] }}</td>
                                                 <td>{{ $app['school_name'] }}</td>
                                                 <td>{{ $app['education_type'] }}</td>
@@ -265,7 +269,7 @@
                                         @endforeach
                                     @else
                                     <tr style="border: none;">
-                                        <td colspan="14" class="text-center" style="padding: 40px 20px; border: none !important; border-bottom: none !important;">신청 내역이 없습니다.</td>
+                                        <td colspan="15" class="text-center" style="padding: 40px 20px; border: none !important; border-bottom: none !important;">신청 내역이 없습니다.</td>
                                     </tr>
                                     @endif
                                 </tbody>

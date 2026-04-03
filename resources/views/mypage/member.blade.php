@@ -36,9 +36,12 @@
 						<dt>현재 비밀번호<span>*</span></dt>
 						<dd>
 							<div class="password-wrap">
-								<input type="password" name="current_password" class="text w100p password-input" placeholder="안전한 정보 수정을 위해 현재 사용 중인 비밀번호를 입력해주세요." autocomplete="off">
+								<input type="password" name="current_password" class="text w100p password-input @error('current_password') is-invalid @enderror" placeholder="안전한 정보 수정을 위해 현재 사용 중인 비밀번호를 입력해주세요." autocomplete="off">
 								<button type="button" class="btn-eye toggle-password r16" aria-label="비밀번호 보기"><img src="/images/icon_eye.svg" alt="보기"></button>
 							</div>
+							@error('current_password')
+							<p class="error_alert">{{ $message }}</p>
+							@enderror
 						</dd>
 					</dl>
 					<dl class="password-fields password-field-hidden">
@@ -215,7 +218,8 @@
 				<div class="btns_tac">
 					<button type="button" class="btn_submit btn_wbb js-edit-btn">수정</button>
 					<button type="submit" class="btn_submit btn_wbb js-submit-btn submit-button-hidden">수정 완료</button>
-					<button type="button" class="btn btn_kwy" data-layer-open="pop_secession">회원 탈퇴</button>
+					<button type="button" class="btn btn_kwy js-cancel-btn submit-button-hidden">수정 취소</button>
+					<button type="button" class="btn btn_kwy js-secession-btn" data-layer-open="pop_secession">회원 탈퇴</button>
 				</div>
 			</form>
 
@@ -335,8 +339,10 @@
 		$('.password-fields').slideUp(300);
 		$('.password-notice').slideUp(300);
 		$('.edit-notice').show();
-		$('.js-submit-btn').hide();
+		$('.js-submit-btn').addClass('submit-button-hidden').hide();
+		$('.js-cancel-btn').addClass('submit-button-hidden').hide();
 		$('.js-edit-btn').show();
+		$('.js-secession-btn').show();
 		$('input[name="current_password"]').val('');
 		$('input[name="password"]').val('');
 		$('input[name="password_confirmation"]').val('');
@@ -375,8 +381,10 @@
 			$('.js-school-search-btn').prop('disabled', false);
 			$('.password-fields input, .password-fields select').prop('disabled', false);
 			$('.edit-notice').hide();
-			$('.js-submit-btn').show();
+			$('.js-submit-btn').removeClass('submit-button-hidden').show();
+			$('.js-cancel-btn').removeClass('submit-button-hidden').show();
 			$('.js-edit-btn').hide();
+			$('.js-secession-btn').hide();
 		}
 		@endif
 
@@ -405,8 +413,10 @@
 		$('.js-school-search-btn').prop('disabled', false);
 		$('.password-fields input, .password-fields select').prop('disabled', false);
 		$('.edit-notice').hide();
-		$('.js-submit-btn').show();
+		$('.js-submit-btn').removeClass('submit-button-hidden').show();
+		$('.js-cancel-btn').removeClass('submit-button-hidden').show();
 		$('.js-edit-btn').hide();
+		$('.js-secession-btn').hide();
 		@else
 		// 검증 오류가 없을 때만 모든 입력 필드 비활성화
 		$('.js-editable-field').prop('disabled', true);
@@ -419,6 +429,8 @@
 	$(function() {
 		var $editBtn = $(".js-edit-btn");
 		var $submitBtn = $(".js-submit-btn");
+		var $cancelBtn = $(".js-cancel-btn");
+		var $secessionBtn = $(".js-secession-btn");
 		var $passwordFields = $(".password-fields");
 		var $passwordNotice = $(".password-notice");
 		var $editNotice = $(".edit-notice");
@@ -444,9 +456,15 @@
 			// 안내 문구 숨기기
 			$editNotice.hide();
 
-			// 버튼 텍스트 변경
 			$editBtn.hide();
-			$submitBtn.show();
+			$secessionBtn.hide();
+			$submitBtn.removeClass('submit-button-hidden').show();
+			$cancelBtn.removeClass('submit-button-hidden').show();
+		});
+
+		$cancelBtn.on("click", function(e) {
+			e.preventDefault();
+			window.location.reload();
 		});
 
 	});
@@ -482,6 +500,14 @@
 		var isSubmitting = false;
 
 		$form.on("submit", function(e) {
+			var currentPassword = $('input[name="current_password"]').val().trim();
+			if (currentPassword === "") {
+				e.preventDefault();
+				alert('정보를 수정하려면 현재 비밀번호를 입력해주세요.');
+				$('input[name="current_password"]').focus();
+				return false;
+			}
+
 			// 새 비밀번호 확인 체크
 			if ($pw.val().trim() !== "" && $pw.val().trim() !== $pwCheck.val().trim()) {
 				e.preventDefault();
@@ -490,18 +516,9 @@
 				return false;
 			}
 
-			// 현재 비밀번호 검증 (새 비밀번호를 입력한 경우)
 			var newPassword = $pw.val().trim();
-			var currentPassword = $('input[name="current_password"]').val().trim();
 
 			if (newPassword !== "") {
-				if (currentPassword === "") {
-					e.preventDefault();
-					alert('비밀번호를 변경하려면 현재 비밀번호를 입력해주세요.');
-					$('input[name="current_password"]').focus();
-					return false;
-				}
-
 				// 현재 비밀번호를 먼저 검증 (AJAX)
 				if (isSubmitting) {
 					return false;

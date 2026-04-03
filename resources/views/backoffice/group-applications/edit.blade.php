@@ -13,6 +13,12 @@
 @php
     $applicationId = data_get($application, 'id');
     $participants = data_get($application, 'participants', []);
+    $memberInfo = data_get($application, 'member');
+    $displayApplicantName = data_get($memberInfo, 'name') ?? data_get($application, 'applicant_name') ?? '';
+    $displayApplicantContact = data_get($memberInfo, 'contact') ?? data_get($application, 'applicant_contact') ?? '';
+    $displaySchoolName = data_get($memberInfo, 'school_name') ?? data_get($application, 'school_name') ?? '';
+    $displaySchoolLevel = data_get($memberInfo, 'school_level') ?? data_get($application, 'school_level') ?? '';
+    $displaySchoolLevelLabel = $displaySchoolLevel === 'middle' ? '중학교' : ($displaySchoolLevel === 'high' ? '고등학교' : $displaySchoolLevel);
 @endphp
 <div class="admin-form-container">
     <div id="application-search-config"
@@ -150,27 +156,23 @@
                                 <div class="form-group">
                                     <label for="applicant_name">신청자명</label>
                                     <div class="school-search-wrapper">
-                                        <input type="text" id="applicant_name" name="applicant_name" value="{{ data_get($application, 'applicant_name') }}">
+                                        <input type="text" id="applicant_name" name="applicant_name" value="{{ $displayApplicantName }}" readonly>
                                         <input type="hidden" id="member_id" name="member_id" value="{{ data_get($application, 'member_id') }}">
-                                        <button type="button" id="member-search-btn" class="btn btn-secondary btn-sm">
+                                        <button type="button" id="member-search-btn" class="btn btn-secondary btn-sm" disabled>
                                             <i class="fas fa-search"></i> 회원 검색
                                         </button>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label for="applicant_contact">연락처</label>
-                                    <input type="text" id="applicant_contact" name="applicant_contact" value="{{ data_get($application, 'applicant_contact') }}">
+                                    <input type="text" id="applicant_contact" name="applicant_contact" value="{{ $displayApplicantContact }}" readonly>
                                 </div>
                                 <div class="form-group">
                                     <label for="school_level">학교급/학교</label>
                                     <div class="school-search-wrapper">
-                                        @php
-                                            $level = data_get($application, 'school_level');
-                                            $levelLabel = $level === 'middle' ? '중학교' : ($level === 'high' ? '고등학교' : $level);
-                                        @endphp
-                                        <input type="text" id="school_level" name="school_level" value="{{ $levelLabel }}">
-                                        <input type="text" id="school_name" name="school_name" value="{{ data_get($application, 'school_name') }}" readonly>
-                                        <button type="button" id="school-search-btn" class="btn btn-secondary btn-sm">
+                                        <input type="text" id="school_level" name="school_level" value="{{ $displaySchoolLevelLabel }}" readonly>
+                                        <input type="text" id="school_name" name="school_name" value="{{ $displaySchoolName }}" readonly>
+                                        <button type="button" id="school-search-btn" class="btn btn-secondary btn-sm" disabled>
                                             <i class="fas fa-search"></i> 검색
                                         </button>
                                     </div>

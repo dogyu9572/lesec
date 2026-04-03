@@ -6,6 +6,7 @@ use App\Models\IndividualApplication;
 use App\Models\GroupApplication;
 use App\Models\GroupApplicationParticipant;
 use App\Models\ProgramReservation;
+use App\Support\ProgramNameSort;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -105,10 +106,7 @@ class RosterService
         // 통합 데이터 변환
         $mergedData = $this->mergePrograms($individualPrograms, $groupPrograms, $individualApplicationsCount, $groupApplicationsCount, $groupParticipantsCount);
 
-        // 정렬 (참가일 기준 내림차순)
-        $mergedData = $mergedData->sortByDesc(function ($item) {
-            return $item['participation_date'] ?? '';
-        })->values();
+        $mergedData = $this->sortMergedRosterPrograms($mergedData);
 
         // 페이지네이션 처리
         $perPage = (int) $request->input('per_page', 20);
@@ -190,6 +188,37 @@ class RosterService
         }
 
         return $merged;
+    }
+
+    /**
+     * 명단 목록 정렬: 참가일 내림차순 → 동일일자는 교육유형(고등→중등 등) → 프로그램명(P·H·M 규칙)
+     */
+    private function sortMergedRosterPrograms(Collection $mergedData): Collection
+    {
+        return $mergedData->sort(function ($a, $b) {
+            $dateA = (string) ($a['participation_date'] ?? '');
+            $dateB = (string) ($b['participation_date'] ?? '');
+            $dateCmp = strcmp($dateB, $dateA);
+            if ($dateCmp !== 0) {
+                return $dateCmp;
+            }
+
+            $eduA = (string) ($a['education_type'] ?? '');
+            $eduB = (string) ($b['education_type'] ?? '');
+            $eduCmp = ProgramNameSort::educationTypeSortOrder($eduA) <=> ProgramNameSort::educationTypeSortOrder($eduB);
+            if ($eduCmp !== 0) {
+                return $eduCmp;
+            }
+
+            $nameA = (string) ($a['program_name'] ?? '');
+            $nameB = (string) ($b['program_name'] ?? '');
+            $nameCmp = ProgramNameSort::compare($nameA, $nameB);
+            if ($nameCmp !== 0) {
+                return $nameCmp;
+            }
+
+            return strcmp($nameA, $nameB);
+        })->values();
     }
 
     /**
@@ -280,16 +309,17 @@ class RosterService
             $programInfo['applied_count'] = $applications->count();
 
             foreach ($applications as $application) {
+                $member = $application->member;
                 $rosterList->push([
                     'id' => $application->id,
                     'application_number' => $application->application_number,
-                    'applicant_name' => $application->applicant_name,
-                    'school_name' => $application->applicant_school_name,
-                    'grade' => $application->applicant_grade,
-                    'class' => $application->applicant_class,
-                    'birthday' => $application->member?->birth_date,
-                    'birthday_formatted' => $application->member?->birth_date?->format('Ymd'),
-                    'gender' => $application->member?->gender === 'male' ? '남' : ($application->member?->gender === 'female' ? '여' : '-'),
+                    'applicant_name' => $member?->name ?? $application->applicant_name,
+                    'school_name' => $member?->school_name ?? $application->applicant_school_name,
+                    'grade' => $member?->grade ?? $application->applicant_grade,
+                    'class' => $member?->class_number ?? $application->applicant_class,
+                    'birthday' => $member?->birth_date,
+                    'birthday_formatted' => $member?->birth_date?->format('Ymd'),
+                    'gender' => $member?->gender === 'male' ? '남' : ($member?->gender === 'female' ? '여' : '-'),
                     'payment_status' => $application->payment_status,
                     'payment_status_label' => $application->payment_status_label,
                     'applied_at' => $application->applied_at,
@@ -529,6 +559,7 @@ class RosterService
             $applications = $query->get();
 
             foreach ($applications as $application) {
+                $member = $application->member;
                 $row = [];
                 foreach ($selectedColumns as $column) {
                     switch ($column) {
@@ -536,22 +567,22 @@ class RosterService
                             $row[$column] = $application->application_number ?? '-';
                             break;
                         case 'applicant_name':
-                            $row[$column] = $application->applicant_name ?? '-';
+                            $row[$column] = $member?->name ?? $application->applicant_name ?? '-';
                             break;
                         case 'school_name':
-                            $row[$column] = $application->applicant_school_name ?? '-';
+                            $row[$column] = $member?->school_name ?? $application->applicant_school_name ?? '-';
                             break;
                         case 'grade':
-                            $row[$column] = $application->applicant_grade ?? '-';
+                            $row[$column] = $member?->grade ?? $application->applicant_grade ?? '-';
                             break;
                         case 'class':
-                            $row[$column] = $application->applicant_class ?? '-';
+                            $row[$column] = $member?->class_number ?? $application->applicant_class ?? '-';
                             break;
                         case 'birthday':
-                            $row[$column] = $application->member?->birth_date?->format('Ymd') ?? '-';
+                            $row[$column] = $member?->birth_date?->format('Ymd') ?? '-';
                             break;
                         case 'gender':
-                            $row[$column] = $application->member?->gender === 'male' ? '남' : ($application->member?->gender === 'female' ? '여' : '-');
+                            $row[$column] = $member?->gender === 'male' ? '남' : ($member?->gender === 'female' ? '여' : '-');
                             break;
                         case 'payment_status':
                             $row[$column] = $application->payment_status_label ?? '-';
@@ -702,10 +733,7 @@ class RosterService
         // 통합 데이터 변환
         $mergedData = $this->mergePrograms($individualPrograms, $groupPrograms, $individualApplicationsCount, $groupApplicationsCount);
 
-        // 정렬 (참가일 기준 내림차순)
-        $mergedData = $mergedData->sortByDesc(function ($item) {
-            return $item['participation_date'] ?? '';
-        })->values();
+        $mergedData = $this->sortMergedRosterPrograms($mergedData);
 
         // 필터 옵션 가져오기
         $filters = $this->getFilterOptions();

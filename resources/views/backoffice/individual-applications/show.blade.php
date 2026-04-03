@@ -10,6 +10,15 @@
 @endsection
 
 @section('content')
+@php
+    $memberInfo = $application->member;
+    $displayApplicantName = $memberInfo->name ?? $application->applicant_name ?? '';
+    $displaySchoolName = $memberInfo->school_name ?? $application->applicant_school_name ?? '';
+    $displayApplicantGrade = $memberInfo->grade ?? $application->applicant_grade ?? '';
+    $displayApplicantClass = $memberInfo->class_number ?? $application->applicant_class ?? '';
+    $displayApplicantContact = $memberInfo->contact ?? $application->applicant_contact ?? '';
+    $displayGuardianContact = $memberInfo->parent_contact ?? $application->guardian_contact ?? '';
+@endphp
 <div class="admin-form-container">
     <div class="form-header">      
         <a href="{{ route('backoffice.individual-applications.index') }}" class="btn btn-secondary">
@@ -123,14 +132,14 @@
                                 <div class="form-group">
                                     <label for="applicant_name">신청자명</label>
                                     <div class="school-search-wrapper">
-                                        <input type="text" id="applicant_name" value="{{ $application->applicant_name }}" readonly>
+                                        <input type="text" id="applicant_name" value="{{ $displayApplicantName }}" readonly>
                                         <button type="button" class="btn btn-secondary btn-sm" disabled>회원 검색</button>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label for="applicant_school_name">학교/학교</label>
                                     <div class="school-search-wrapper">
-                                        <input type="text" id="applicant_school_name" value="{{ $application->applicant_school_name ?? '' }}" readonly>
+                                        <input type="text" id="applicant_school_name" value="{{ $displaySchoolName }}" readonly>
                                         <button type="button" class="btn btn-secondary btn-sm" disabled>검색</button>
                                     </div>
                                 </div>
@@ -138,24 +147,18 @@
                                     <label>학년/반</label>
                                     <div class="grade-class-wrapper">
                                         <div class="grade-class-item">
-                                            @php
-                                                $grade = $application->applicant_grade ?? $application->member->grade ?? null;
-                                            @endphp
                                             <select id="applicant_grade" name="applicant_grade" disabled>
                                                 <option value="">학년</option>
                                                 @for($i = 1; $i <= 3; $i++)
-                                                    <option value="{{ $i }}" @selected($grade == $i)>{{ $i }}학년</option>
+                                                    <option value="{{ $i }}" @selected($displayApplicantGrade == $i)>{{ $i }}학년</option>
                                                 @endfor
                                             </select>
                                         </div>
                                         <div class="grade-class-item">
-                                            @php
-                                                $class = $application->applicant_class ?? $application->member->class_number ?? null;
-                                            @endphp
                                             <select id="applicant_class" name="applicant_class" disabled>
                                                 <option value="">반</option>
                                                 @for($i = 1; $i <= 20; $i++)
-                                                    <option value="{{ $i }}" @selected($class == $i)>{{ $i }}반</option>
+                                                    <option value="{{ $i }}" @selected($displayApplicantClass == $i)>{{ $i }}반</option>
                                                 @endfor
                                             </select>
                                         </div>
@@ -165,10 +168,10 @@
                                     <label>연락처</label>
                                     <div class="grade-class-wrapper">
                                         <div class="grade-class-item">
-                                            <input type="text" value="{{ $application->applicant_contact }}" readonly>
+                                            <input type="text" value="{{ $displayApplicantContact }}" readonly>
                                         </div>
                                         <div class="grade-class-item">
-                                            <input type="text" value="{{ $application->guardian_contact ?? '' }}" readonly>
+                                            <input type="text" value="{{ $displayGuardianContact }}" readonly>
                                         </div>
                                     </div>
                                 </div>

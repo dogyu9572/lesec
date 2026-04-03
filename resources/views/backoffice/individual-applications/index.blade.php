@@ -6,6 +6,7 @@
 <link rel="stylesheet" href="{{ asset('css/common/buttons.css') }}">
 <link rel="stylesheet" href="{{ asset('css/backoffice/users.css') }}">
 <link rel="stylesheet" href="{{ asset('css/backoffice/boards.css') }}">
+<link rel="stylesheet" href="{{ asset('css/backoffice/group-programs.css') }}">
 <link rel="stylesheet" href="{{ asset('css/backoffice/member-groups.css') }}">
 @endsection
 
@@ -145,7 +146,8 @@
                 <div class="table-responsive">
                     <table class="board-table">
 						<colgroup>
-							<col width="40">
+							<col width="56">
+							<col width="7%">
 							<col width="7%">
 							<col width="5%">
 							<col width="5%">
@@ -156,14 +158,44 @@
 							<col width="7%">
 							<col width="5%">
 							<col width="100">
-							<col width="100">
 							<col width="130">
 							<col width="80">
 						</colgroup>
                         <thead>
                             <tr>
                                 <th>번호</th>
-                                <th>신청번호</th>
+                                <th class="board-table-sortable">
+                                    @php
+                                        $sortParam = request('sort', 'applied_at');
+                                        $orderParam = request('order', 'desc');
+                                        $isSortByApplicationNumber = ($sortParam === 'application_number');
+                                        $isAsc = $orderParam === 'asc';
+                                        $nextOrder = $isSortByApplicationNumber && $isAsc ? 'desc' : 'asc';
+                                        $sortUrl = route('backoffice.individual-applications.index', array_merge(request()->except(['sort', 'order', 'page']), ['sort' => 'application_number', 'order' => $nextOrder]));
+                                    @endphp
+                                    <a href="{{ $sortUrl }}" class="board-table-sort-link">
+                                        신청번호
+                                        <span class="board-table-sort-arrows">
+                                            <i class="fas fa-arrows-alt-v" title="정렬"></i>
+                                        </span>
+                                    </a>
+                                </th>
+                                <th class="board-table-sortable">
+                                    @php
+                                        $sortParam = request('sort', 'applied_at');
+                                        $orderParam = request('order', 'desc');
+                                        $isSortByParticipation = ($sortParam === 'participation_date');
+                                        $isAsc = $orderParam === 'asc';
+                                        $nextOrder = $isSortByParticipation && $isAsc ? 'desc' : 'asc';
+                                        $sortUrl = route('backoffice.individual-applications.index', array_merge(request()->except(['sort', 'order', 'page']), ['sort' => 'participation_date', 'order' => $nextOrder]));
+                                    @endphp
+                                    <a href="{{ $sortUrl }}" class="board-table-sort-link">
+                                        참가일
+                                        <span class="board-table-sort-arrows">
+                                            <i class="fas fa-arrows-alt-v" title="정렬"></i>
+                                        </span>
+                                    </a>
+                                </th>
                                 <th>신청유형</th>
                                 <th>신청자명</th>
                                 <th>학교명</th>
@@ -173,8 +205,22 @@
                                 <th>결제방법</th>
                                 <th>결제상태</th>
                                 <th>참가비</th>
-                                <th>참가일</th>
-                                <th>신청일시</th>
+                                <th class="board-table-sortable">
+                                    @php
+                                        $sortParam = request('sort', 'applied_at');
+                                        $orderParam = request('order', 'desc');
+                                        $isSortByAppliedAt = ($sortParam === 'applied_at');
+                                        $isAsc = $orderParam === 'asc';
+                                        $nextOrder = $isSortByAppliedAt && $isAsc ? 'desc' : 'asc';
+                                        $sortUrl = route('backoffice.individual-applications.index', array_merge(request()->except(['sort', 'order', 'page']), ['sort' => 'applied_at', 'order' => $nextOrder]));
+                                    @endphp
+                                    <a href="{{ $sortUrl }}" class="board-table-sort-link">
+                                        신청일시
+                                        <span class="board-table-sort-arrows">
+                                            <i class="fas fa-arrows-alt-v" title="정렬"></i>
+                                        </span>
+                                    </a>
+                                </th>
                                 <th style="width: 80px;">관리</th>
                             </tr>
                         </thead>
@@ -183,17 +229,6 @@
                                 <tr>
                                     <td>{{ $applications->total() - ($applications->currentPage() - 1) * $applications->perPage() - $loop->index }}</td>
                                     <td>{{ $application->application_number }}</td>
-                                    <td>{{ $application->reception_type_label }}</td>
-                                    <td>{{ $application->applicant_name }}</td>
-                                    <td>{{ $application->applicant_school_name ?? '-' }}</td>
-                                    <td>{{ $application->education_type_label }}</td>
-                                    <td>{{ $application->program_name }}</td>
-                                    <td>
-                                        {{ $application->draw_result_label }}
-                                    </td>
-                                    <td>{{ $application->payment_method ? ($paymentMethods[$application->payment_method] ?? $application->payment_method) : '-' }}</td>
-                                    <td>{{ $application->payment_status_label }}</td>
-                                    <td>{{ $application->participation_fee ? number_format($application->participation_fee) : '-' }}</td>
                                     <td>
                                         @php
                                             $reservation = $application->reservation;
@@ -223,6 +258,17 @@
                                             -
                                         @endif
                                     </td>
+                                    <td>{{ $application->reception_type_label }}</td>
+                                    <td>{{ $application->member->name ?? $application->applicant_name }}</td>
+                                    <td>{{ $application->member->school_name ?? $application->applicant_school_name ?? '-' }}</td>
+                                    <td>{{ $application->education_type_label }}</td>
+                                    <td>{{ $application->program_name }}</td>
+                                    <td>
+                                        {{ $application->draw_result_label }}
+                                    </td>
+                                    <td>{{ $application->payment_method ? ($paymentMethods[$application->payment_method] ?? $application->payment_method) : '-' }}</td>
+                                    <td>{{ $application->payment_status_label }}</td>
+                                    <td>{{ $application->participation_fee ? number_format($application->participation_fee) : '-' }}</td>
                                     <td>{{ optional($application->applied_at)->format('Y.m.d H:i') ?? '-' }}</td>
                                     <td>
                                         <div class="board-btn-group">

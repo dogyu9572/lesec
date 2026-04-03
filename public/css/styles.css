@@ -531,6 +531,9 @@
 	.btn_submit.mt4 {margin-top:40px;}
 	.btns_tac {margin-top:80px; display:flex; justify-content:center; gap:8px;}
 	.btns_tac .btn_submit {margin:0;}
+	/* .btn_submit { display:block } 보다 뒤에 두어 초기에 수정 완료/취소 버튼이 숨겨지도록 함 */
+	.btns_tac .btn_submit.submit-button-hidden,
+	.btns_tac .btn.submit-button-hidden {display:none;}
 	.btns_tac .btn {width:200px; height:62px; line-height:60px; font-weight:500;}
 	.popup#pop_school .scroll {max-height:calc(100vh - 313px);}
 	

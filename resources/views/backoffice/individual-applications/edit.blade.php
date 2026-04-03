@@ -12,6 +12,14 @@
 @section('content')
 @php
     $drawResultValue = $application->draw_result ?? \App\Models\IndividualApplication::DRAW_RESULT_PENDING;
+    $memberInfo = $application->member;
+    $displayApplicantName = $memberInfo->name ?? $application->applicant_name ?? '';
+    $displaySchoolName = $memberInfo->school_name ?? $application->applicant_school_name ?? '';
+    $displayApplicantGrade = $memberInfo->grade ?? $application->applicant_grade ?? '';
+    $displayApplicantClass = $memberInfo->class_number ?? $application->applicant_class ?? '';
+    $displayApplicantContact = $memberInfo->contact ?? $application->applicant_contact ?? '';
+    $displayGuardianContact = $memberInfo->parent_contact ?? $application->guardian_contact ?? '';
+    $displayMemberEmail = $memberInfo?->email ?? '';
 @endphp
 <div class="admin-form-container">
     <div class="form-header">      
@@ -86,7 +94,7 @@
                                 <div class="form-group">
                                     <label for="applicant_name">신청자명</label>
                                     <div class="school-search-wrapper">
-                                        <input type="text" id="applicant_name" name="applicant_name" value="{{ $application->applicant_name }}" readonly>
+                                        <input type="text" id="applicant_name" name="applicant_name" value="{{ $displayApplicantName }}" readonly>
                                         <input type="hidden" id="member_id" name="member_id" value="{{ $application->member_id }}">
                                         <!-- <button type="button" id="member-search-btn" class="btn btn-secondary btn-sm"><i class="fas fa-search"></i> 회원 검색</button> -->
                                     </div>
@@ -94,9 +102,9 @@
                                 <div class="form-group">
                                     <label for="school_name">학교/학교</label>
                                     <div class="school-search-wrapper">
-                                        <input type="text" id="school_name" name="applicant_school_name" value="{{ $application->applicant_school_name ?? '' }}" readonly>
+                                        <input type="text" id="school_name" name="applicant_school_name" value="{{ $displaySchoolName }}" readonly>
                                         <input type="hidden" id="school_id" value="">
-                                        <button type="button" id="school-search-btn" class="btn btn-secondary btn-sm">
+                                        <button type="button" id="school-search-btn" class="btn btn-secondary btn-sm" disabled>
                                             <i class="fas fa-search"></i> 검색
                                         </button>
                                     </div>
@@ -105,12 +113,12 @@
                                     <label>학년/반</label>
                                     <div class="grade-class-wrapper">
                                         <div class="grade-class-item">
-                                            <input type="hidden" id="applicant_grade" name="applicant_grade" value="{{ $application->applicant_grade ?? ($application->member->grade ?? '') }}">
-                                            <input type="text" id="applicant_grade_display" value="{{ ($application->applicant_grade ?? $application->member->grade ?? '') ? ($application->applicant_grade ?? $application->member->grade) . '학년' : '' }}" readonly>
+                                            <input type="hidden" id="applicant_grade" name="applicant_grade" value="{{ $displayApplicantGrade }}">
+                                            <input type="text" id="applicant_grade_display" value="{{ $displayApplicantGrade ? $displayApplicantGrade . '학년' : '' }}" readonly>
                                         </div>
                                         <div class="grade-class-item">
-                                            <input type="hidden" id="applicant_class" name="applicant_class" value="{{ $application->applicant_class ?? ($application->member->class_number ?? '') }}">
-                                            <input type="text" id="applicant_class_display" value="{{ ($application->applicant_class ?? $application->member->class_number ?? '') ? ($application->applicant_class ?? $application->member->class_number) . '반' : '' }}" readonly>
+                                            <input type="hidden" id="applicant_class" name="applicant_class" value="{{ $displayApplicantClass }}">
+                                            <input type="text" id="applicant_class_display" value="{{ $displayApplicantClass ? $displayApplicantClass . '반' : '' }}" readonly>
                                         </div>
                                     </div>
                                 </div>
@@ -118,10 +126,10 @@
                                     <label>연락처</label>
                                     <div class="grade-class-wrapper contact-wrapper">
                                         <div class="grade-class-item">
-                                            <input type="text" id="applicant_contact" name="applicant_contact" value="{{ $application->applicant_contact }}" readonly>
+                                            <input type="text" id="applicant_contact" name="applicant_contact" value="{{ $displayApplicantContact }}" readonly>
                                         </div>
                                         <div class="grade-class-item">
-                                            <input type="text" id="guardian_contact" name="guardian_contact" value="{{ $application->guardian_contact ?? '' }}" readonly>
+                                            <input type="text" id="guardian_contact" name="guardian_contact" value="{{ $displayGuardianContact }}" readonly>
                                         </div>
                                     </div>
                                 </div>
@@ -142,6 +150,10 @@
                                 <div class="form-group">
                                     <label for="applied_at">신청일시</label>
                                     <input type="text" id="applied_at" value="{{ optional($application->applied_at)->format('Y.m.d H:i') ?? '' }}" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label for="member_email_display">이메일</label>
+                                    <input type="text" id="member_email_display" value="{{ $displayMemberEmail }}" readonly>
                                 </div>
                             </div>
                         </div>

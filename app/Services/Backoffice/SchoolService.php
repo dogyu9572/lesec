@@ -59,19 +59,27 @@ class SchoolService
     }
 
     /**
-     * 시/도 목록 조회
+     * 시/도 목록 조회 (등록된 학교에 쓰인 city 기준 + 없으면 맨 뒤에 검정고시·홈스쿨링·기타/해외)
      */
     public function getCities(): array
     {
-        return School::query()
+        $cities = School::query()
             ->whereNotNull('city')
             ->distinct()
             ->orderByRaw("CASE WHEN city = '기타/해외' THEN 1 ELSE 0 END")
             ->orderBy('city')
             ->pluck('city')
             ->filter()
-            ->values()
-            ->toArray();
+            ->unique()
+            ->values();
+
+        foreach (['검정고시', '홈스쿨링', '기타/해외'] as $fixedCity) {
+            if (!$cities->contains($fixedCity)) {
+                $cities->push($fixedCity);
+            }
+        }
+
+        return $cities->toArray();
     }
 
     /**
@@ -79,8 +87,8 @@ class SchoolService
      */
     public function getDistricts(?string $city = null): array
     {
-        // 기타/해외 선택 시 빈 배열 반환
-        if ($city === '기타/해외') {
+        // 시·군·구 없이 직접 입력하는 특수 시/도 선택 시 빈 배열 반환
+        if (in_array($city, ['기타/해외', '검정고시', '홈스쿨링'], true)) {
             return [];
         }
 

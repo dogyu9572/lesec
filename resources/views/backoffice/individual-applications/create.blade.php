@@ -176,7 +176,7 @@
                                     <div class="school-search-wrapper">
                                         <input type="text" id="school_name" name="applicant_school_name" value="{{ old('applicant_school_name') }}" readonly>
                                         <input type="hidden" id="school_id" value="">
-                                        <button type="button" id="school-search-btn" class="btn btn-secondary btn-sm">
+                                        <button type="button" id="school-search-btn" class="btn btn-secondary btn-sm" disabled>
                                             <i class="fas fa-search"></i> 검색
                                         </button>
                                     </div>

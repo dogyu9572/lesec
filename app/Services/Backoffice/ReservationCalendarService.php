@@ -3,6 +3,7 @@
 namespace App\Services\Backoffice;
 
 use App\Models\ProgramReservation;
+use App\Support\ProgramNameSort;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
@@ -141,6 +142,9 @@ class ReservationCalendarService
             }
         }
 
+        ProgramNameSort::sortReservationRows($individual);
+        ProgramNameSort::sortReservationRows($group);
+
         return [
             'individual' => $individual,
             'group' => $group,
@@ -176,6 +180,8 @@ class ReservationCalendarService
         foreach ($reservationsByDate as $dateKey => &$data) {
             $individual = $data['individual'] ?? [];
             $group = $data['group'] ?? [];
+            ProgramNameSort::sortReservationRows($individual);
+            ProgramNameSort::sortReservationRows($group);
             $data['individual'] = $individual;
             $data['group'] = $group;
             $data['summary'] = [
@@ -184,6 +190,7 @@ class ReservationCalendarService
                 'total' => count($individual) + count($group),
             ];
         }
+        unset($data);
 
         ksort($reservationsByDate);
 
@@ -202,6 +209,7 @@ class ReservationCalendarService
         return [
             'program_reservation_id' => $program->id,
             'type' => $program->application_type,
+            'education_type' => $program->education_type ?? '',
             'date' => $program->education_start_date ? Carbon::parse($program->education_start_date)->format('Y-m-d') : '',
             'education_start_date' => $program->education_start_date ? Carbon::parse($program->education_start_date)->format('Y-m-d') : null,
             'education_end_date' => $program->education_end_date ? Carbon::parse($program->education_end_date)->format('Y-m-d') : null,

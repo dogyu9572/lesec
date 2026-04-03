@@ -134,6 +134,7 @@
                         <col width="*">
                         <col width="5%">
                         <col width="6%">
+                        <col width="6%">
                         <col width="7%">
                         <col width="100">
                         <col width="100">
@@ -182,6 +183,7 @@
                             <th>프로그램명</th>
                             <th>신청인원</th>
                             <th>명단등록인원</th>
+                            <th>결제상태</th>
                             <th>결제방법</th>
                             <th>참가비</th>
                             <th>신청일시</th>
@@ -225,12 +227,13 @@
                                 @endif
                             </td>
                             <td>{{ data_get($application, 'application_status_label', '-') }}</td>
-                            <td>{{ data_get($application, 'applicant_name', '-') }}</td>
-                            <td>{{ data_get($application, 'school_name', '-') }}</td>
+                            <td>{{ data_get($application, 'member.name', data_get($application, 'applicant_name', '-')) }}</td>
+                            <td>{{ data_get($application, 'member.school_name', data_get($application, 'school_name', '-')) }}</td>
                             <td>{{ data_get($application, 'education_type_label', '-') }}</td>
                             <td>{{ data_get($application, 'program_name_label', '-') }}</td>
                             <td>{{ data_get($application, 'applicant_count', '-') }}</td>
                             <td>{{ count(data_get($application, 'participants', [])) }}</td>
+                            <td>{{ data_get($application, 'payment_status_label', '-') }}</td>
                             <td>{{ data_get($application, 'payment_method_label', '-') }}</td>
                             <td>
                                 @php $unitFee = $application->fee_per_person; @endphp

@@ -27,7 +27,7 @@ class GroupApplicationService
     public function getFilteredApplications(Request $request): LengthAwarePaginator
     {
         $query = GroupApplication::query()
-            ->with(['reservation', 'participants']);
+            ->with(['reservation', 'participants', 'member']);
 
         if ($request->filled('application_status')) {
             $query->where('application_status', $request->input('application_status'));
@@ -61,9 +61,19 @@ class GroupApplicationService
                 if ($searchType === 'application_number') {
                     $innerQuery->where('application_number', 'like', "%{$keyword}%");
                 } elseif ($searchType === 'applicant_name') {
-                    $innerQuery->where('applicant_name', 'like', "%{$keyword}%");
+                    $innerQuery->where(function ($q) use ($keyword) {
+                        $q->where('applicant_name', 'like', "%{$keyword}%")
+                            ->orWhereHas('member', function ($subQ) use ($keyword) {
+                                $subQ->where('name', 'like', "%{$keyword}%");
+                            });
+                    });
                 } elseif ($searchType === 'school_name') {
-                    $innerQuery->where('school_name', 'like', "%{$keyword}%");
+                    $innerQuery->where(function ($q) use ($keyword) {
+                        $q->where('school_name', 'like', "%{$keyword}%")
+                            ->orWhereHas('member', function ($subQ) use ($keyword) {
+                                $subQ->where('school_name', 'like', "%{$keyword}%");
+                            });
+                    });
                 } elseif ($searchType === 'program_name') {
                     $innerQuery->whereHas('reservation', function ($q) use ($keyword) {
                         $q->where('program_name', 'like', "%{$keyword}%");
@@ -73,6 +83,10 @@ class GroupApplicationService
                         ->where('application_number', 'like', "%{$keyword}%")
                         ->orWhere('applicant_name', 'like', "%{$keyword}%")
                         ->orWhere('school_name', 'like', "%{$keyword}%")
+                        ->orWhereHas('member', function ($subQ) use ($keyword) {
+                            $subQ->where('name', 'like', "%{$keyword}%")
+                                ->orWhere('school_name', 'like', "%{$keyword}%");
+                        })
                         ->orWhereHas('reservation', function ($q) use ($keyword) {
                             $q->where('program_name', 'like', "%{$keyword}%");
                         });
@@ -118,7 +132,7 @@ class GroupApplicationService
     public function getApplicationDetail(int $applicationId): GroupApplication
     {
         return GroupApplication::query()
-            ->with(['participants' => fn($query) => $query->orderBy('id', 'asc'), 'reservation'])
+            ->with(['participants' => fn($query) => $query->orderBy('id', 'asc'), 'reservation', 'member'])
             ->findOrFail($applicationId);
     }
 

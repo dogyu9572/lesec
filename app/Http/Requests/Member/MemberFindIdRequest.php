@@ -41,9 +41,12 @@ class MemberFindIdRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
+        $name = $this->input('name');
+        $contact = $this->input('contact');
+
         $this->merge([
-            'name' => trim((string) $this->input('name')),
-            'contact' => preg_replace('/[^0-9]/', '', (string) $this->input('contact')),
+            'name' => is_string($name) ? trim($name) : '',
+            'contact' => is_string($contact) ? preg_replace('/[^0-9]/', '', $contact) : '',
         ]);
     }
 }

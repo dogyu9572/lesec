@@ -260,7 +260,7 @@
      style="display: none;"></div>
 
 @section('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1" integrity="sha384-jb8JQMbMoBUzgWatfe6COACi2ljcDdZQ2OxczGA3bGNeWe+6DChMTBJemed7ZnvJ" crossorigin="anonymous"></script>
 <script src="{{ asset('js/backoffice/dashboard.js') }}"></script>
 <script src="{{ asset('js/backoffice/reservation-calendar.js') }}"></script>
 @endsection

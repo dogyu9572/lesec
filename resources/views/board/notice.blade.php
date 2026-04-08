@@ -7,6 +7,7 @@
 		<div class="board_top vab">
 			<div class="total">TOTAL<strong>{{ number_format($totalCount ?? 0) }}</strong></div>
 			<form class="search_wrap" method="get" action="{{ route('board.notice') }}">
+				<input type="hidden" name="CSRFToken" value="{{ csrf_token() }}">
 				<select name="search_type" id="search_type">
 					<option value="title" @if(($filters['search_type'] ?? 'title') === 'title') selected @endif>제목</option>
 					<option value="content" @if(($filters['search_type'] ?? '') === 'content') selected @endif>내용</option>

@@ -8,6 +8,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Session\TokenMismatchException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -44,5 +45,18 @@ return Application::configure(basePath: dirname(__DIR__))
             }
 
             return response()->view('errors.419', [], 419);
+        });
+
+        $exceptions->render(function (\Throwable $e, $request) {
+            if (!app()->hasDebugModeEnabled()
+                && !$e instanceof HttpException
+                && !$e instanceof TokenMismatchException
+            ) {
+                if ($request->expectsJson()) {
+                    return response()->json(['message' => '서비스 처리 중 오류가 발생했습니다.'], 500);
+                }
+
+                return response()->view('errors.500', [], 500);
+            }
         });
     })->create();

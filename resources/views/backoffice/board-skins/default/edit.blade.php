@@ -323,7 +323,7 @@
 @section('scripts')
     <!-- jQuery, Bootstrap, Summernote JS (순서 중요!) -->
     <script src="{{ asset('js/jquery-3.7.1.min.js') }}" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-Piv4xVNRyMGpqkS2by6br4gNJ7DXjqk09RmUpJ8jgGtD7zP9yug3goQfGII0yAns" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.js" integrity="sha384-i2Bp4eSJchLbcNhKfUAYCjD+Og0pvh5YgJRQ9PFln4m2cLs10fQa+gkhwdviv0ap" crossorigin="anonymous"></script>
     <script src="{{ asset('js/backoffice/board-post-form.js') }}"></script>
 @endsection

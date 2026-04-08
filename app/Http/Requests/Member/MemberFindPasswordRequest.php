@@ -43,10 +43,14 @@ class MemberFindPasswordRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
+        $loginId = $this->input('login_id');
+        $name = $this->input('name');
+        $contact = $this->input('contact');
+
         $this->merge([
-            'login_id' => trim((string) $this->input('login_id')),
-            'name' => trim((string) $this->input('name')),
-            'contact' => preg_replace('/[^0-9]/', '', (string) $this->input('contact')),
+            'login_id' => is_string($loginId) ? trim($loginId) : '',
+            'name' => is_string($name) ? trim($name) : '',
+            'contact' => is_string($contact) ? preg_replace('/[^0-9]/', '', $contact) : '',
         ]);
     }
 }

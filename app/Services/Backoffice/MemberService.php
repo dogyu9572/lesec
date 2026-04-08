@@ -89,8 +89,13 @@ class MemberService
                 $query->where(function ($q) use ($searchKeyword, $normalizedKeyword) {
                     $q->where('login_id', 'like', "%{$searchKeyword}%")
                         ->orWhere('name', 'like', "%{$searchKeyword}%")
-                        ->orWhere('school_name', 'like', "%{$searchKeyword}%")
-                        ->orWhere('email', 'like', "%{$searchKeyword}%")
+                        ->orWhere(function ($schoolQ) use ($searchKeyword) {
+                            $schoolQ->whereSchoolNameKeyword($searchKeyword);
+                        })
+                        ->orWhere(function ($emailQ) use ($searchKeyword) {
+                            Member::applyWhereDeterministicFieldMatches($emailQ, 'email', $searchKeyword);
+                            $emailQ->orWhere('email', 'like', "%{$searchKeyword}%");
+                        })
                         ->orWhere(function ($contactQ) use ($normalizedKeyword) {
                             Member::applyWhereDeterministicFieldMatches($contactQ, 'contact', $normalizedKeyword);
                             $contactQ->orWhere('contact', 'like', "%{$normalizedKeyword}%");
@@ -130,6 +135,13 @@ class MemberService
                     } else {
                         $query->where('city', 'like', "%{$searchKeyword}%");
                     }
+                } elseif ($searchType === 'school_name') {
+                    $query->whereSchoolNameKeyword($searchKeyword);
+                } elseif ($searchType === 'email') {
+                    $query->where(function ($emailQ) use ($searchKeyword) {
+                        Member::applyWhereDeterministicFieldMatches($emailQ, 'email', $searchKeyword);
+                        $emailQ->orWhere('email', 'like', "%{$searchKeyword}%");
+                    });
                 } else {
                     $query->where($searchType, 'like', "%{$searchKeyword}%");
                 }

@@ -126,6 +126,22 @@ class Member extends Authenticatable
     }
 
     /**
+     * 학교명 부분 검색 (schools.school_name 기준).
+     * members.school_name 은 암호화되어 SQL LIKE 로는 검색할 수 없음.
+     */
+    public function scopeWhereSchoolNameKeyword($query, string $keyword): void
+    {
+        $keyword = trim($keyword);
+        if ($keyword === '') {
+            return;
+        }
+
+        $query->whereHas('school', function ($schoolQuery) use ($keyword) {
+            $schoolQuery->where('school_name', 'like', '%'.$keyword.'%');
+        });
+    }
+
+    /**
      * 학교와의 관계
      */
     public function school()

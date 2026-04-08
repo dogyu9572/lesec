@@ -53,8 +53,8 @@ class SecurityHeaders
     }
 
     /**
-     * 사용자 사이트: script-src 에 unsafe-inline 미사용.
-     * style-src 에는 레이어 팝업·게시 HTML 등 인라인 style 속성 대응을 위해 unsafe-inline 유지.
+     * 사용자 사이트: script/style 모두 unsafe-inline 미사용을 기본으로 한다.
+     * 인쇄 페이지는 기존 템플릿 호환을 위해 style-src unsafe-inline을 제한 허용한다.
      */
     private function frontPolicy(string $nonce, Request $request): string
     {
@@ -64,8 +64,11 @@ class SecurityHeaders
             'https://cdn.jsdelivr.net',
             'https://cdnjs.cloudflare.com',
             'https://*.kakaocdn.net',
-            "'unsafe-inline'",
         ];
+
+        if ($request->is('print') || $request->is('print/*')) {
+            $styleSrc[] = "'unsafe-inline'";
+        }
 
         $directives = [
             "default-src 'self'",

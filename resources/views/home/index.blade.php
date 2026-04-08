@@ -114,11 +114,13 @@ $(".main_type_link dt button").click(function(){
             </script>
         @else
             {{-- 레이어팝업 (오버레이) --}}
-            <div class="popup-layer popup-fixed" 
+            <div class="popup-layer popup-fixed"
                  id="popup-{{ $popup->id }}"
                  data-popup-id="{{ $popup->id }}"
                  data-display-type="layer"
-                 style="position: absolute !important; width: {{ $popup->width }}px; height: auto; top: {{ $popup->position_top }}px; left: {{ $popup->position_left }}px; z-index: 99999;">
+                 data-popup-width="{{ $popup->width }}"
+                 data-popup-top="{{ $popup->position_top }}"
+                 data-popup-left="{{ $popup->position_left }}">
                 
                 <div class="popup-body">
                     @if($popup->popup_type === 'image' && $popup->popup_image)

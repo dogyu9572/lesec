@@ -6,8 +6,32 @@
 
     const PopupManager = {
         init: function() {
+            this.applyLayerLayout();
             this.checkCookies();
             this.bindEvents();
+        },
+
+        // CSP(style-src) 강화를 위해 인라인 style 대신 JS로 레이어 위치/크기 적용
+        applyLayerLayout: function() {
+            $('.popup-layer[data-display-type="layer"]').each(function() {
+                const width = parseInt($(this).attr('data-popup-width'), 10);
+                const top = parseInt($(this).attr('data-popup-top'), 10);
+                const left = parseInt($(this).attr('data-popup-left'), 10);
+
+                this.style.setProperty('position', 'absolute', 'important');
+                this.style.setProperty('height', 'auto');
+                this.style.setProperty('z-index', '99999');
+
+                if (!Number.isNaN(width)) {
+                    this.style.setProperty('width', width + 'px');
+                }
+                if (!Number.isNaN(top)) {
+                    this.style.setProperty('top', top + 'px');
+                }
+                if (!Number.isNaN(left)) {
+                    this.style.setProperty('left', left + 'px');
+                }
+            });
         },
 
         // 이벤트 바인딩 (이벤트 위임 패턴)

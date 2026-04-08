@@ -6,17 +6,16 @@
 		
 		<div class="board_top vab">
 			<div class="total">TOTAL<strong>{{ number_format($totalCount ?? 0) }}</strong></div>
-			<form class="search_wrap" method="get" action="{{ route('board.dataroom') }}">
-				<input type="hidden" name="CSRFToken" value="{{ csrf_token() }}">
+			<div class="search_wrap" data-search-url="{{ route('board.dataroom') }}">
 				<select name="search_type" id="search_type">
 					<option value="title" @if(($filters['search_type'] ?? 'title') === 'title') selected @endif>제목</option>
 					<option value="content" @if(($filters['search_type'] ?? '') === 'content') selected @endif>내용</option>
 				</select>
 				<div class="search_area">
-					<input type="text" name="keyword" value="{{ $filters['keyword'] ?? '' }}" placeholder="검색어를 입력해주세요.">
-					<button type="submit" class="btn">검색</button>
+					<input type="text" name="keyword" value="{{ $filters['keyword'] ?? '' }}" placeholder="검색어를 입력해주세요." data-search-keyword>
+					<button type="button" class="btn" data-search-submit>검색</button>
 				</div>
-			</form>
+			</div>
 		</div>
 
 		<div class="board_list mo_break_tbl">
@@ -84,4 +83,7 @@
 	</div>
 
 </main>
+@push('scripts')
+<script src="{{ asset('js/board-search.js') }}"></script>
+@endpush
 @endsection

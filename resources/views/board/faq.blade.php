@@ -11,20 +11,19 @@
 				<a href="{{ route('board.faq', array_merge(request()->except('page', 'category'), ['category' => $category])) }}" class="{{ ($filters['category'] ?? '') === $category ? 'on' : '' }}">{{ $category }}</a>
 				@endforeach
 			</div>
-			<form class="search_wrap" method="get" action="{{ route('board.faq') }}">
-				<input type="hidden" name="CSRFToken" value="{{ csrf_token() }}">
+			<div class="search_wrap" data-search-url="{{ route('board.faq') }}">
 				<select name="search_type" id="search_type">
 					<option value="title" @if(($filters['search_type'] ?? 'title') === 'title') selected @endif>제목</option>
 					<option value="content" @if(($filters['search_type'] ?? '') === 'content') selected @endif>내용</option>
 				</select>
 				<div class="search_area">
-					<input type="text" name="keyword" value="{{ $filters['keyword'] ?? '' }}" placeholder="검색어를 입력해주세요.">
-					<button type="submit" class="btn">검색</button>
+					<input type="text" name="keyword" value="{{ $filters['keyword'] ?? '' }}" placeholder="검색어를 입력해주세요." data-search-keyword>
+					<button type="button" class="btn" data-search-submit>검색</button>
 				</div>
 				@if(!empty($filters['category']))
 					<input type="hidden" name="category" value="{{ $filters['category'] }}">
 				@endif
-			</form>
+			</div>
 		</div>
 
 		<div class="faq_wrap">
@@ -92,6 +91,7 @@
 
 </main>
 @push('scripts')
+<script src="{{ asset('js/board-search.js') }}"></script>
 <script src="{{ asset('js/board-faq.js') }}"></script>
 @endpush
 @endsection

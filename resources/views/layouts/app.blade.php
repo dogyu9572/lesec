@@ -14,9 +14,9 @@
 	<meta property="og:title" content="서울대학교 농생명과학공동기기원 생명·환경과학교육센터" />
 	<meta property="og:subject" content="서울대학교 농생명과학공동기기원 생명·환경과학교육센터" />
 	<meta property="og:description" content="서울대학교 농생명과학공동기기원 생명·환경과학교육센터" />
-	<meta property="og:image" content="/images/og_image.jpg" />
-	<meta name="author" content="http://">
-	<link rel="canonical" href="http://" />
+	<meta property="og:image" content="{{ url('/images/og_image.jpg') }}" />
+	<meta name="author" content="{{ config('app.url') }}">
+	<link rel="canonical" href="{{ url()->current() }}" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5, user-scalable=yes">
 
 	<link rel="icon" href="/images/favicon.png" type="image/x-icon"/>
@@ -30,7 +30,7 @@
     
     <!-- jQuery (로컬 호스팅, SRI 무결성 검증 — CSP script-src 'self'와 일치) -->
     <script src="{{ asset('js/jquery-3.7.1.min.js') }}" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-	<script src="/js/com.js"></script>
+	<script src="{{ asset('js/com.js') }}"></script>
 </head>
 <body>
 	<a href="#main-content" class="skip-link">본문 바로가기</a>

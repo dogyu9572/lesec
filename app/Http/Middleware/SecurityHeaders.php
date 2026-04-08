@@ -27,6 +27,13 @@ class SecurityHeaders
         $response->headers->set('X-Content-Type-Options', 'nosniff');
         $response->headers->set('X-XSS-Protection', '1; mode=block');
 
+        if ($request->secure()) {
+            $response->headers->set(
+                'Strict-Transport-Security',
+                'max-age=31536000; includeSubDomains'
+            );
+        }
+
         if (!$response->headers->has('Content-Security-Policy')) {
             $response->headers->set('Content-Security-Policy', $this->contentSecurityPolicy($request));
         }
@@ -39,17 +46,17 @@ class SecurityHeaders
         $nonce = $request->attributes->get('csp_nonce', '');
 
         if ($request->is('backoffice') || $request->is('backoffice/*')) {
-            return $this->backofficePolicy($nonce);
+            return $this->backofficePolicy($nonce, $request);
         }
 
-        return $this->frontPolicy($nonce);
+        return $this->frontPolicy($nonce, $request);
     }
 
     /**
      * 사용자 사이트: script-src 에 unsafe-inline 미사용.
      * style-src 에는 레이어 팝업·게시 HTML 등 인라인 style 속성 대응을 위해 unsafe-inline 유지.
      */
-    private function frontPolicy(string $nonce): string
+    private function frontPolicy(string $nonce, Request $request): string
     {
         $styleSrc = [
             "'self'",
@@ -60,7 +67,7 @@ class SecurityHeaders
             "'unsafe-inline'",
         ];
 
-        return implode('; ', [
+        $directives = [
             "default-src 'self'",
             "script-src 'self' 'nonce-{$nonce}' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://ssl.daumcdn.net https://*.daumcdn.net https://*.kakaocdn.net",
             'style-src ' . implode(' ', $styleSrc),
@@ -68,19 +75,26 @@ class SecurityHeaders
             "img-src 'self' data: blob: https:",
             "connect-src 'self' https://api.tosspayments.com https://log.tosspayments.com https://*.tosspayments.com https://*.daumcdn.net https://*.kakao.com",
             "frame-src 'self' https://*.tosspayments.com",
+            "frame-ancestors 'self'",
             "form-action 'self' https://*.tosspayments.com",
             "object-src 'none'",
             "base-uri 'self'",
-        ]);
+        ];
+
+        if ($request->secure()) {
+            $directives[] = 'upgrade-insecure-requests';
+        }
+
+        return implode('; ', $directives);
     }
 
     /**
      * 백오피스: Summernote·다수 onclick 등으로 script/style unsafe-inline 유지.
      * (nonce가 함께 있으면 unsafe-inline이 무시되어 이벤트 핸들러가 차단될 수 있음)
      */
-    private function backofficePolicy(string $nonce): string
+    private function backofficePolicy(string $nonce, Request $request): string
     {
-        return implode('; ', [
+        $directives = [
             "default-src 'self'",
             "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
@@ -88,9 +102,16 @@ class SecurityHeaders
             "img-src 'self' data: blob: https:",
             "connect-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://api.tosspayments.com https://log.tosspayments.com https://*.tosspayments.com",
             "frame-src 'self' https://*.tosspayments.com",
+            "frame-ancestors 'self'",
             "form-action 'self' https://*.tosspayments.com",
             "object-src 'none'",
             "base-uri 'self'",
-        ]);
+        ];
+
+        if ($request->secure()) {
+            $directives[] = 'upgrade-insecure-requests';
+        }
+
+        return implode('; ', $directives);
     }
 }

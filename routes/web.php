@@ -24,6 +24,11 @@ use App\Http\Controllers\Member\SchoolSearchController;
 // 메인 페이지
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
+// 스캐너·비정상 세그먼트 단일 경로(/http:, /https:) — 콜론 URI는 아래 제약 라우트로만 매칭됨
+Route::any('{invalidUrlSchemeSegment}', fn () => response()->view('errors.404', [], 404))
+	->where('invalidUrlSchemeSegment', 'http:|https:')
+	->name('invalid.url_scheme_segment');
+
 // 팝업 표시 (일반 팝업용)
 Route::get('/popup/{popup}', [PopupController::class, 'showPopup'])->name('popup.show');
 
@@ -65,6 +70,8 @@ Route::prefix('sub')->name('sub.')->group(function () {
 
 //프로그램
 Route::prefix('program')->name('program.')->group(function () {
+	Route::any('{invalidUrlSchemeSegment}', fn () => response()->view('errors.404', [], 404))
+		->where('invalidUrlSchemeSegment', 'http:|https:');
 	// 통합 라우트 (타입별 유형 선택, 단체 신청, 개인 신청)
 	Route::get('/{type}', [ProgramController::class, 'show'])
 		->where('type', 'middle_semester|middle_vacation|high_semester|high_vacation|special')
@@ -116,6 +123,8 @@ Route::prefix('program')->name('program.')->group(function () {
 
 //게시판
 Route::prefix('board')->name('board.')->group(function () {
+	Route::any('{invalidUrlSchemeSegment}', fn () => response()->view('errors.404', [], 404))
+		->where('invalidUrlSchemeSegment', 'http:|https:');
 	//공지사항
 	Route::get('/notice', [SubController::class, 'notice'])->name('notice');
 	Route::get('/notice/attachments/{postId}/{attachmentIndex}', [SubController::class, 'downloadBoardAttachment'])
@@ -249,6 +258,4 @@ Route::prefix('error')->name('error.')->group(function () {
 require __DIR__ . '/backoffice.php';
 
 // 비정상 경로 등 미매칭 요청은 공통 404 뷰로 처리 (스캐너 탐지 대응)
-Route::fallback(function () {
-    abort(404);
-});
+Route::fallback(fn () => response()->view('errors.404', [], 404));

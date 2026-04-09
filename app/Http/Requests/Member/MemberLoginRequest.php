@@ -43,9 +43,11 @@ class MemberLoginRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $loginId = $this->input('login_id');
+        $password = $this->input('password');
 
         $this->merge([
             'login_id' => is_string($loginId) ? trim($loginId) : '',
+            'password' => is_string($password) ? $password : '',
             'remember_login_id' => $this->boolean('remember_login_id'),
         ]);
     }

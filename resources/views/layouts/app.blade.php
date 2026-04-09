@@ -30,7 +30,7 @@
     
     <!-- jQuery (로컬 호스팅, SRI 무결성 검증 — CSP script-src 'self'와 일치) -->
     <script src="{{ asset('js/jquery-3.7.1.min.js') }}" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-	<script src="{{ asset('js/com.js') }}"></script>
+	<script src="{{ asset('js/com.js') }}" integrity="sha384-awbKsQAd9Y12u/l4/kUbkV54Klmhu98t22vPe8ejs4RCMoOOD2R0LFHOYQOjVM5p" crossorigin="anonymous"></script>
 </head>
 <body>
 	<a href="#main-content" class="skip-link">본문 바로가기</a>

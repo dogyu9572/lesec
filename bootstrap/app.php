@@ -7,7 +7,6 @@ use App\Http\Middleware\TrustHosts;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use Illuminate\Session\TokenMismatchException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -37,7 +36,13 @@ return Application::configure(basePath: dirname(__DIR__))
             ->description('학교 알리미 API에서 학교 정보 자동 동기화');
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        $exceptions->render(function (TokenMismatchException $e, $request) {
+        // Laravel는 TokenMismatchException을 prepareException 단계에서 HttpException(419)으로 바꾼 뒤
+        // render 콜백에 넘기므로, 419는 HttpException으로 처리해야 한다.
+        $exceptions->render(function (HttpException $e, $request) {
+            if ($e->getStatusCode() !== 419) {
+                return null;
+            }
+
             if ($request->expectsJson()) {
                 return response()->json([
                     'message' => '세션이 만료되었습니다. 페이지를 새로고침한 뒤 다시 시도해 주세요.',
@@ -45,7 +50,7 @@ return Application::configure(basePath: dirname(__DIR__))
             }
 
             return redirect()
-                ->back()
+                ->back(302, [], '/')
                 ->withErrors(['session' => '세션이 만료되었습니다. 페이지를 새로고침한 뒤 다시 시도해 주세요.'])
                 ->withInput($request->except(['password', 'password_confirmation']));
         });
@@ -53,7 +58,6 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (\Throwable $e, $request) {
             if (!app()->hasDebugModeEnabled()
                 && !$e instanceof HttpException
-                && !$e instanceof TokenMismatchException
             ) {
                 if ($request->expectsJson()) {
                     return response()->json(['message' => '서비스 처리 중 오류가 발생했습니다.'], 500);

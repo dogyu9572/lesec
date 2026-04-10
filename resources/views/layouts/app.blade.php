@@ -127,8 +127,7 @@
 			</nav>
 			@if ($isMemberLoggedIn)
 			<form id="member-logout-form" action="{{ route('member.logout') }}" method="POST" class="is-hidden">
-				@csrf
-				<input type="hidden" name="CSRFToken" value="{{ csrf_token() }}">
+				@include('member.partials.csrf-fields-head')
 			</form>
 			@endif
 		</div>

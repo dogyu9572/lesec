@@ -91,9 +91,13 @@ class MemberAuthController extends Controller
         }
 
         RateLimiter::hit($limiterKey, self::LOGIN_LOCKOUT_SECONDS);
+        $failedCount = RateLimiter::attempts($limiterKey);
 
         return back()
-            ->withErrors(['login_failed' => '아이디 또는 비밀번호가 올바르지 않습니다.'])
+            ->withErrors([
+                'login_failed' => '아이디 또는 비밀번호가 올바르지 않습니다. '
+                    . "(연속 실패 {$failedCount}회, 5회 초과 시 10분간 로그인이 제한됩니다.)",
+            ])
             ->onlyInput('login_id');
     }
 

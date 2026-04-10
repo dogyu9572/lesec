@@ -16,8 +16,7 @@
 					<p class="error_alert mb16">{{ $errors->first('login_failed') }}</p>
 				@endif
 				<form method="POST" action="{{ route('member.login.submit') }}" class="js-member-form">
-					@csrf
-					<input type="hidden" name="CSRFToken" value="{{ csrf_token() }}">
+					@include('member.partials.csrf-fields-head')
 					<div class="password-wrap">
 						<input type="text" name="login_id" class="text" placeholder="아이디를 입력해주세요." value="{{ old('login_id', $savedLoginId ?? '') }}" aria-label="아이디">
 						<button type="button" class="btn-clear clear-password" aria-label="삭제">
@@ -57,6 +56,7 @@
 					</div>
 					<button type="submit" class="btn btn_wbb">로그인</button>
 					<a href="{{ route('member.register') }}" class="btn btn_bwb">회원가입</a>
+					@include('member.partials.csrf-fields-tail')
 				</form>
 			</div>
 		</div>

@@ -17,8 +17,7 @@
 				<p class="error_alert mb16">{{ $errors->first('find_pw_flow') }}</p>
 				@endif
 				<form method="POST" action="{{ route('member.find_pw.submit') }}" class="js-member-form">
-					@csrf
-					<input type="hidden" name="CSRFToken" value="{{ csrf_token() }}">
+					@include('member.partials.csrf-fields-head')
 					<input type="text" name="name" class="text" value="{{ old('name') }}" placeholder="이름을 입력해 주세요." aria-label="이름">
 					@error('name')
 					<p class="error_alert">{{ $message }}</p>
@@ -31,6 +30,7 @@
 					@error('login_id')
 					<p class="error_alert">{{ $message }}</p>
 					@enderror
+					@include('member.partials.csrf-fields-tail')
 					<button type="submit" class="btn btn_wbb mt4">확인</button>
 				</form>
 			</div>

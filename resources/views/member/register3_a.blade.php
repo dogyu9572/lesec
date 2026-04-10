@@ -24,7 +24,7 @@
 				@if ($errors->any())
 					data-errors='@json($errors->messages())'
 				@endif>
-				@csrf
+				@include('member.partials.csrf-fields-head')
 
 				<div class="stit num mb0 nbd_b"><span>1</span>기본 정보 <p class="abso">* 는 필수 입력 사항입니다.</p></div>
 				<div class="inputs">
@@ -264,6 +264,7 @@
 					</div>
 				</div>
 
+				@include('member.partials.csrf-fields-tail')
 				<button type="submit" class="btn_submit btn_wbb">가입하기</button>
 			</form>
 			

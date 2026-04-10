@@ -176,10 +176,10 @@
                                                 data-participation-date="{{ optional($program->education_start_date)->format('Y-m-d') }}"
                                                 data-education-fee="{{ $program->education_fee ?? 0 }}"
                                                 data-has-online-card="{{ $hasOnlineCard ? '1' : '0' }}">
-                                                @csrf
-                                                <input type="hidden" name="CSRFToken" value="{{ csrf_token() }}">
+                                                @include('member.partials.csrf-fields-head')
                                                 <input type="hidden" name="program_reservation_id" value="{{ $program->id }}">
                                                 <input type="hidden" name="participation_date" value="{{ optional($program->education_start_date)->format('Y-m-d') }}">
+                                                @include('member.partials.csrf-fields-tail')
                                                 <button type="submit" class="btn btn_kwk js-individual-apply-btn">대기자 신청</button>
                                             </form>
                                         @endif
@@ -192,10 +192,10 @@
                                             data-participation-date="{{ optional($program->education_start_date)->format('Y-m-d') }}"
                                             data-education-fee="{{ $program->education_fee ?? 0 }}"
                                             data-has-online-card="{{ $hasOnlineCard ? '1' : '0' }}">
-                                            @csrf
-                                            <input type="hidden" name="CSRFToken" value="{{ csrf_token() }}">
+                                            @include('member.partials.csrf-fields-head')
                                             <input type="hidden" name="program_reservation_id" value="{{ $program->id }}">
                                             <input type="hidden" name="participation_date" value="{{ optional($program->education_start_date)->format('Y-m-d') }}">
+                                            @include('member.partials.csrf-fields-tail')
                                             <button type="submit" class="btn btn_wkk js-individual-apply-btn">신청하기</button>
                                         </form>
                                     @endif

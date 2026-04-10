@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\RateLimiter;
 
 class MemberAuthController extends Controller
 {
-    private const LOGIN_MAX_ATTEMPTS = 5;
+    private const LOGIN_MAX_ATTEMPTS = 4;
     private const LOGIN_LOCKOUT_SECONDS = 600;
 
     public function __construct(private readonly MemberAuthService $authService) {}
@@ -50,7 +50,7 @@ class MemberAuthController extends Controller
     /**
      * 로그인 처리
      */
-    public function login(MemberLoginRequest $request): \Illuminate\Http\RedirectResponse
+    public function login(MemberLoginRequest $request): \Illuminate\Http\RedirectResponse|\Illuminate\Http\Response
     {
         $limiterKey = $this->buildLoginRateLimitKey(
             (string) $request->input('login_id'),
@@ -61,9 +61,16 @@ class MemberAuthController extends Controller
             $seconds = RateLimiter::availableIn($limiterKey);
             $minutes = (int) ceil(max($seconds, 1) / 60);
 
-            return back()
-                ->withErrors(['login_failed' => "로그인 시도 횟수를 초과했습니다. {$minutes}분 후 다시 시도해 주세요."])
-                ->onlyInput('login_id');
+            $errors = (new \Illuminate\Support\ViewErrorBag())->put(
+                'default',
+                new \Illuminate\Support\MessageBag(['login_failed' => ["로그인 시도 횟수를 초과했습니다. {$minutes}분 후 다시 시도해 주세요."]])
+            );
+
+            return response()->view('member.login', [
+                'gNum' => '00', 'sNum' => '01', 'gName' => '로그인', 'sName' => '로그인',
+                'savedLoginId' => $request->input('login_id'),
+                'errors' => $errors,
+            ], 429);
         }
 
         $credentials = [

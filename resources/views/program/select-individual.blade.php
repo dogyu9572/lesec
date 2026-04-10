@@ -179,7 +179,6 @@
                                                 @include('member.partials.csrf-fields-head')
                                                 <input type="hidden" name="program_reservation_id" value="{{ $program->id }}">
                                                 <input type="hidden" name="participation_date" value="{{ optional($program->education_start_date)->format('Y-m-d') }}">
-                                                @include('member.partials.csrf-fields-tail')
                                                 <button type="submit" class="btn btn_kwk js-individual-apply-btn">대기자 신청</button>
                                             </form>
                                         @endif
@@ -195,7 +194,6 @@
                                             @include('member.partials.csrf-fields-head')
                                             <input type="hidden" name="program_reservation_id" value="{{ $program->id }}">
                                             <input type="hidden" name="participation_date" value="{{ optional($program->education_start_date)->format('Y-m-d') }}">
-                                            @include('member.partials.csrf-fields-tail')
                                             <button type="submit" class="btn btn_wkk js-individual-apply-btn">신청하기</button>
                                         </form>
                                     @endif

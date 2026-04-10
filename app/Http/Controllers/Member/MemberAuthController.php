@@ -20,7 +20,7 @@ class MemberAuthController extends Controller
     public function showLoginForm(Request $request): \Illuminate\View\View|\Illuminate\Http\RedirectResponse
     {
         if ($this->hasSuspiciousQuery($request)) {
-            return redirect()->route('member.login');
+            abort(400);
         }
 
         $gNum = '00';

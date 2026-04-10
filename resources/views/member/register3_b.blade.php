@@ -273,8 +273,7 @@
 					@enderror
 				</div>
 
-				@include('member.partials.csrf-fields-tail')
-				<button type="submit" class="btn_submit btn_wbb">가입하기</button>
+			<button type="submit" class="btn_submit btn_wbb">가입하기</button>
 			</form>
 			
 		</div>

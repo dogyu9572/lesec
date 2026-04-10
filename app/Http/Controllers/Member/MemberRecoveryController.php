@@ -28,7 +28,7 @@ class MemberRecoveryController extends Controller
     public function showFindIdForm(Request $request): \Illuminate\View\View|\Illuminate\Http\RedirectResponse
     {
         if (!empty($request->query())) {
-            return redirect()->route('member.find_id');
+            abort(400);
         }
 
         $gNum = '00';
@@ -103,7 +103,7 @@ class MemberRecoveryController extends Controller
     public function showFindPasswordForm(Request $request): \Illuminate\View\View|\Illuminate\Http\RedirectResponse
     {
         if (!empty($request->query())) {
-            return redirect()->route('member.find_pw');
+            abort(400);
         }
 
         $gNum = '00';

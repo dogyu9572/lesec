@@ -56,7 +56,6 @@
 					</div>
 					<button type="submit" class="btn btn_wbb">로그인</button>
 					<a href="{{ route('member.register') }}" class="btn btn_bwb">회원가입</a>
-					@include('member.partials.csrf-fields-tail')
 				</form>
 			</div>
 		</div>

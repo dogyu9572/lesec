@@ -30,7 +30,6 @@
 					@error('login_id')
 					<p class="error_alert">{{ $message }}</p>
 					@enderror
-					@include('member.partials.csrf-fields-tail')
 					<button type="submit" class="btn btn_wbb mt4">확인</button>
 				</form>
 			</div>

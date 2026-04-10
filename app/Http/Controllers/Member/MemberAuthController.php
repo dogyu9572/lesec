@@ -6,35 +6,42 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Member\MemberLoginRequest;
 use Illuminate\Http\Request;
 use App\Services\Member\MemberAuthService;
-use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\RateLimiter;
 
 class MemberAuthController extends Controller
 {
+    private const LOGIN_MAX_ATTEMPTS = 5;
+    private const LOGIN_LOCKOUT_SECONDS = 600;
+
     public function __construct(private readonly MemberAuthService $authService) {}
     /**
      * 로그인 페이지 표시
      */
-    public function showLoginForm(): \Illuminate\View\View
+    public function showLoginForm(Request $request): \Illuminate\View\View|\Illuminate\Http\RedirectResponse
     {
+        if ($this->hasSuspiciousQuery($request)) {
+            return redirect()->route('member.login');
+        }
+
         $gNum = '00';
         $sNum = '01';
         $gName = '로그인';
         $sName = '로그인';
 
         // 로그인 성공 후 돌아갈 URL 설정 (오픈 리다이렉트 방지: 상대 경로만 허용)
-        $redirect = request()->query('redirect');
+        $redirect = $request->query('redirect');
         if (is_string($redirect) && $redirect !== '') {
             $redirect = trim($redirect);
             // "/path?query" 형태만 허용
             if (str_starts_with($redirect, '/')) {
-                request()->session()->put('url.intended', $redirect);
+                $request->session()->put('url.intended', $redirect);
             }
         }
 
         // 저장된 아이디 읽기 (old 값이 없을 때만 사용)
         $savedLoginId = null;
         if (!old('login_id')) {
-            $savedLoginId = request()->cookie('saved_login_id');
+            $savedLoginId = $request->cookie('saved_login_id');
         }
 
         return view('member.login', compact('gNum', 'sNum', 'gName', 'sName', 'savedLoginId'));
@@ -45,6 +52,20 @@ class MemberAuthController extends Controller
      */
     public function login(MemberLoginRequest $request): \Illuminate\Http\RedirectResponse
     {
+        $limiterKey = $this->buildLoginRateLimitKey(
+            (string) $request->input('login_id'),
+            (string) $request->ip()
+        );
+
+        if (RateLimiter::tooManyAttempts($limiterKey, self::LOGIN_MAX_ATTEMPTS)) {
+            $seconds = RateLimiter::availableIn($limiterKey);
+            $minutes = (int) ceil(max($seconds, 1) / 60);
+
+            return back()
+                ->withErrors(['login_failed' => "로그인 시도 횟수를 초과했습니다. {$minutes}분 후 다시 시도해 주세요."])
+                ->onlyInput('login_id');
+        }
+
         $credentials = [
             'login_id' => $request->get('login_id'),
             'password' => $request->get('password'),
@@ -52,6 +73,7 @@ class MemberAuthController extends Controller
         ];
 
         if ($this->authService->attemptLogin($credentials, $request->boolean('remember_login_id'))) {
+            RateLimiter::clear($limiterKey);
             $request->session()->regenerate();
 
             $response = redirect()->intended(route('home'));
@@ -67,6 +89,8 @@ class MemberAuthController extends Controller
 
             return $response;
         }
+
+        RateLimiter::hit($limiterKey, self::LOGIN_LOCKOUT_SECONDS);
 
         return back()
             ->withErrors(['login_failed' => '아이디 또는 비밀번호가 올바르지 않습니다.'])
@@ -86,5 +110,24 @@ class MemberAuthController extends Controller
         return redirect()
             ->route('member.login')
             ->with('status', '로그아웃되었습니다.');
+    }
+
+    private function hasSuspiciousQuery(Request $request): bool
+    {
+        $allowedKeys = ['redirect'];
+        $queryKeys = array_keys($request->query());
+
+        foreach ($queryKeys as $key) {
+            if (!in_array((string) $key, $allowedKeys, true)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function buildLoginRateLimitKey(string $loginId, string $ipAddress): string
+    {
+        return 'member-login:' . sha1(strtolower(trim($loginId)) . '|' . $ipAddress);
     }
 }

@@ -4,16 +4,15 @@
 
 	<div class="location_wrap">
 		<div class="map_wrap">
-			<div id="daumRoughmapContainer1761096711855" class="root_daum_roughmap root_daum_roughmap_landing"></div>
-			<script charset="UTF-8" class="daum_roughmap_loader_script" src="https://ssl.daumcdn.net/dmaps/map_js_init/roughmapLoader.js"></script>
-			<script charset="UTF-8" nonce="{{ $cspNonce }}">
-				new daum.roughmap.Lander({
-					"timestamp" : "1761096711855",
-					"key" : "yewgtasywjg",
-					"mapWidth" : "1920",
-					"mapHeight" : "400"
-				}).render();
-			</script>
+			<div class="inner map_text_wrap">
+				<div class="map_text">
+					<div class="address">
+						<strong>지도 안내</strong>
+						<p>보안 정책 적용으로 지도는 외부 페이지에서 확인할 수 있습니다.</p>
+						<a href="https://map.kakao.com/link/search/서울대학교%2075동" target="_blank" rel="noopener noreferrer" class="btn btn_wbb mt16">카카오맵에서 위치 확인</a>
+					</div>
+				</div>
+			</div>
 		</div>
 		<div class="inner map_text_wrap">
 			<div class="map_text flex">

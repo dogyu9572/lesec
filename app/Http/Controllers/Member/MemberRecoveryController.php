@@ -25,8 +25,12 @@ class MemberRecoveryController extends Controller
     /**
      * 아이디 찾기 화면
      */
-    public function showFindIdForm(): \Illuminate\View\View
+    public function showFindIdForm(Request $request): \Illuminate\View\View|\Illuminate\Http\RedirectResponse
     {
+        if (!empty($request->query())) {
+            return redirect()->route('member.find_id');
+        }
+
         $gNum = '00';
         $sNum = '03';
         $gName = '회원가입';
@@ -96,8 +100,12 @@ class MemberRecoveryController extends Controller
     /**
      * 비밀번호 변경 요청 화면
      */
-    public function showFindPasswordForm(): \Illuminate\View\View
+    public function showFindPasswordForm(Request $request): \Illuminate\View\View|\Illuminate\Http\RedirectResponse
     {
+        if (!empty($request->query())) {
+            return redirect()->route('member.find_pw');
+        }
+
         $gNum = '00';
         $sNum = '03';
         $gName = '회원가입';

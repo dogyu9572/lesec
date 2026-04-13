@@ -47,11 +47,6 @@ return Application::configure(basePath: dirname(__DIR__))
                 return null;
             }
 
-            // 회원 영역 POST는 스캐너/클라이언트가 CSRF 실패를 명확히 인지하도록 419를 그대로 반환
-            if ($request->isMethod('POST') && $request->is('member/*')) {
-                return response('CSRF token mismatch.', 419);
-            }
-
             if ($request->expectsJson()) {
                 return response()->json([
                     'message' => '세션이 만료되었습니다. 페이지를 새로고침한 뒤 다시 시도해 주세요.',

@@ -12,13 +12,13 @@
 				@if (session('status'))
 					<p class="c_green mb16">{{ session('status') }}</p>
 				@endif
-				@if ($errors->has('login_failed'))
-					<p class="error_alert mb16">{{ $errors->first('login_failed') }}</p>
+				@if (!empty($loginFailedMessage))
+					<p class="error_alert mb16">{{ $loginFailedMessage }}</p>
 				@endif
 				<form method="POST" action="{{ route('member.login.submit') }}" class="js-member-form">
 					@include('member.partials.csrf-fields-head')
 					<div class="password-wrap">
-						<input type="text" name="login_id" class="text" placeholder="아이디를 입력해주세요." value="{{ old('login_id', $savedLoginId ?? '') }}" aria-label="아이디">
+						<input type="text" name="login_id" class="text" placeholder="아이디를 입력해주세요." value="{{ $loginIdField }}" aria-label="아이디">
 						<button type="button" class="btn-clear clear-password" aria-label="삭제">
 							<img src="/images/icon_clear.svg" alt="삭제">
 						</button>
@@ -46,7 +46,7 @@
 
 					<div class="btns">
 						<label class="check">
-							<input type="checkbox" name="remember_login_id" value="1" {{ old('remember_login_id') || (isset($savedLoginId) && $savedLoginId) ? 'checked' : '' }}>
+							<input type="checkbox" name="remember_login_id" value="1" {{ $rememberLoginChecked ? 'checked' : '' }}>
 							<i></i>아이디 저장
 						</label>
 						<div class="finds">

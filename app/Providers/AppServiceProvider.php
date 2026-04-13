@@ -4,12 +4,15 @@ namespace App\Providers;
 
 use App\Models\AdminMenu;
 use App\Models\Setting;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Request as RequestFacade;
 use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
@@ -27,6 +30,21 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        RateLimiter::for('member-login', function (Request $request) {
+            $loginId = strtolower(trim((string) $request->input('login_id', '')));
+            $limiterKey = $request->ip() . '|' . $loginId;
+
+            // 스캐너 기준에서 5회 연속 시도 내 차단이 명확히 보이도록 5번째 요청부터 429 반환
+            return Limit::perMinutes(10, 4)
+                ->by($limiterKey)
+                ->response(function () {
+                    return response(
+                        '로그인 시도 횟수를 초과했습니다. 잠시 후 다시 시도해 주세요.',
+                        429
+                    );
+                });
+        });
+
         View::share('cspNonce', '');
 
         // HTTPS 강제 (.env의 APP_URL이 https://로 시작하는 경우)
@@ -41,9 +59,9 @@ class AppServiceProvider extends ServiceProvider
         }
 
         // 백오피스 경로에서 현재 메뉴 정보를 뷰에 공유
-        if (Request::is('backoffice*')) {
+        if (RequestFacade::is('backoffice*')) {
             View::composer('*', function ($view) {
-                $currentPath = Request::path();
+                $currentPath = RequestFacade::path();
                 $currentMenu = AdminMenu::getCurrentMenu($currentPath);
 
                 // 현재 메뉴가 있으면 타이틀 생성, 없으면 기본 타이틀 사용

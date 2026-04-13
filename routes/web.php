@@ -201,7 +201,9 @@ Route::prefix('location')->name('location.')->group(function () {
 Route::prefix('member')->name('member.')->group(function () {
 	// 로그인
 	Route::get('/login', [MemberAuthController::class, 'showLoginForm'])->name('login');
-	Route::post('/login', [MemberAuthController::class, 'login'])->name('login.submit');
+	Route::post('/login', [MemberAuthController::class, 'login'])
+		->middleware('throttle:member-login')
+		->name('login.submit');
 	Route::post('/logout', [MemberAuthController::class, 'logout'])->name('logout');
 
 	// 회원가입

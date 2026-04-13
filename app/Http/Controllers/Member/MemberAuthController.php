@@ -7,10 +7,13 @@ use App\Http\Requests\Member\MemberLoginRequest;
 use Illuminate\Http\Request;
 use App\Services\Member\MemberAuthService;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\MessageBag;
+use Illuminate\Support\ViewErrorBag;
 
 class MemberAuthController extends Controller
 {
-    private const LOGIN_MAX_ATTEMPTS = 4;
+    /** 연속 실패 이 횟수 이상이면 잠금 (5회 실패 후 6번째 요청부터 차단) */
+    private const LOGIN_MAX_ATTEMPTS = 5;
     private const LOGIN_LOCKOUT_SECONDS = 600;
 
     public function __construct(private readonly MemberAuthService $authService) {}
@@ -23,11 +26,6 @@ class MemberAuthController extends Controller
             abort(400);
         }
 
-        $gNum = '00';
-        $sNum = '01';
-        $gName = '로그인';
-        $sName = '로그인';
-
         // 로그인 성공 후 돌아갈 URL 설정 (오픈 리다이렉트 방지: 상대 경로만 허용)
         $redirect = $request->query('redirect');
         if (is_string($redirect) && $redirect !== '') {
@@ -38,13 +36,7 @@ class MemberAuthController extends Controller
             }
         }
 
-        // 저장된 아이디 읽기 (old 값이 없을 때만 사용)
-        $savedLoginId = null;
-        if (!old('login_id')) {
-            $savedLoginId = $request->cookie('saved_login_id');
-        }
-
-        return view('member.login', compact('gNum', 'sNum', 'gName', 'sName', 'savedLoginId'));
+        return view('member.login', $this->loginPageData($request, new ViewErrorBag()));
     }
 
     /**
@@ -61,16 +53,16 @@ class MemberAuthController extends Controller
             $seconds = RateLimiter::availableIn($limiterKey);
             $minutes = (int) ceil(max($seconds, 1) / 60);
 
-            $errors = (new \Illuminate\Support\ViewErrorBag())->put(
+            $errors = (new ViewErrorBag())->put(
                 'default',
-                new \Illuminate\Support\MessageBag(['login_failed' => ["로그인 시도 횟수를 초과했습니다. {$minutes}분 후 다시 시도해 주세요."]])
+                new MessageBag(['login_failed' => ["로그인 시도 횟수를 초과했습니다. {$minutes}분 후 다시 시도해 주세요."]])
             );
 
-            return response()->view('member.login', [
-                'gNum' => '00', 'sNum' => '01', 'gName' => '로그인', 'sName' => '로그인',
-                'savedLoginId' => $request->input('login_id'),
-                'errors' => $errors,
-            ], 429);
+            return response()->view(
+                'member.login',
+                $this->loginPageData($request, $errors),
+                429
+            );
         }
 
         $credentials = [
@@ -100,12 +92,17 @@ class MemberAuthController extends Controller
         RateLimiter::hit($limiterKey, self::LOGIN_LOCKOUT_SECONDS);
         $failedCount = RateLimiter::attempts($limiterKey);
 
-        return back()
-            ->withErrors([
+        $lockoutMinutes = (int) (self::LOGIN_LOCKOUT_SECONDS / 60);
+        $errors = (new ViewErrorBag())->put(
+            'default',
+            new MessageBag([
                 'login_failed' => '아이디 또는 비밀번호가 올바르지 않습니다. '
-                    . "(연속 실패 {$failedCount}회, 5회 초과 시 10분간 로그인이 제한됩니다.)",
+                    . "(연속 실패 {$failedCount}회, ".self::LOGIN_MAX_ATTEMPTS."회 실패 시 {$lockoutMinutes}분간 로그인이 제한됩니다.)",
             ])
-            ->onlyInput('login_id');
+        );
+
+        // POST 응답 본문에 실패 횟수가 포함되도록 302 대신 422 + 뷰 반환 (DAST 등 동일 본문 오탐 방지)
+        return response()->view('member.login', $this->loginPageData($request, $errors), 422);
     }
 
     /**
@@ -141,4 +138,38 @@ class MemberAuthController extends Controller
     {
         return 'member-login:' . sha1(strtolower(trim($loginId)) . '|' . $ipAddress);
     }
+
+    /**
+     * 로그인 폼 뷰 데이터 (GET / 실패 POST / 잠금 429 공통)
+     */
+    private function loginPageData(Request $request, ViewErrorBag $errors): array
+    {
+        $savedLoginId = null;
+        if (! $request->old('login_id')) {
+            $savedLoginId = $request->cookie('saved_login_id');
+        }
+
+        $hasLoginFailed = $errors->has('login_failed');
+
+        if ($request->isMethod('POST') && $hasLoginFailed) {
+            $loginIdField = (string) $request->input('login_id', '');
+            $rememberLoginChecked = $request->boolean('remember_login_id');
+        } else {
+            $loginIdField = old('login_id', $savedLoginId ?? '');
+            $rememberLoginChecked = (bool) old('remember_login_id') || (bool) $savedLoginId;
+        }
+
+        return [
+            'gNum' => '00',
+            'sNum' => '01',
+            'gName' => '로그인',
+            'sName' => '로그인',
+            'savedLoginId' => $savedLoginId,
+            'loginIdField' => $loginIdField,
+            'rememberLoginChecked' => $rememberLoginChecked,
+            'loginFailedMessage' => $errors->first('login_failed'),
+            'errors' => $errors,
+        ];
+    }
+
 }

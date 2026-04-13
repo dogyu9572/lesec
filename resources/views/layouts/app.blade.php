@@ -219,7 +219,7 @@
     @yield('popups')
     
     <!-- 스크립트 -->
-    <script src="{{ asset('js/popup.js') }}" integrity="sha384-4Pq2nQgfCDlAQX66AB/N1GIiiQ5RYLCO30PJhCmjR/E1QdaC6re5iF8n9hSXhASY" crossorigin="anonymous"></script>
+    <script src="{{ asset('js/popup.js') }}" integrity="sha384-RUQlhYemTgWjsr52IR8oTmpsQb7wQWdF0RSK2UxKGXtf81xCqvoWqtAHgZfStFKG" crossorigin="anonymous"></script>
     @stack('scripts')
 	@endif
 </body>

@@ -7,6 +7,8 @@ use App\Http\Middleware\TrustHosts;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -60,8 +62,11 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->render(function (\Throwable $e, $request) {
+            // ValidationException(폼 유효성 실패)과 HttpException 계열은
+            // Laravel 기본 처리(redirect + 에러 메시지)에 맡겨야 한다.
             if (!app()->hasDebugModeEnabled()
-                && !$e instanceof HttpException
+                && !$e instanceof HttpExceptionInterface
+                && !$e instanceof ValidationException
             ) {
                 if ($request->expectsJson()) {
                     return response()->json(['message' => '서비스 처리 중 오류가 발생했습니다.'], 500);

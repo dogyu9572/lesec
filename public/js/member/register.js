@@ -1069,7 +1069,6 @@
   };
 
   MemberRegister.prototype.bindPasswordPreservation = function () {
-    var self = this;
     var $passwordInput = this.$form.find('[name="password"]');
     var $passwordConfirmInput = this.$form.find(
       '[name="password_confirmation"]'

@@ -11,6 +11,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use App\Services\Member\MemberRegisterService;
 use App\Services\Member\PhoneVerificationService;
 use App\Http\Requests\Member\SendSmsVerificationRequest;
@@ -163,7 +164,7 @@ class MemberRegisterController extends Controller
 
         // SMS 인증이 없으면 인증 페이지로 리다이렉트 (절대 회원 구분 페이지로 가지 않음)
         if (!$hasSmsVerification) {
-            \Log::warning('14세 미만 회원가입: SMS 인증 세션이 없음', [
+            Log::warning('14세 미만 회원가입: SMS 인증 세션이 없음', [
                 'session_id' => $request->session()->getId(),
                 'has_sms_session' => $request->session()->has(self::SMS_VERIFICATION_SESSION_KEY),
                 'sms_session_content' => $smsSession,

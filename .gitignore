@@ -15,6 +15,7 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+/.vscode-server/
 /.history
 *.log
 *.cache
@@ -24,11 +25,15 @@ Thumbs.db
 # IDE 및 에디터 관련
 .cursor-server/
 .cursor/
+.codex/
+.copilot/
 .config/
+.dotnet/
 .local/
 .ssh/
 .npm/
 .dbclient/
+.wget-hsts
 
 # 시스템 파일
 .bash_history

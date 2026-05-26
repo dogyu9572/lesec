@@ -483,8 +483,11 @@ class MemberMypageController extends Controller
             $columnIndex++;
         }
 
+        // 안내 문구 (E1)
+        $sheet->setCellValue('E1', '고등학생의 경우 생년월일 정보 입력 안하셔도 됩니다.');
+
         // 헤더 스타일 설정
-        $sheet->getStyle('A1:D1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:E1')->getFont()->setBold(true);
 
         // 샘플 데이터 작성
         $rowIndex = 2;
@@ -500,7 +503,7 @@ class MemberMypageController extends Controller
         }
 
         // 컬럼 너비 자동 조정
-        foreach (range('A', 'D') as $column) {
+        foreach (range('A', 'E') as $column) {
             $sheet->getColumnDimension($column)->setAutoSize(true);
         }
 

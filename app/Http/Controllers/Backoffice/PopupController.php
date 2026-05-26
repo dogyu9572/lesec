@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Backoffice;
 
 use App\Http\Controllers\Controller;
 use App\Models\Popup;
+use App\Support\HtmlSanitizer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -99,6 +100,7 @@ class PopupController extends Controller
         // ]);
 
         $data = $request->all();
+        $data['popup_content'] = HtmlSanitizer::clean($data['popup_content'] ?? null);
         
         // 팝업 타입을 이미지로 고정
         $data['popup_type'] = 'image';
@@ -171,6 +173,7 @@ class PopupController extends Controller
         ]);
 
         $data = $request->all();
+        $data['popup_content'] = HtmlSanitizer::clean($data['popup_content'] ?? null);
         
         // 이미지 업로드 처리
         if ($request->hasFile('popup_image')) {
@@ -248,6 +251,10 @@ class PopupController extends Controller
      */
     public function showPopup(Popup $popup)
     {
+        if ($popup->popup_type === 'html') {
+            $popup->popup_content = HtmlSanitizer::clean($popup->popup_content);
+        }
+
         return view('popup.show', compact('popup'));
     }
 }

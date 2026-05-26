@@ -3,6 +3,7 @@
 namespace App\Services\Backoffice;
 
 use App\Models\Board;
+use App\Support\HtmlSanitizer;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -169,34 +170,7 @@ class BoardPostService
      */
     private function sanitizeContent(string $content): string
     {
-        // 빈 문자열이나 null 체크
-        if (empty($content)) {
-            return '';
-        }
-
-        // font 태그를 span 태그로 변환 (color 속성을 style로 변환)
-        $content = preg_replace_callback(
-            '/<font\s+color=["\']?([^"\'>\s]+)["\']?[^>]*>(.*?)<\/font>/is',
-            function ($matches) {
-                $color = $matches[1];
-                $text = $matches[2];
-                return '<span style="color:' . htmlspecialchars($color, ENT_QUOTES, 'UTF-8') . '">' . $text . '</span>';
-            },
-            $content
-        );
-
-        // color 속성이 없는 font 태그는 그대로 유지 (나중에 제거될 수 있음)
-        // strip_tags는 속성을 유지하므로 스타일이 보존됨
-        // Summernote가 생성하는 모든 태그 허용: <b>, <i>, <s>, <strike> 포함
-        $allowedTags = '<p><br><strong><b><em><i><u><s><strike><ol><ul><li><h1><h2><h3><h4><h5><h6><blockquote><pre><code><table><thead><tbody><tr><td><th><a><img><div><span><iframe><video><source><font>';
-        $cleaned = strip_tags($content, $allowedTags);
-
-        // strip_tags 결과가 false일 경우 원본 반환
-        if ($cleaned === false) {
-            return $content;
-        }
-
-        return $cleaned;
+        return HtmlSanitizer::clean($content);
     }
 
     /**

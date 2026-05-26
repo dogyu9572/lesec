@@ -17,7 +17,7 @@
 					<li class="c{{ $index + 1 }}">
 						<i></i>
 						<div class="tit">{{ $block['title'] }}</div>
-						<p>{!! $block['content'] !!}</p>
+						<div class="editor-content">{!! $block['content'] !!}</div>
 					</li>
 				@endforeach
 			@else

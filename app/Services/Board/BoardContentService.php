@@ -3,6 +3,7 @@
 namespace App\Services\Board;
 
 use App\Models\Board;
+use App\Support\HtmlSanitizer;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Query\Builder;
@@ -304,7 +305,7 @@ class BoardContentService
     private function transformPost(object $post): object
     {
         if (!empty($post->content) && is_string($post->content)) {
-            $post->content = $this->sanitizeInlineStyle($post->content);
+            $post->content = HtmlSanitizer::clean($post->content);
         }
 
         $post->attachments = $this->decodeAttachments($post->attachments);
@@ -322,14 +323,6 @@ class BoardContentService
         }
 
         return $post;
-    }
-
-    /**
-     * CSP(style-src) 위반을 피하기 위해 본문 HTML의 인라인 style 속성을 제거한다.
-     */
-    private function sanitizeInlineStyle(string $content): string
-    {
-        return (string) preg_replace('/\sstyle=(["\']).*?\1/i', '', $content);
     }
 
     /**

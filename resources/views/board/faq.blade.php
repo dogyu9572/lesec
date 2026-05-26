@@ -43,7 +43,7 @@
 						<i></i>
 					</button>
 				</dt>
-				<dd id="faq-content-{{ $post->id }}">
+				<dd id="faq-content-{{ $post->id }}" class="editor-content">
 					{!! $post->content !!}
 					@if(!empty($post->attachments))
 					<div class="btns">

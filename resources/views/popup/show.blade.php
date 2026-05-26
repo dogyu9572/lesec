@@ -46,6 +46,57 @@
             align-items: flex-start;
             padding: 20px;
         }
+
+        .popup-body.popup-body-html.editor-content {
+            display: block;
+            text-align: left;
+            line-height: 1.6;
+            overflow-x: auto;
+        }
+
+        .popup-body.popup-body-html.editor-content p {
+            margin: 0 0 16px;
+        }
+
+        .popup-body.popup-body-html.editor-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            table-layout: auto;
+        }
+
+        .popup-body.popup-body-html.editor-content th,
+        .popup-body.popup-body-html.editor-content td {
+            border: 1px solid #ddd;
+            padding: 10px 12px;
+            line-height: 1.5;
+            vertical-align: middle;
+        }
+
+        .popup-body.popup-body-html.editor-content th {
+            background: #f7f8f9;
+            font-weight: 700;
+        }
+
+        .popup-body.popup-body-html.editor-content a {
+            display: inline;
+            line-height: inherit;
+            color: #0066cc;
+            text-decoration: underline;
+        }
+
+        .popup-body.popup-body-html.editor-content img {
+            max-width: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+        }
+
+        .popup-body.popup-body-html.editor-content ul,
+        .popup-body.popup-body-html.editor-content ol {
+            margin: 16px 0;
+            padding-left: 40px;
+        }
         
         .popup-body img {
             width: 100%;
@@ -108,7 +159,7 @@
 </head>
 <body>
     <div class="popup-container">
-        <div class="popup-body {{ $popup->popup_type === 'html' ? 'popup-body-html' : '' }}">
+        <div class="popup-body {{ $popup->popup_type === 'html' ? 'popup-body-html editor-content' : '' }}">
             @if($popup->popup_type === 'image' && $popup->popup_image)
                 @if($popup->url)
                     <a href="{{ $popup->url }}" target="{{ $popup->url_target }}">

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Program;
+use App\Support\HtmlSanitizer;
 
 class ProgramService
 {
@@ -21,10 +22,17 @@ class ProgramService
      */
     public function getProgramByType(string $type, string $applicationType = 'individual'): ?Program
     {
-        return Program::byType($type)
+        $program = Program::byType($type)
             ->byApplicationType($applicationType)
             ->active()
             ->first();
+
+        if ($program) {
+            $program->detail_content = HtmlSanitizer::clean($program->detail_content);
+            $program->other_info = HtmlSanitizer::clean($program->other_info);
+        }
+
+        return $program;
     }
 
     /**

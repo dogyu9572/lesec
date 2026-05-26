@@ -24,13 +24,13 @@
 				<button type="button" class="btn_apply pc_vw" data-navigate-select="individual" data-select-url="{{ route('program.select.individual', $type) }}">신청하기</button>
 			</div>
 			<div class="itit mt0">상세 내용</div>
-			<div class="glbox">
+			<div class="glbox editor-content">
 				@if($program && $program->detail_content)
 					{!! $program->detail_content !!}
 				@endif
 			</div>
 			<div class="itit">기타 안내</div>
-			<div class="glbox etc_info">
+			<div class="glbox etc_info editor-content">
 				@if($program && $program->other_info)
 					{!! $program->other_info !!}
 				@endif

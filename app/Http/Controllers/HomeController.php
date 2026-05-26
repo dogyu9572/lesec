@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use App\Services\Board\BoardContentService;
+use App\Support\HtmlSanitizer;
 
 class HomeController extends Controller
 {
@@ -41,6 +42,13 @@ class HomeController extends Controller
                 // 서버사이드에서 쿠키 확인하여 숨겨진 팝업 제외
                 $cookieName = 'popup_hide_' . $popup->id;
                 return !isset($_COOKIE[$cookieName]) || $_COOKIE[$cookieName] !== '1';
+            })
+            ->map(function ($popup) {
+                if ($popup->popup_type === 'html') {
+                    $popup->popup_content = HtmlSanitizer::clean($popup->popup_content);
+                }
+
+                return $popup;
             });
 
         // 활성화된 배너 조회

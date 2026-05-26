@@ -13,7 +13,7 @@
 					</dl>
 				</div>
 			</div>
-			<div class="con">
+			<div class="con editor-content">
 				{!! $post->content !!}
 			</div>
 			@if(!empty($post->attachments))

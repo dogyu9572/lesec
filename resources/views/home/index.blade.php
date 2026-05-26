@@ -122,7 +122,7 @@ $(".main_type_link dt button").click(function(){
                  data-popup-top="{{ $popup->position_top }}"
                  data-popup-left="{{ $popup->position_left }}">
                 
-                <div class="popup-body">
+                <div class="popup-body {{ $popup->popup_type === 'html' ? 'editor-content' : '' }}">
                     @if($popup->popup_type === 'image' && $popup->popup_image)
                         @if($popup->url)
                             <a href="{{ $popup->url }}" target="{{ $popup->url_target }}">

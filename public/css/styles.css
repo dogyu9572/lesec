@@ -202,6 +202,60 @@
 	.board_bottom .paging .last {margin-left:8px;}
 	.board_bottom .paging .next,
 	.board_bottom .paging .last {transform:scaleX(-1);}
+/* 에디터 출력 공통 */
+	.editor-content {font-size:inherit; line-height:1.6; color:inherit; overflow-x:auto;}
+	.editor-content > :first-child {margin-top:0 !important;}
+	.editor-content > :last-child {margin-bottom:0 !important;}
+	.editor-content p {margin:0 0 16px 0; font-size:inherit; line-height:inherit;}
+	.editor-content b,
+	.editor-content strong {font-weight:700 !important;}
+	.editor-content i,
+	.editor-content em {font-style:italic !important;}
+	.editor-content u {text-decoration:underline !important;}
+	.editor-content s,
+	.editor-content strike {text-decoration:line-through !important;}
+	.editor-content ul,
+	.editor-content ol {margin:16px 0; padding-left:40px; list-style-position:outside;}
+	.editor-content ul {list-style-type:disc !important;}
+	.editor-content ol {list-style-type:decimal !important;}
+	.editor-content li {display:list-item !important; margin:8px 0; overflow:visible; list-style:inherit;}
+	.editor-content ul li {list-style-type:disc !important;}
+	.editor-content ol li {list-style-type:decimal !important;}
+	.editor-content a {color:#0066cc !important; text-decoration:underline;}
+	.editor-content a:hover {color:#0052a3 !important;}
+	.editor-content img,
+	.editor-content iframe,
+	.editor-content video {max-width:100%; height:auto;}
+	.editor-content table {width:100%; border-collapse:collapse; margin:16px 0; table-layout:auto; overflow:visible;}
+	.editor-content thead,
+	.editor-content tbody,
+	.editor-content tr,
+	.editor-content th,
+	.editor-content td {overflow:visible;}
+	.editor-content th,
+	.editor-content td {border:1px solid #ddd; padding:10px 12px; font-size:inherit; line-height:1.5; color:inherit; vertical-align:middle;}
+	.editor-content th {background:#f7f8f9; font-weight:700 !important;}
+	.editor-content th p,
+	.editor-content td p {margin-bottom:8px;}
+	.editor-content th p:last-child,
+	.editor-content td p:last-child {margin-bottom:0;}
+	.editor-content h1,
+	.editor-content h2,
+	.editor-content h3,
+	.editor-content h4,
+	.editor-content h5,
+	.editor-content h6 {margin:24px 0 16px 0; font-weight:700; color:inherit; line-height:1.4;}
+	.editor-content h1 {font-size:2em;}
+	.editor-content h2 {font-size:1.75em;}
+	.editor-content h3 {font-size:1.5em;}
+	.editor-content h4 {font-size:1.25em;}
+	.editor-content h5 {font-size:1.1em;}
+	.editor-content h6 {font-size:1em;}
+	.editor-content blockquote {margin:16px 0; padding:12px 16px; border-left:4px solid #ddd; background:#f7f8f9;}
+	.editor-content pre {margin:16px 0; padding:12px 16px; overflow:auto; background:#f7f8f9; border:1px solid #e0e3ee;}
+	.popup-body.editor-content:has(img) {padding:30px 30px 20px;}
+	.popup-body.editor-content a {display:inline; line-height:inherit;}
+	.popup-body.editor-content img {width:auto; margin:0; object-fit:contain;}
 /* 게시판 상세 */
 	.board_view {border-top:#222 1px solid;}
 	.board_view .tit {border-bottom:#ddd 1px solid; padding:32px 0;}
@@ -782,6 +836,7 @@
 	.establishment_wrap i {position:absolute; top:-40px; right:16px; width:80px; height:80px; border-radius:50%; background:#fff no-repeat 50% 50%; border:2px solid;}
 	.establishment_wrap .tit {font-size:22px; font-weight:700; line-height:1.55; margin-bottom:16px;}
 	.establishment_wrap p {color:#333; line-height:1.65;}
+	.establishment_wrap .editor-content {color:#333; line-height:1.65;}
 	.establishment_wrap .c1 {border-color:#39B54A;}
 	.establishment_wrap .c1 i {border-color:#39B54A; background-image:url('/images/icon_establishment01.svg');}
 	.establishment_wrap .c1 .tit {color:#39B54A;}

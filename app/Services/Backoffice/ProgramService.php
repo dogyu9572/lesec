@@ -3,6 +3,7 @@
 namespace App\Services\Backoffice;
 
 use App\Models\Program;
+use App\Support\HtmlSanitizer;
 
 class ProgramService
 {
@@ -19,7 +20,20 @@ class ProgramService
      */
     public function updateProgram(Program $program, array $data): bool
     {
+        $data = $this->sanitizeEditorFields($data);
+
         return $program->update($data);
+    }
+
+    private function sanitizeEditorFields(array $data): array
+    {
+        foreach (['detail_content', 'other_info'] as $field) {
+            if (array_key_exists($field, $data)) {
+                $data[$field] = HtmlSanitizer::clean($data[$field]);
+            }
+        }
+
+        return $data;
     }
 
     /**

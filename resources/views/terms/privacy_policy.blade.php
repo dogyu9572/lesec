@@ -2,7 +2,7 @@
 @section('content')
 <main class="pb">
     
-    <div class="inner terms_area">
+    <div class="inner terms_area editor-content">
         @if(isset($post) && $post->content)
             {!! $post->content !!}
         @else

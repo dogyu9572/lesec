@@ -732,6 +732,7 @@ function syncEditorContent() {
     if ($('#content').length && typeof $('#content').summernote === 'function') {
         const content = $('#content').summernote('code');
         $('#content').val(content);
+        document.getElementById('content')?.setAttribute('value', content);
     }
     
     // 커스텀 필드 에디터들 콘텐츠 동기화
@@ -740,6 +741,7 @@ function syncEditorContent() {
         if (editorId && typeof $(this).summernote === 'function') {
             const content = $(this).summernote('code');
             $('#' + editorId).val(content);
+            document.getElementById(editorId)?.setAttribute('value', content);
         }
     });
 }
@@ -786,3 +788,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+document.addEventListener('submit', function() {
+    if (typeof syncEditorContent === 'function') {
+        syncEditorContent();
+    }
+}, true);

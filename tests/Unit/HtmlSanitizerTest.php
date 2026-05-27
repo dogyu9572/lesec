@@ -9,15 +9,15 @@ class HtmlSanitizerTest extends TestCase
 {
     public function test_it_keeps_editor_tables_and_removes_xss_vectors(): void
     {
-        $html = '<script>alert(1)</script><table onclick="alert(1)" style="color:red"><tr><td><a href="javascript:alert(1)">link</a></td></tr></table>';
+        $html = '<script>alert(1)</script><table onclick="alert(1)" style="color:red; background-image:url(javascript:alert(1))"><tr><td align="center" style="text-align:center"><a href="javascript:alert(1)">link</a></td></tr></table>';
 
         $clean = HtmlSanitizer::clean($html);
 
-        $this->assertStringContainsString('<table>', $clean);
-        $this->assertStringContainsString('<td>', $clean);
+        $this->assertStringContainsString('<table style="color: red">', $clean);
+        $this->assertStringContainsString('<td align="center" style="text-align: center">', $clean);
         $this->assertStringNotContainsString('<script', $clean);
         $this->assertStringNotContainsString('onclick', $clean);
-        $this->assertStringNotContainsString('style=', $clean);
+        $this->assertStringNotContainsString('background-image', $clean);
         $this->assertStringNotContainsString('javascript:', $clean);
     }
 

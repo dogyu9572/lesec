@@ -24,7 +24,7 @@
     <!-- Styles -->
     <link rel="stylesheet" href="{{ asset('/css/popup.css') }}">
 	<link rel="stylesheet" href="{{ asset('/css/font.css') }}">
-	<link rel="stylesheet" href="{{ asset('/css/styles.css') }}">
+	<link rel="stylesheet" href="{{ asset('/css/styles.css') }}?v={{ @filemtime(public_path('css/styles.css')) }}">
 	<link rel="stylesheet" href="{{ asset('/css/reactive.css') }}">
     @yield('styles')
     

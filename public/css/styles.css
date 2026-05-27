@@ -221,12 +221,23 @@
 	.editor-content li {display:list-item !important; margin:8px 0; overflow:visible; list-style:inherit;}
 	.editor-content ul li {list-style-type:disc !important;}
 	.editor-content ol li {list-style-type:decimal !important;}
-	.editor-content a {color:#0066cc !important; text-decoration:underline;}
-	.editor-content a:hover {color:#0052a3 !important;}
+	.editor-content a {color:#0066cc; text-decoration:underline;}
+	.editor-content a:hover {color:#0052a3;}
 	.editor-content img,
 	.editor-content iframe,
 	.editor-content video {max-width:100%; height:auto;}
+	.editor-content [align="left"] {text-align:left;}
+	.editor-content [align="center"] {text-align:center;}
+	.editor-content [align="right"] {text-align:right;}
+	.editor-content [align="justify"] {text-align:justify;}
+	.editor-content [valign="top"] {vertical-align:top;}
+	.editor-content [valign="middle"] {vertical-align:middle;}
+	.editor-content [valign="bottom"] {vertical-align:bottom;}
+	.editor-content [valign="baseline"] {vertical-align:baseline;}
 	.editor-content table {width:100%; border-collapse:collapse; margin:16px 0; table-layout:auto; overflow:visible;}
+	.editor-content table[align="center"] {margin-left:auto; margin-right:auto;}
+	.editor-content table[align="right"] {margin-left:auto; margin-right:0;}
+	.editor-content table[align="left"] {margin-left:0; margin-right:auto;}
 	.editor-content thead,
 	.editor-content tbody,
 	.editor-content tr,
@@ -268,6 +279,10 @@
 	.board_view .con {padding:60px 0; letter-spacing:-0.34px; font-size:20px; line-height:1.6; color:#212529;}
 	.board_view .con img {height:auto !important;}
 	.board_view .con * {max-width:100%; overflow:hidden;}
+	.board_view .con.editor-content * {overflow:visible;}
+	.board_view .con.editor-content img,
+	.board_view .con.editor-content iframe,
+	.board_view .con.editor-content video {overflow:hidden;}
 	.board_view .con ul,
 	.board_view .con ol,
 	.board_view .con li {overflow:visible;}
@@ -334,8 +349,7 @@
 	.board_view .con [style*="color:rgb(255,255,255)"],
 	.board_view .con [style*="color:rgb(255,255,255)"],
 	.board_view .con [style*="color:rgb(255, 255, 255)"] {color:#fff !important;}
-	/* 배경색도 정상 반영되도록 */
-	.board_view .con [style*="background-color"] {background-color:inherit;}
+	/* 배경색은 에디터에서 정화된 인라인 스타일이 그대로 반영되도록 둔다. */
 	/* font 태그는 기본적으로 색상이 적용되도록 (인라인 스타일이 우선) */
 	.board_view .con font {display:inline;}
 	/* 리스트 스타일 - 마커(점, 숫자)가 정상 표시되도록 */
@@ -346,8 +360,8 @@
 	.board_view .con ul li {list-style-type:disc !important;}
 	.board_view .con ol li {list-style-type:decimal !important;}
 	/* 링크 스타일 */
-	.board_view .con a {color:#0066cc !important; text-decoration:underline;}
-	.board_view .con a:hover {color:#0052a3 !important;}
+	.board_view .con a {color:#0066cc; text-decoration:underline;}
+	.board_view .con a:hover {color:#0052a3;}
 	/* 테이블 스타일 */
 	.board_view .con table {width:100%; border-collapse:collapse; margin:16px 0;}
 	.board_view .con table td, .board_view .con table th {padding:8px; border:1px solid #ddd; font-size:inherit; color:inherit;}
@@ -686,6 +700,10 @@
 	.contact_list li.tel b {background-image:url('/images/icon_tel.svg');}
 	.etc_info p {position:relative; font-size:17px; line-height:28px; padding-left:11px;}
 	.etc_info p:before {content:""; position:absolute; top:13px; left:0; width:3px; height:3px; background:#666; border-radius:50%;}
+	.etc_info.editor-content p {padding-left:0;}
+	.etc_info.editor-content p:before {content:none;}
+	.etc_info.editor-content ul,
+	.etc_info.editor-content ol {padding-left:40px;}
 	/* 단체 신청 */
 	.schedule_wrap {display:flex; gap:40px; align-items:flex-start;}
 	.schedule_wrap > * {width:calc(50% - 20px);}

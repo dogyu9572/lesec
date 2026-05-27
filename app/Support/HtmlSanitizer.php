@@ -23,9 +23,20 @@ class HtmlSanitizer
         'iframe' => ['src', 'title', 'width', 'height', 'allowfullscreen'],
         'video' => ['src', 'width', 'height', 'controls'],
         'source' => ['src', 'type'],
-        'td' => ['colspan', 'rowspan'],
-        'th' => ['colspan', 'rowspan'],
-        '*' => ['class', 'title'],
+        'font' => ['color', 'face', 'size'],
+        'table' => ['align', 'border', 'cellpadding', 'cellspacing', 'width', 'height'],
+        'tr' => ['align', 'valign'],
+        'td' => ['align', 'valign', 'colspan', 'rowspan', 'width', 'height'],
+        'th' => ['align', 'valign', 'colspan', 'rowspan', 'width', 'height'],
+        '*' => ['align', 'class', 'style', 'title'],
+    ];
+
+    private const ALLOWED_STYLE_PROPERTIES = [
+        'background-color', 'border', 'border-bottom', 'border-collapse', 'border-color', 'border-left',
+        'border-right', 'border-style', 'border-top', 'border-width', 'color', 'font-size', 'font-style',
+        'font-weight', 'height', 'line-height', 'margin', 'margin-bottom', 'margin-left', 'margin-right',
+        'margin-top', 'max-width', 'padding', 'padding-bottom', 'padding-left', 'padding-right',
+        'padding-top', 'text-align', 'text-decoration', 'vertical-align', 'width',
     ];
 
     public static function clean(?string $html): string
@@ -104,8 +115,19 @@ class HtmlSanitizer
                 self::ALLOWED_ATTRIBUTES[$tag] ?? []
             );
 
-            if (str_starts_with($name, 'on') || $name === 'style' || !in_array($name, $allowed, true)) {
+            if (str_starts_with($name, 'on') || !in_array($name, $allowed, true)) {
                 $node->removeAttributeNode($attribute);
+                continue;
+            }
+
+            if ($name === 'style') {
+                $style = self::sanitizeStyle($value);
+                if ($style === '') {
+                    $node->removeAttributeNode($attribute);
+                    continue;
+                }
+
+                $node->setAttribute($name, $style);
                 continue;
             }
 
@@ -114,7 +136,37 @@ class HtmlSanitizer
                 continue;
             }
 
-            if (in_array($name, ['width', 'height', 'colspan', 'rowspan'], true) && !preg_match('/^\d{1,4}%?$/', $value)) {
+            if (in_array($name, ['width', 'height'], true) && !self::isSafeLength($value)) {
+                $node->removeAttributeNode($attribute);
+                continue;
+            }
+
+            if (in_array($name, ['colspan', 'rowspan', 'border', 'cellpadding', 'cellspacing'], true) && !preg_match('/^\d{1,4}$/', $value)) {
+                $node->removeAttributeNode($attribute);
+                continue;
+            }
+
+            if ($name === 'align' && !in_array(strtolower($value), ['left', 'center', 'right', 'justify'], true)) {
+                $node->removeAttributeNode($attribute);
+                continue;
+            }
+
+            if ($name === 'valign' && !in_array(strtolower($value), ['top', 'middle', 'bottom', 'baseline'], true)) {
+                $node->removeAttributeNode($attribute);
+                continue;
+            }
+
+            if ($name === 'color' && !self::isSafeColor($value)) {
+                $node->removeAttributeNode($attribute);
+                continue;
+            }
+
+            if ($name === 'size' && !preg_match('/^[1-7]$/', $value)) {
+                $node->removeAttributeNode($attribute);
+                continue;
+            }
+
+            if ($name === 'face' && !preg_match('/^[\p{L}\p{N}\s,"\-_.]+$/u', $value)) {
                 $node->removeAttributeNode($attribute);
                 continue;
             }
@@ -146,6 +198,153 @@ class HtmlSanitizer
         }
 
         return in_array($scheme, ['http', 'https'], true);
+    }
+
+    private static function sanitizeStyle(string $style): string
+    {
+        $clean = [];
+
+        foreach (explode(';', $style) as $declaration) {
+            if (!str_contains($declaration, ':')) {
+                continue;
+            }
+
+            [$property, $value] = array_map('trim', explode(':', $declaration, 2));
+            $property = strtolower($property);
+            $value = preg_replace('/\s+/', ' ', $value) ?? '';
+
+            if (
+                $property === ''
+                || $value === ''
+                || str_contains($value, '!important')
+                || !in_array($property, self::ALLOWED_STYLE_PROPERTIES, true)
+                || !self::isSafeStyleValue($property, $value)
+            ) {
+                continue;
+            }
+
+            $clean[] = $property . ': ' . $value;
+        }
+
+        return implode('; ', $clean);
+    }
+
+    private static function isSafeStyleValue(string $property, string $value): bool
+    {
+        $lowerValue = strtolower($value);
+
+        if (preg_match('/(?:expression|url\s*\(|javascript:|vbscript:|data:|@import|behavior\s*:|-moz-binding)/i', $lowerValue)) {
+            return false;
+        }
+
+        if (in_array($property, ['color', 'background-color', 'border-color'], true)) {
+            return self::isSafeColorList($value);
+        }
+
+        if ($property === 'text-align') {
+            return in_array($lowerValue, ['left', 'center', 'right', 'justify'], true);
+        }
+
+        if ($property === 'vertical-align') {
+            return in_array($lowerValue, ['top', 'middle', 'bottom', 'baseline', 'text-top', 'text-bottom'], true)
+                || self::isSafeLength($value);
+        }
+
+        if ($property === 'font-weight') {
+            return in_array($lowerValue, ['normal', 'bold', 'bolder', 'lighter'], true)
+                || preg_match('/^[1-9]00$/', $value);
+        }
+
+        if ($property === 'font-style') {
+            return in_array($lowerValue, ['normal', 'italic', 'oblique'], true);
+        }
+
+        if ($property === 'text-decoration') {
+            return preg_match('/^(?:none|underline|line-through|overline)(?:\s+(?:underline|line-through|overline))*$/i', $value);
+        }
+
+        if ($property === 'border-collapse') {
+            return in_array($lowerValue, ['collapse', 'separate'], true);
+        }
+
+        if ($property === 'border-style') {
+            return preg_match('/^(?:none|solid|dashed|dotted|double)(?:\s+(?:none|solid|dashed|dotted|double)){0,3}$/i', $value);
+        }
+
+        if (str_ends_with($property, 'width') || str_ends_with($property, 'height') || str_starts_with($property, 'margin') || str_starts_with($property, 'padding')) {
+            return self::isSafeLengthList($value);
+        }
+
+        if ($property === 'font-size' || $property === 'line-height') {
+            return self::isSafeLength($value) || in_array($lowerValue, ['normal', 'small', 'medium', 'large', 'x-small', 'x-large'], true);
+        }
+
+        if (str_starts_with($property, 'border')) {
+            return self::isSafeBorderValue($value);
+        }
+
+        return false;
+    }
+
+    private static function isSafeColorList(string $value): bool
+    {
+        if (self::isSafeColor($value)) {
+            return true;
+        }
+
+        foreach (preg_split('/\s+/', trim($value)) ?: [] as $color) {
+            if ($color !== '' && !self::isSafeColor($color)) {
+                return false;
+            }
+        }
+
+        return trim($value) !== '';
+    }
+
+    private static function isSafeColor(string $value): bool
+    {
+        $value = trim($value);
+
+        return preg_match('/^#[0-9a-f]{3}(?:[0-9a-f]{3})?$/i', $value)
+            || preg_match('/^rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}(?:\s*,\s*(?:0|1|0?\.\d+))?\s*\)$/i', $value)
+            || preg_match('/^[a-z]+$/i', $value);
+    }
+
+    private static function isSafeLengthList(string $value): bool
+    {
+        foreach (preg_split('/\s+/', trim($value)) ?: [] as $length) {
+            if ($length !== '' && !self::isSafeLength($length)) {
+                return false;
+            }
+        }
+
+        return trim($value) !== '';
+    }
+
+    private static function isSafeLength(string $value): bool
+    {
+        return preg_match('/^(?:auto|0|-?\d{1,4}(?:\.\d{1,2})?(?:px|em|rem|%|pt)?)$/i', trim($value));
+    }
+
+    private static function isSafeBorderValue(string $value): bool
+    {
+        foreach (preg_split('/\s+/', trim($value)) ?: [] as $part) {
+            if ($part === '') {
+                continue;
+            }
+
+            if (
+                self::isSafeLength($part)
+                || self::isSafeColor($part)
+                || preg_match('/^(?:none|solid|dashed|dotted|double)$/i', $part)
+            ) {
+                continue;
+            }
+
+            return false;
+        }
+
+        return trim($value) !== '';
     }
 
     private static function unwrap(DOMElement $node): void

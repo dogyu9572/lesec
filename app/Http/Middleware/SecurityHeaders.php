@@ -54,6 +54,7 @@ class SecurityHeaders
 
     /**
      * 사용자 사이트: script/style 모두 unsafe-inline 미사용을 기본으로 한다.
+     * 에디터 본문은 정화된 style 속성만 사용자 화면에 출력되므로 style-src-attr만 제한 허용한다.
      * 인쇄 페이지는 기존 템플릿 호환을 위해 style-src unsafe-inline을 제한 허용한다.
      */
     private function frontPolicy(string $nonce, Request $request): string
@@ -74,6 +75,7 @@ class SecurityHeaders
             "default-src 'self'",
             "script-src 'self' 'nonce-{$nonce}' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://ssl.daumcdn.net https://*.daumcdn.net https://*.kakaocdn.net",
             'style-src ' . implode(' ', $styleSrc),
+            "style-src-attr 'unsafe-inline'",
             "font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net",
             "img-src 'self' data: blob: https:",
             "connect-src 'self' https://api.tosspayments.com https://log.tosspayments.com https://*.tosspayments.com https://*.daumcdn.net https://*.kakao.com",

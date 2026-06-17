@@ -158,6 +158,14 @@ class MemberGroupController extends BaseController
                 $memberIdsToAdd = array_values(array_unique($request->input('add_member_ids', [])));
                 $memberIdsToRemove = array_values(array_unique($request->input('remove_member_ids', [])));
 
+                Log::info('회원 그룹 변경분 저장', [
+                    'group_id' => $memberGroup->id,
+                    'add_count' => count($memberIdsToAdd),
+                    'remove_count' => count($memberIdsToRemove),
+                    'add_member_ids' => $memberIdsToAdd,
+                    'remove_member_ids' => $memberIdsToRemove,
+                ]);
+
                 if (!empty($memberIdsToAdd)) {
                     $this->memberGroupService->addMembersToGroup($memberGroup->id, $memberIdsToAdd);
                 }
@@ -172,7 +180,7 @@ class MemberGroupController extends BaseController
                     $this->memberGroupService->updateMemberCount($memberGroup);
                 }
             } elseif ($request->filled('member_ids')) {
-                // 이전 방식 호환: 전체 회원 ID 목록이 넘어온 경우 동기화 처리
+                // 이전 방식 호환: max_input_vars에 잘린 목록이 기존 회원을 대량 해제하지 않도록 추가만 처리한다.
                 $newMemberIds = $request->input('member_ids');
                 
                 // 기존 회원 ID 목록
@@ -180,24 +188,21 @@ class MemberGroupController extends BaseController
                 
                 // 추가할 회원 (새로 추가된 회원)
                 $memberIdsToAdd = array_diff($newMemberIds, $existingMemberIds);
-                
-                // 삭제할 회원 (기존에 있던 회원 중 제거된 회원)
-                $memberIdsToRemove = array_diff($existingMemberIds, $newMemberIds);
+
+                Log::warning('회원 그룹 수정 요청이 이전 member_ids 방식으로 들어와 삭제 동기화는 건너뜁니다.', [
+                    'group_id' => $memberGroup->id,
+                    'submitted_member_ids_count' => count($newMemberIds),
+                    'existing_member_ids_count' => count($existingMemberIds),
+                    'add_count' => count($memberIdsToAdd),
+                    'max_input_vars' => ini_get('max_input_vars'),
+                ]);
                 
                 // 회원 추가
                 if (!empty($memberIdsToAdd)) {
                     $this->memberGroupService->addMembersToGroup($memberGroup->id, array_values($memberIdsToAdd));
                 }
-                
-                // 회원 삭제 (member_group_id를 null로 설정)
-                if (!empty($memberIdsToRemove)) {
-                    Member::whereIn('id', $memberIdsToRemove)
-                        ->where('member_group_id', $memberGroup->id)
-                        ->update(['member_group_id' => null]);
-                }
-                
-                // 회원 수 업데이트 (추가/삭제 후)
-                if (!empty($memberIdsToAdd) || !empty($memberIdsToRemove)) {
+
+                if (!empty($memberIdsToAdd)) {
                     $this->memberGroupService->updateMemberCount($memberGroup);
                 }
             }

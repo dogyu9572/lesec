@@ -85,7 +85,6 @@
                                                         </button>
                                                     </td>
                                                 </tr>
-                                                <input type="hidden" name="member_ids[]" value="{{ $member->id }}" id="member_input_{{ $member->id }}" data-member-id="{{ $member->id }}" class="existing-member-input">
                                             @endforeach
                                         @else
                                             <tr style="border: none;">
@@ -128,4 +127,3 @@ var groupId = {{ $group->id }};
 </script>
 <script src="{{ asset('js/backoffice/member-groups.js') }}"></script>
 @endsection
-

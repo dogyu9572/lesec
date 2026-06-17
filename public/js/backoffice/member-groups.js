@@ -3,6 +3,63 @@
 let currentPage = 1;
 let selectedMemberIds = [];
 
+function renumberMemberRows(memberListBody) {
+    memberListBody.querySelectorAll('tr[data-member-id]').forEach((row, index) => {
+        row.querySelector('td:first-child').textContent = index + 1;
+    });
+}
+
+function ensureEmptyMemberRow(memberListBody) {
+    if (memberListBody.querySelectorAll('tr[data-member-id]').length === 0) {
+        memberListBody.innerHTML = '<tr style="border: none;"><td colspan="9" class="text-center" style="padding: 40px 20px; border: none !important; border-bottom: none !important;">등록된 회원이 없습니다.</td></tr>';
+    } else {
+        renumberMemberRows(memberListBody);
+    }
+}
+
+function removeMemberRow(memberId) {
+    const memberListBody = document.getElementById('member-list-body');
+    const memberGroupForm = document.getElementById('memberGroupForm');
+    if (!memberListBody || !memberGroupForm) {
+        return;
+    }
+
+    const row = memberListBody.querySelector(`tr[data-member-id="${memberId}"]`);
+    const addInput = document.getElementById(`member_add_input_${memberId}`) || document.getElementById(`member_input_${memberId}`);
+
+    if (addInput) {
+        addInput.remove();
+    } else if (typeof groupId !== 'undefined' && groupId) {
+        let removeInput = document.getElementById(`member_remove_input_${memberId}`);
+        if (!removeInput) {
+            removeInput = document.createElement('input');
+            removeInput.type = 'hidden';
+            removeInput.name = 'remove_member_ids[]';
+            removeInput.value = memberId;
+            removeInput.id = `member_remove_input_${memberId}`;
+            memberGroupForm.appendChild(removeInput);
+        }
+    }
+
+    if (row) {
+        row.remove();
+    }
+
+    ensureEmptyMemberRow(memberListBody);
+}
+
+function bindRemoveMemberButtons(memberListBody) {
+    memberListBody.querySelectorAll('.remove-member-btn').forEach(btn => {
+        if (!btn.hasAttribute('data-listener-added')) {
+            btn.setAttribute('data-listener-added', 'true');
+            btn.addEventListener('click', function() {
+                const memberId = parseInt(this.getAttribute('data-member-id'));
+                removeMemberRow(memberId);
+            });
+        }
+    });
+}
+
 /**
  * 팝업에서 선택한 회원을 받아서 그룹에 추가
  * individual-applications/create와 동일한 방식으로 단일 회원 선택 지원
@@ -105,42 +162,10 @@ window.applySelectedMember = function(selectedMember) {
                 memberListBody.appendChild(row);
             });
 
-            // 삭제 버튼 이벤트 리스너 추가
-            memberListBody.querySelectorAll('.remove-member-btn').forEach(btn => {
-                if (!btn.hasAttribute('data-listener-added')) {
-                    btn.setAttribute('data-listener-added', 'true');
-                    btn.addEventListener('click', function() {
-                        const memberId = parseInt(this.getAttribute('data-member-id'));
-                        const row = memberListBody.querySelector(`tr[data-member-id="${memberId}"]`);
-                        
-                        // 테이블에서 행 제거
-                        if (row) {
-                            row.remove();
-                        }
-                        
-                        // 폼에서 hidden input 제거
-                        const hiddenInput = document.getElementById(`member_input_${memberId}`);
-                        if (hiddenInput) {
-                            hiddenInput.remove();
-                        }
-                        
-                        // 회원이 없으면 빈 메시지 표시
-                        if (memberListBody.querySelectorAll('tr[data-member-id]').length === 0) {
-                            memberListBody.innerHTML = '<tr style="border: none;"><td colspan="9" class="text-center" style="padding: 40px 20px; border: none !important; border-bottom: none !important;">등록된 회원이 없습니다.</td></tr>';
-                        } else {
-                            // 번호 재정렬
-                            memberListBody.querySelectorAll('tr[data-member-id]').forEach((row, index) => {
-                                row.querySelector('td:first-child').textContent = index + 1;
-                            });
-                        }
-                    });
-                }
-            });
+            bindRemoveMemberButtons(memberListBody);
 
             // 번호 재정렬
-            memberListBody.querySelectorAll('tr[data-member-id]').forEach((row, index) => {
-                row.querySelector('td:first-child').textContent = index + 1;
-            });
+            renumberMemberRows(memberListBody);
         })
         .catch(error => {
             console.error('회원 검증 중 오류:', error);
@@ -200,6 +225,11 @@ window.applySelectedMember = function(selectedMember) {
                 return; // 이미 추가된 회원은 건너뛰기
             }
 
+            const removeInput = document.getElementById(`member_remove_input_${member.id}`);
+            if (removeInput) {
+                removeInput.remove();
+            }
+
             const row = document.createElement('tr');
             row.dataset.memberId = member.id;
             const rowNumber = memberListBody.querySelectorAll('tr[data-member-id]').length + 1;
@@ -220,55 +250,23 @@ window.applySelectedMember = function(selectedMember) {
                 </td>
             `;
 
-            // hidden input 추가 (폼 제출 시 사용) - 폼에 직접 추가
+            // hidden input 추가 (폼 제출 시 사용) - 수정 화면은 추가된 회원만 전송
             const hiddenInput = document.createElement('input');
             hiddenInput.type = 'hidden';
-            hiddenInput.name = 'member_ids[]';
+            hiddenInput.name = 'add_member_ids[]';
             hiddenInput.value = member.id;
             hiddenInput.dataset.memberId = member.id;
-            hiddenInput.id = `member_input_${member.id}`;
+            hiddenInput.id = `member_add_input_${member.id}`;
             hiddenInput.classList.add('new-member-input'); // 새로 추가된 회원 표시
             memberGroupForm.appendChild(hiddenInput);
 
             memberListBody.appendChild(row);
         });
 
-        // 삭제 버튼 이벤트 리스너 추가
-        memberListBody.querySelectorAll('.remove-member-btn').forEach(btn => {
-            if (!btn.hasAttribute('data-listener-added')) {
-                btn.setAttribute('data-listener-added', 'true');
-                btn.addEventListener('click', function() {
-                    const memberId = parseInt(this.getAttribute('data-member-id'));
-                    const row = memberListBody.querySelector(`tr[data-member-id="${memberId}"]`);
-                    
-                    // 테이블에서 행 제거
-                    if (row) {
-                        row.remove();
-                    }
-                    
-                    // 폼에서 hidden input 제거
-                    const hiddenInput = document.getElementById(`member_input_${memberId}`);
-                    if (hiddenInput) {
-                        hiddenInput.remove();
-                    }
-                    
-                    // 회원이 없으면 빈 메시지 표시
-                    if (memberListBody.querySelectorAll('tr[data-member-id]').length === 0) {
-                        memberListBody.innerHTML = '<tr style="border: none;"><td colspan="9" class="text-center" style="padding: 40px 20px; border: none !important; border-bottom: none !important;">등록된 회원이 없습니다.</td></tr>';
-                    } else {
-                        // 번호 재정렬
-                        memberListBody.querySelectorAll('tr[data-member-id]').forEach((row, index) => {
-                            row.querySelector('td:first-child').textContent = index + 1;
-                        });
-                    }
-                });
-            }
-        });
+        bindRemoveMemberButtons(memberListBody);
 
         // 번호 재정렬
-        memberListBody.querySelectorAll('tr[data-member-id]').forEach((row, index) => {
-            row.querySelector('td:first-child').textContent = index + 1;
-        });
+        renumberMemberRows(memberListBody);
     })
     .catch(error => {
         console.error('회원 검증 중 오류:', error);
@@ -292,36 +290,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // edit 페이지에서 기존 회원 삭제 버튼 이벤트 리스너 추가
     const memberListBody = document.getElementById('member-list-body');
     if (memberListBody) {
-        memberListBody.querySelectorAll('.remove-member-btn').forEach(btn => {
-            if (!btn.hasAttribute('data-listener-added')) {
-                btn.setAttribute('data-listener-added', 'true');
-                btn.addEventListener('click', function() {
-                    const memberId = parseInt(this.getAttribute('data-member-id'));
-                    const row = memberListBody.querySelector(`tr[data-member-id="${memberId}"]`);
-                    
-                    // 테이블에서 행 제거
-                    if (row) {
-                        row.remove();
-                    }
-                    
-                    // 폼에서 hidden input 제거
-                    const hiddenInput = document.getElementById(`member_input_${memberId}`);
-                    if (hiddenInput) {
-                        hiddenInput.remove();
-                    }
-                    
-                    // 회원이 없으면 빈 메시지 표시
-                    if (memberListBody.querySelectorAll('tr[data-member-id]').length === 0) {
-                        memberListBody.innerHTML = '<tr style="border: none;"><td colspan="9" class="text-center" style="padding: 40px 20px; border: none !important; border-bottom: none !important;">등록된 회원이 없습니다.</td></tr>';
-                    } else {
-                        // 번호 재정렬
-                        memberListBody.querySelectorAll('tr[data-member-id]').forEach((row, index) => {
-                            row.querySelector('td:first-child').textContent = index + 1;
-                        });
-                    }
-                });
-            }
-        });
+        bindRemoveMemberButtons(memberListBody);
     }
 
     // 팝업 검색 버튼 클릭
@@ -374,15 +343,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // 회원 삭제 버튼 (edit 페이지)
-    const removeMemberBtns = document.querySelectorAll('.remove-member-btn');
-    removeMemberBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const memberId = parseInt(this.getAttribute('data-member-id'));
-            removeMemberFromGroup(memberId);
-        });
-    });
-
     // 검색어 입력 시 엔터키 처리
     const popupSearchKeyword = document.getElementById('popup_search_keyword');
     if (popupSearchKeyword) {
@@ -399,9 +359,13 @@ document.addEventListener('DOMContentLoaded', function() {
     if (memberGroupForm) {
         memberGroupForm.addEventListener('submit', function(e) {
             const memberInputs = this.querySelectorAll('input[name="member_ids[]"]');
+            const addMemberInputs = this.querySelectorAll('input[name="add_member_ids[]"]');
+            const removeMemberInputs = this.querySelectorAll('input[name="remove_member_ids[]"]');
             console.log('=== 폼 제출 전 회원 데이터 확인 ===');
             console.log('회원 ID 개수:', memberInputs.length);
             console.log('회원 ID 목록:', Array.from(memberInputs).map(input => input.value));
+            console.log('추가 회원 ID 목록:', Array.from(addMemberInputs).map(input => input.value));
+            console.log('삭제 회원 ID 목록:', Array.from(removeMemberInputs).map(input => input.value));
             
             // FormData로 실제 전송될 데이터 확인
             const formData = new FormData(this);
@@ -735,4 +699,3 @@ function removeMemberFromGroup(memberId) {
         alert('회원 제거 중 오류가 발생했습니다.');
     });
 }
-

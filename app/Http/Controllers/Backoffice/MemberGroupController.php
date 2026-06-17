@@ -144,13 +144,35 @@ class MemberGroupController extends BaseController
             'color' => 'nullable|string|max:20',
             'member_ids' => 'nullable|array',
             'member_ids.*' => 'integer|exists:members,id',
+            'add_member_ids' => 'nullable|array',
+            'add_member_ids.*' => 'integer|exists:members,id',
+            'remove_member_ids' => 'nullable|array',
+            'remove_member_ids.*' => 'integer|exists:members,id',
         ]);
 
         try {
             $this->memberGroupService->updateGroup($memberGroup, $request->all());
 
-            // 회원 추가/삭제 처리
-            if ($request->filled('member_ids')) {
+            // 수정 화면은 max_input_vars 제한을 피하기 위해 변경분만 전송한다.
+            if ($request->has('add_member_ids') || $request->has('remove_member_ids')) {
+                $memberIdsToAdd = array_values(array_unique($request->input('add_member_ids', [])));
+                $memberIdsToRemove = array_values(array_unique($request->input('remove_member_ids', [])));
+
+                if (!empty($memberIdsToAdd)) {
+                    $this->memberGroupService->addMembersToGroup($memberGroup->id, $memberIdsToAdd);
+                }
+
+                if (!empty($memberIdsToRemove)) {
+                    Member::whereIn('id', $memberIdsToRemove)
+                        ->where('member_group_id', $memberGroup->id)
+                        ->update(['member_group_id' => null]);
+                }
+
+                if (!empty($memberIdsToAdd) || !empty($memberIdsToRemove)) {
+                    $this->memberGroupService->updateMemberCount($memberGroup);
+                }
+            } elseif ($request->filled('member_ids')) {
+                // 이전 방식 호환: 전체 회원 ID 목록이 넘어온 경우 동기화 처리
                 $newMemberIds = $request->input('member_ids');
                 
                 // 기존 회원 ID 목록
@@ -324,4 +346,3 @@ class MemberGroupController extends BaseController
         }
     }
 }
-
